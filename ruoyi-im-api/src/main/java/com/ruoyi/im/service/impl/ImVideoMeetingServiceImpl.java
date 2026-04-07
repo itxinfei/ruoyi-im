@@ -589,7 +589,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 先停止其他人的屏幕共享
-        participantMapper.updateScreenShareStatus(null, false);
+        participantMapper.stopAllScreenShare(meetingId, false);
 
         participant.setIsSharing(true);
         participantMapper.updateById(participant);

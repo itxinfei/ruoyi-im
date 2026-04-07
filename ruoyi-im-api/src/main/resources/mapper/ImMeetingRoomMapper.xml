@@ -34,9 +34,9 @@
         LEFT JOIN sys_dept d ON r.department_id = d.dept_id
         <where>
             <if test="req.keyword != null and req.keyword != ''">
-                AND r.room_name LIKE CONCAT('%', #{req.keyword}, '%')
+                AND (r.room_name LIKE CONCAT('%', #{req.keyword}, '%')
                 OR r.room_number LIKE CONCAT('%', #{req.keyword}, '%')
-                OR r.location LIKE CONCAT('%', #{req.keyword}, '%')
+                OR r.location LIKE CONCAT('%', #{req.keyword}, '%'))
             </if>
             <if test="req.departmentId != null">
                 AND r.department_id = #{req.departmentId}

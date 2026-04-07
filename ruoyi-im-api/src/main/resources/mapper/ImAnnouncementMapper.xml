@@ -43,8 +43,8 @@
         LEFT JOIN sys_dept d ON a.department_id = d.dept_id
         <where>
             <if test="req.keyword != null and req.keyword != ''">
-                AND a.title LIKE CONCAT('%', #{req.keyword}, '%')
-                OR a.content LIKE CONCAT('%', #{req.keyword}, '%')
+                AND (a.title LIKE CONCAT('%', #{req.keyword}, '%')
+                OR a.content LIKE CONCAT('%', #{req.keyword}, '%'))
             </if>
             <if test="req.announcementType != null and req.announcementType != ''">
                 AND a.type = #{req.announcementType}

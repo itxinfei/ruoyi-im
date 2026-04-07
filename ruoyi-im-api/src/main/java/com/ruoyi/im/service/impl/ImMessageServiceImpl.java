@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImConversation;
+import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImMessageEditHistory;
 import com.ruoyi.im.domain.ImUserSession;
@@ -801,12 +802,18 @@ public class ImMessageServiceImpl implements ImMessageService {
             BusinessExceptionHelper.throwMessageNotFound();
         }
 
+        // 校验用户是否为目标会话成员，防止IDOR
+        Long targetConvId = Optional.ofNullable(toConversationId).orElse(originalMessage.getConversationId());
+        ImConversationMember member = imConversationMemberMapper.selectByConversationIdAndUserId(targetConvId, userId);
+        if (member == null) {
+            throw new BusinessException("无权向该会话转发消息");
+        }
+
         // 解密原消息内容
         String decryptedContent = encryptionUtil.decryptMessage(originalMessage.getContent());
 
         ImMessage forwardMessage = new ImMessage();
-        forwardMessage.setConversationId(
-            Optional.ofNullable(toConversationId).orElse(originalMessage.getConversationId()));
+        forwardMessage.setConversationId(targetConvId);
         forwardMessage.setSenderId(userId);
         forwardMessage.setReceiverId(
             Optional.ofNullable(toUserId).orElse(originalMessage.getReceiverId()));

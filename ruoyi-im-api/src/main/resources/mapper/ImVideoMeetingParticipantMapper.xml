@@ -57,6 +57,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </update>
 
+    <update id="stopAllScreenShare">
+        update im_video_meeting_participant
+        set is_sharing = #{status}
+        where meeting_id = #{meetingId}
+    </update>
+
     <insert id="batchInsert">
         insert into im_video_meeting_participant
         (meeting_id, user_id, user_name, user_avatar, role, status, create_time)

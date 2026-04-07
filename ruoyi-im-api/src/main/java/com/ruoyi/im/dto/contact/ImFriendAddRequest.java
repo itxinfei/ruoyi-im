@@ -3,6 +3,7 @@ package com.ruoyi.im.dto.contact;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
@@ -19,6 +20,7 @@ public class ImFriendAddRequest implements Serializable {
     /**
      * 目标用户ID
      */
+    @NotNull(message = "目标用户ID不能为空")
     private Long targetUserId;
 
     /**

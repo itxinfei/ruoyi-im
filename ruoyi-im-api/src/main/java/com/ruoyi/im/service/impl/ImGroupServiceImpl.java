@@ -256,6 +256,12 @@ public class ImGroupServiceImpl implements ImGroupService {
 
     @Override
     public List<ImGroupMemberVO> getGroupMembers(Long groupId, Long userId) {
+        // 校验请求者是否为群组成员，防止IDOR
+        ImGroupMember requester = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
+        if (requester == null) {
+            throw new BusinessException("无权查看群成员列表");
+        }
+
         List<ImGroupMember> memberList = imGroupMemberMapper.selectImGroupMemberListByGroupId(groupId);
 
         List<Long> userIds = memberList.stream()
@@ -357,6 +363,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             BusinessExceptionHelper.throwNoPermission("无权限移除成员");
         }
 
+        int removedCount = 0;
         for (Long userId : userIds) {
             if (userId.equals(group.getOwnerId())) {
                 BusinessExceptionHelper.throwCannotRemoveOwner();
@@ -369,11 +376,13 @@ public class ImGroupServiceImpl implements ImGroupService {
                 }
                 if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
                             BusinessExceptionHelper.throwNotAllowed("管理员不能移除其他管理员");
-                        }                imGroupMemberMapper.deleteImGroupMemberById(member.getId());
+                        }
+                imGroupMemberMapper.deleteImGroupMemberById(member.getId());
+                removedCount++;
             }
         }
 
-        group.setMemberCount(group.getMemberCount() - userIds.size());
+        group.setMemberCount(group.getMemberCount() - removedCount);
         group.setUpdateTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
 

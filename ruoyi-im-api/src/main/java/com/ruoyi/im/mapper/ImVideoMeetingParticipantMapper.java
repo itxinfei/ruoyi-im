@@ -58,6 +58,15 @@ public interface ImVideoMeetingParticipantMapper extends BaseMapper<ImVideoMeeti
     int updateScreenShareStatus(@Param("id") Long id, @Param("status") Boolean status);
 
     /**
+     * 停止会议中所有参与者的屏幕共享状态
+     *
+     * @param meetingId 会议ID
+     * @param status 共享状态
+     * @return 更新行数
+     */
+    int stopAllScreenShare(@Param("meetingId") Long meetingId, @Param("status") Boolean status);
+
+    /**
      * 批量插入参与者
      *
      * @param participants 参与者列表
