@@ -292,6 +292,17 @@ html.dark {
 
   // === Component Colors (暗色模式组件专用色) ===
   --dt-send-btn-empty-bg: #3b4252;  /* 暗色模式发送按钮空状态背景 */
+
+  // === Navigation Sidebar (暗色模式侧边栏) ===
+  --dt-nav-sidebar-bg: #1e293b;  /* 暗色模式侧边栏背景 */
+  --dt-nav-sidebar-text: rgba(255, 255, 255, 0.7);  /* 暗色模式侧边栏文字色 */
+  --dt-nav-sidebar-text-hover: rgba(255, 255, 255, 0.95);  /* 暗色模式侧边栏hover文字色 */
+  --dt-nav-sidebar-text-active: #ffffff;  /* 暗色模式侧边栏激活文字色 */
+  --dt-nav-sidebar-hover: rgba(255, 255, 255, 0.08);  /* 暗色模式侧边栏hover背景 */
+  --dt-nav-sidebar-active: rgba(255, 255, 255, 0.12);  /* 暗色模式侧边栏激活背景 */
+  --dt-nav-logo-bg: linear-gradient(160deg, #1e3a5f 0%, #1e293b 100%);  /* 暗色模式Logo背景 */
+  --dt-avatar-ring-bg-dark: rgba(255, 255, 255, 0.1);  /* 暗色模式头像ring背景 */
+  --dt-avatar-ring-border-dark: rgba(255, 255, 255, 0.15);  /* 暗色模式头像ring边框 */
 }
 
 // SCSS 辅助 Mixins
