@@ -156,7 +156,7 @@
             </div>
             <!-- 钉钉规范：hover 直接显示6个常用表情 -->
             <div class="reaction-trigger" title="表情">
-              <el-icon style="font-size: 16px;"><Star /></el-icon>
+              <el-icon><Star /></el-icon>
             </div>
             <div class="reaction-panel" @mouseenter="showReactionPanel = true" @mouseleave="showReactionPanel = false">
               <span
@@ -497,7 +497,7 @@ const formatDisplayUrl = (url) => {
   display: flex;
   flex-direction: column;
   padding: 0 var(--dt-spacing-xl);
-  margin-bottom: var(--dt-spacing-md);
+  margin-bottom: var(--dt-spacing-lg);
 }
 
 /* 连续消息压缩间距（同一人1分钟内：4px） */
@@ -508,11 +508,11 @@ const formatDisplayUrl = (url) => {
 .system-notice {
   align-self: center;
   margin: var(--dt-spacing-lg) 0;
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-tertiary);
   background: var(--dt-bg-hover);
   padding: 4px 12px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   font-weight: 500;
 }
 
@@ -635,13 +635,13 @@ const formatDisplayUrl = (url) => {
 /* 核心气泡规范 - 钉钉风格：简洁圆角气泡 */
 .message-bubble {
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-word;
   white-space: pre-wrap;
   position: relative;
   max-width: var(--dt-bubble-max-width);
-  transition: background-color 0.2s ease;
+  transition: background-color var(--dt-transition-fast);
 }
 
 /* 待发送状态 */
@@ -671,7 +671,7 @@ const formatDisplayUrl = (url) => {
   min-width: 120px;
   max-width: 280px;
   max-height: 400px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   display: block;
   object-fit: cover;
 }
@@ -691,7 +691,7 @@ const formatDisplayUrl = (url) => {
   justify-content: center;
   border-radius: var(--dt-radius-sm);
   color: var(--dt-text-tertiary);
-  font-size: 24px;
+  font-size: var(--dt-font-size-2xl);
 }
 
 /* 视频消息 */
@@ -734,7 +734,7 @@ const formatDisplayUrl = (url) => {
   justify-content: center;
   background-color: rgba(255, 255, 255, 0.8);  /* 白色半透明背景 */
   border-radius: 50%;
-  font-size: 16px;
+  font-size: var(--dt-font-size-lg);
   color: var(--dt-text-primary);
 }
 
@@ -742,7 +742,7 @@ const formatDisplayUrl = (url) => {
   position: absolute;
   bottom: 8px;
   right: 8px;
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-white);
   background-color: var(--dt-overlay-bg);
   padding: 2px 6px;
@@ -757,8 +757,8 @@ const formatDisplayUrl = (url) => {
   width: 260px;
   height: 64px;
   padding: 8px 12px;
-  border-radius: 8px;
-  transition: background-color 0.2s ease;
+  border-radius: var(--dt-radius-lg);
+  transition: background-color var(--dt-transition-fast);
   cursor: pointer;
 }
 
@@ -767,7 +767,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .file-content .file-icon {
-  font-size: 36px;
+  font-size: 36px;  /* 文件图标36px，保持非标准值 */
   flex-shrink: 0;
 }
 
@@ -780,7 +780,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .file-content .file-name {
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   font-weight: 500;
   color: var(--dt-text-primary);
   overflow: hidden;
@@ -789,7 +789,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .file-content .file-size {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
 }
 
@@ -807,7 +807,7 @@ const formatDisplayUrl = (url) => {
 .file-download-fill {
   height: 100%;
   background: var(--dt-brand-color);  /* 钉钉规范：品牌蓝色 */
-  transition: width 0.1s linear;
+  transition: width var(--dt-transition-fast);
 }
 
 /* 语音消息 - 钉钉风格 */
@@ -831,7 +831,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .voice-duration {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   font-weight: 500;
 }
 
@@ -843,10 +843,10 @@ const formatDisplayUrl = (url) => {
   min-width: 200px;
   max-width: 240px;
   padding: 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition: background-color var(--dt-transition-fast), border-color var(--dt-transition-fast);
 }
 
 .card-content:hover {
@@ -886,11 +886,11 @@ const formatDisplayUrl = (url) => {
 }
 
 .card-tag {
-  font-size: 10px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-brand-color);
   background-color: var(--dt-brand-bg);
   padding: 2px 6px;
-  border-radius: 2px;
+  border-radius: var(--dt-radius-xs);
   flex-shrink: 0;
 }
 
@@ -900,10 +900,10 @@ const formatDisplayUrl = (url) => {
   flex-direction: column;
   min-width: 200px;
   max-width: 280px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--dt-transition-fast);
 }
 
 .location-content:hover {
@@ -938,7 +938,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .location-icon {
-  font-size: 20px;
+  font-size: 20px;  /* 位置图标20px，保持非标准值 */
   color: var(--dt-text-white);
 }
 
@@ -997,12 +997,12 @@ const formatDisplayUrl = (url) => {
 /* 链接卡片 - 钉钉风格 */
 .link-content {
   padding: 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
 }
 
 .link-title {
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   font-weight: 600;
   color: var(--dt-text-primary);
   margin-bottom: 6px;
@@ -1012,7 +1012,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .link-desc {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
   line-height: 1.5;
   margin-bottom: 8px;
@@ -1023,7 +1023,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .link-url {
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-tertiary);
   display: flex;
   align-items: center;
@@ -1051,7 +1051,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .status-icon {
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);  /* 13px对齐到标准12px */
 }
 
 .status-icon.is-loading {
@@ -1069,7 +1069,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .read-status {
-  font-size: 11px;
+  font-size: var(--dt-font-size-xs);
   white-space: nowrap;
 }
 
@@ -1083,7 +1083,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .edited-tag {
-  font-size: 11px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-quaternary);
   margin-left: 4px;
 }
@@ -1093,7 +1093,7 @@ const formatDisplayUrl = (url) => {
   display: flex;
   align-items: center;
   background-color: var(--dt-bg-card);
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   box-shadow: var(--dt-shadow-2);
   padding: 4px 6px;
   gap: 2px;
@@ -1102,7 +1102,7 @@ const formatDisplayUrl = (url) => {
   z-index: 10;
   opacity: 0;
   transform: translateY(4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition: opacity var(--dt-transition-fast), transform var(--dt-transition-fast);
   pointer-events: none;
 }
 
@@ -1128,17 +1128,17 @@ const formatDisplayUrl = (url) => {
   justify-content: center;
   border-radius: var(--dt-radius-sm);  /* 钉钉规范：4px圆角 */
   cursor: pointer;
-  color: var(--dt-text-icon, #ADB1B8);  /* 钉钉规范：图标默认色 */
+  color: var(--dt-text-icon);  /* 钉钉规范：图标默认色 */
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
   :deep(.el-icon) {
-    font-size: 16px;  /* 钉钉规范：16x16图标 */
+    font-size: var(--dt-font-size-lg);  /* 钉钉规范：16x16图标 */
   }
 }
 
 .action-item:hover {
   background-color: var(--dt-bg-hover);
-  color: var(--dt-brand-color);  /* 钉钉规范：悬停变 #277EFB */
+  color: var(--dt-brand-color);
 }
 
 .action-item:active {
@@ -1153,13 +1153,17 @@ const formatDisplayUrl = (url) => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: var(--dt-text-icon, #ADB1B8);
+  color: var(--dt-text-icon);
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
   position: relative;
 
   &:hover {
     background-color: var(--dt-bg-hover);
     color: var(--dt-brand-color);
+  }
+
+  :deep(.el-icon) {
+    font-size: var(--dt-font-size-lg);
   }
 }
 
@@ -1210,7 +1214,7 @@ const formatDisplayUrl = (url) => {
 }
 
 .quick-emoji {
-  font-size: 18px;
+  font-size: var(--dt-font-size-xl);
   cursor: pointer;
   transition: background-color var(--dt-transition-fast);
   padding: 2px;

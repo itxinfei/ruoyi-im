@@ -603,18 +603,18 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
     .call-icon {
       color: var(--dt-brand-color);
-      font-size: 18px;
+      font-size: var(--dt-font-size-xl);
     }
 
     .title {
-      font-size: 15px;
+      font-size: var(--dt-font-size-md);
       font-weight: 600;
       color: var(--dt-text-white);
     }
 
     .participant-count {
       margin-left: 8px;
-      font-size: 13px;
+      font-size: var(--dt-font-size-sm);
       color: rgba(255, 255, 255, 0.6);
     }
   }
@@ -635,13 +635,13 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   margin-bottom: 12px;
 
   .timer-label {
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
     color: rgba(255, 255, 255, 0.5);
     margin-right: 8px;
   }
 
   .timer-value {
-    font-size: 18px;
+    font-size: var(--dt-font-size-xl);
     font-weight: 700;
     font-family: monospace;
     color: var(--dt-brand-color);
@@ -667,7 +667,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   overflow: hidden;
   background: var(--dt-overlay-bg);
   border: 2px solid transparent;
-  transition: border-color 0.3s, box-shadow 0.3s;
+  transition: border-color var(--dt-transition-base), box-shadow var(--dt-transition-base);
 
   &.is-speaking {
     border-color: var(--dt-brand-color);
@@ -708,7 +708,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     justify-content: space-between;
 
     .participant-name {
-      font-size: 13px;
+      font-size: var(--dt-font-size-sm);
       font-weight: 500;
       color: white;
       white-space: nowrap;
@@ -721,7 +721,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
       gap: 4px;
 
       .badge-icon {
-        font-size: 14px;
+        font-size: var(--dt-font-size-base);
         padding: 2px;
         border-radius: 4px;
         background: var(--dt-overlay-bg);
@@ -752,7 +752,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
       align-items: center;
       justify-content: center;
       color: rgba(255, 255, 255, 0.2);
-      font-size: 32px;
+      font-size: 32px;  /* 空头像图标32px，保持非标准值 */
     }
 
     .empty-label {
@@ -760,7 +760,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
       bottom: 8px;
       left: 50%;
       transform: translateX(-50%);
-      font-size: 12px;
+      font-size: var(--dt-font-size-sm);
       color: rgba(255, 255, 255, 0.2);
     }
   }
@@ -790,7 +790,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     bottom: 4px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 11px;
+    font-size: var(--dt-font-size-xs);
     color: var(--dt-text-white);
     opacity: 0.7;
     background: var(--dt-overlay-bg);
@@ -821,7 +821,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   border: none;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.7);
-  transition: color 0.2s;
+  transition: color var(--dt-transition-fast);
 
   .icon-circle {
     width: 52px;
@@ -831,8 +831,8 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
-    transition: background 0.2s;
+    font-size: 22px;  /* 通话控制按钮图标22px，保持非标准值 */
+    transition: background var(--dt-transition-fast);
 
     &:hover {
       background: rgba(255, 255, 255, 0.2);
@@ -840,7 +840,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   }
 
   span {
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
   }
 
   &.active .icon-circle {
@@ -863,7 +863,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
 .invite-tip {
   margin-bottom: 12px;
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
 }
 

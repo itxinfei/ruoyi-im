@@ -751,7 +751,7 @@ onMounted(() => {
   gap: 8px;
   z-index: 10;
   color: var(--dt-brand-color);
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   font-weight: 500;
 }
 
@@ -767,7 +767,7 @@ onMounted(() => {
 .reply-preview-bar {
   height: auto;
   max-height: 60px;
-  background: var(--dt-brand-bg);   /* 浅蓝色背景 #E8F2FE */
+  background: var(--dt-brand-bg);
   border-left: 2px solid var(--dt-brand-color);
   display: flex;
   align-items: flex-start;
@@ -818,7 +818,7 @@ onMounted(() => {
 .icon-close {
   cursor: pointer;
   color: var(--dt-text-tertiary);
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   margin-left: 8px;
   transition: color var(--dt-transition-fast);
 }
@@ -961,7 +961,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 22px;  /* 表情图标22px，保持非标准值 */
   cursor: pointer;
   border-radius: var(--dt-radius-lg);
   transition: background-color var(--dt-transition-fast);
@@ -1013,8 +1013,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  font-size: 14px;
-  transition: background-color 0.2s ease;
+  font-size: var(--dt-font-size-base);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .preview-remove:hover {
@@ -1050,10 +1050,10 @@ onMounted(() => {
   position: absolute;
   bottom: 2px;
   left: 4px;
-  font-size: 10px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-white);
   background-color: var(--dt-overlay-bg);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-xs);
   padding: 1px 3px;
 }
 
@@ -1061,10 +1061,10 @@ onMounted(() => {
   position: absolute;
   bottom: 2px;
   right: 4px;
-  font-size: 10px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-white);
   background-color: var(--dt-overlay-bg);
-  border-radius: 2px;
+  border-radius: var(--dt-radius-xs);
   padding: 1px 3px;
 }
 
@@ -1142,7 +1142,7 @@ onMounted(() => {
   height: 100%;
   outline: none;
   border: none;
-  font-size: 15px;
+  font-size: var(--dt-font-size-md);
   line-height: 1.7;
   color: var(--dt-text-primary);
   white-space: pre-wrap;
@@ -1205,5 +1205,5 @@ onMounted(() => {
 
 /* 滚动条美化 */
 .input-main::-webkit-scrollbar { width: 4px; }
-.input-main::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 2px; }
+.input-main::-webkit-scrollbar-thumb { background: var(--dt-scrollbar-thumb-bg); border-radius: var(--dt-radius-sm); }
 </style>

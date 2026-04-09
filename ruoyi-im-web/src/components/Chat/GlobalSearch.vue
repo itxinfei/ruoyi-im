@@ -303,7 +303,7 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-desc);
     margin-bottom: 8px;
     padding: 0 4px;
@@ -384,7 +384,7 @@ onMounted(() => {
     margin-bottom: 4px;
 
     .msg-name { font-size: var(--dt-font-size-xs); color: var(--dt-text-secondary); }
-    .msg-time { font-size: 11px; color: var(--dt-text-tertiary); }
+    .msg-time { font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); }
   }
 
   .msg-content {
@@ -425,5 +425,5 @@ onMounted(() => {
 }
 
 .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-.scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 4px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--dt-scrollbar-thumb-bg); border-radius: var(--dt-radius-sm); }
 </style>

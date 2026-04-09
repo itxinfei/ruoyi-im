@@ -432,7 +432,7 @@ defineExpose({
         padding: 12px;
         cursor: pointer;
         border-bottom: 1px solid var(--dt-border-lighter);
-        transition: background-color 0.15s;
+        transition: background-color var(--dt-transition-fast);
 
         &:hover {
           background: var(--dt-bg-hover);

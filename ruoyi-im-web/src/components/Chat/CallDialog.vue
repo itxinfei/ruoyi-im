@@ -402,8 +402,8 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
       opacity: 0;
     }
   }
-  .peer-name { font-size: 24px; font-weight: 600; margin: var(--dt-spacing-md) 0; }
-  .call-status-tag { font-size: 14px; color: var(--dt-text-white); opacity: 0.7; }
+  .peer-name { font-size: var(--dt-font-size-2xl); font-weight: 600; margin: var(--dt-spacing-md) 0; }
+  .call-status-tag { font-size: var(--dt-font-size-base); color: var(--dt-text-white); opacity: 0.7; }
   .call-timer { font-size: 20px; font-family: monospace; margin-top: var(--dt-spacing-md); color: var(--dt-brand-color); }
 }
 
@@ -417,11 +417,11 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
 .console-btn {
   @include button-reset; display: flex; flex-direction: column; align-items: center; gap: 8px;
   .icon-circle {
-    width: 64px; height: 64px; border-radius: var(--dt-radius-full); @include flex-center; font-size: 28px;
-    background: rgba(255,255,255,0.1); transition: background-color 0.2s;
+    width: 64px; height: 64px; border-radius: var(--dt-radius-full); @include flex-center; font-size: 28px;  /* 通话按钮图标28px，保持非标准值 */
+    background: rgba(255,255,255,0.1); transition: background-color var(--dt-transition-fast);
     &:hover { background: rgba(255,255,255,0.2); }
   }
-  span { font-size: 13px; color: var(--dt-text-white); opacity: 0.8; }
+  span { font-size: var(--dt-font-size-sm); color: var(--dt-text-white); opacity: 0.8; }
 
   &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
   &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); } .el-icon { transform: rotate(135deg); } }

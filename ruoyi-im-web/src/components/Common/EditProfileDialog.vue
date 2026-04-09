@@ -287,7 +287,7 @@ watch(() => props.modelValue, (val) => {
         align-items: center;
         justify-content: center;
         opacity: 0;
-        transition: opacity 0.2s;
+        transition: opacity var(--dt-transition-fast);
 
         .el-icon {
           font-size: 24px;

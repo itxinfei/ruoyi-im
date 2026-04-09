@@ -570,12 +570,11 @@ const handleShowAnnouncement = async () => {
   :deep(.el-drawer) {
     background: var(--dt-bg-body);
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);  /* 抽屉阴影 */
-    transition: transform 250ms ease-out;  /* 钉钉规范：250ms ease-out */
+    transition: transform var(--dt-transition-base);
   }
 
-  // 钉钉规范：遮罩 rgba(0,0,0,0.1)
   :deep(.el-drawer__overlay) {
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--dt-overlay-bg);
   }
 
   // 钉钉规范：左侧8px圆角，右侧无
@@ -604,12 +603,12 @@ const handleShowAnnouncement = async () => {
         gap: 12px;
         .name {
           margin: 0;
-          font-size: 16px;
+          font-size: var(--dt-font-size-lg);
           color: var(--dt-text-main);
         }
         .sub {
           margin: 4px 0 0;
-          font-size: 12px;
+          font-size: var(--dt-font-size-sm);
           color: var(--dt-text-desc);
         }
       }
@@ -622,7 +621,7 @@ const handleShowAnnouncement = async () => {
     align-items: center;
     margin-bottom: 12px;
     .title { font-weight: 500; color: var(--dt-text-main); }
-    .count { font-size: 12px; color: var(--dt-text-desc); }
+    .count { font-size: var(--dt-font-size-sm); color: var(--dt-text-desc); }
   }
 
   .member-grid {
@@ -647,7 +646,7 @@ const handleShowAnnouncement = async () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 8px;
+          font-size: 8px;  /* 角色角标图标8px，保持非标准值 */
           &.owner {
             background: var(--dt-warning-color);
             color: var(--dt-text-white);
@@ -659,7 +658,7 @@ const handleShowAnnouncement = async () => {
         }
       }
       .nickname {
-        font-size: 11px;
+        font-size: var(--dt-font-size-xs);
         color: var(--dt-text-desc);
         max-width: 100%;
         overflow: hidden;
@@ -692,7 +691,7 @@ const handleShowAnnouncement = async () => {
           align-items: center;
           justify-content: center;
           color: var(--dt-brand-color);
-          font-size: 18px;
+          font-size: var(--dt-font-size-xl);
           transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
         }
         &:hover .more-icon {
@@ -728,7 +727,7 @@ const handleShowAnnouncement = async () => {
       display: flex;
       justify-content: space-between;
       margin-bottom: 12px;
-      font-size: 14px;
+      font-size: var(--dt-font-size-base);
       &:last-child { margin-bottom: 0; }
       label { color: var(--dt-text-desc); }
       span { color: var(--dt-text-main); }
@@ -749,7 +748,7 @@ const handleShowAnnouncement = async () => {
       justify-content: space-between;
       align-items: center;
       padding: 8px 0;
-      font-size: 14px;
+      font-size: var(--dt-font-size-base);
       color: var(--dt-text-main);
     }
   }
@@ -764,7 +763,7 @@ const handleShowAnnouncement = async () => {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 14px;
+      font-size: var(--dt-font-size-base);
       color: var(--dt-text-main);
     }
   }
@@ -798,7 +797,7 @@ const handleShowAnnouncement = async () => {
   }
   .qr-code-tip {
     margin: 12px 0 0;
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
     color: var(--dt-text-desc);
   }
 }
@@ -817,10 +816,10 @@ const handleShowAnnouncement = async () => {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    font-size: 13px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-main);
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background var(--dt-transition-fast);
     &:hover {
       background: var(--dt-bg-hover);
     }
@@ -844,7 +843,7 @@ const handleShowAnnouncement = async () => {
     border-bottom: 1px solid var(--dt-border-light);
     &:last-child { border-bottom: none; }
     .announcement-content {
-      font-size: 14px;
+      font-size: var(--dt-font-size-base);
       color: var(--dt-text-main);
       line-height: 1.6;
       white-space: pre-wrap;
@@ -853,7 +852,7 @@ const handleShowAnnouncement = async () => {
       display: flex;
       justify-content: space-between;
       margin-top: 8px;
-      font-size: 12px;
+      font-size: var(--dt-font-size-sm);
       color: var(--dt-text-desc);
     }
   }
@@ -863,6 +862,6 @@ const handleShowAnnouncement = async () => {
   text-align: center;
   padding: 32px;
   color: var(--dt-text-desc);
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
 }
 </style>

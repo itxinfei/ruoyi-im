@@ -232,7 +232,7 @@ const formatFileSize = (bytes) => {
   padding: 12px;
   background: var(--dt-bg-hover);
   border-radius: 8px;
-  transition: background 0.2s;
+  transition: background var(--dt-transition-fast);
 }
 
 .attachment-item:hover {

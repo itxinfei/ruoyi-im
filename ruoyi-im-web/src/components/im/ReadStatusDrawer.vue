@@ -119,7 +119,7 @@ const formatTime = (ts) => {
 .close-icon {
   cursor: pointer;
   color: var(--dt-text-tertiary);
-  font-size: 18px;
+  font-size: var(--dt-font-size-xl);
   transition: color var(--dt-transition-fast);
 }
 
@@ -153,7 +153,7 @@ const formatTime = (ts) => {
 }
 
 .user-list::-webkit-scrollbar { width: 4px; }
-.user-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.05); border-radius: 2px; }
+.user-list::-webkit-scrollbar-thumb { background: var(--dt-scrollbar-thumb-bg); border-radius: var(--dt-radius-sm); }
 
 .user-item {
   display: flex;
@@ -210,7 +210,7 @@ const formatTime = (ts) => {
 }
 
 .empty-icon {
-  font-size: 48px;
+  font-size: 48px;  /* 空状态图标48px，保持非标准值 */
   margin-bottom: 12px;
 }
 

@@ -700,7 +700,7 @@ const scrollToMessage = (messageId) => {
 <style scoped>
 .chat-window { display: flex; flex-direction: column; height: 100%; background-color: var(--dt-bg-chat); position: relative; }
 .chat-header {
-  height: var(--dt-chat-header-height); /* 钉钉规范：60px */
+  height: var(--dt-chat-header-height); /* 钉钉规范：56px */
   padding: 0 20px;
   display: flex;
   align-items: center;
@@ -724,7 +724,7 @@ const scrollToMessage = (messageId) => {
 }
 
 .title {
-  font-size: 17px;
+  font-size: 17px;  /* 钉钉规范：头部标题17px */
   font-weight: 600;
   color: var(--dt-text-primary);
 }
@@ -742,7 +742,7 @@ const scrollToMessage = (messageId) => {
 
 .header-right .el-icon {
   cursor: pointer;
-  font-size: 18px;
+  font-size: var(--dt-font-size-xl);
   padding: var(--dt-spacing-sm);
   border-radius: var(--dt-radius-lg);
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
@@ -781,7 +781,7 @@ const scrollToMessage = (messageId) => {
 }
 
 .header-right :deep(.el-dropdown-menu__item .el-icon) {
-  font-size: 16px;
+  font-size: var(--dt-font-size-lg);
   color: var(--dt-text-secondary);
 }
 

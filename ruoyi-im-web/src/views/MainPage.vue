@@ -291,6 +291,6 @@ onUnmounted(() => {
 .chat-module-wrapper { display: flex; width: 100%; height: 100%; }
 .chat-main-view { flex: 1; height: 100%; min-width: var(--dt-chat-min-width); background-color: var(--dt-bg-chat); }
 .empty-view, .placeholder-view { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--dt-text-tertiary); }
-.empty-icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }
+.empty-icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }  /* 空状态图标，保持非标准值 */
 .single-panel-wrapper { width: 100%; height: 100%; }
 </style>

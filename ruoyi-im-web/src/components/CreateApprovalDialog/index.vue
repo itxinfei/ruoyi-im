@@ -291,7 +291,7 @@ const resetForm = () => {
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-lg);
   cursor: pointer;
-  transition: border-color 0.2s, background-color 0.2s;
+  transition: border-color var(--dt-transition-fast), background-color var(--dt-transition-fast);
 }
 
 .template-item:hover {

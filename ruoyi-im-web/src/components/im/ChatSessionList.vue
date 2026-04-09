@@ -172,7 +172,7 @@ const formatTime = (time) => {
   gap: 4px;
   margin-top: 10px;
   background: var(--dt-bg-hover);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   padding: 4px;
 }
 
@@ -182,11 +182,11 @@ const formatTime = (time) => {
   border: none;
   background: transparent;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);  /* 13px对齐到标准12px */
   font-weight: 500;
   color: var(--dt-text-secondary);
   cursor: pointer;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  transition: color var(--dt-transition-fast), background-color var(--dt-transition-fast);
 }
 
 .session-tab:hover {
@@ -206,10 +206,10 @@ const formatTime = (time) => {
   align-items: center;
   height: 34px;
   background-color: var(--dt-bg-hover);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   padding: 0 12px;
   border: 1.5px solid transparent;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--dt-transition-fast);
 }
 
 .search-bar:hover {
@@ -224,7 +224,7 @@ const formatTime = (time) => {
 
 .search-icon {
   color: var(--dt-text-tertiary);
-  font-size: 16px;
+  font-size: var(--dt-font-size-lg);
 }
 
 .search-bar input {
@@ -233,7 +233,7 @@ const formatTime = (time) => {
   outline: none;
   margin-left: 10px;
   width: 100%;
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   color: var(--dt-text-primary);
 }
 
@@ -248,8 +248,8 @@ const formatTime = (time) => {
 
 /* 滚动条美化 */
 .session-list::-webkit-scrollbar { width: 4px; }
-.session-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.08); border-radius: 2px; }
-.session-list::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.15); }
+.session-list::-webkit-scrollbar-thumb { background: var(--dt-scrollbar-thumb-bg); border-radius: var(--dt-radius-sm); }
+.session-list::-webkit-scrollbar-thumb:hover { background: var(--dt-scrollbar-thumb-bg-hover); }
 .session-list::-webkit-scrollbar-track { background: transparent; }
 
 .session-item {
@@ -289,8 +289,8 @@ const formatTime = (time) => {
 
 .avatar-wrapper {
   position: relative;
-  width: 44px; /* 增大头像 */
-  height: 44px;
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   margin-right: var(--dt-spacing-md);
   flex-shrink: 0;
 }
@@ -309,7 +309,7 @@ const formatTime = (time) => {
   right: -4px;
   background-color: var(--dt-unread-color);
   color: var(--dt-text-white);
-  font-size: 10px;
+  font-size: var(--dt-font-size-xs);
   font-weight: var(--dt-font-weight-semibold);
   line-height: 16px;
   min-width: 16px;
@@ -325,7 +325,7 @@ const formatTime = (time) => {
 }
 
 .unread-badge-capsule {
-  border-radius: 8px; /* 高度 16px 的一半，圆角为 8px */
+  border-radius: var(--dt-radius-lg);
 }
 
 .content-wrapper {
@@ -345,7 +345,7 @@ const formatTime = (time) => {
 }
 
 .session-name {
-  font-size: 15px;
+  font-size: var(--dt-font-size-md);
   font-weight: 500;
   color: var(--dt-text-primary);
   overflow: hidden;
@@ -354,7 +354,7 @@ const formatTime = (time) => {
 }
 
 .session-time {
-  font-size: 11px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
   margin-left: 8px;
   flex-shrink: 0;
@@ -367,7 +367,7 @@ const formatTime = (time) => {
 }
 
 .last-message {
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -393,7 +393,7 @@ const formatTime = (time) => {
   justify-content: center;
   height: 200px;
   color: var(--dt-text-tertiary);
-  font-size: 13px;
+  font-size: var(--dt-font-size-sm);
   gap: 12px;
 }
 
@@ -403,7 +403,7 @@ const formatTime = (time) => {
 
 .empty-list p {
   color: var(--dt-text-secondary);
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   margin-top: 4px;
 }
 </style>

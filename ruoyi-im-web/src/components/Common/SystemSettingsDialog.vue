@@ -720,8 +720,8 @@ watch(visible, (val) => {
 .scrollbar-thin::-webkit-scrollbar { width: 6px; }
 .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(0,0,0,0.1);
-  border-radius: 3px;
+  background: var(--dt-scrollbar-thumb-bg);
+  border-radius: var(--dt-radius-sm);
 }
 
 // 暗色模式

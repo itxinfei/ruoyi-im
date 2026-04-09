@@ -214,7 +214,7 @@ const getBarHeight = (index) => {
 
   // 播放时波形动画 (使用 opacity 变化，符合规范)
   &.playing .waveform-bar {
-    transition: opacity 0.3s ease;
+    transition: opacity var(--dt-transition-base);
 
     @for $i from 1 through 24 {
       &:nth-child(#{$i}) {
@@ -246,7 +246,7 @@ const getBarHeight = (index) => {
     .progress-fill {
       height: 100%;
       background: var(--dt-brand-color);
-      transition: width 0.1s linear;
+      transition: width var(--dt-transition-fast);
     }
   }
 

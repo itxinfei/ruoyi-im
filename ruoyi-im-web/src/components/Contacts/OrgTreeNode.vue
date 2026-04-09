@@ -67,7 +67,7 @@ const handleClick = () => {
   padding: 0 var(--dt-spacing-sm);
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--dt-transition-fast);
 
   &:hover {
     background: var(--dt-bg-hover);
@@ -87,7 +87,7 @@ const handleClick = () => {
   .expand-icon {
     font-size: 14px;
     color: var(--dt-text-tertiary);
-    transition: transform 0.2s ease;
+    transition: transform var(--dt-transition-fast);
     margin-right: 6px;
     &.rotated {
       transform: rotate(90deg);

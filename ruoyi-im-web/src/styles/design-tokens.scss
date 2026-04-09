@@ -159,6 +159,10 @@
   --dt-overlay-bg: rgba(0, 0, 0, 0.6);  /* 钉钉规范：视频时长背景 rgba(0,0,0,0.6) */
   --dt-bg-placeholder: #F2F4F5;  /* 钉钉规范：图片加载占位背景 */
 
+  // === Scrollbar ===
+  --dt-scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);  /* 滚动条滑块背景 */
+  --dt-scrollbar-thumb-bg-hover: rgba(0, 0, 0, 0.35);  /* 滚动条滑块hover背景 */
+
   // === Transition ===
   --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --dt-transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -174,7 +178,7 @@
   --dt-contact-panel-width: 240px;
   --dt-chat-min-width: 480px;
   --dt-header-height: 56px;
-  --dt-chat-header-height: 60px;
+  --dt-chat-header-height: 56px;
   --dt-chat-input-height: 96px;
 
   // === Spacing System (8px 栅格) ===
@@ -281,6 +285,10 @@ html.dark {
   // === Overlay & Placeholder (暗色模式) ===
   --dt-overlay-bg: rgba(255, 255, 255, 0.2);  /* 暗色模式视频时长背景 */
   --dt-bg-placeholder: #374151;  /* 暗色模式图片加载占位背景 */
+
+  // === Scrollbar (暗色模式滚动条) ===
+  --dt-scrollbar-thumb-bg: rgba(255, 255, 255, 0.2);  /* 暗色模式滚动条滑块背景 */
+  --dt-scrollbar-thumb-bg-hover: rgba(255, 255, 255, 0.35);  /* 暗色模式滚动条滑块hover背景 */
 
   // === Component Colors (暗色模式组件专用色) ===
   --dt-send-btn-empty-bg: #3b4252;  /* 暗色模式发送按钮空状态背景 */

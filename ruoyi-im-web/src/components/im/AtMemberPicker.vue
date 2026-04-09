@@ -199,8 +199,8 @@ watch(filteredMembers, () => {
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba(0, 0, 0, 0.1);
-    border-radius: 2px;
+    background: var(--dt-scrollbar-thumb-bg);
+    border-radius: var(--dt-radius-sm);
   }
 }
 
@@ -258,7 +258,7 @@ watch(filteredMembers, () => {
 
 .select-icon {
   color: var(--dt-brand-color);
-  font-size: 14px;
+  font-size: var(--dt-font-size-base);
   flex-shrink: 0;
 }
 
@@ -273,7 +273,7 @@ watch(filteredMembers, () => {
   gap: var(--dt-spacing-sm);
 
   .el-icon {
-    font-size: 24px;
+    font-size: var(--dt-font-size-2xl);
   }
 }
 </style>

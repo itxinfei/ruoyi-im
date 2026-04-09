@@ -206,7 +206,7 @@ const handleSave = async () => {
   align-items: center;
   color: var(--dt-text-white);
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity var(--dt-transition-base);
 }
 
 .upload-mask .el-icon {

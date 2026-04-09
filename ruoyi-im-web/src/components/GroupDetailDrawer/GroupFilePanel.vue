@@ -675,7 +675,7 @@ defineExpose({ open })
     padding: 12px;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color var(--dt-transition-fast);
 
     &:hover {
       background: var(--dt-bg-body);
@@ -734,7 +734,7 @@ defineExpose({ open })
 
     .file-actions {
       opacity: 0;
-      transition: opacity 0.2s;
+      transition: opacity var(--dt-transition-fast);
     }
   }
 }

@@ -182,7 +182,7 @@ onMounted(() => {
   gap: 12px;
   box-shadow: var(--dt-shadow-1);
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: box-shadow var(--dt-transition-fast);
 }
 
 .group-item:hover {
