@@ -904,7 +904,7 @@ onUnmounted(() => {
   box-sizing: border-box;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.2s ease;
+  transition: background-color var(--dt-transition-fast);
   border-radius: 8px;
   margin: 0;
 
@@ -930,7 +930,7 @@ onUnmounted(() => {
   font-size: 20px;
   flex-shrink: 0;
   color: var(--dt-text-secondary);
-  transition: color 0.2s ease;
+  transition: color var(--dt-transition-fast);
 }
 
 .nav-label {

@@ -371,13 +371,13 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .dept-folder-card {
   background: var(--dt-bg-card);
   padding: 16px 20px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   gap: 14px;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: border-color var(--dt-transition-fast), background-color var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
@@ -389,7 +389,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     color: var(--dt-brand-color);
     width: 44px;
     height: 44px;
-    border-radius: 10px;
+    border-radius: 10px;  /* 保持非标准值 */
     background: var(--dt-brand-bg);
     display: flex;
     align-items: center;
@@ -435,13 +435,13 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .member-card-ding {
   background: var(--dt-bg-card);
   padding: 16px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
   gap: 14px;
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
@@ -484,7 +484,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    transition: opacity var(--dt-transition-fast), background-color var(--dt-transition-fast), color var(--dt-transition-fast);
     border: none;
     cursor: pointer;
 
