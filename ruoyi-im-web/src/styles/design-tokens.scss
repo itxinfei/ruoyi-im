@@ -174,6 +174,8 @@
   --dt-avatar-size-sm: 24px;
   --dt-avatar-size-md: 36px;
   --dt-avatar-size-lg: 44px;
+  --dt-avatar-session: 40px;  // 会话列表头像 钉钉标准
+  --dt-session-item-height: 56px;  // 会话项固定高度 钉钉标准
   --dt-session-panel-width: 250px;
   --dt-contact-panel-width: 240px;
   --dt-chat-min-width: 480px;
@@ -209,8 +211,9 @@
   --dt-text-link-color: var(--dt-brand-color);
   --dt-text-link-hover-color: #4493FA;
 
-  // === Bubble Compact (气泡紧凑模式) ===
+  // === Bubble Compact (气泡紧凑模式 - 连续消息) ===
   --dt-bubble-compact-padding: 6px;
+  --dt-bubble-compact-margin-top: -4px;  // 连续消息压缩间距 钉钉标准
 
   // === Component Specific (钉钉风格 - 对齐21文档) ===
   --dt-bubble-padding-v: 8px;   /* 钉钉规范：上下 8px */
@@ -223,7 +226,10 @@
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
   --dt-btn-min-width: 80px;
-  --dt-toolbar-height: 32px;
+  --dt-toolbar-height: 48px;  // 工具栏高度 钉钉标准
+  --dt-toolbar-icon-size: 20px;  // 工具栏图标尺寸 钉钉标准
+  --dt-toolbar-icon-gap: 8px;  // 工具栏图标间距 钉钉标准
+  --dt-send-btn-width: 64px;  // 发送按钮宽度 钉钉标准
   --dt-input-min-height: 96px;
   --dt-input-max-height: 300px;
 

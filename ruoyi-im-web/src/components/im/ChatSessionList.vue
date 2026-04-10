@@ -28,34 +28,58 @@
 
     <!-- 会话列表区 -->
     <div class="session-list" v-loading="loading">
-      <div 
-        v-for="session in filteredSessions" 
-        :key="session.id"
-        class="session-item"
-        :class="{ 'is-active': currentSession && currentSession.id === session.id, 'is-pinned': session.isPinned }"
-        @click="selectSession(session)"
-      >
-        <!-- 头像区 (对齐钉钉 4px 圆角) -->
-        <div class="avatar-wrapper" @click.stop="handleAvatarClick(session)">
-          <img :src="session.avatar || '/avatars/default.png'" class="avatar" alt="avatar" />
-          <div v-if="session.unreadCount > 0" class="unread-badge" :class="getUnreadBadgeClass(session.unreadCount)">
-            {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+      <!-- 分类分组列表 -->
+      <template v-for="group in groupedSessions" :key="group.type">
+        <!-- 分类头部（可折叠） -->
+        <div
+          v-if="group.sessions.length > 0 || group.type === 'PINNED'"
+          class="session-group"
+          :class="{ 'is-collapsed': collapsedGroups[group.type] }"
+        >
+          <div class="group-header" @click="toggleGroup(group.type)">
+            <el-icon class="group-arrow">
+              <ArrowDown v-if="!collapsedGroups[group.type]" />
+              <ArrowRight v-else />
+            </el-icon>
+            <span class="group-name">{{ group.label }}</span>
+            <span v-if="group.unreadCount > 0" class="group-unread-badge">
+              {{ group.unreadCount > 99 ? '99+' : group.unreadCount }}
+            </span>
           </div>
-        </div>
 
-        <!-- 内容区 -->
-        <div class="content-wrapper">
-          <div class="content-top">
-            <span class="session-name">{{ session.name }}</span>
-            <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
-          </div>
-          <div class="content-bottom">
-            <span v-if="session.draftContent" class="draft-tag">[草稿]</span>
-            <span class="last-message">{{ session.lastMessage }}</span>
-            <el-icon v-if="session.isMuted" class="mute-icon" :size="14"><BellFilled /></el-icon>
+          <!-- 分组内的会话项 -->
+          <div v-show="!collapsedGroups[group.type]" class="group-sessions">
+            <div
+              v-for="session in group.sessions"
+              :key="session.id"
+              class="session-item"
+              :class="{ 'is-active': currentSession && currentSession.id === session.id, 'is-pinned': session.isPinned }"
+              @click="selectSession(session)"
+            >
+              <!-- 头像区 (对齐钉钉 4px 圆角) -->
+              <div class="avatar-wrapper" @click.stop="handleAvatarClick(session)">
+                <img :src="session.avatar || '/avatars/default.png'" class="avatar" alt="avatar" />
+                <div v-if="session.unreadCount > 0" class="unread-badge" :class="getUnreadBadgeClass(session.unreadCount)">
+                  {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
+                </div>
+              </div>
+
+              <!-- 内容区 -->
+              <div class="content-wrapper">
+                <div class="content-top">
+                  <span class="session-name">{{ session.name }}</span>
+                  <span class="session-time">{{ formatTime(session.lastMessageTime) }}</span>
+                </div>
+                <div class="content-bottom">
+                  <span v-if="session.draftContent" class="draft-tag">[草稿]</span>
+                  <span class="last-message">{{ session.lastMessage }}</span>
+                  <el-icon v-if="session.isMuted" class="mute-icon" :size="14"><BellFilled /></el-icon>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </template>
 
       <!-- 空状态 -->
       <div v-if="!loading && filteredSessions.length === 0" class="empty-list">
@@ -71,9 +95,9 @@
  * ChatSessionList.vue (对齐钉钉 250px 规范)
  * 修复：数据初始化加载、色彩对齐、图标修正
  */
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, reactive } from 'vue';
 import { useStore } from 'vuex';
-import { Search, BellFilled, ChatLineRound } from '@element-plus/icons-vue';
+import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight } from '@element-plus/icons-vue';
 
 const store = useStore();
 
@@ -81,6 +105,25 @@ const store = useStore();
 const isSearchFocused = ref(false);
 const searchKeyword = ref('');
 const filterType = ref('all');
+
+// 分类折叠状态
+const collapsedGroups = reactive({
+  PINNED: false,
+  PRIVATE: false,
+  GROUP: false
+});
+
+// 分类定义
+const sessionGroups = [
+  { type: 'PINNED', label: '置顶' },
+  { type: 'PRIVATE', label: '单聊' },
+  { type: 'GROUP', label: '群聊' }
+];
+
+// 切换分组折叠状态
+const toggleGroup = (type) => {
+  collapsedGroups[type] = !collapsedGroups[type];
+};
 
 // 会话类型过滤 tabs
 const sessionTabs = [
@@ -105,6 +148,36 @@ const filteredSessions = computed(() => {
     list = list.filter(s => s.name?.toLowerCase().includes(searchKeyword.value.toLowerCase()));
   }
   return list;
+});
+
+// 分组会话列表（钉钉分类设计：置顶 > 单聊 > 群聊）
+const groupedSessions = computed(() => {
+  const list = filteredSessions.value;
+
+  return sessionGroups.map(group => {
+    let groupSessions;
+
+    if (filterType.value !== 'all') {
+      // 单一类型过滤时，只显示该类型的非置顶会话
+      groupSessions = list.filter(s => !s.isPinned && s.type === filterType.value);
+    } else {
+      // 全部类型时，按分组显示
+      if (group.type === 'PINNED') {
+        groupSessions = list.filter(s => s.isPinned);
+      } else {
+        groupSessions = list.filter(s => !s.isPinned && s.type === group.type);
+      }
+    }
+
+    const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0);
+
+    return {
+      type: group.type,
+      label: group.label,
+      sessions: groupSessions,
+      unreadCount
+    };
+  });
 });
 
 // 初始化加载
@@ -252,10 +325,64 @@ const formatTime = (time) => {
 .session-list::-webkit-scrollbar-thumb:hover { background: var(--dt-scrollbar-thumb-bg-hover); }
 .session-list::-webkit-scrollbar-track { background: transparent; }
 
+/* 分类分组样式 */
+.session-group {
+  margin-bottom: 4px;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color var(--dt-transition-fast);
+}
+
+.group-header:hover {
+  background-color: var(--dt-bg-session-hover);
+}
+
+.group-arrow {
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  margin-right: 8px;
+  transition: transform var(--dt-transition-fast);
+}
+
+.session-group.is-collapsed .group-arrow {
+  transform: rotate(0deg);
+}
+
+.group-name {
+  font-size: var(--dt-font-size-sm);
+  font-weight: 500;
+  color: var(--dt-text-secondary);
+  flex: 1;
+}
+
+.group-unread-badge {
+  background-color: var(--dt-error-color);
+  color: var(--dt-text-white);
+  font-size: 10px;
+  font-weight: 600;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.group-sessions {
+  /* 展开状态 */
+}
+
 .session-item {
   display: flex;
   align-items: center;
-  height: 64px; /* 钉钉规范：会话列表项高度 64px */
+  height: var(--dt-session-item-height);  /* 钉钉标准 56px */
   padding: 0 var(--dt-spacing-lg);
   cursor: pointer;
   position: relative;
@@ -289,8 +416,8 @@ const formatTime = (time) => {
 
 .avatar-wrapper {
   position: relative;
-  width: var(--dt-avatar-size-md);
-  height: var(--dt-avatar-size-md);
+  width: var(--dt-avatar-session);  /* 钉钉标准 40px */
+  height: var(--dt-avatar-session);  /* 钉钉标准 40px */
   margin-right: var(--dt-spacing-md);
   flex-shrink: 0;
 }

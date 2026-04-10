@@ -125,9 +125,9 @@ const handleToggleTheme = () => {
 }
 
 .nav-logo {
-  width: 50px;
-  height: 50px;
-  border-radius: 4px;
+  width: var(--dt-logo-size);
+  height: var(--dt-logo-size);
+  border-radius: var(--dt-radius-lg);
   background: var(--dt-nav-logo-bg, var(--dt-brand-gradient));
   display: flex;
   align-items: center;
@@ -161,14 +161,14 @@ const handleToggleTheme = () => {
 .nav-item {
   position: relative;
   width: 100%;
+  height: 48px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0;
-  padding: 1px 0;
+  gap: 2px;
   cursor: pointer;
-  border-radius: 0;
+  border-radius: var(--dt-radius-lg);
   color: var(--dt-nav-sidebar-text, rgba(255, 255, 255, 0.7));
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
   margin: 0;
@@ -185,7 +185,7 @@ const handleToggleTheme = () => {
 }
 
 .nav-item .el-icon {
-  font-size: 22px;
+  font-size: 20px;
 }
 
 .nav-label {
@@ -217,7 +217,7 @@ const handleToggleTheme = () => {
 .nav-divider {
   width: 48px;
   height: 1px;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--dt-border-light);
   margin: 4px auto;
   flex-shrink: 0;
 }
@@ -242,17 +242,17 @@ const handleToggleTheme = () => {
   padding: 1px 0;
   cursor: pointer;
   border-radius: 0;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--dt-nav-sidebar-text, rgba(255, 255, 255, 0.7));
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 }
 
 .nav-bottom .nav-item:hover {
-  color: rgba(255, 255, 255, 0.95);
-  background: rgba(255, 255, 255, 0.12);
+  color: var(--dt-nav-sidebar-text-hover, rgba(255, 255, 255, 0.95));
+  background: var(--dt-nav-sidebar-hover, rgba(255, 255, 255, 0.12));
 }
 
 .nav-bottom .nav-item:active {
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--dt-nav-sidebar-active, rgba(255, 255, 255, 0.18));
 }
 
 /* 用户头像 - 钉钉风格 */
@@ -281,9 +281,9 @@ const handleToggleTheme = () => {
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
+  border-radius: var(--dt-radius-lg);
   border: none;
   position: absolute;
   top: 50%;

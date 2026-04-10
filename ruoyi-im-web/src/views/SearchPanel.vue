@@ -10,6 +10,7 @@
           class="search-input"
           placeholder="搜索消息、联系人、群组、文件..."
           autofocus
+          @input="handleInstantSearch"
           @keyup.enter="handleSearch"
         >
         <el-icon v-if="keyword" class="clear-icon" @click="clearSearch"><Close /></el-icon>
@@ -311,6 +312,7 @@ const searchHistory = ref([])
 const results = ref({})
 const scopeSession = ref(null)
 const scopeMode = ref('global')
+let searchTimer = null  // 搜索防抖定时器
 
 const searchTabs = [
   { label: '全部', value: 'all' },
@@ -406,6 +408,21 @@ const handleSearch = async () => {
   } finally {
     loading.value = false
   }
+}
+
+// 即时搜索（钉钉规范：输入即搜索，防抖 300ms）
+const handleInstantSearch = () => {
+  if (searchTimer) clearTimeout(searchTimer)
+
+  if (!keyword.value.trim()) {
+    searched.value = false
+    results.value = {}
+    return
+  }
+
+  searchTimer = setTimeout(() => {
+    handleSearch()
+  }, 300)
 }
 
 const switchTab = (type) => {

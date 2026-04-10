@@ -1127,12 +1127,12 @@ onMounted(() => {
   font-size: var(--dt-font-size-sm);
 }
 
-/* 主输入区 - 钉钉规范优化：初始高度120px */
+/* 主输入区 - 钉钉规范优化 */
 .input-main {
   flex: 1;
   padding: 8px var(--dt-spacing-xl);
-  min-height: 120px;
-  max-height: 320px;
+  min-height: var(--dt-input-min-height);  /* 钉钉标准 96px */
+  max-height: var(--dt-input-max-height);  /* 钉钉标准 300px */
   overflow-y: auto;
 }
 
