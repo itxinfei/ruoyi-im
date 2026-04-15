@@ -108,6 +108,8 @@
   --dt-text-link: #0089ff;
   --dt-text-link-hover: #33a1ff;
   --dt-text-white: #ffffff;
+  --dt-text-main: var(--dt-text-primary);  /* 别名兼容性 */
+  --dt-text-desc: var(--dt-text-secondary);  /* 别名兼容性 */
 
   // === Component Colors (组件专用色) ===
   --dt-send-btn-empty-bg: #E5E7EB;  /* 钉钉规范：发送按钮空状态背景 */
