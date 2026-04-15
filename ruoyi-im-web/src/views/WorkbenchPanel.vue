@@ -905,7 +905,7 @@ onUnmounted(() => {
   cursor: pointer;
   position: relative;
   transition: background-color var(--dt-transition-fast);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   margin: 0;
 
   &:hover {
@@ -1383,7 +1383,7 @@ onUnmounted(() => {
   &__status {
     width: 4px;
     height: 32px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-xs);
     flex-shrink: 0;
 
     &.high { background: var(--dt-error-color); }

@@ -1004,7 +1004,7 @@ const scrollToMessage = (messageId) => {
   min-height: var(--dt-input-min-height);
   max-height: 40%;
   margin: 0 var(--dt-chat-gutter) var(--dt-chat-gutter);
-  border-radius: 20px;
+  border-radius: var(--dt-radius-2xl);
   overflow: hidden;
   border: 1px solid rgba(23, 26, 29, 0.06);
   box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
@@ -1051,7 +1051,7 @@ const scrollToMessage = (messageId) => {
 
   :deep(.chat-input-wrapper) {
     margin: 0 10px 10px;
-    border-radius: 16px;
+    border-radius: var(--dt-radius-2xl);
   }
 
   .selection-header {
