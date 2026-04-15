@@ -340,7 +340,7 @@ onMounted(async () => {
 .metric-icon {
   width: 48px;
   height: 48px;
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
