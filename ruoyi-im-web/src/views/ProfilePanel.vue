@@ -472,7 +472,7 @@ onMounted(loadUser)
       color: var(--dt-text-quaternary);
       margin-left: auto;
       transition: color var(--dt-transition-fast);
-      font-size: var(--dt-icon-size-lg, 20px);
+      font-size: var(--dt-icon-size-lg);
     }
   }
 }

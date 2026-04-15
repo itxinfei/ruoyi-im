@@ -849,7 +849,7 @@ onMounted(() => {
 }
 .docs-content { flex: 1; padding: var(--dt-spacing-lg); overflow-y: auto; }
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 200px); color: var(--dt-text-tertiary);
-  .empty-icon { font-size: var(--dt-icon-size-xl, 64px); margin-bottom: var(--dt-spacing-lg); opacity: 0.5; color: var(--dt-border-color); }
+  .empty-icon { font-size: 64px; margin-bottom: var(--dt-spacing-lg); opacity: 0.5; color: var(--dt-border-color); }
   .empty-text { margin: 0; font-size: var(--dt-font-size-sm); }
 }
 .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 200px); color: var(--dt-text-tertiary);

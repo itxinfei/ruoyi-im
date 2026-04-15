@@ -198,7 +198,7 @@ const getBarHeight = (index) => {
   // 波形图容器
   .waveform-container {
     flex: 1;
-    height: var(--dt-icon-size-lg, 30px);
+    height: 30px;
     display: flex;
     align-items: center;
     gap: var(--dt-spacing-xs, 2px);

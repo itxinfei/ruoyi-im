@@ -449,7 +449,7 @@ onMounted(() => {
 }
 
 .empty-icon {
-  font-size: var(--dt-icon-size-xl, 64px);
+  font-size: 64px;
   margin-bottom: var(--dt-spacing-lg);
   color: var(--dt-border-color);
 }

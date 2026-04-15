@@ -379,7 +379,7 @@ onMounted(() => {
 }
 
 .empty-icon {
-  font-size: var(--dt-icon-size-2xl, 64px);
+  font-size: 64px;
   margin-bottom: var(--dt-spacing-lg);
   color: var(--dt-border-color);
 }
@@ -428,7 +428,7 @@ onMounted(() => {
   flex-shrink: 0;
 
   .el-icon {
-    font-size: var(--dt-icon-size-lg, 22px);
+    font-size: 22px;
   }
 
   &.type-text {

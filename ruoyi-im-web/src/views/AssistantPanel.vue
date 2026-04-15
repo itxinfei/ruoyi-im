@@ -498,7 +498,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--dt-icon-size-lg, 20px);
+  font-size: var(--dt-icon-size-lg);
 }
 
 .header-info {
@@ -740,8 +740,8 @@ onMounted(() => {
 }
 
 .hero-icon {
-  width: var(--dt-icon-size-2xl, 80px);
-  height: var(--dt-icon-size-2xl, 80px);
+  width: var(--dt-icon-size-2xl);
+  height: var(--dt-icon-size-2xl);
   margin: 0 auto var(--dt-spacing-xl);
   border-radius: var(--dt-radius-xl);
   background: var(--dt-brand-color);
@@ -749,7 +749,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--dt-icon-size-xl, 36px);
+  font-size: var(--dt-icon-size-xl);
   box-shadow: var(--dt-shadow-2);
 }
 
@@ -811,7 +811,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: var(--dt-icon-size-lg, 22px);
+  font-size: 22px;
 }
 
 .card-label {
@@ -880,7 +880,7 @@ onMounted(() => {
 
 .history-icon {
   color: var(--dt-brand-color);
-  font-size: var(--dt-icon-size-lg, 20px);
+  font-size: var(--dt-icon-size-lg);
 }
 
 .history-content {

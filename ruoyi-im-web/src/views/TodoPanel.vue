@@ -343,5 +343,5 @@ onMounted(() => loadTodos())
   }
 }
 .todo-actions { opacity: 0; display: flex; gap: var(--dt-spacing-xs); transition: color var(--dt-transition-fast); .action-icon { border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); padding: 4px; &:hover { color: var(--dt-brand-color); } &.danger:hover { color: var(--dt-error-color); } } }
-.empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl, 100px) 0; color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-xl, 48px); margin-bottom: var(--dt-spacing-md); opacity: 0.3; } }
+.empty-state, .loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--dt-spacing-3xl) 0; color: var(--dt-text-tertiary); .el-icon { font-size: var(--dt-icon-size-xl); margin-bottom: var(--dt-spacing-md); opacity: 0.3; } }
 </style>
