@@ -112,9 +112,7 @@
                   <div class="item-title">
                     {{ msg.senderName }}
                   </div>
-                  <div class="item-desc">
-                    {{ msg.content }}
-                  </div>
+                  <div class="item-desc" v-html="highlightKeyword(msg.content, keyword)" />
                   <div class="item-time">
                     {{ formatTime(msg.createTime) }}
                   </div>
@@ -237,9 +235,7 @@
                   <div class="item-title">
                     {{ item.senderName }}
                   </div>
-                  <div class="item-desc">
-                    {{ item.content }}
-                  </div>
+                  <div class="item-desc" v-html="highlightKeyword(item.content, keyword)" />
                   <div class="item-time">
                     {{ formatTime(item.createTime) }}
                   </div>
@@ -536,6 +532,14 @@ const formatFileSize = (size) => {
     i++
   }
   return size.toFixed(1) + ' ' + units[i]
+}
+
+// 高亮搜索关键词
+const highlightKeyword = (text, keyword) => {
+  if (!text || !keyword) return text || ''
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const regex = new RegExp(`(${escaped})`, 'gi')
+  return text.replace(regex, '<mark class="search-highlight">$1</mark>')
 }
 
 // 初始化
@@ -878,5 +882,13 @@ loadHotKeywords()
     margin-top: var(--dt-spacing-md);
     font-size: var(--dt-font-size-sm);
   }
+}
+
+/* 搜索关键词高亮 */
+:deep(.search-highlight) {
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
+  padding: 0 2px;
+  border-radius: 2px;
 }
 </style>
