@@ -897,7 +897,7 @@ onBeforeUnmount(() => {
   height: 36px;
   display: block;
   object-fit: cover;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-xl);
   box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
   background: var(--dt-bg-card);
 }
@@ -1012,7 +1012,7 @@ onBeforeUnmount(() => {
   max-width: 100%;
   padding: 8px 12px;
   border-left: 3px solid var(--dt-brand-color);
-  border-radius: 10px;
+  border-radius: var(--dt-radius-xl);
   background: rgba(39, 126, 251, 0.08);
   color: var(--dt-text-secondary);
   font-size: 12px;
@@ -1529,7 +1529,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-lg);
   color: var(--dt-text-primary);
   text-align: left;
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
