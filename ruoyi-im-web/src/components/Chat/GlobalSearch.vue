@@ -278,7 +278,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   z-index: 101;
   max-height: 500px;
   display: flex;

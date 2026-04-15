@@ -408,7 +408,7 @@ onMounted(() => {
 }
 
 .kpi-card {
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
 }
 
@@ -438,7 +438,7 @@ onMounted(() => {
 }
 
 .panel {
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
 }
 

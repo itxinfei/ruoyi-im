@@ -200,7 +200,7 @@ onMounted(() => {
 
 .request-item {
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   padding: 12px 16px;
   display: flex;
   align-items: center;
@@ -211,7 +211,7 @@ onMounted(() => {
 .request-avatar {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   background: linear-gradient(135deg, var(--dt-brand-color), var(--dt-brand-active));
   color: var(--dt-text-white);
   display: flex;
