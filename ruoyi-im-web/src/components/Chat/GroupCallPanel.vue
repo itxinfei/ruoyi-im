@@ -573,7 +573,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 <style scoped lang="scss">
 .group-call-panel {
   :deep(.el-dialog) {
-    background: var(--dt-bg-card-dark, #1a1a2e);
+    background: var(--dt-bg-card-dark);
     border-radius: var(--dt-radius-xl);
     overflow: hidden;
   }
@@ -587,7 +587,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
   :deep(.el-dialog__body) {
     padding: 0;
-    color: var(--dt-text-white, #fff);
+    color: var(--dt-text-white);
   }
 }
 
@@ -844,7 +844,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   }
 
   &.active .icon-circle {
-    background: var(--dt-error-color, #F53F3F);
+    background: var(--dt-error-color);
     color: white;
   }
 

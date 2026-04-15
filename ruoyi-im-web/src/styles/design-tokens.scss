@@ -226,6 +226,7 @@
   --dt-chat-gutter-compact: 16px;
   --dt-chat-content-max-width: 1120px;
   --dt-time-divider-bg: rgba(255, 255, 255, 0.82);
+  --dt-chat-window-header-bg: #f8fbff;  /* 聊天窗口顶部渐变起始色 */
   --dt-swipe-action-width: 84px;
   --dt-btn-height-sm: 32px;
   --dt-btn-height-md: 36px;
@@ -314,6 +315,9 @@ html.dark {
   --dt-nav-logo-bg: linear-gradient(160deg, #1e3a5f 0%, #1e293b 100%);  /* 暗色模式Logo背景 */
   --dt-avatar-ring-bg-dark: rgba(255, 255, 255, 0.1);  /* 暗色模式头像ring背景 */
   --dt-avatar-ring-border-dark: rgba(255, 255, 255, 0.15);  /* 暗色模式头像ring边框 */
+  --dt-avatar-ring-bg-dark-hover: rgba(255, 255, 255, 0.25);  /* 暗色模式头像ring hover背景 */
+  --dt-avatar-ring-border-dark-hover: rgba(255, 255, 255, 0.3);  /* 暗色模式头像ring hover边框 */
+  --dt-avatar-ring-shadow-dark-hover: rgba(255, 255, 255, 0.15);  /* 暗色模式头像ring hover阴影 */
 }
 
 // SCSS 辅助 Mixins

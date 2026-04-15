@@ -170,19 +170,19 @@ const handleToggleTheme = () => {
   gap: 2px;
   cursor: pointer;
   border-radius: var(--dt-radius-lg);
-  color: var(--dt-nav-sidebar-text, rgba(255, 255, 255, 0.7));
+  color: var(--dt-nav-sidebar-text);
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
   margin: 0;
 }
 
 .nav-item:hover {
-  background-color: var(--dt-nav-sidebar-hover, rgba(255, 255, 255, 0.12));
-  color: var(--dt-nav-sidebar-text-hover, rgba(255, 255, 255, 0.95));
+  background-color: var(--dt-nav-sidebar-hover);
+  color: var(--dt-nav-sidebar-text-hover);
 }
 
 .nav-item.active {
-  background-color: var(--dt-nav-sidebar-active, rgba(255, 255, 255, 0.2));
-  color: var(--dt-nav-sidebar-text-active, var(--dt-text-white));
+  background-color: var(--dt-nav-sidebar-active);
+  color: var(--dt-nav-sidebar-text-active);
 }
 
 .nav-item .el-icon {
@@ -243,17 +243,17 @@ const handleToggleTheme = () => {
   padding: 1px 0;
   cursor: pointer;
   border-radius: 0;
-  color: var(--dt-nav-sidebar-text, rgba(255, 255, 255, 0.7));
+  color: var(--dt-nav-sidebar-text);
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 }
 
 .nav-bottom .nav-item:hover {
-  color: var(--dt-nav-sidebar-text-hover, rgba(255, 255, 255, 0.95));
-  background: var(--dt-nav-sidebar-hover, rgba(255, 255, 255, 0.12));
+  color: var(--dt-nav-sidebar-text-hover);
+  background: var(--dt-nav-sidebar-hover);
 }
 
 .nav-bottom .nav-item:active {
-  background: var(--dt-nav-sidebar-active, rgba(255, 255, 255, 0.18));
+  background: var(--dt-nav-sidebar-active);
 }
 
 /* 用户头像 - 钉钉风格 */
@@ -270,15 +270,15 @@ const handleToggleTheme = () => {
   position: absolute;
   inset: 0;
   border-radius: var(--dt-radius-lg);
-  background: var(--dt-avatar-ring-bg-dark, rgba(255,255,255,0.2));
-  border: 2px solid var(--dt-avatar-ring-border-dark, rgba(255,255,255,0.15));
+  background: var(--dt-avatar-ring-bg-dark);
+  border: 2px solid var(--dt-avatar-ring-border-dark);
   transition: background-color var(--dt-transition-base), border-color var(--dt-transition-base), box-shadow var(--dt-transition-base);
 }
 
 .user-avatar-wrapper:hover .avatar-ring {
-  background: rgba(255,255,255,0.25);
-  border-color: rgba(255,255,255,0.3);
-  box-shadow: 0 0 12px rgba(255,255,255,0.15);
+  background: var(--dt-avatar-ring-bg-dark-hover);
+  border-color: var(--dt-avatar-ring-border-dark-hover);
+  box-shadow: 0 0 12px var(--dt-avatar-ring-shadow-dark-hover);
 }
 
 .user-avatar {
