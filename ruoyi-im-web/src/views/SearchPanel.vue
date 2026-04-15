@@ -534,12 +534,24 @@ const formatFileSize = (size) => {
   return size.toFixed(1) + ' ' + units[i]
 }
 
+// HTML转义防止XSS
+const escapeHtml = (str) => {
+  if (!str) return ''
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 // 高亮搜索关键词
 const highlightKeyword = (text, keyword) => {
-  if (!text || !keyword) return text || ''
+  if (!text || !keyword) return escapeHtml(text) || ''
   const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   const regex = new RegExp(`(${escaped})`, 'gi')
-  return text.replace(regex, '<mark class="search-highlight">$1</mark>')
+  const escapedText = escapeHtml(text)
+  return escapedText.replace(regex, '<mark class="search-highlight">$1</mark>')
 }
 
 // 初始化
