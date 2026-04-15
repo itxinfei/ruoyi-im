@@ -23,6 +23,7 @@ export default defineConfig({
         manualChunks: {
           'element-plus': ['element-plus'],
           'vue-vendor': ['vue', 'vue-router', 'vuex'],
+          'echarts': ['echarts'],
           'utils': ['axios', 'dayjs', 'dompurify']
         }
       }
