@@ -85,7 +85,7 @@ textarea {
 
 ::-webkit-scrollbar-thumb {
   background: var(--dt-scrollbar-thumb-bg);
-  border-radius: 3px;
+  border-radius: var(--dt-radius-xs);
 
   &:hover {
     background: var(--dt-scrollbar-thumb-bg-hover);
@@ -101,12 +101,12 @@ textarea {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: 3px;
+    border-radius: var(--dt-radius-xs);
   }
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-scrollbar-thumb-bg);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-xs);
     transition: background var(--dt-transition-fast);
 
     &:hover {
@@ -602,7 +602,7 @@ textarea {
   min-width: 18px !important;
   height: 18px !important;
   line-height: 18px !important;
-  border-radius: 9px !important; // 完全圆形
+  border-radius: var(--dt-radius-full) !important; // 完全圆形
   font-size: var(--dt-font-size-xs) !important; // 11px
   padding: 0 5px !important;
 }
@@ -720,12 +720,12 @@ textarea {
 .el-progress {
   .el-progress-bar__outer {
     background-color: var(--dt-border-lighter) !important;
-    border-radius: 4px !important;
+    border-radius: var(--dt-radius-sm) !important;
   }
   
   .el-progress-bar__inner {
     background-color: var(--dt-brand-color) !important;
-    border-radius: 4px !important;
+    border-radius: var(--dt-radius-sm) !important;
   }
   
   &--line .el-progress-bar {

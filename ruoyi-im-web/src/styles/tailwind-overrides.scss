@@ -26,7 +26,7 @@
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 3px;
+    border-radius: var(--dt-radius-xs);
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
@@ -48,7 +48,7 @@
 
   .scrollbar-sidebar::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.2);
-    border-radius: 2px;
+    border-radius: var(--dt-radius-xs);
   }
 
   .scrollbar-sidebar::-webkit-scrollbar-thumb:hover {
