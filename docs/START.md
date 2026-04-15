@@ -186,10 +186,45 @@ redis-cli ping
 | AI 执行者 | 01 → 02 → 30 → 13 |
 | 前端开发 | 01 → 21 → 35(前端全局样式) → 33(API) |
 | 后端开发 | 01 → 32 → 33 → 34(WebSocket) |
+| AI大模型开发 | [60-AI大模型开发总览](60-AI大模型开发总览.md) → [68-端到端实战教程](68-端到端实战教程.md) |
 | 产品/设计 | 10 → 12 → 21 → 26 |
 
-完整文档索引 → [00-文档索引总纲](docs/00-文档索引总纲.md)
+完整文档索引 → [00-文档索引总纲](00-文档索引总纲.md)
 
 ---
 
-*最后更新：2026-04-07*
+## AI大模型开发快速入门
+
+如果你需要开发或使用AI大模型功能，请参考以下快速路径：
+
+### 环境准备
+
+```bash
+# 创建conda环境
+conda create -n llm-training python=3.10 -y
+conda activate llm-training
+
+# 安装PyTorch
+pip install torch==2.2.0 --index-url https://download.pytorch.org/whl/cu118
+
+# 安装AI开发依赖
+pip install transformers peft accelerate bitsandbytes datasets trl
+```
+
+### 快速验证
+
+```python
+# 验证环境
+python -c "
+import torch
+print(f'PyTorch: {torch.__version__}')
+print(f'CUDA: {torch.cuda.is_available()}')
+"
+
+# 运行端到端教程
+# 详见 docs/68-端到端实战教程.md
+```
+
+---
+
+*最后更新：2026-04-14*

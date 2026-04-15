@@ -91,7 +91,7 @@
 ### 3.1 审批提醒 (APPROVAL)
 - **场景**：当用户有新的审批待处理时推送。
 - **Payload**:
-```json
+```javascript
 {
   "type": "NOTIFY",
   "action": "APPROVAL_PENDING",
@@ -161,8 +161,8 @@
   "type": "MESSAGE",
   "action": "SYNC_REQ",
   "data": {
-    "lastKnownMsgId": "1234567890", // 客户端本地最新的一条消息ID
-    "conversationId": "all"         // 或指定会话
+    "lastKnownMsgId": "1234567890",
+    "conversationId": "all"
   }
 }
 ```

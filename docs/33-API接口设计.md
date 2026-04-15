@@ -11,7 +11,7 @@
 ### 1.1 通用规范
 
 **请求头**：
-```
+```text
 Content-Type: application/json
 Authorization: Bearer {token}
 X-Device-Id: {设备ID}
@@ -120,7 +120,7 @@ X-Client-Version: {客户端版本}
   "nickname": "string",
   "avatar": "string",
   "signature": "string",
-  "gender": 0|1|2
+  "gender": "string (0=未知,1=男,2=女)"
 }
 ```
 
