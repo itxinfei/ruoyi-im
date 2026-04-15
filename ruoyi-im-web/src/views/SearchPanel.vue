@@ -751,7 +751,7 @@ loadHotKeywords()
     .hot-keyword {
       padding: var(--dt-spacing-xs) var(--dt-spacing-md);
       background: var(--dt-bg-body);
-      border-radius: var(--dt-radius-full, 16px);
+      border-radius: var(--dt-radius-full);
       font-size: var(--dt-font-size-xs);
       cursor: pointer;
       transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
@@ -866,11 +866,11 @@ loadHotKeywords()
 
 .empty-results {
   text-align: center;
-  padding: var(--dt-spacing-2xl, 60px) 0;
+  padding: var(--dt-spacing-2xl) 0;
   color: var(--dt-text-tertiary);
 
   .el-icon {
-    font-size: var(--dt-icon-size-xl, 48px);
+    font-size: var(--dt-icon-size-xl);
     opacity: 0.5;
   }
 
