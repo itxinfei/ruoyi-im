@@ -103,3 +103,86 @@ export function searchMail(keyword) {
     params: { keyword }
   })
 }
+
+/**
+ * 回复邮件
+ * @param {Object} data - { mailId, toIds, subject, content }
+ * @returns {Promise}
+ */
+export function replyMail(data) {
+  return request({
+    url: '/api/im/email/reply',
+    method: 'post',
+    data: {
+      mailId: data.mailId,
+      toIds: data.toIds || [],
+      subject: data.subject,
+      content: data.content
+    }
+  })
+}
+
+/**
+ * 保存草稿
+ * @param {Object} data - { toIds, subject, content }
+ * @returns {Promise}
+ */
+export function saveDraft(data) {
+  return request({
+    url: '/api/im/email/draft',
+    method: 'post',
+    data: {
+      toIds: data.toIds || [],
+      subject: data.subject,
+      content: data.content
+    }
+  })
+}
+
+/**
+ * 获取草稿列表
+ * @returns {Promise}
+ */
+export function getDrafts() {
+  return request({
+    url: '/api/im/email/draft/list',
+    method: 'get'
+  })
+}
+
+/**
+ * 删除草稿
+ * @param {number} id - 草稿ID
+ * @returns {Promise}
+ */
+export function deleteDraft(id) {
+  return request({
+    url: `/api/im/email/draft/${id}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取邮件附件
+ * @param {number} mailId - 邮件ID
+ * @returns {Promise}
+ */
+export function getMailAttachments(mailId) {
+  return request({
+    url: `/api/im/email/${mailId}/attachments`,
+    method: 'get'
+  })
+}
+
+/**
+ * 下载附件
+ * @param {number} attachmentId - 附件ID
+ * @returns {Promise}
+ */
+export function downloadAttachment(attachmentId) {
+  return request({
+    url: `/api/im/email/attachment/${attachmentId}`,
+    method: 'get',
+    responseType: 'blob'
+  })
+}

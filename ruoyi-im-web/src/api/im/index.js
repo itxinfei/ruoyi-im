@@ -34,7 +34,14 @@ export {
   pinConversation,
   muteConversation,
   markConversationAsRead,
-  saveDraft
+  saveDraft,
+  getSessionGroups,
+  createSessionGroup,
+  updateSessionGroup,
+  deleteSessionGroup,
+  addConversationToGroup,
+  removeConversationFromGroup,
+  moveConversationToGroup
 } from './conversation'
 
 export {

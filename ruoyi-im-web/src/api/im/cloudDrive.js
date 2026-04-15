@@ -313,3 +313,33 @@ export function getQuota() {
     method: 'get'
   })
 }
+
+// ==================== 文件收藏 ====================
+
+/**
+ * 切换文件收藏状态
+ * @param {number} fileId - 文件ID
+ * @param {boolean} starred - 是否收藏
+ * @returns {Promise}
+ */
+export function toggleFileStar(fileId, starred) {
+  return request({
+    url: `/api/im/cloud/file/${fileId}/star`,
+    method: 'put',
+    data: { starred }
+  })
+}
+
+/**
+ * 切换文件夹收藏状态
+ * @param {number} folderId - 文件夹ID
+ * @param {boolean} starred - 是否收藏
+ * @returns {Promise}
+ */
+export function toggleFolderStar(folderId, starred) {
+  return request({
+    url: `/api/im/cloud/folder/${folderId}/star`,
+    method: 'put',
+    data: { starred }
+  })
+}

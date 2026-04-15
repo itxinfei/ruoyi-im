@@ -130,3 +130,80 @@ export function cancelSchedule(eventId) {
     method: 'put'
   })
 }
+
+// ==================== 日历共享 ====================
+
+/**
+ * 共享日历给指定用户
+ * @param {Object} data - { calendarId, targetUserId, permission }
+ * @returns {Promise}
+ */
+export function shareCalendar(data) {
+  return request({
+    url: '/api/im/schedule/calendar/share',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 获取日历共享列表
+ * @param {number} calendarId - 日历ID
+ * @returns {Promise}
+ */
+export function getCalendarShares(calendarId) {
+  return request({
+    url: `/api/im/schedule/calendar/${calendarId}/shares`,
+    method: 'get'
+  })
+}
+
+/**
+ * 更新日历共享权限
+ * @param {number} shareId - 分享ID
+ * @param {Object} data - { permission }
+ * @returns {Promise}
+ */
+export function updateCalendarShare(shareId, data) {
+  return request({
+    url: `/api/im/schedule/calendar/share/${shareId}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 取消日历共享
+ * @param {number} shareId - 分享ID
+ * @returns {Promise}
+ */
+export function deleteCalendarShare(shareId) {
+  return request({
+    url: `/api/im/schedule/calendar/share/${shareId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 获取已共享给我的日历列表
+ * @returns {Promise}
+ */
+export function getSharedCalendars() {
+  return request({
+    url: '/api/im/schedule/calendar/shared',
+    method: 'get'
+  })
+}
+
+/**
+ * 更新日历设置
+ * @param {Object} data - { calendarId, name, color, isDefault }
+ * @returns {Promise}
+ */
+export function updateCalendarSettings(data) {
+  return request({
+    url: '/api/im/schedule/calendar/settings',
+    method: 'put',
+    data
+  })
+}

@@ -171,3 +171,94 @@ export function unpinMessage(conversationId) {
     method: 'delete'
   })
 }
+
+// ==================== 会话分组 ====================
+
+/**
+ * 获取会话分组列表
+ * @returns {Promise}
+ */
+export function getSessionGroups() {
+  return request({
+    url: '/api/im/conversation/groups',
+    method: 'get'
+  })
+}
+
+/**
+ * 创建会话分组
+ * @param {Object} data - { name, sortOrder }
+ * @returns {Promise}
+ */
+export function createSessionGroup(data) {
+  return request({
+    url: '/api/im/conversation/group',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 更新会话分组
+ * @param {number} groupId - 分组ID
+ * @param {Object} data - { name, sortOrder }
+ * @returns {Promise}
+ */
+export function updateSessionGroup(groupId, data) {
+  return request({
+    url: `/api/im/conversation/group/${groupId}`,
+    method: 'put',
+    data
+  })
+}
+
+/**
+ * 删除会话分组
+ * @param {number} groupId - 分组ID
+ * @returns {Promise}
+ */
+export function deleteSessionGroup(groupId) {
+  return request({
+    url: `/api/im/conversation/group/${groupId}`,
+    method: 'delete'
+  })
+}
+
+/**
+ * 将会话添加到分组
+ * @param {Object} data - { conversationId, groupId }
+ * @returns {Promise}
+ */
+export function addConversationToGroup(data) {
+  return request({
+    url: '/api/im/conversation/group/add',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 将会话从分组移除
+ * @param {Object} data - { conversationId, groupId }
+ * @returns {Promise}
+ */
+export function removeConversationFromGroup(data) {
+  return request({
+    url: '/api/im/conversation/group/remove',
+    method: 'post',
+    data
+  })
+}
+
+/**
+ * 移动会话到另一个分组
+ * @param {Object} data - { conversationId, fromGroupId, toGroupId }
+ * @returns {Promise}
+ */
+export function moveConversationToGroup(data) {
+  return request({
+    url: '/api/im/conversation/group/move',
+    method: 'post',
+    data
+  })
+}

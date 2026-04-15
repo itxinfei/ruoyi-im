@@ -150,3 +150,17 @@ export function handleApproval(data) {
     }
   })
 }
+
+/**
+ * 审批抄送
+ * @param {number} id - 审批ID
+ * @param {Array<number>} toUserIds - 抄送用户ID列表
+ * @returns {Promise}
+ */
+export function addCcApproval(id, toUserIds) {
+  return request({
+    url: `/api/im/approval/${id}/cc`,
+    method: 'post',
+    data: { toUserIds }
+  })
+}
