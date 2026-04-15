@@ -196,7 +196,6 @@ const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
 const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection, manualReconnect } = useWebRTC({
   sendSignal: (action, data) => sendMessage({ type: 'call', data: { action, ...data } }),
   onConnectionStateChange: (state) => {
-    console.log('通话连接状态变化:', state)
     if (state === 'reconnecting') {
       status.value = 'reconnecting'
     } else if (state === 'reconnect_failed') {
@@ -204,9 +203,7 @@ const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConne
       ElMessage.warning('通话连接中断，正在为您重新拨打...')
     }
   },
-  onIceConnectionStateChange: (iceState) => {
-    console.log('ICE连接状态:', iceState)
-  },
+  onIceConnectionStateChange: () => {},
   localVideo: localVideoRef, remoteVideo: remoteVideoRef, remoteAudio: remoteAudioRef
 })
 
