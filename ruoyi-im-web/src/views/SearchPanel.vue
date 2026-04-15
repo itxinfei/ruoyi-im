@@ -640,7 +640,7 @@ loadHotKeywords()
   color: var(--dt-text-secondary);
   font-size: 12px;
   padding: 2px 8px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   cursor: pointer;
 }
 
@@ -665,7 +665,7 @@ loadHotKeywords()
   background: var(--dt-brand-lighter);
   color: var(--dt-brand-color);
   padding: 2px 6px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
   font-size: 12px;
 }
@@ -864,7 +864,7 @@ loadHotKeywords()
   color: var(--dt-brand-color);
   font-size: 12px;
   padding: 4px 8px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
 }
 
@@ -889,6 +889,6 @@ loadHotKeywords()
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   padding: 0 2px;
-  border-radius: 2px;
+  border-radius: var(--dt-radius-xs);
 }
 </style>
