@@ -683,7 +683,7 @@ const handleShowAnnouncement = async () => {
           width: 32px;
           height: 32px;
           border: 1px dashed var(--dt-border-light);
-          border-radius: 4px;
+          border-radius: var(--dt-radius-sm);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -699,7 +699,7 @@ const handleShowAnnouncement = async () => {
           height: 32px;
           background: var(--dt-brand-bg);
           border: none;
-          border-radius: 4px;
+          border-radius: var(--dt-radius-sm);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -721,7 +721,7 @@ const handleShowAnnouncement = async () => {
           height: 32px;
           background: var(--dt-bg-hover);
           border: none;
-          border-radius: 4px;
+          border-radius: var(--dt-radius-sm);
           display: flex;
           align-items: center;
           justify-content: center;
