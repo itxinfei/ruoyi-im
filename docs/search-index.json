@@ -1,0 +1,1118 @@
+[
+  {
+    "title": "00 文档索引总纲 (Documentation Map)",
+    "path": "00-文档索引总纲.md",
+    "category": "root",
+    "headings": [
+      "一、总纲层（00-04）",
+      "二、需求层（10-19）",
+      "三、设计层（20-27）",
+      "四、技术层（30-39）",
+      "五、功能模块层（40-49）",
+      "六、部署与测试层（50-55）",
+      "七、大模型开发层（60-69）",
+      "大模型开发快速导航",
+      "大模型开发版本兼容性",
+      "八、快速导航",
+      "八、辅助文件"
+    ],
+    "summary": "--- --- ---",
+    "updatedAt": "2026-04-14T04:23:49.221Z"
+  },
+  {
+    "title": "01 AI全栈开发综合指南",
+    "path": "01-AI全栈开发综合指南.md",
+    "category": "root",
+    "headings": [
+      "一、项目定位",
+      "二、技术栈",
+      "三、开发命令",
+      "前端",
+      "后端",
+      "四、核心功能模块 (职责划分)",
+      "五、核心数据模型",
+      "消息类型",
+      "消息状态",
+      "会话类型",
+      "群成员角色"
+    ],
+    "summary": "--- **RuoYi-IM**：企业内网私有化部署的 Web 版钉钉式协同平台 - IM 即时通讯是核心中的核心",
+    "updatedAt": "2026-03-21T08:40:58.415Z"
+  },
+  {
+    "title": "02 大模型研发规范",
+    "path": "02-大模型研发规范.md",
+    "category": "root",
+    "headings": [
+      "绝对红线法则 (Zero-Tolerance Rules)",
+      "1. JDK 1.8 语法铁律",
+      "2. Vue 3 规范铁律",
+      "3. 三层架构隔离不可逾越",
+      "4. 数据隔离与查询红线",
+      "5. 垃圾代码零容忍与命名肃清法则",
+      "控制边界与拦截门 (Quality Gates)",
+      "1. 代码准入红线",
+      "2. 计划与存量复用基准",
+      "高可用与防御式编程准则 (High-Availability & Defensive Thinking)",
+      "1. 幂等性与并发安全"
+    ],
+    "summary": "--- **强制 1.8，禁用任何 Java 9+ 语法特性。** 一旦发现直接判定产出为废品。 - **不用 `var`**：禁止类型推断语句。",
+    "updatedAt": "2026-03-21T08:12:58.855Z"
+  },
+  {
+    "title": "03 实现状态矩阵",
+    "path": "03-实现状态矩阵.md",
+    "category": "root",
+    "headings": [
+      "状态定义",
+      "状态更新规则",
+      "一、IM 核心功能",
+      "1.1 会话管理",
+      "1.2 消息收发",
+      "1.3 消息展示",
+      "1.4 文件上传",
+      "1.5 搜索功能",
+      "1.6 通话功能",
+      "二、协同功能",
+      "2.1 通讯录"
+    ],
+    "summary": "--- --- 1. **更新时机**：每次功能开发完成后",
+    "updatedAt": "2026-03-31T05:34:16.810Z"
+  },
+  {
+    "title": "04 待确认问题",
+    "path": "04-待确认问题.md",
+    "category": "root",
+    "headings": [
+      "一、P0 已确认项（原阻塞开发）",
+      "二、P1 已确认项（原影响验收）",
+      "三、P2 已确认项（原后续迭代）",
+      "四、核心业务规则池 (C-xxx)",
+      "五、处理流程",
+      "六、处理规则 (Anti-Hallucination Defense)",
+      "七、定期清理机制",
+      "清理周期",
+      "清理检查清单",
+      "周清理检查清单",
+      "自动化提醒"
+    ],
+    "summary": "--- --- ---",
+    "updatedAt": "2026-03-21T08:47:20.616Z"
+  },
+  {
+    "title": "10 产品需求总纲",
+    "path": "10-产品需求总纲.md",
+    "category": "root",
+    "headings": [
+      "1. 项目背景与目标",
+      "1.1 成功标准 (Success Criteria)",
+      "用户成功指标",
+      "业务成功指标",
+      "技术成功指标",
+      "质量成功指标",
+      "2. 核心功能逻辑指令集 (Execution-Ready Logic)",
+      "2.1 消息生命周期状态机 (The Message State Machine)",
+      "2.2 实时通讯 (WebSocket) 推送协议",
+      "2.3 权限与隔离指令",
+      "2.4 组织架构与联系人 (Contacts) - P1"
+    ],
+    "summary": "- **项目名称**：RuoYi-IM - **核心定位**：基于 RuoYi 框架的企业级内网私有化即时通讯平台。 - **对标产品**：钉钉 (DingTalk) Windows 客户端 8.2.0。",
+    "updatedAt": "2026-03-27T05:48:39.618Z"
+  },
+  {
+    "title": "11 实施优先级与迭代计划",
+    "path": "11-实施优先级与迭代计划.md",
+    "category": "root",
+    "headings": [
+      "1. 规划原则",
+      "2. 总体阶段",
+      "2.1 Phase 1：IM 主链路可用",
+      "2.2 Phase 2：IM 协作增强",
+      "2.3 Phase 3：平台核心协同模块",
+      "2.4 Phase 4：平台配套完善",
+      "3. IM 详细建设顺序",
+      "3.1 第一批",
+      "3.2 第二批",
+      "3.3 第三批",
+      "4. 左侧导航建设顺序"
+    ],
+    "summary": "1. 产品目标是“私有化 Web 版钉钉”，默认体验参考钉钉 Windows 客户端。 2. IM 是核心中的核心，任何迭代都不得削弱 IM 主链路。 3. 前端按 Vue3 项目处理，后端按单体 Java 项目处理。",
+    "updatedAt": "2026-04-14T04:26:24.431Z"
+  },
+  {
+    "title": "12 需求点清单",
+    "path": "12-需求点清单.md",
+    "category": "root",
+    "headings": [
+      "一、需求总览",
+      "1.1 项目定位",
+      "1.2 需求分层",
+      "1.3 需求统计",
+      "二、IM 核心功能 (P0)",
+      "2.1 会话管理",
+      "2.2 消息收发",
+      "2.3 消息展示",
+      "2.4 文件上传",
+      "2.5 搜索功能",
+      "2.6 通话功能"
+    ],
+    "summary": "--- RuoYi-IM 是面向企业内网场景的即时通讯与协同平台，产品形态对标钉钉 Windows 客户端。 ---",
+    "updatedAt": "2026-03-28T08:25:08.788Z"
+  },
+  {
+    "title": "13 需求明细",
+    "path": "13-需求明细.md",
+    "category": "root",
+    "headings": [
+      "1. 使用规则",
+      "2. 消息模块总说明",
+      "2.1 模块目标",
+      "2.2 模块边界",
+      "2.3 平台级导航要求",
+      "2.3.1 功能目标",
+      "2.3.2 左侧导航目标模块",
+      "2.3.3 验收标准",
+      "3. 会话与联系人列表 (L2 Session Bar)",
+      "3.1 功能目标",
+      "3.2 UI 规格 (DingTalk Spec)"
+    ],
+    "summary": "1. 每个模块都按同一结构描述： - 功能目标 - 用户入口",
+    "updatedAt": "2026-04-01T04:03:08.472Z"
+  },
+  {
+    "title": "14 页面路由与菜单映射",
+    "path": "14-页面路由与菜单映射.md",
+    "category": "root",
+    "headings": [
+      "1. 使用规则",
+      "2. 映射表",
+      "3. 路由要点",
+      "4. 组件归属",
+      "5. 更新流程"
+    ],
+    "summary": "1. 新增导航项/页面时，先检查本表是否需要扩充。 2. 任何入口调整，都要先在本节里记录修改前后对比。 3. 任务执行前，先从本表确认路由、页面、入口、组件的绑定关系。",
+    "updatedAt": "2026-03-27T08:04:31.149Z"
+  },
+  {
+    "title": "15 产品形态与导航清单",
+    "path": "15-产品形态与导航清单.md",
+    "category": "root",
+    "headings": [
+      "1. 目标产品定义",
+      "2. 对标原则",
+      "2.1 必须对标的内容",
+      "2.2 不要求逐像素复刻的内容",
+      "2.3 目标口径",
+      "3. 左侧导航目标清单",
+      "3.1 核心模块",
+      "3.2 高频协同模块",
+      "3.3 辅助模块",
+      "3.4 管理与运维模块",
+      "4. 模块优先级"
+    ],
+    "summary": "本项目的目标不是“做一个有 IM 功能的后台系统”，而是： 1. 做一个可内网部署、私有化交付的 Web 版钉钉 2. 参考钉钉 Windows 客户端的功能结构、导航布局、页面层级、交互方式和视觉风格",
+    "updatedAt": "2026-03-20T10:14:00.625Z"
+  },
+  {
+    "title": "16 设计复刻差异",
+    "path": "16-设计复刻差异.md",
+    "category": "root",
+    "headings": [
+      "1. 使用规则",
+      "2. 总体差距矩阵",
+      "3. 功能缺口与设计不完善点",
+      "3.1 已解决项 ✅",
+      "3.2 待解决项 ⏳",
+      "4. 立即行动建议",
+      "5. 变更记录"
+    ],
+    "summary": "1. 每次调整样式前，先对照本表确认属于哪组差异。 2. 明显偏离钉钉界面时，不直接动手补功能，而是先更新差异表及任务卡 `notes`。 3. 设计复刻任务必须附带视觉对比（稿、截图），并在 `llm-tasks.yaml` 中引用本文件。",
+    "updatedAt": "2026-04-01T01:51:21.311Z"
+  },
+  {
+    "title": "17 接口与入口清单",
+    "path": "17-接口与入口清单.md",
+    "category": "root",
+    "headings": [
+      "1. 使用规则",
+      "2. 消息模块主链路",
+      "3. 消息能力扩展",
+      "4. 通话",
+      "5. 群详情与群文件",
+      "6. 左侧导航平台模块",
+      "7. 入口统一性风险",
+      "8. 后续维护建议"
+    ],
+    "summary": "1. 任务开始前，先从本文件确认入口、页面、接口来源。 2. 如果本文件中某项为 `unknown`，模型必须保守处理，不得自行发明接口。 3. 本文件只记录高价值映射，不替代详细接口文档。",
+    "updatedAt": "2026-03-27T08:06:15.961Z"
+  },
+  {
+    "title": "18 平台模块与管理后台需求",
+    "path": "18-平台模块与管理后台需求.md",
+    "category": "root",
+    "headings": [
+      "一、平台协同模块 (Client Modules)",
+      "1.1 通讯录 (Contacts)",
+      "1.1.1 功能目标",
+      "1.1.2 页面布局",
+      "1.1.3 验收标准",
+      "1.2 工作台 (Workbench)",
+      "1.2.1 功能目标",
+      "1.2.2 页面布局",
+      "1.2.3 应用入口配置",
+      "1.3 审批模块 (Approval)",
+      "1.3.1 功能目标"
+    ],
+    "summary": "--- - 快速查找成员、部门、群组 - 从通讯录直接发起会话",
+    "updatedAt": "2026-04-01T04:03:55.722Z"
+  },
+  {
+    "title": "19 需求追溯矩阵 (Requirements Traceability Matrix)",
+    "path": "19-需求追溯矩阵.md",
+    "category": "root",
+    "headings": [
+      "一、追溯矩阵总览",
+      "二、IM核心模块追溯 (Docs-13)",
+      "2.1 会话列表 (§3)",
+      "2.2 聊天区 (§4)",
+      "2.3 输入区 (§5)",
+      "2.4 搜索与协同 (§6-7)",
+      "三、协同与管理模块追溯 (Docs-18)",
+      "3.1 用户与认证",
+      "四、待确定的核心风险项",
+      "五、变更记录"
+    ],
+    "summary": "--- --- ---",
+    "updatedAt": "2026-03-21T02:27:36.032Z"
+  },
+  {
+    "title": "20 UI交互规范总纲",
+    "path": "20-UI交互规范总纲.md",
+    "category": "root",
+    "headings": [
+      "1. 空间逻辑指令 (Spatial Rules)",
+      "1.1 触发式展示 (Trigger‑Only)",
+      "1.2 三段式稳定布局",
+      "1.3 禁用 `el-row/el-col` 构建骨架",
+      "2. 视觉 Token 指令 (Visual Tokens)",
+      "2.1 颜色锁 (Official DingTalk Standard)",
+      "2.2 排版与字距",
+      "2.3 气泡规范",
+      "3. 资源气密性指令 (Air‑gap Assets)",
+      "3.1 图标",
+      "3.2 字体图标与图片"
+    ],
+    "summary": "--- - **硬性红线**：禁止将次要信息（群成员、个人资料、文件详情）直接显示在右侧。 - **必须实现**：详情类内容必须使用 `el‑drawer`（侧边抽屉）或 `el‑dialog`（弹窗）承载，且必须由用户主动点击图标/名称触发。",
+    "updatedAt": "2026-04-01T04:03:56.034Z"
+  },
+  {
+    "title": "21 IM 桌面端页面规范 (DingTalk Desktop Spec)",
+    "path": "21-IM桌面端页面规范.md",
+    "category": "root",
+    "headings": [
+      "1. 页面总布局 (The Three-Pane Layout)",
+      "1.1 骨架尺寸 (Master Dimensions)",
+      "1.2 根节点约束 (Viewport Hardening)",
+      "2. 8px 黄金比例尺 (Visual Rhythm)",
+      "3. 二级会话栏规格 (Session List Details)",
+      "3.1 会话项 (Session Item)",
+      "4. 聊天主区域规格 (Chat Panel Details)",
+      "4.1 消息气泡 (Message Bubble)",
+      "4.2 消息间距 (Message Spacing)",
+      "4.3 输入区 (Input Area)",
+      "5. 详情抽屉规范 (Detail Drawer)"
+    ],
+    "summary": "--- 消息主页面必须采用原生的 Flexbox 结构，严禁响应式折叠，严禁使用 `el-row/col`。 1. **L1 一级主导航 (Sidebar)**: 固定宽度 `64px`。背景色 `#2B2D33`（深色侧边栏，钉钉Windows标准）。",
+    "updatedAt": "2026-04-01T04:03:08.823Z"
+  },
+  {
+    "title": "22 UI 视觉与交互红线 (UI Quality Checklist)",
+    "path": "22-UI视觉与交互红线.md",
+    "category": "root",
+    "headings": [
+      "1. 核心骨架 (Skeleton) 红线",
+      "2. 消息气泡 (Message Bubble) 精准红线",
+      "3. 颜色与字体 (Colors & Fonts) 红线",
+      "4. 输入区 (Input Area) 红线",
+      "5. 通用组件 (General Components) 红线",
+      "6. 禁止行为 (Hard Bans)",
+      "7. 变更记录"
+    ],
+    "summary": "--- - **[S1] 三栏布局固定化**：左侧 L1 (`64px`)、会话 L2 (`250px`) 必须固定宽度。严禁使用百分比布局导致宽度在宽屏下无限拉伸。 - **[S2] 根滚动条禁令**：全局 `body` 和 `#app` 必须禁止滚动 (`overflow: hidden`)。仅允许在 L2 列表、L3 聊天区域进行局部滚动。",
+    "updatedAt": "2026-04-07T01:48:32.011Z"
+  },
+  {
+    "title": "23 UI 复刻任务计划",
+    "path": "23-UI复刻任务计划.md",
+    "category": "root",
+    "headings": [
+      "1. 任务原则",
+      "2. 高优先任务",
+      "3. 复刻任务流程",
+      "4. 支持与审查"
+    ],
+    "summary": "1. 每个 UI 复刻任务必须引用 `21-IM桌面端页面规范.md` 与 `16-设计复刻差异.md`。 2. 任务 scope 仅覆盖一个页面/组件层级，优先对齐差距最高的 P0 项（会话列表、消息气泡、输入区、聊天头部）。 3. 任务必须同时填入 `manual_test_steps`、`acceptance`，并与 `54-验收用例清单.md` 保持",
+    "updatedAt": "2026-03-21T02:01:15.211Z"
+  },
+  {
+    "title": "24 页面缺陷与功能缺口清单",
+    "path": "24-页面缺陷与功能缺口清单.md",
+    "category": "root",
+    "headings": [
+      "1. 记录规范",
+      "2. 当前问题清单",
+      "3. 更新流程"
+    ],
+    "summary": "1. 每条问题使用固定格式：`模块`、`页面/组件`、`问题描述`、`影响级别`、`建议任务`、`状态`。 2. 影响级别分为 `P0`（阻断主流程）、`P1`（影响高频体验）、`P2`（可延期优化）。 3. 问题修复后，状态从 `open` 改为 `done`，并在 `notes` 写明对应提交或变更说明。",
+    "updatedAt": "2026-03-28T00:58:17.283Z"
+  },
+  {
+    "title": "25 钉钉 Windows 复刻基线",
+    "path": "25-钉钉Windows复刻基线.md",
+    "category": "root",
+    "headings": [
+      "1. 适用范围",
+      "2. 复刻等级定义",
+      "3. 页面基线表",
+      "5. 验收口径",
+      "6. 对齐与细节指南 (Alignment Guide)",
+      "6.1 核心骨架尺寸",
+      "6.2 聊天组件微观对齐",
+      "6.3 列表项 (List Item)"
+    ],
+    "summary": "1. 消息主页面（会话栏 + 聊天区 + 详情区） 2. 搜索页面 3. 群详情/个人详情页面",
+    "updatedAt": "2026-04-07T01:47:27.344Z"
+  },
+  {
+    "title": "26 IM 交互深度行为规范 (DingTalk Interaction & UI Spec)",
+    "path": "26-IM交互深度行为规范.md",
+    "category": "root",
+    "headings": [
+      "1. 消息气泡全态 UI 与交互 (Message Bubble)",
+      "1.1 气泡形态与悬停 (Hover Awareness)",
+      "1.2 发送状态闭环 (Sending Status)",
+      "1.3 已读与未读感知 (Read Receipts)",
+      "1.4 系统通知与撤回 (System Messages)",
+      "1.5 多媒体消息气泡规范 (Multimedia Messages)",
+      "1.5.1 图片消息 (Image Message)",
+      "1.5.2 视频消息 (Video Message)",
+      "1.5.3 语音消息 (Voice Message)",
+      "1.5.4 文件消息 (File Message)",
+      "1.5.5 链接卡片消息 (Link Card)"
+    ],
+    "summary": "--- - **常规态**： - 发送方：背景 `#277EFB`，文字 `#FFFFFF`，圆角 `8px 4px 8px 8px`。",
+    "updatedAt": "2026-04-01T04:03:56.066Z"
+  },
+  {
+    "title": "30 技术架构与约束",
+    "path": "30-技术架构与约束.md",
+    "category": "root",
+    "headings": [
+      "一、前端开发规范",
+      "1.1 目录结构",
+      "1.2 组件规范",
+      "1.3 API 调用规范",
+      "1.4 状态管理规范",
+      "1.5 内网部署约束 (Intranet Deployment)",
+      "1.6 全局数据契约 (Data Contract)",
+      "1.7 全链路追踪 (End-to-End Traceability)",
+      "1.8 高保真组件实现蓝图 (Implementation Blueprints)",
+      "1.9 长效运行与内存安全 (Memory Safety)",
+      "二、后端开发规范"
+    ],
+    "summary": "--- ruoyi-im-web/src/ ├── api/              # API 接口层",
+    "updatedAt": "2026-03-27T05:41:20.718Z"
+  },
+  {
+    "title": "31 实体与状态模型",
+    "path": "31-实体与状态模型.md",
+    "category": "root",
+    "headings": [
+      "1. 核心产品关系",
+      "2. 核心实体",
+      "2.1 用户 User",
+      "2.2 会话 Conversation / Session",
+      "2.3 消息 Message",
+      "2.4 群组 Group",
+      "2.5 群文件 GroupFile",
+      "2.6 通话 Call",
+      "2.7 收藏 Favorite",
+      "3. 核心关系",
+      "3.1 用户与会话"
+    ],
+    "summary": "本项目的核心关系是： 1. 用户围绕会话进行沟通 2. 会话承载消息",
+    "updatedAt": "2026-03-27T05:48:47.331Z"
+  },
+  {
+    "title": "32 数据库设计文档",
+    "path": "32-数据库设计.md",
+    "category": "root",
+    "headings": [
+      "一、数据库概览",
+      "1.1 基本信息",
+      "1.2 表分类统计",
+      "二、核心表结构",
+      "2.1 用户表 (im_user)",
+      "2.2 会话表 (im_conversation)",
+      "2.3 会话成员表 (im_conversation_member)",
+      "2.4 消息表 (im_message)",
+      "2.5 群组表 (im_group)",
+      "2.6 群成员表 (im_group_member)",
+      "2.7 好友关系表 (im_friend)"
+    ],
+    "summary": "--- --- CREATE TABLE im_user (",
+    "updatedAt": "2026-03-27T05:37:47.091Z"
+  },
+  {
+    "title": "33 API接口设计文档",
+    "path": "33-API接口设计.md",
+    "category": "root",
+    "headings": [
+      "一、接口规范",
+      "1.1 通用规范",
+      "1.2 分页参数",
+      "二、用户模块 API",
+      "2.1 用户认证",
+      "POST /api/auth/login",
+      "POST /api/auth/logout",
+      "POST /api/auth/refresh",
+      "2.2 用户信息",
+      "GET /api/user/info",
+      "PUT /api/user/info"
+    ],
+    "summary": "--- **请求头**： Content-Type: application/json",
+    "updatedAt": "2026-03-21T05:53:27.197Z"
+  },
+  {
+    "title": "34 WebSocket协议规范",
+    "path": "34-WebSocket协议.md",
+    "category": "root",
+    "headings": [
+      "1. 协议基础",
+      "1.1 数据帧格式 (JSON)",
+      "1.2 核心消息类型 (`type`)",
+      "2. IM 聊天消息 (`MESSAGE`)",
+      "2.1 序列号机制 (Sequence ID - 核心卓越项)",
+      "2.2 发送与接收流程 (Reliability Cycle)",
+      "3. 消息撤回与编辑 (Update Logic)",
+      "3.1 审批提醒 (APPROVAL)",
+      "3.2 待办提醒 (TASK)",
+      "4. 状态与事件 (`EVENT`)",
+      "4.1 输入中状态 (TYPING)"
+    ],
+    "summary": "--- { \"type\": \"MESSAGE\",",
+    "updatedAt": "2026-03-27T05:39:00.583Z"
+  },
+  {
+    "title": "35 前端全局样式与主题配置 (Theme & Styles)",
+    "path": "35-前端全局样式与主题配置.md",
+    "category": "root",
+    "headings": [
+      "1. 样式体系概述",
+      "2. 钉钉级视觉契约 (Visual Contract)",
+      "3. 组件级样式指南 (Implementation Logic)",
+      "3.1 会话列表项 (Session Item)",
+      "3.2 消息气泡 (Message Bubble)",
+      "3.3 全局边框",
+      "3. 本地图标索引 (Local Icons)",
+      "调用方式",
+      "4. 全局实用类 (Utility Classes)",
+      "5. AI 编码指令 (Styling Rules)",
+      "6. 维护与扩展指引"
+    ],
+    "summary": "--- 项目采用 **CSS 变量 + SCSS 设计令牌** 的方式管理颜色、间距、圆角等全局视觉属性。所有组件样式应通过 `var(--xxx)` 或 SCSS 变量引用，避免直接写死颜色或尺寸。 - **设计令牌文件**：`src/styles/design-tokens.scss` 定义了颜色、字体、阴影等变量，并在 `:root` 中导出为 CSS",
+    "updatedAt": "2026-04-01T04:03:56.103Z"
+  },
+  {
+    "title": "36 全链路数据流与时序图 (Full‑Stack Data Flow)",
+    "path": "36-全链路数据流与时序图.md",
+    "category": "root",
+    "headings": [
+      "1. 文本消息发送时序 (P0 – Message Flow)",
+      "2. 语音转文字业务流 (P1 – Audio AI Flow)",
+      "3. 文件上传与预览流 (P2 – File Upload Flow)",
+      "4. 群聊消息广播流 (P3 – Group Chat Flow)",
+      "5. 音视频通话建立流 (P4 – Call Setup Flow)",
+      "6. WebSocket 重连与心跳 (P5 – WS Reconnection)",
+      "7. 全局异常处理流"
+    ],
+    "summary": "--- sequenceDiagram participant UserA as 前端 (User A)",
+    "updatedAt": "2026-03-21T05:31:10.620Z"
+  },
+  {
+    "title": "40 通知推送模块设计文档",
+    "path": "40-通知推送模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、前端实现 (纯 JS 规范)",
+      "2.1 通知管理服务封装",
+      "三、后端实现 (JDK 1.8 规范)",
+      "3.1 通知异步分发 (EventBus)",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 桌面通知 (Desktop Notification)",
+      "4.1.1 通知样式",
+      "4.1.2 通知内容布局",
+      "4.1.3 消息通知内容"
+    ],
+    "summary": "--- - **业务需求**：详见 [13-需求明细.md](13-需求明细.md) §17。 - **技术定位**：本模块负责 Web Notification API 的封装、离线通知策略以及免打扰时段的逻辑判定。",
+    "updatedAt": "2026-04-01T04:03:09.542Z"
+  },
+  {
+    "title": "41 安全与权限模块设计文档",
+    "path": "41-安全与权限模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "1.2 核心原则",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 权限拦截注解",
+      "2.2 角色拦截注解",
+      "2.3 JWT 认证服务",
+      "2.4 权限拦截器",
+      "2.5 RBAC 数据模型",
+      "2.6 敏感词过滤服务",
+      "2.7 审计日志服务"
+    ],
+    "summary": "--- - **认证 (Authentication)**：基于 JWT 的无状态认证逻辑，支持 Token 刷新与多端互踢。 - **授权 (Authorization)**：基于 RBAC 模型的权限校验，包含角色管理、菜单权限、数据权限三层。",
+    "updatedAt": "2026-04-07T01:48:18.634Z"
+  },
+  {
+    "title": "42 消息搜索模块设计文档",
+    "path": "42-消息搜索模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 全文搜索逻辑 (MySQL 5.7)",
+      "三、前端实现 (纯 JS 规范)",
+      "3.1 搜索防抖与跳转逻辑",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 搜索输入框 (Search Input)",
+      "4.1.1 会话列表搜索框",
+      "4.1.2 输入框状态",
+      "4.1.3 图标与按钮"
+    ],
+    "summary": "--- - **需求参考**：详见 [13-需求明细.md](13-需求明细.md) §6。 - **技术定位**：负责基于数据库全文索引 (NGRAM) 的内容检索、多维搜索结果聚合及关键词高亮逻辑实现。",
+    "updatedAt": "2026-04-07T01:48:32.035Z"
+  },
+  {
+    "title": "43 文件管理模块设计文档",
+    "path": "43-文件管理模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 文件上传处理逻辑",
+      "三、前端实现 (纯 JS 规范)",
+      "3.1 上传组件逻辑封装",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 云盘页面整体布局 (Cloud Drive Layout)",
+      "4.2 左侧导航分类 (Navigation Categories)",
+      "4.2.1 导航项规范",
+      "4.2.2 导航分类"
+    ],
+    "summary": "--- - **业务需求**：详见 [13-需求明细.md](13-需求明细.md) §5.4 及 [18-平台模块与管理后台需求.md](18-平台模块与管理后台需求.md) §1.6。 - **技术定位**：负责文件的二进制流传输、MD5 秒传判定、分片上传状态维护（Redis）及内网存储路径映射。",
+    "updatedAt": "2026-04-01T04:03:09.760Z"
+  },
+  {
+    "title": "44 审批流程模块设计文档",
+    "path": "44-审批流程模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "1.2 核心逻辑模型",
+      "二、数据库设计",
+      "2.1 审批模板表 (im_approval_template)",
+      "三、后端实现 (JDK 1.8 规范)",
+      "3.1 审批流转核心逻辑",
+      "四、前端实现 (纯 JS 规范)",
+      "4.1 审批列表逻辑",
+      "五、UI 表现与对齐规范 (DingTalk Style)",
+      "5.1 审批首页布局 (Approval Home)"
+    ],
+    "summary": "--- - **需求参考**：本模块的业务逻辑、UI 布局及验收标准详见 [18-平台模块与管理后台需求.md](18-平台模块与管理后台需求.md) §1.3。 - **技术定位**：本设计文档专注于动态表单 JSON 解析、工作流引擎状态机及审批链路的后端实现。",
+    "updatedAt": "2026-04-01T04:03:09.867Z"
+  },
+  {
+    "title": "45 群组管理模块设计文档",
+    "path": "45-群组管理模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 核心成员校验逻辑",
+      "三、前端实现 (纯 JS 规范)",
+      "3.1 群详情抽屉逻辑封装",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 群详情抽屉 (GroupDetailDrawer)",
+      "4.1.1 抽屉容器",
+      "4.1.2 头部区域",
+      "4.1.3 群基本信息区"
+    ],
+    "summary": "--- - **业务明细**：详见 [13-需求明细.md](13-需求明细.md) §7。 - **UI 强制规范 (C-005)**：客户端群详情入口必须统一归一为右侧抽屉 (**GroupDetailDrawer**)。",
+    "updatedAt": "2026-04-07T01:48:32.042Z"
+  },
+  {
+    "title": "46 消息收藏模块设计文档",
+    "path": "46-消息收藏模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 收藏持久化逻辑",
+      "三、前端实现 (纯 JS 规范)",
+      "3.1 收藏列表逻辑封装",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 收藏页面整体布局 (Favorites Layout)",
+      "4.2 左侧分类导航 (Category Navigation)",
+      "4.2.1 导航项规范",
+      "4.2.2 导航项状态"
+    ],
+    "summary": "--- - **需求参考**：详见 [13-需求明细.md](13-需求明细.md) §7.2。 - **技术定位**：负责收藏夹的 CRUD 逻辑、分类标签管理及\"从收藏跳转至历史消息\"的 ID 定位算法。",
+    "updatedAt": "2026-04-01T04:03:10.058Z"
+  },
+  {
+    "title": "47 日历日程模块设计文档",
+    "path": "47-日历日程模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 日程基础逻辑",
+      "三、前端实现 (纯 JS 规范)",
+      "3.1 日程列表封装",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 日历整体布局 (Calendar Layout)",
+      "4.2 日历网格视图 (Calendar Grid)",
+      "4.2.1 月视图 (Month View)",
+      "4.2.2 周视图 (Week View)"
+    ],
+    "summary": "--- - **需求参考**：详见 [18-平台模块与管理后台需求.md](18-平台模块与管理后台需求.md) §1.5。 - **技术定位**：负责日程事件的生命周期管理、周期性重复提醒算法以及与 IM 消息的关联（如：消息一键转日程）。",
+    "updatedAt": "2026-04-01T04:03:10.156Z"
+  },
+  {
+    "title": "48 待办任务模块设计文档",
+    "path": "48-待办任务模块设计.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 职责边界",
+      "二、后端实现 (JDK 1.8 规范)",
+      "2.1 待办核心逻辑",
+      "三、前端实现 (纯 JS 规范)",
+      "3.1 待办管理逻辑封装",
+      "四、UI 表现与对齐规范 (DingTalk Style)",
+      "4.1 待办页面整体布局 (Todo Layout)",
+      "4.2 分类导航 (Category Navigation)",
+      "4.2.1 导航项规范",
+      "4.2.2 导航项状态"
+    ],
+    "summary": "--- - **需求参考**：详见 [18-平台模块与管理后台需求.md](18-平台模块与管理后台需求.md) §1.4。 - **技术定位**：负责待办任务的状态机（PENDING/COMPLETED/EXPIRED）、优先级调度以及过期自动预警推送。",
+    "updatedAt": "2026-04-01T04:03:10.212Z"
+  },
+  {
+    "title": "49 通话界面UI设计规范",
+    "path": "49-通话界面UI设计规范.md",
+    "category": "root",
+    "headings": [
+      "一、设计概述",
+      "1.1 通话场景",
+      "1.2 通话状态流转",
+      "1.3 通话规则 (C-009)",
+      "二、来电界面 (Incoming Call Interface)",
+      "2.1 全屏来电弹窗",
+      "2.2 来电头部区域",
+      "2.3 来电操作区域",
+      "2.3.1 接听按钮 (Accept)",
+      "2.3.2 拒绝按钮 (Reject)",
+      "2.4 动画效果"
+    ],
+    "summary": "--- [IDLE] → [CALLING] → [RINGING] → [CONNECTED] → [ENDED] ↓         ↓           ↓            ↓",
+    "updatedAt": "2026-04-01T04:03:56.141Z"
+  },
+  {
+    "title": "50 部署指南",
+    "path": "50-部署指南.md",
+    "category": "root",
+    "headings": [
+      "一、环境要求",
+      "1.1 服务器配置",
+      "1.2 软件环境",
+      "1.3 端口要求",
+      "二、后端部署",
+      "2.1 打包",
+      "进入后端项目目录",
+      "Maven 打包（跳过测试）",
+      "打包产物",
+      "target/ruoyi-im-api.jar",
+      "2.2 配置文件"
+    ],
+    "summary": "--- --- cd ruoyi-im-api",
+    "updatedAt": "2026-03-21T05:31:10.710Z"
+  },
+  {
+    "title": "51 开发环境搭建指南",
+    "path": "51-开发环境搭建指南.md",
+    "category": "root",
+    "headings": [
+      "一、环境准备",
+      "1.1 JDK 安装",
+      "输出：java version \"1.8.0_xxx\"",
+      "1.2 Node.js 安装",
+      "输出：v16.x.x 或更高",
+      "输出：8.x.x 或更高",
+      "1.3 MySQL 安装",
+      "输入密码后进入 MySQL 命令行",
+      "1.4 Redis 安装",
+      "输出：PONG",
+      "1.5 IDE 配置"
+    ],
+    "summary": "--- **Windows**： 1. 下载 JDK 1.8：https://www.oracle.com/java/technologies/javase/javase8-archive-downloads.html",
+    "updatedAt": "2026-04-07T01:48:27.151Z"
+  },
+  {
+    "title": "52 测试与质量策略",
+    "path": "52-测试与质量策略.md",
+    "category": "root",
+    "headings": [
+      "1. 验证层级与目标",
+      "2. 自动化测试策略",
+      "3. CI/CD 集成",
+      "4. 测试环境与数据",
+      "5. 回归与风险管理"
+    ],
+    "summary": "--- --- 1. **单元测试**（Vitest）",
+    "updatedAt": "2026-03-21T02:43:04.602Z"
+  },
+  {
+    "title": "53 文档体系优化与合规审计报告",
+    "path": "53-文档体系优化报告.md",
+    "category": "root",
+    "headings": [
+      "一、重大合规性重构 (Compliance Audit)",
+      "1.1 斩断 TypeScript 越界污染",
+      "1.2 肃清垃圾代码陷阱（命名规约）",
+      "1.3 确立 Antigravity Agent Protocol",
+      "二、体系目录结构重塑 (Numbering & Index Fix)",
+      "2.1 修复全局断层与编号错位",
+      "2.2 全域超链（Cross-reference）自动愈合",
+      "三、C-xxx 核心业务规则强同步 (Business Rules Synchronization)",
+      "3.1 解决 ID 脑裂（Collision Resolution）",
+      "四、文档内部层级规范 (Markdown Hierarchy Repair)",
+      "4.1 纠正错误标题级别 (H2 to H3)"
+    ],
+    "summary": "--- 针对早期文档中潜在导致 AI 产生幻觉与生成非标准代码的隐患，本项目已全面施行“降级与洗牌”： - **整改前**：部分底层设计、存储结构文档中遗留了 TS 接口与枚举，易导致大模型误用 TS 栈。早期优化报告甚至误建议“补充 TypeScript 类型”。",
+    "updatedAt": "2026-03-21T04:28:15.711Z"
+  },
+  {
+    "title": "54 验收用例清单",
+    "path": "54-验收用例清单.md",
+    "category": "root",
+    "headings": [
+      "1. 使用说明",
+      "2. IM 核心路径",
+      "2.1 会话列表",
+      "2.2 聊天区与气泡",
+      "2.3 输入区",
+      "2.4 搜索",
+      "2.5 群详情与群文件",
+      "2.6 通话",
+      "2.7 收藏与链接卡片",
+      "3. 平台模块",
+      "3.1 通讯录"
+    ],
+    "summary": "1. 每次完成一个任务后，对照本清单核对对应项。 2. 本清单按模块分类，粒度控制在“一个页面/一个能力”。 3. 若验收涉及前端与后端，需同时验证 UI 行为和接口数据。",
+    "updatedAt": "2026-03-20T10:13:30.758Z"
+  },
+  {
+    "title": "55 内网部署与环境指南",
+    "path": "55-内网部署与环境指南.md",
+    "category": "root",
+    "headings": [
+      "1. 环境前置要求",
+      "2. Nginx 核心配置",
+      "2.1 静态资源托管（前端）",
+      "2.2 HTTPS 与 WSS 配置要点",
+      "3. 反向代理与服务发现（Docker‑Compose 示例）",
+      "4. 健康检查与自动重启",
+      "5. 日志与监控",
+      "6. 常见故障排查",
+      "7. 部署步骤概览"
+    ],
+    "summary": "--- - **操作系统**：Linux (CentOS 7/8、Ubuntu 20.04 推荐)。 - **JDK**：1.8（已在后端 `pom.xml` 中声明）。",
+    "updatedAt": "2026-03-21T02:43:25.207Z"
+  },
+  {
+    "title": "60 AI大模型开发总览",
+    "path": "60-AI大模型开发总览.md",
+    "category": "root",
+    "headings": [
+      "文档定位",
+      "核心原则",
+      "文档体系结构",
+      "快速导航",
+      "按角色导航",
+      "按场景导航",
+      "架构总览",
+      "版本兼容性矩阵",
+      "环境依赖",
+      "硬件要求",
+      "Python依赖"
+    ],
+    "summary": "--- 本章节为 **AI大模型开发专项文档体系** 的索引入口，涵盖从模型训练、微调到生产部署的全生命周期技术指引。 1. **数据优先**：任何模型优化必须以数据质量为基础",
+    "updatedAt": "2026-04-14T04:25:25.064Z"
+  },
+  {
+    "title": "61 模型训练指南",
+    "path": "61-模型训练指南.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、环境准备 (Environment Setup)",
+      "1.1 硬件检查",
+      "检查GPU可用性",
+      "检查CUDA版本",
+      "检查PyTorch与CUDA兼容性",
+      "1.2 虚拟环境创建",
+      "使用conda创建环境",
+      "安装PyTorch（根据CUDA版本选择）",
+      "CUDA 11.8",
+      "CUDA 12.1"
+    ],
+    "summary": "--- 本文档详细描述模型训练的全流程，包括数据准备、训练配置、分布式训练、实验追踪等核心环节。 nvidia-smi",
+    "updatedAt": "2026-04-14T04:28:11.463Z"
+  },
+  {
+    "title": "62 模型微调手册",
+    "path": "62-模型微调手册.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、微调技术对比 (Technique Comparison)",
+      "二、LoRA微调 (LoRA Fine-tuning)",
+      "2.1 原理说明",
+      "LoRA核心思想",
+      "原始前向: h = Wx",
+      "LoRA后: h = Wx + BAx, 其中 A ∈ R^(r×d), B ∈ R^(d×r), r << min(d, k)",
+      "2.2 依赖安装",
+      "2.3 基础配置",
+      "lora_config.py",
+      "默认目标模块（根据模型架构自动适配）"
+    ],
+    "summary": "--- 模型微调（Fine-tuning）是将预训练模型适配到特定任务的关键技术。本文档涵盖LoRA、QLoRA、全量微调等多种技术方案，提供完整配置模板与最佳实践。 ---",
+    "updatedAt": "2026-04-14T04:14:00.179Z"
+  },
+  {
+    "title": "63 推理部署与上线",
+    "path": "63-推理部署与上线.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、模型导出 (Model Export)",
+      "1.1 HuggingFace格式导出",
+      "export_hf.py",
+      "1.2 ONNX格式导出",
+      "export_onnx.py",
+      "二、服务化部署 (Serving Deployment)",
+      "2.1 vLLM部署",
+      "安装vLLM",
+      "启动vLLM服务",
+      "2.2 FastAPI服务封装"
+    ],
+    "summary": "--- 本文档涵盖模型推理优化的全流程，包括模型导出、服务化部署、灰度策略、监控告警等关键环节，确保模型安全、稳定、高效地对外提供服务。 from transformers import AutoModelForCausalLM, AutoTokenizer",
+    "updatedAt": "2026-04-14T04:28:32.961Z"
+  },
+  {
+    "title": "64 性能优化与压缩",
+    "path": "64-性能优化与压缩.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、模型量化 (Model Quantization)",
+      "1.1 量化技术对比",
+      "1.2 动态量化 (Post-Training Dynamic Quantization)",
+      "dynamic_quantization.py",
+      "1.3 静态量化 (Post-Training Static Quantization)",
+      "static_quantization.py",
+      "1.4 GPTQ量化",
+      "安装GPTQ",
+      "GPTQ量化脚本",
+      "gptq_quantization.py"
+    ],
+    "summary": "--- 本文档涵盖模型性能优化的核心技木，包括模型量化、剪枝、知识蒸馏等压缩技术，以及推理加速优化手段，帮助在保证效果的前提下提升推理效率。 import torch",
+    "updatedAt": "2026-04-14T04:16:33.665Z"
+  },
+  {
+    "title": "65 数据治理规范",
+    "path": "65-数据治理规范.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、数据分类 (Data Classification)",
+      "1.1 敏感等级分类",
+      "1.2 数据类型分类",
+      "data_classifier.py",
+      "1.3 PII实体类型",
+      "二、数据采集规范 (Data Collection)",
+      "2.1 采集合规检查",
+      "collection_checklist.py",
+      "2.2 授权验证",
+      "authorization_validator.py"
+    ],
+    "summary": "--- 数据是AI大模型开发的核心资产。本文档建立完整的数据治理体系，涵盖数据采集、清洗、标注、存储、使用、销毁的全生命周期管理规范，确保数据质量、安全与合规。 from enum import Enum",
+    "updatedAt": "2026-04-14T04:17:57.278Z"
+  },
+  {
+    "title": "66 伦理合规与安全",
+    "path": "66-伦理合规与安全.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、合规框架 (Compliance Framework)",
+      "1.1 法规体系",
+      "1.2 AI风险等级分类 (EU AI Act)",
+      "ai_risk_classifier.py",
+      "二、隐私保护 (Privacy Protection)",
+      "2.1 隐私保护原则",
+      "2.2 隐私影响评估 (PIA)",
+      "privacy_impact_assessment.py",
+      "2.3 数据主体权利保障",
+      "data_subject_rights.py"
+    ],
+    "summary": "--- 本文档建立AI大模型的伦理合规与安全保障体系，涵盖隐私保护、内容安全、模型安全、伦理审查等核心领域，确保AI系统在合法合规、道德伦理的框架内运行。 from enum import Enum",
+    "updatedAt": "2026-04-14T04:19:25.253Z"
+  },
+  {
+    "title": "67 AI API参考手册",
+    "path": "67-AI-API参考手册.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、API基础规范",
+      "1.1 基础URL",
+      "1.2 认证方式",
+      "1.3 请求格式",
+      "二、聊天补全 API (Chat Completion)",
+      "2.1 接口定义",
+      "2.2 请求参数 (Request Parameters)",
+      "messages 参数结构",
+      "2.3 请求示例 (Request Examples)",
+      "Python SDK示例"
+    ],
+    "summary": "--- 本文档提供AI大模型推理API的完整参考，包含中英文参数对照、返回值定义、错误码表等内容。所有API均遵循RESTful规范，返回JSON格式数据。 Authorization: Bearer <API_KEY>",
+    "updatedAt": "2026-04-14T04:30:43.927Z"
+  },
+  {
+    "title": "68 端到端实战教程",
+    "path": "68-端到端实战教程.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "教程目标",
+      "实战案例：智能客服助手微调",
+      "案例目标",
+      "第一阶段：环境准备",
+      "1.1 硬件要求",
+      "最低配置",
+      "推荐配置",
+      "1.2 环境初始化",
+      "创建conda环境",
+      "安装PyTorch（CUDA 11.8）"
+    ],
+    "summary": "--- 本文档提供AI大模型从数据准备到生产部署的完整端到端实战教程，通过一个实际的对话助手微调案例，带领读者完整经历模型训练、微调、评估、压缩和部署的全流程。 完成本教程后，您将掌握：",
+    "updatedAt": "2026-04-14T04:21:45.834Z"
+  },
+  {
+    "title": "69 质量门禁与验收标准",
+    "path": "69-质量门禁与验收标准.md",
+    "category": "root",
+    "headings": [
+      "概述 (Overview)",
+      "一、质量门禁体系 (Quality Gates)",
+      "1.1 门禁检查点",
+      "1.2 门禁检查矩阵",
+      "二、文档质量标准 (Documentation Quality)",
+      "2.1 文档覆盖率要求",
+      "2.2 文档格式规范",
+      "文档格式检查配置",
+      "2.3 文档质量检查脚本",
+      "三、代码质量标准 (Code Quality)",
+      "3.1 代码规范检查"
+    ],
+    "summary": "--- 本文档定义AI大模型开发的质量门禁体系和验收标准，涵盖文档质量、代码质量、模型质量、部署质量等各个维度的检查清单和指标要求，确保交付物符合质量标准。 flowchart LR",
+    "updatedAt": "2026-04-14T04:23:01.376Z"
+  },
+  {
+    "title": "Claude 提示词库",
+    "path": "Claude提示词库.md",
+    "category": "root",
+    "headings": [
+      "1. 规划提示词",
+      "2. 开发提示词",
+      "3. 审查提示词"
+    ],
+    "summary": "基于以下全套文档体系执行任务规划： 【核心基建】 1. 02-大模型研发规范.md (强制：所有代码均受此控制)",
+    "updatedAt": "2026-03-21T08:41:32.000Z"
+  },
+  {
+    "title": "LLM 任务模板",
+    "path": "LLM任务模板.md",
+    "category": "root",
+    "headings": [
+      "使用说明",
+      "标准模板",
+      "编写要求"
+    ],
+    "summary": "每次只创建一个任务卡。 任务卡用于模型执行，不等同于产品需求原文。 task_id: IM-XXX-001",
+    "updatedAt": "2026-03-21T08:41:34.028Z"
+  },
+  {
+    "title": "RuoYi-IM 需求文档中心",
+    "path": "README.md",
+    "category": "root",
+    "headings": [
+      "快速导航",
+      "文档索引",
+      "一、总纲层（00-04）",
+      "二、需求层（10-19）",
+      "三、设计层（20-26）",
+      "四、技术层（30-39）",
+      "五、功能模块层（40-49）",
+      "六、部署与测试层（50-55）",
+      "七、大模型开发层（60-69）",
+      "状态定义",
+      "项目状态"
+    ],
+    "summary": "--- --- ---",
+    "updatedAt": "2026-04-14T04:24:05.129Z"
+  },
+  {
+    "title": "START - 5分钟快速上手",
+    "path": "START.md",
+    "category": "root",
+    "headings": [
+      "环境检查清单",
+      "第一步：克隆项目",
+      "第二步：初始化数据库",
+      "2.1 创建 MySQL 数据库",
+      "2.2 导入数据库脚本",
+      "脚本位置：ruoyi-im-api/sql/im_db.sql",
+      "输出应该 > 50（表示表已创建）",
+      "第三步：配置后端",
+      "3.1 修改数据库连接",
+      "3.2 启动后端",
+      "应返回用户 JSON 数据"
+    ],
+    "summary": "--- 在你开始之前，确保以下工具已安装： ---",
+    "updatedAt": "2026-04-14T04:25:31.973Z"
+  }
+]
