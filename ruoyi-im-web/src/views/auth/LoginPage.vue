@@ -221,11 +221,11 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f4f8;
+  background: var(--dt-bg-body);
   padding: 24px;
   position: relative;
   overflow: hidden;
-  transition: background 0.3s ease;
+  transition: background var(--dt-transition-base);
 }
 
 /* 背景装饰 */
@@ -292,8 +292,8 @@ onMounted(() => {
   width: 100%;
   max-width: 900px;
   min-height: 560px;
-  background: #ffffff;
-  border-radius: 20px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-2xl);
   box-shadow: var(--dt-shadow-2);
   overflow: hidden;
   position: relative;
@@ -351,14 +351,14 @@ onMounted(() => {
 h1 {
   font-size: 26px;
   font-weight: 700;
-  color: #1a1a2e;
+  color: var(--dt-text-primary);
   margin: 0 0 8px 0;
   letter-spacing: -0.5px;
 }
 
 .subtitle {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--dt-text-secondary);
   margin: 0;
 }
 
@@ -377,7 +377,7 @@ h1 {
   .field-label {
     font-size: 13px;
     font-weight: 500;
-    color: #374151;
+    color: var(--dt-text-primary);
   }
 }
 
@@ -390,8 +390,8 @@ h1 {
     position: absolute;
     left: 14px;
     font-size: 18px;
-    color: #9ca3af;
-    transition: color 0.2s;
+    color: var(--dt-text-tertiary);
+    transition: color var(--dt-transition-fast);
   }
 
   input {
@@ -399,19 +399,19 @@ h1 {
     height: 48px;
     padding: 0 44px;
     font-size: 15px;
-    color: #1f2937;
-    background: #f9fafb;
+    color: var(--dt-text-primary);
+    background: var(--dt-bg-input);
     border: 2px solid transparent;
-    border-radius: 10px;
+    border-radius: var(--dt-radius-lg);
     outline: none;
-    transition: background-color 0.2s ease;
+    transition: background-color var(--dt-transition-fast);
 
     &::placeholder {
-      color: #9ca3af;
+      color: var(--dt-text-tertiary);
     }
 
     &:hover {
-      background: #f3f4f6;
+      background: var(--dt-bg-input-hover);
     }
   }
 

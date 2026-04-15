@@ -351,10 +351,18 @@
         </div>
       </div>
       <template #footer>
+        <el-button @click="openShareDialog">分享</el-button>
         <el-button @click="openEditDialog">编辑</el-button>
         <el-button type="primary" @click="showDetailDialog = false">关闭</el-button>
       </template>
     </el-dialog>
+
+    <!-- 日历分享弹窗 -->
+    <CalendarShareDialog
+      v-model="showShareDialog"
+      :calendar-id="currentEvent?.id"
+      @success="loadEvents"
+    />
   </div>
 </template>
 
@@ -370,6 +378,7 @@ import {
   deleteSchedule,
   getSchedulesByRange
 } from '@/api/im/schedule'
+import CalendarShareDialog from '@/components/CalendarShareDialog/index.vue'
 
 // 状态
 const currentView = ref('month')
@@ -379,6 +388,7 @@ const events = ref([])
 const loading = ref(false)
 const showCreateDialog = ref(false)
 const showDetailDialog = ref(false)
+const showShareDialog = ref(false)
 const editingEvent = ref(null)
 const currentEvent = ref(null)
 const submitting = ref(false)
@@ -719,6 +729,11 @@ function openEditDialog() {
 function openEventDetail(event) {
   currentEvent.value = event
   showDetailDialog.value = true
+}
+
+function openShareDialog() {
+  showDetailDialog.value = false
+  showShareDialog.value = true
 }
 
 async function handleSubmit() {

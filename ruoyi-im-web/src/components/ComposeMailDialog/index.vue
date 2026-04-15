@@ -75,7 +75,7 @@
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
 import { ElMessage } from 'element-plus'
-import { sendMail } from '@/api/im/mail'
+import { sendMail, replyMail } from '@/api/im/mail'
 
 const props = defineProps({
   modelValue: {
@@ -163,7 +163,18 @@ const handleSubmit = async () => {
       }))
     }
 
-    const res = await sendMail(data)
+    let res
+    if (props.replyTo?.isReply) {
+      // 回复邮件：使用 replyMail 保持邮件线程
+      res = await replyMail({
+        mailId: props.replyTo.id,
+        toIds: [],
+        subject: form.subject,
+        content: form.content
+      })
+    } else {
+      res = await sendMail(data)
+    }
     if (res.code === 200) {
       ElMessage.success('邮件发送成功')
       emit('success', res.data)

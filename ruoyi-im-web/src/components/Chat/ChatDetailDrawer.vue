@@ -7,7 +7,7 @@ import { getGroupFileStatistics } from '@/api/im/groupFile'
 import { initiateCall } from '@/api/im/videoCall'
 import { clearConversationMessages } from '@/api/im/message'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Phone, VideoCamera, Link, Bell, Microphone, StarFilled, Mute, More, ArrowUp } from '@element-plus/icons-vue'
+import { Phone, VideoCamera, Link, Bell, Microphone, StarFilled, Mute, More, ArrowUp, Download } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
@@ -244,6 +244,15 @@ const handleShowQrCode = async () => {
   } finally {
     qrCodeLoading.value = false
   }
+}
+
+// 下载群二维码
+const handleDownloadQrCode = () => {
+  if (!qrCodeUrl.value) return
+  const link = document.createElement('a')
+  link.href = qrCodeUrl.value
+  link.download = `群二维码-${props.session.name || 'group'}.png`
+  link.click()
 }
 
 // 切换显示全部成员
@@ -516,6 +525,10 @@ const handleShowAnnouncement = async () => {
         <img v-if="qrCodeUrl" :src="qrCodeUrl" alt="群二维码" class="qr-code-image" />
         <div v-else class="qr-code-empty">加载中...</div>
         <p class="qr-code-tip">扫码加入群聊</p>
+        <el-button v-if="qrCodeUrl" type="primary" link size="small" @click="handleDownloadQrCode">
+          <el-icon><Download /></el-icon>
+          下载二维码
+        </el-button>
       </div>
     </el-dialog>
 

@@ -13,11 +13,14 @@ export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
   const peerConnection = ref(null)
   const isConnected = ref(false)
 
-  // ICE 服务器配置（建议生产环境使用 STUN/TURN 服务器）
+  // ICE 服务器配置（生产环境建议使用 STUN/TURN 服务器）
+  // TURN 服务器用于解决对称型 NAT 限制问题，保证内网用户也能建立通话
   const rtcConfig = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
+      { urls: 'stun:stun1.l.google.com:19302' },
+      // 可配置 TURN 服务器（需要替换为实际的 TURN 服务器地址和凭证）
+      // { urls: 'turn:your-turn-server.com:3478', username: 'user', credential: 'pass' }
     ]
   }
 

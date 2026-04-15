@@ -110,6 +110,13 @@
         </div>
       </template>
 
+      <!-- 通话记录模块 -->
+      <template v-else-if="activeModule === 'call'">
+        <div class="single-panel-wrapper">
+          <CallHistoryPanel @call="handleCallRecall" />
+        </div>
+      </template>
+
       <!-- 个人资料模块 -->
       <template v-else-if="activeModule === 'profile'">
         <div class="single-panel-wrapper">
@@ -176,6 +183,7 @@ import AdminLayout from '@/views/admin/AdminLayout.vue'
 import FavoritesPanel from '@/views/FavoritesPanel.vue'
 import DingPanel from '@/views/DingPanel.vue'
 import WorkReportPanel from '@/views/WorkReportPanel.vue'
+import CallHistoryPanel from '@/components/Chat/CallHistoryPanel.vue'
 
 const store = useStore()
 const activeModule = ref('chat')
@@ -197,6 +205,13 @@ const openSystemSettings = () => {
   showSystemSettingsDialog.value = true
 }
 
+// 通话记录重新呼叫 - 切换到聊天页面发起呼叫
+const handleCallRecall = ({ targetId, targetName, callType }) => {
+  // 切换到聊天模块
+  activeModule.value = 'chat'
+  ElMessage.info(`将在聊天中发起与「${targetName}」的通话`)
+}
+
 const getModuleName = (id) => {
   const map = {
     'chat': '消息',
@@ -213,7 +228,8 @@ const getModuleName = (id) => {
     'settings': '设置',
     'admin': '管理后台',
     'favorites': '收藏',
-    'ding': 'DING'
+    'ding': 'DING',
+    'call': '通话'
   }
   return map[id] || id
 }

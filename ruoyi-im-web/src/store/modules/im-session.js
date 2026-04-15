@@ -8,7 +8,14 @@ import {
   muteConversation,
   deleteConversation as apiDeleteConversation,
   markConversationAsRead,
-  saveDraft as apiSaveDraft
+  saveDraft as apiSaveDraft,
+  getSessionGroups,
+  createSessionGroup,
+  updateSessionGroup,
+  deleteSessionGroup,
+  addConversationToGroup,
+  removeConversationFromGroup,
+  moveConversationToGroup
 } from '@/api/im'
 import { formatMessagePreviewFromObject } from '@/utils/message'
 
@@ -29,7 +36,13 @@ export default {
     loading: false,
 
     // 当前筛选类型
-    currentFilter: 'all'
+    currentFilter: 'all',
+
+    // 会话分组列表
+    sessionGroups: [],
+
+    // 默认分组ID（未分组）
+    defaultGroupId: null
   }),
 
   getters: {
@@ -52,6 +65,38 @@ export default {
     // 根据 ID 获取会话
     sessionById: (state) => (id) => {
       return state.sessions.find(s => s.id === id)
+    },
+
+    // 获取会话分组
+    sessionGroups(state) {
+      return state.sessionGroups
+    },
+
+    // 根据分组获取会话
+    sessionsByGroup: (state) => (groupId) => {
+      if (!groupId) {
+        // 未分组：返回没有分组ID的会话
+        return state.sessions.filter(s => !s.groupId)
+      }
+      return state.sessions.filter(s => s.groupId === groupId)
+    },
+
+    // 分组后的会话列表（带分组标题）
+    groupedSessions(state) {
+      const groups = state.sessionGroups.map(g => ({
+        ...g,
+        sessions: state.sessions.filter(s => s.groupId === g.id)
+      }))
+      // 未分组的会话
+      const ungrouped = state.sessions.filter(s => !s.groupId)
+      if (ungrouped.length > 0) {
+        groups.push({
+          id: null,
+          name: '未分组',
+          sessions: ungrouped
+        })
+      }
+      return groups
     }
   },
 
@@ -105,11 +150,49 @@ export default {
       state.currentSession = null
       state.totalUnreadCount = 0
       state.currentFilter = 'all'
+      state.sessionGroups = []
     },
 
     // 设置筛选类型
     SET_FILTER(state, filter) {
       state.currentFilter = filter
+    },
+
+    // 设置会话分组列表
+    SET_SESSION_GROUPS(state, groups) {
+      state.sessionGroups = groups
+    },
+
+    // 添加会话分组
+    ADD_SESSION_GROUP(state, group) {
+      state.sessionGroups.push(group)
+    },
+
+    // 更新会话分组
+    UPDATE_SESSION_GROUP(state, { id, ...updates }) {
+      const index = state.sessionGroups.findIndex(g => g.id === id)
+      if (index !== -1) {
+        state.sessionGroups[index] = { ...state.sessionGroups[index], ...updates }
+      }
+    },
+
+    // 删除会话分组
+    REMOVE_SESSION_GROUP(state, groupId) {
+      state.sessionGroups = state.sessionGroups.filter(g => g.id !== groupId)
+      // 清除该分组下会话的分组ID
+      state.sessions.forEach(s => {
+        if (s.groupId === groupId) {
+          s.groupId = null
+        }
+      })
+    },
+
+    // 设置会话分组
+    SET_SESSION_GROUP(state, { sessionId, groupId }) {
+      const session = state.sessions.find(s => s.id === sessionId)
+      if (session) {
+        session.groupId = groupId
+      }
     }
   },
 
@@ -232,6 +315,97 @@ export default {
         await markConversationAsRead(session.id)
       } catch (e) {
         console.warn('标记已读失败', e)
+      }
+    },
+
+    // 加载会话分组
+    async loadSessionGroups({ commit }) {
+      try {
+        const res = await getSessionGroups()
+        if (res.code === 200) {
+          commit('SET_SESSION_GROUPS', res.data || [])
+        }
+      } catch (e) {
+        console.error('加载会话分组失败', e)
+      }
+    },
+
+    // 创建会话分组
+    async addSessionGroup({ commit }, { name, sortOrder }) {
+      try {
+        const res = await createSessionGroup({ name, sortOrder })
+        if (res.code === 200) {
+          commit('ADD_SESSION_GROUP', res.data)
+          return res.data
+        }
+      } catch (e) {
+        console.error('创建会话分组失败', e)
+        throw e
+      }
+    },
+
+    // 更新会话分组
+    async editSessionGroup({ commit }, { id, name, sortOrder }) {
+      try {
+        const res = await updateSessionGroup(id, { name, sortOrder })
+        if (res.code === 200) {
+          commit('UPDATE_SESSION_GROUP', { id, name, sortOrder })
+        }
+      } catch (e) {
+        console.error('更新会话分组失败', e)
+        throw e
+      }
+    },
+
+    // 删除会话分组
+    async removeSessionGroup({ commit }, groupId) {
+      try {
+        const res = await deleteSessionGroup(groupId)
+        if (res.code === 200) {
+          commit('REMOVE_SESSION_GROUP', groupId)
+        }
+      } catch (e) {
+        console.error('删除会话分组失败', e)
+        throw e
+      }
+    },
+
+    // 将会话添加到分组
+    async addSessionToGroup({ commit }, { sessionId, groupId }) {
+      try {
+        const res = await addConversationToGroup({ conversationId: sessionId, groupId })
+        if (res.code === 200) {
+          commit('SET_SESSION_GROUP', { sessionId, groupId })
+        }
+      } catch (e) {
+        console.error('添加会话到分组失败', e)
+        throw e
+      }
+    },
+
+    // 将会话从分组移除
+    async removeSessionFromGroup({ commit }, { sessionId, groupId }) {
+      try {
+        const res = await removeConversationFromGroup({ conversationId: sessionId, groupId })
+        if (res.code === 200) {
+          commit('SET_SESSION_GROUP', { sessionId, groupId: null })
+        }
+      } catch (e) {
+        console.error('从分组移除会话失败', e)
+        throw e
+      }
+    },
+
+    // 移动会话到另一个分组
+    async moveSessionToGroup({ commit }, { sessionId, fromGroupId, toGroupId }) {
+      try {
+        const res = await moveConversationToGroup({ conversationId: sessionId, fromGroupId, toGroupId })
+        if (res.code === 200) {
+          commit('SET_SESSION_GROUP', { sessionId, groupId: toGroupId })
+        }
+      } catch (e) {
+        console.error('移动会话到分组失败', e)
+        throw e
       }
     }
   }

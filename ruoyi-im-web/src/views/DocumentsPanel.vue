@@ -267,7 +267,7 @@
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { getDocuments, searchDocuments, toggleStar, updateDocument, deleteDocument, permanentlyDeleteDocument, restoreDocument, shareDocument } from '@/api/im/document'
-import { createFolder, getQuota, uploadFile, getFileList, getFolderList, renameFolder, deleteFolder, deleteFile, renameFile } from '@/api/im/cloudDrive'
+import { createFolder, getQuota, uploadFile, getFileList, getFolderList, renameFolder, deleteFolder, deleteFile, renameFile, toggleFileStar, toggleFolderStar } from '@/api/im/cloudDrive'
 import { formatFileSize, formatTime } from '@/utils/format'
 import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
 import { Folder, UserFilled, Clock, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone, View, Edit, Share, StarFilled, EditPen, Refresh, ArrowLeft } from '@element-plus/icons-vue'
@@ -656,9 +656,20 @@ const handleDropdownCommand = async (command, file) => {
     case 'star':
     case 'unstar': {
       try {
-        const res = await toggleStar(file.id, command === 'star')
+        const isStar = command === 'star'
+        let res
+        if (file.documentType === 'FOLDER') {
+          res = await toggleFolderStar(file.cloudFileId || file.id, isStar)
+        } else if (file.cloudFileId) {
+          // 云盘文件
+          res = await toggleFileStar(file.cloudFileId, isStar)
+        } else {
+          // 文档系统文件 - 使用 document API
+          const { toggleStar } = await import('@/api/im/document')
+          res = await toggleStar(file.id, isStar)
+        }
         if (res.code === 200) {
-          ElMessage.success(command === 'star' ? '已收藏' : '已取消收藏')
+          ElMessage.success(isStar ? '已收藏' : '已取消收藏')
           loadDocuments()
         }
       } catch (error) {
