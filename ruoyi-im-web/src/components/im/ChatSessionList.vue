@@ -477,7 +477,7 @@ const handleGlobalClick = () => {
   height: 28px;
   border: none;
   background: transparent;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-md);
   font-size: var(--dt-font-size-sm);  /* 13px对齐到标准12px */
   font-weight: 500;
   color: var(--dt-text-secondary);
@@ -599,7 +599,7 @@ const handleGlobalClick = () => {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1288,7 +1288,7 @@ onBeforeUnmount(() => {
 .card-avatar {
   width: 44px;
   height: 44px;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -1406,7 +1406,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 6px;
   padding: 6px 8px;
-  border-radius: 14px;
+  border-radius: var(--dt-radius-lg);
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(23, 26, 29, 0.08);
   box-shadow: var(--dt-shadow-2);
@@ -1438,7 +1438,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   color: var(--dt-text-secondary);
   transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
@@ -1462,7 +1462,7 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   font-size: 14px;
   transition: background-color var(--dt-transition-fast), transform var(--dt-transition-fast);
 
@@ -1589,7 +1589,7 @@ onBeforeUnmount(() => {
   .avatar {
     width: 32px;
     height: 32px;
-    border-radius: 9px;
+    border-radius: var(--dt-radius-md);
   }
 
   .message-row {
