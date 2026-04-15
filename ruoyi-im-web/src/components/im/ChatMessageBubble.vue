@@ -995,7 +995,7 @@ onBeforeUnmount(() => {
 
 .is-other .message-bubble {
   color: var(--dt-text-primary);
-  background: linear-gradient(180deg, #ffffff 0%, #fbfcfd 100%);
+  background: var(--dt-bubble-left-bg);
   border: 1px solid rgba(23, 26, 29, 0.06);
   border-top-left-radius: 8px;
   box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);

@@ -822,7 +822,7 @@ const scrollToMessage = (messageId) => {
   position: relative;
   background:
     radial-gradient(circle at top, rgba(39, 126, 251, 0.08), transparent 26%),
-    linear-gradient(180deg, var(--dt-chat-window-header-bg, #f8fbff) 0%, var(--dt-bg-chat) 18%);
+    linear-gradient(180deg, var(--dt-chat-window-header-bg) 0%, var(--dt-bg-chat) 18%);
 }
 
 .chat-header {
