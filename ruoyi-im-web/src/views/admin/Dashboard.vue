@@ -82,6 +82,9 @@ import { ElMessage } from 'element-plus'
 import { User, Star, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
 import * as echarts from 'echarts'
+import { useTheme } from '@/composables/useTheme'
+
+const { isDark } = useTheme()
 
 const overview = ref({
   totalUsers: 0,
@@ -118,6 +121,11 @@ const metrics = computed(() => ([
   { key: 'today', label: '今日消息', value: overview.value.todayMessages || 0, icon: ChatLineSquare, iconClass: 'messages' }
 ]))
 
+// 获取暗色模式下对应的颜色值
+const getDarkModeColor = (lightVar, darkVar) => {
+  return isDark.value ? darkVar : lightVar
+}
+
 const initMessageChart = () => {
   if (!messageChartRef.value) return
   if (messageChart) messageChart.dispose()
@@ -128,6 +136,7 @@ const initMessageChart = () => {
 const updateMessageChart = () => {
   if (!messageChart) return
   const total = messageStats.value.totalMessages || 0
+  const textColor = isDark.value ? '#f1f5f9' : '#5f6670'
   const option = {
     tooltip: {
       trigger: 'item',
@@ -136,7 +145,7 @@ const updateMessageChart = () => {
     legend: {
       orient: 'horizontal',
       bottom: 0,
-      textStyle: { color: 'var(--dt-text-secondary)', fontSize: 12 }
+      textStyle: { color: textColor, fontSize: 12 }
     },
     series: [{
       type: 'pie',
@@ -145,7 +154,7 @@ const updateMessageChart = () => {
       avoidLabelOverlap: false,
       itemStyle: {
         borderRadius: 4,
-        borderColor: 'var(--dt-bg-card)',
+        borderColor: isDark.value ? '#1e293b' : '#ffffff',
         borderWidth: 2
       },
       label: { show: false },
@@ -153,9 +162,9 @@ const updateMessageChart = () => {
         label: { show: true, fontSize: 14, fontWeight: 'bold' }
       },
       data: [
-        { value: messageStats.value.textMessages || 0, name: '文本', itemStyle: { color: 'var(--dt-brand-color)' } },
-        { value: messageStats.value.imageMessages || 0, name: '图片', itemStyle: { color: 'var(--dt-success-color)' } },
-        { value: messageStats.value.fileMessages || 0, name: '文件', itemStyle: { color: 'var(--dt-warning-color)' } }
+        { value: messageStats.value.textMessages || 0, name: '文本', itemStyle: { color: getDarkModeColor('#277EFB', '#4493FA') } },
+        { value: messageStats.value.imageMessages || 0, name: '图片', itemStyle: { color: getDarkModeColor('#00B42A', '#22C55E') } },
+        { value: messageStats.value.fileMessages || 0, name: '文件', itemStyle: { color: getDarkModeColor('#FF7D00', '#FB923C') } }
       ]
     }],
     graphic: [{
@@ -165,7 +174,7 @@ const updateMessageChart = () => {
       style: {
         text: total.toString(),
         textAlign: 'center',
-        fill: 'var(--dt-text-primary)',
+        fill: isDark.value ? '#f1f5f9' : '#171a1d',
         fontSize: 24,
         fontWeight: 'bold'
       }
@@ -176,7 +185,7 @@ const updateMessageChart = () => {
       style: {
         text: '总消息数',
         textAlign: 'center',
-        fill: 'var(--dt-text-tertiary)',
+        fill: isDark.value ? '#64748b' : '#8a9099',
         fontSize: 12
       }
     }]
@@ -193,6 +202,7 @@ const initUserChart = () => {
 
 const updateUserChart = () => {
   if (!userChart) return
+  const textColor = isDark.value ? '#f1f5f9' : '#5f6670'
   const option = {
     tooltip: {
       trigger: 'item',
@@ -201,7 +211,7 @@ const updateUserChart = () => {
     legend: {
       orient: 'horizontal',
       bottom: 0,
-      textStyle: { color: 'var(--dt-text-secondary)', fontSize: 12 }
+      textStyle: { color: textColor, fontSize: 12 }
     },
     series: [{
       type: 'pie',
@@ -210,7 +220,7 @@ const updateUserChart = () => {
       avoidLabelOverlap: false,
       itemStyle: {
         borderRadius: 4,
-        borderColor: 'var(--dt-bg-card)',
+        borderColor: isDark.value ? '#1e293b' : '#ffffff',
         borderWidth: 2
       },
       label: { show: false },
@@ -218,9 +228,9 @@ const updateUserChart = () => {
         label: { show: true, fontSize: 14, fontWeight: 'bold' }
       },
       data: [
-        { value: userStats.value.superAdminCount || 0, name: '超级管理员', itemStyle: { color: 'var(--dt-error-color)' } },
-        { value: userStats.value.adminCount || 0, name: '管理员', itemStyle: { color: 'var(--dt-warning-color)' } },
-        { value: userStats.value.userCount || 0, name: '普通用户', itemStyle: { color: 'var(--dt-text-tertiary)' } }
+        { value: userStats.value.superAdminCount || 0, name: '超级管理员', itemStyle: { color: getDarkModeColor('#F53F3F', '#F87171') } },
+        { value: userStats.value.adminCount || 0, name: '管理员', itemStyle: { color: getDarkModeColor('#FF7D00', '#FB923C') } },
+        { value: userStats.value.userCount || 0, name: '普通用户', itemStyle: { color: getDarkModeColor('#8a9099', '#64748b') } }
       ]
     }],
     graphic: [{
@@ -230,7 +240,7 @@ const updateUserChart = () => {
       style: {
         text: (userStats.value.total || 0).toString(),
         textAlign: 'center',
-        fill: 'var(--dt-text-primary)',
+        fill: isDark.value ? '#f1f5f9' : '#171a1d',
         fontSize: 24,
         fontWeight: 'bold'
       }
@@ -241,7 +251,7 @@ const updateUserChart = () => {
       style: {
         text: '总用户数',
         textAlign: 'center',
-        fill: 'var(--dt-text-tertiary)',
+        fill: isDark.value ? '#64748b' : '#8a9099',
         fontSize: 12
       }
     }]
@@ -292,6 +302,13 @@ const loadUserStats = async () => {
     userStatsLoading.value = false
   }
 }
+
+// 监听暗色模式变化，更新图表
+watch(isDark, async () => {
+  await nextTick()
+  updateMessageChart()
+  updateUserChart()
+})
 
 onMounted(async () => {
   await Promise.all([loadOverview(), loadMessageStats(), loadUserStats()])
