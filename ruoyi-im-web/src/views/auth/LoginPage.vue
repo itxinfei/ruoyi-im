@@ -336,7 +336,7 @@ onMounted(() => {
 
   .el-icon {
     font-size: 28px;
-    color: #fff;
+    color: var(--dt-text-white);
   }
 }
 
@@ -422,7 +422,7 @@ h1 {
     background: none;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--dt-text-tertiary);
     transition: color 0.2s;
 
     .el-icon {
@@ -430,19 +430,19 @@ h1 {
     }
 
     &:hover {
-      color: #6b7280;
+      color: var(--dt-text-secondary);
     }
   }
 }
 
 .field-group.focused {
   .field-icon {
-    color: #277EFB;
+    color: var(--dt-brand-color);
   }
 
   input {
     background: #fff;
-    border-color: #277EFB;
+    border-color: var(--dt-brand-color);
     box-shadow: var(--dt-shadow-brand);
   }
 }
@@ -489,7 +489,7 @@ h1 {
 
   input:checked + .checkbox-custom {
     background: var(--dt-brand-color);
-    border-color: #277EFB;
+    border-color: var(--dt-brand-color);
 
     &::after {
       opacity: 1;
@@ -498,13 +498,13 @@ h1 {
 
   .checkbox-label {
     font-size: 13px;
-    color: #6b7280;
+    color: var(--dt-text-secondary);
   }
 }
 
 .link-btn {
   font-size: 13px;
-  color: #277EFB;
+  color: var(--dt-brand-color);
   background: none;
   border: none;
   cursor: pointer;
@@ -513,7 +513,7 @@ h1 {
   transition: color 0.2s;
 
   &:hover {
-    color: #165DFF;
+    color: var(--dt-brand-active);
   }
 }
 
@@ -523,7 +523,7 @@ h1 {
   height: 50px;
   font-size: 15px;
   font-weight: 600;
-  color: #fff;
+  color: var(--dt-text-white);
   background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
   border: none;
   border-radius: var(--dt-radius-xl);
@@ -597,7 +597,7 @@ h1 {
   margin-top: 32px;
   text-align: center;
   font-size: 13px;
-  color: #9ca3af;
+  color: var(--dt-text-tertiary);
 }
 
 /* 品牌展示区 */
@@ -621,7 +621,7 @@ h1 {
 
 .brand-content {
   text-align: center;
-  color: #fff;
+  color: var(--dt-text-white);
   position: relative;
   z-index: 1;
 
@@ -682,7 +682,7 @@ h1 {
   border: none;
   border-radius: var(--dt-radius-xl);
   cursor: pointer;
-  color: #6b7280;
+  color: var(--dt-text-secondary);
   transition: background-color 0.2s;
   z-index: 10;
 
@@ -702,7 +702,7 @@ h1 {
   left: 50%;
   transform: translateX(-50%);
   font-size: 12px;
-  color: #9ca3af;
+  color: var(--dt-text-tertiary);
   z-index: 10;
 }
 
@@ -732,11 +732,11 @@ h1 {
   }
 
   h1 {
-    color: #f3f4f6;
+    color: var(--dt-text-quaternary);
   }
 
   .subtitle {
-    color: #9ca3af;
+    color: var(--dt-text-tertiary);
   }
 
   .field-label {
@@ -746,10 +746,10 @@ h1 {
   .field-input-wrapper {
     input {
       background: #262640;
-      color: #f3f4f6;
+      color: var(--dt-text-quaternary);
 
       &::placeholder {
-        color: #6b7280;
+        color: var(--dt-text-secondary);
       }
 
       &:hover {
@@ -761,12 +761,12 @@ h1 {
   .field-group.focused {
     input {
       background: #262640;
-      border-color: #277EFB;
+      border-color: var(--dt-brand-color);
     }
   }
 
   .checkbox-label {
-    color: #9ca3af;
+    color: var(--dt-text-tertiary);
   }
 
   .brand-showcase {
@@ -775,16 +775,16 @@ h1 {
 
   .theme-toggle {
     background: #262640;
-    color: #9ca3af;
+    color: var(--dt-text-tertiary);
 
     &:hover {
       background: #2d2d4a;
-      color: #f3f4f6;
+      color: var(--dt-text-quaternary);
     }
   }
 
   .copyright {
-    color: #6b7280;
+    color: var(--dt-text-secondary);
   }
 }
 
