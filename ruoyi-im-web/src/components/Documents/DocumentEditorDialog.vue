@@ -260,7 +260,7 @@ watch(() => props.modelValue, (val) => {
     .doc-icon {
       width: 48px;
       height: 48px;
-      border-radius: 8px;
+      border-radius: var(--dt-radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -307,7 +307,7 @@ watch(() => props.modelValue, (val) => {
         color: var(--dt-text-primary);
         background: var(--dt-bg-body);
         padding: 16px;
-        border-radius: 8px;
+        border-radius: var(--dt-radius-lg);
         margin: 0;
       }
     }
@@ -318,7 +318,7 @@ watch(() => props.modelValue, (val) => {
       img {
         max-width: 100%;
         max-height: 50vh;
-        border-radius: 8px;
+        border-radius: var(--dt-radius-lg);
       }
     }
 

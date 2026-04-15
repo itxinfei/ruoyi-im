@@ -723,7 +723,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
       .badge-icon {
         font-size: var(--dt-font-size-base);
         padding: 2px;
-        border-radius: 4px;
+        border-radius: var(--dt-radius-sm);
         background: var(--dt-overlay-bg);
 
         &.muted { color: var(--dt-error-color); }
@@ -795,7 +795,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     opacity: 0.7;
     background: var(--dt-overlay-bg);
     padding: 1px 6px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
   }
 }
 

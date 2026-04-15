@@ -189,7 +189,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 .avatar-wrapper {
   width: 64px;
   height: 64px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   overflow: hidden;
   background: var(--dt-bg-body);
   display: flex;
@@ -255,7 +255,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 .profile-actions .el-button {
   padding: 6px 12px;
   font-size: 12px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
 }
 
 .profile-actions .call-btn {
@@ -275,7 +275,7 @@ watch(visible, (val) => { if (!val) emit('update:modelValue', false) })
 
 .detail-list {
   border: 1px solid var(--dt-border-light);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   padding: 12px 16px;
   background: var(--dt-bg-body);
 }
