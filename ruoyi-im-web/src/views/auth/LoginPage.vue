@@ -468,7 +468,7 @@ h1 {
     width: 18px;
     height: 18px;
     border: 2px solid #d1d5db;
-    border-radius: 5px;
+    border-radius: var(--dt-radius-sm);
     position: relative;
     transition: background-color 0.2s, border-color 0.2s;
 
@@ -526,7 +526,7 @@ h1 {
   color: #fff;
   background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
   border: none;
-  border-radius: 10px;
+  border-radius: var(--dt-radius-xl);
   cursor: pointer;
   margin-top: 8px;
   transition: background-color 0.25s, opacity 0.25s;
@@ -651,7 +651,7 @@ h1 {
   gap: 12px;
   padding: 14px 20px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: var(--dt-radius-xl);
   transition: background-color 0.2s;
 
   &:hover {
@@ -680,7 +680,7 @@ h1 {
   justify-content: center;
   background: #fff;
   border: none;
-  border-radius: 12px;
+  border-radius: var(--dt-radius-xl);
   cursor: pointer;
   color: #6b7280;
   transition: background-color 0.2s;
