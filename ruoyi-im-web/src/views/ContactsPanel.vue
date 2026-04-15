@@ -389,7 +389,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
     color: var(--dt-brand-color);
     width: 44px;
     height: 44px;
-    border-radius: 10px;  /* 保持非标准值 */
+    border-radius: var(--dt-radius-xl);
     background: var(--dt-brand-bg);
     display: flex;
     align-items: center;
@@ -453,7 +453,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
   .m-avatar {
     width: 48px;
     height: 48px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-lg);
     object-fit: cover;
   }
 

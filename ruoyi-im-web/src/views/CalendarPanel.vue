@@ -1238,7 +1238,7 @@ function getReminderText(minutes) {
 .day-event {
   font-size: 11px;
   padding: 2px 4px;
-  border-radius: 3px;
+  border-radius: var(--dt-radius-sm);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1356,7 +1356,7 @@ function getReminderText(minutes) {
   position: absolute;
   left: 2px;
   right: 2px;
-  border-radius: 4px;
+  border-radius: var(--dt-radius-sm);
   padding: 4px;
   font-size: 11px;
   color: var(--dt-text-white);
@@ -1432,7 +1432,7 @@ function getReminderText(minutes) {
   position: absolute;
   left: 70px;
   right: var(--dt-spacing-lg);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   padding: var(--dt-spacing-sm);
   color: var(--dt-text-white);
   cursor: pointer;
