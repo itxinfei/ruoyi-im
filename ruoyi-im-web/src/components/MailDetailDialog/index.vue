@@ -231,7 +231,7 @@ const formatFileSize = (bytes) => {
   gap: 12px;
   padding: 12px;
   background: var(--dt-bg-hover);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   transition: background var(--dt-transition-fast);
 }
 

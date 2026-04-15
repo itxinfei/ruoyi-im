@@ -1474,7 +1474,7 @@ function getReminderText(minutes) {
   .detail-category {
     width: 4px;
     height: 24px;
-    border-radius: 2px;
+    border-radius: var(--dt-radius-xs);
 
     &.work { background: var(--dt-event-work); }
     &.meeting { background: var(--dt-event-meeting); }

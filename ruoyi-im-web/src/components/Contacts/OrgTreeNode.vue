@@ -65,7 +65,7 @@ const handleClick = () => {
   align-items: center;
   height: 36px;
   padding: 0 var(--dt-spacing-sm);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   transition: background-color var(--dt-transition-fast);
 

@@ -673,7 +673,7 @@ defineExpose({ open })
     display: flex;
     align-items: center;
     padding: 12px;
-    border-radius: 8px;
+    border-radius: var(--dt-radius-lg);
     cursor: pointer;
     transition: background-color var(--dt-transition-fast);
 
@@ -692,7 +692,7 @@ defineExpose({ open })
       align-items: center;
       justify-content: center;
       background: var(--dt-brand-bg);
-      border-radius: 8px;
+      border-radius: var(--dt-radius-lg);
       margin-right: 12px;
 
       .el-icon {

@@ -207,7 +207,7 @@ const handleToggleTheme = () => {
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;

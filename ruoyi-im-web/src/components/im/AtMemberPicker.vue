@@ -252,7 +252,7 @@ watch(filteredMembers, () => {
   color: var(--dt-brand-color);
   background: var(--dt-brand-bg);
   padding: 1px 4px;
-  border-radius: 2px;
+  border-radius: var(--dt-radius-xs);
   flex-shrink: 0;
 }
 
