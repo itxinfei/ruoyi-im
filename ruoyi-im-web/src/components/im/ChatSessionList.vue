@@ -1,5 +1,5 @@
 <template>
-  <div class="session-panel">
+  <div class="session-panel" @click="handleGlobalClick">
     <!-- 头部搜索与筛选 (对齐钉钉 8px 步进) -->
     <div class="panel-header">
       <div class="search-bar" :class="{ 'is-focused': isSearchFocused }">
@@ -23,6 +23,14 @@
         >
           {{ tab.label }}
         </button>
+      </div>
+      <!-- 分组管理按钮 -->
+      <div class="session-actions">
+        <el-tooltip content="分组管理">
+          <el-button text size="small" @click="openGroupDialog()">
+            <el-icon><FolderOpened /></el-icon>
+          </el-button>
+        </el-tooltip>
       </div>
     </div>
 
@@ -55,6 +63,7 @@
               class="session-item"
               :class="{ 'is-active': currentSession && currentSession.id === session.id, 'is-pinned': session.isPinned }"
               @click="selectSession(session)"
+              @contextmenu.prevent="handleContextMenu($event, session)"
             >
               <!-- 头像区 (对齐钉钉 4px 圆角) -->
               <div class="avatar-wrapper" @click.stop="handleAvatarClick(session)">
@@ -87,6 +96,85 @@
         <p>暂无消息会话</p>
       </div>
     </div>
+
+    <!-- 右键会话上下文菜单 -->
+    <Teleport to="body">
+      <div
+        v-if="contextMenuVisible"
+        class="session-context-menu"
+        :style="contextMenuStyle"
+        @click.stop
+      >
+        <div class="context-menu-header">移动到分组</div>
+        <div
+          class="context-menu-item"
+          @click="moveSessionToGroup(contextMenuSession, null)"
+        >
+          <el-icon><FolderAdd /></el-icon>
+          未分组
+        </div>
+        <div
+          v-for="group in userSessionGroups"
+          :key="group.id"
+          class="context-menu-item"
+          :class="{ 'is-active': contextMenuSession?.groupId === group.id }"
+          @click="moveSessionToGroup(contextMenuSession, group.id)"
+        >
+          <el-icon><FolderOpened /></el-icon>
+          {{ group.name }}
+        </div>
+        <div class="context-menu-divider" />
+        <div class="context-menu-item" @click="openGroupDialog()">
+          <el-icon><Plus /></el-icon>
+          新建分组
+        </div>
+      </div>
+    </Teleport>
+
+    <!-- 分组管理对话框 -->
+    <el-dialog
+      v-model="showGroupDialog"
+      :title="editingGroup ? '编辑分组' : '会话分组'"
+      width="400px"
+      destroy-on-close
+    >
+      <div class="group-dialog-content">
+        <!-- 新建分组 -->
+        <div class="group-create-row">
+          <el-input
+            v-model="newGroupName"
+            placeholder="输入新分组名称"
+            @keyup.enter="handleSaveGroup"
+          />
+          <el-button type="primary" size="small" @click="handleSaveGroup">
+            新建
+          </el-button>
+        </div>
+
+        <!-- 分组列表 -->
+        <div class="group-list">
+          <div
+            v-for="group in userSessionGroups"
+            :key="group.id"
+            class="group-list-item"
+          >
+            <span class="group-item-name">{{ group.name }}</span>
+            <span class="group-item-count">
+              {{ sessionsByGroup(group.id)?.length || 0 }} 个会话
+            </span>
+            <div class="group-item-actions">
+              <el-button text size="small" @click="openGroupDialog(group)">
+                <el-icon><Edit /></el-icon>
+              </el-button>
+              <el-button text size="small" type="danger" @click="handleDeleteGroup(group)">
+                <el-icon><Delete /></el-icon>
+              </el-button>
+            </div>
+          </div>
+          <el-empty v-if="userSessionGroups.length === 0" description="暂无分组" :image-size="60" />
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -94,10 +182,12 @@
 /**
  * ChatSessionList.vue (对齐钉钉 250px 规范)
  * 修复：数据初始化加载、色彩对齐、图标修正
+ * 功能增强：会话分组管理（用户创建分组）
  */
 import { ref, computed, onMounted, reactive } from 'vue';
 import { useStore } from 'vuex';
-import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight } from '@element-plus/icons-vue';
+import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight, MoreFilled, FolderOpened, FolderAdd, Delete, Edit, Plus } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
 
 const store = useStore();
 
@@ -110,8 +200,17 @@ const filterType = ref('all');
 const collapsedGroups = reactive({
   PINNED: false,
   PRIVATE: false,
-  GROUP: false
+  GROUP: false,
+  USER_GROUP: false
 });
+
+// 会话分组相关状态
+const showGroupDialog = ref(false);
+const editingGroup = ref(null);
+const newGroupName = ref('');
+const contextMenuSession = ref(null);
+const contextMenuVisible = ref(false);
+const contextMenuStyle = ref({});
 
 // 分类定义
 const sessionGroups = [
@@ -137,6 +236,10 @@ const loading = computed(() => store.state.im?.session?.loading);
 const currentSession = computed(() => store.state.im?.session?.currentSession);
 const sessions = computed(() => store.getters['im/session/sortedSessions']);
 
+// 会话分组相关
+const userSessionGroups = computed(() => store.getters['im/session/sessionGroups'] || []);
+const sessionsByGroup = (groupId) => store.getters['im/session/sessionsByGroup'](groupId);
+
 const filteredSessions = computed(() => {
   let list = sessions.value || [];
   // 按类型过滤
@@ -150,11 +253,11 @@ const filteredSessions = computed(() => {
   return list;
 });
 
-// 分组会话列表（钉钉分类设计：置顶 > 单聊 > 群聊）
+// 分组会话列表（钉钉分类设计：置顶 > 单聊 > 群聊 + 用户分组）
 const groupedSessions = computed(() => {
   const list = filteredSessions.value;
 
-  return sessionGroups.map(group => {
+  const typeGroups = sessionGroups.map(group => {
     let groupSessions;
 
     if (filterType.value !== 'all') {
@@ -178,11 +281,33 @@ const groupedSessions = computed(() => {
       unreadCount
     };
   });
+
+  // 用户创建的分组（只在全部筛选时显示）
+  if (filterType.value === 'all' && userSessionGroups.value.length > 0) {
+    const userGroups = userSessionGroups.value.map(g => {
+      // 该分组下的会话（排除已置顶的，置顶会话在置顶分组中显示）
+      const groupSessions = list.filter(s => !s.isPinned && s.groupId === g.id);
+      const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0);
+      return {
+        type: 'USER_GROUP_' + g.id,
+        label: g.name,
+        sessions: groupSessions,
+        unreadCount,
+        groupId: g.id,
+        isUserGroup: true
+      };
+    }).filter(g => g.sessions.length > 0);
+
+    typeGroups.push(...userGroups);
+  }
+
+  return typeGroups;
 });
 
 // 初始化加载
 onMounted(() => {
   store.dispatch('im/session/loadSessions');
+  store.dispatch('im/session/loadSessionGroups');
 });
 
 const selectSession = (session) => {
@@ -214,13 +339,111 @@ const formatTime = (time) => {
   if (!time) return '';
   const date = new Date(time);
   const now = new Date();
-  
+
   // 如果是今天，显示时间；否则显示日期
   if (date.toDateString() === now.toDateString()) {
-    return date.getHours().toString().padStart(2, '0') + ':' + 
+    return date.getHours().toString().padStart(2, '0') + ':' +
            date.getMinutes().toString().padStart(2, '0');
   }
   return (date.getMonth() + 1) + '/' + date.getDate();
+};
+
+// ============ 会话分组管理 ============
+
+// 打开分组管理对话框
+const openGroupDialog = (group = null) => {
+  editingGroup.value = group;
+  newGroupName.value = group ? group.name : '';
+  showGroupDialog.value = true;
+};
+
+// 创建或更新分组
+const handleSaveGroup = async () => {
+  if (!newGroupName.value.trim()) {
+    ElMessage.warning('分组名称不能为空');
+    return;
+  }
+  try {
+    if (editingGroup.value) {
+      await store.dispatch('im/session/editSessionGroup', {
+        id: editingGroup.value.id,
+        name: newGroupName.value.trim()
+      });
+      ElMessage.success('分组名称已更新');
+    } else {
+      await store.dispatch('im/session/addSessionGroup', {
+        name: newGroupName.value.trim()
+      });
+      ElMessage.success('分组已创建');
+    }
+    showGroupDialog.value = false;
+    newGroupName.value = '';
+    editingGroup.value = null;
+  } catch (e) {
+    console.error('保存分组失败', e);
+  }
+};
+
+// 删除分组
+const handleDeleteGroup = async (group) => {
+  try {
+    await ElMessageBox.confirm(
+      `确定删除分组"${group.name}"？会话将移至未分组。`,
+      '删除分组',
+      { type: 'warning' }
+    );
+    await store.dispatch('im/session/removeSessionGroup', group.id);
+    ElMessage.success('分组已删除');
+  } catch (e) {
+    if (e !== 'cancel') {
+      console.error('删除分组失败', e);
+    }
+  }
+};
+
+// 将会话添加到分组
+const moveSessionToGroup = async (session, groupId) => {
+  try {
+    if (session.groupId === groupId) {
+      // 已在该分组，转为未分组
+      await store.dispatch('im/session/removeSessionFromGroup', {
+        sessionId: session.id,
+        groupId: session.groupId
+      });
+    } else {
+      await store.dispatch('im/session/addSessionToGroup', {
+        sessionId: session.id,
+        groupId
+      });
+    }
+    contextMenuVisible.value = false;
+  } catch (e) {
+    console.error('移动会话失败', e);
+  }
+};
+
+// 右键菜单
+const handleContextMenu = (event, session) => {
+  event.preventDefault();
+  contextMenuSession.value = session;
+  contextMenuVisible.value = true;
+  contextMenuStyle.value = {
+    left: event.clientX + 'px',
+    top: event.clientY + 'px'
+  };
+};
+
+// 关闭右键菜单
+const closeContextMenu = () => {
+  contextMenuVisible.value = false;
+  contextMenuSession.value = null;
+};
+
+// 点击空白处关闭菜单
+const handleGlobalClick = () => {
+  if (contextMenuVisible.value) {
+    closeContextMenu();
+  }
 };
 </script>
 
@@ -272,6 +495,13 @@ const formatTime = (time) => {
   color: var(--dt-brand-color);
   font-weight: 600;
   box-shadow: var(--dt-shadow-1);
+}
+
+.session-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+  padding: 0 4px;
 }
 
 .search-bar {
@@ -532,5 +762,111 @@ const formatTime = (time) => {
   color: var(--dt-text-secondary);
   font-size: var(--dt-font-size-base);
   margin-top: 4px;
+}
+
+/* 右键上下文菜单 */
+.session-context-menu {
+  position: fixed;
+  z-index: 9999;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-2);
+  min-width: 160px;
+  padding: 4px 0;
+}
+
+.context-menu-header {
+  padding: 8px 12px;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
+  font-weight: 500;
+  border-bottom: 1px solid var(--dt-border-light);
+  margin-bottom: 4px;
+}
+
+.context-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-primary);
+  cursor: pointer;
+  transition: background-color var(--dt-transition-fast);
+}
+
+.context-menu-item:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+.context-menu-item.is-active {
+  color: var(--dt-brand-color);
+}
+
+.context-menu-divider {
+  height: 1px;
+  background: var(--dt-border-light);
+  margin: 4px 0;
+}
+
+/* 分组管理对话框 */
+.group-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.group-create-row {
+  display: flex;
+  gap: 8px;
+}
+
+.group-create-row .el-input {
+  flex: 1;
+}
+
+.group-list {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  padding: 8px;
+}
+
+.group-list-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: var(--dt-radius-md);
+  transition: background-color var(--dt-transition-fast);
+}
+
+.group-list-item:hover {
+  background-color: var(--dt-bg-hover);
+}
+
+.group-item-name {
+  flex: 1;
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-primary);
+  font-weight: 500;
+}
+
+.group-item-count {
+  font-size: var(--dt-font-size-xs);
+  color: var(--dt-text-tertiary);
+  margin: 0 8px;
+}
+
+.group-item-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity var(--dt-transition-fast);
+}
+
+.group-list-item:hover .group-item-actions {
+  opacity: 1;
 }
 </style>

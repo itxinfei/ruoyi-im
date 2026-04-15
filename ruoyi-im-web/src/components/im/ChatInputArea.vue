@@ -8,8 +8,30 @@
   >
     <!-- 拖拽上传遮罩 -->
     <div v-if="isDragover" class="dragover-mask">
-      <el-icon class="drag-icon"><Upload /></el-icon>
+      <el-icon class="drag-icon">
+        <Upload />
+      </el-icon>
       <span>拖拽文件到此处上传</span>
+    </div>
+
+    <!-- 拖拽上传进度遮罩 -->
+    <div v-if="dragUploadingFiles.length > 0" class="drag-progress-mask">
+      <div class="drag-progress-content">
+        <el-icon class="drag-progress-icon">
+          <Upload />
+        </el-icon>
+        <span class="drag-progress-text">正在上传 {{ dragUploadingFiles.length }} 个文件...</span>
+        <div class="drag-progress-bar">
+          <el-progress
+            :percentage="dragProgressPercentage"
+            :stroke-width="4"
+            :show-text="false"
+          />
+        </div>
+        <span class="drag-progress-detail">
+          {{ dragProgressText }}
+        </span>
+      </div>
     </div>
 
     <!-- 引用消息预览区 -->
@@ -18,27 +40,33 @@
         <span class="reply-author">{{ replyingMessage.senderName }}: </span>
         <span class="reply-text">{{ replyingMessage.content }}</span>
       </div>
-      <el-icon class="icon-close" @click="clearReply"><Close /></el-icon>
+      <el-icon class="icon-close" @click="clearReply">
+        <Close />
+      </el-icon>
     </div>
 
     <!-- 编辑模式提示条 -->
     <div v-if="isEditMode" class="edit-mode-bar">
       <span class="edit-mode-text">编辑消息</span>
       <span class="edit-mode-hint">Enter 保存 · ESC 取消</span>
-      <el-icon class="icon-close" @click="cancelEdit"><Close /></el-icon>
+      <el-icon class="icon-close" @click="cancelEdit">
+        <Close />
+      </el-icon>
     </div>
 
     <!-- 工具栏 -->
     <div class="toolbar">
       <!-- 表情选择器 -->
       <el-popover
+        v-model:visible="emojiPickerVisible"
         placement="top"
         :width="320"
         trigger="click"
-        v-model:visible="emojiPickerVisible"
       >
         <template #reference>
-          <el-icon class="tool-icon" title="表情"><Star /></el-icon>
+          <el-icon class="tool-icon" title="表情">
+            <Star />
+          </el-icon>
         </template>
         <div class="emoji-picker">
           <div class="emoji-grid">
@@ -61,7 +89,9 @@
         accept="image/*"
         class="upload-wrapper"
       >
-        <el-icon class="tool-icon" title="图片"><Picture /></el-icon>
+        <el-icon class="tool-icon" title="图片">
+          <Picture />
+        </el-icon>
       </el-upload>
 
       <!-- 文件上传 -->
@@ -72,7 +102,9 @@
         :on-change="processFileSelect"
         class="upload-wrapper"
       >
-        <el-icon class="tool-icon" title="文件"><Folder /></el-icon>
+        <el-icon class="tool-icon" title="文件">
+          <Folder />
+        </el-icon>
       </el-upload>
 
       <!-- 视频上传 -->
@@ -84,7 +116,9 @@
         accept="video/*"
         class="upload-wrapper"
       >
-        <el-icon class="tool-icon" title="视频"><VideoCamera /></el-icon>
+        <el-icon class="tool-icon" title="视频">
+          <VideoCamera />
+        </el-icon>
       </el-upload>
 
       <!-- 名片 -->
@@ -103,7 +137,12 @@
       </el-icon>
 
       <!-- 语音录制 -->
-      <el-icon class="tool-icon" :class="{ 'is-recording': isRecording }" title="语音" @click="toggleRecording">
+      <el-icon
+        class="tool-icon"
+        :class="{ 'is-recording': isRecording }"
+        title="语音"
+        @click="toggleRecording"
+      >
         <Microphone />
       </el-icon>
     </div>
@@ -111,12 +150,16 @@
     <!-- 录音状态区 -->
     <div v-if="isRecording" class="recording-bar">
       <div class="recording-info">
-        <span class="recording-dot"></span>
+        <span class="recording-dot" />
         <span class="recording-text">录音中 {{ formatDuration(recordingDuration) }}</span>
       </div>
       <div class="recording-actions">
-        <button class="rec-btn cancel" @click="cancelRecording">取消</button>
-        <button class="rec-btn send" @click="sendRecording">发送</button>
+        <button class="rec-btn cancel" @click="cancelRecording">
+          取消
+        </button>
+        <button class="rec-btn send" @click="sendRecording">
+          发送
+        </button>
       </div>
     </div>
 
@@ -124,7 +167,9 @@
     <div v-if="pendingImages.length > 0" class="image-preview-bar">
       <div v-for="(img, index) in pendingImages" :key="index" class="preview-item">
         <el-image :src="img.url" fit="cover" class="preview-img" />
-        <el-icon class="preview-remove" @click="removeImage(index)"><Close /></el-icon>
+        <el-icon class="preview-remove" @click="removeImage(index)">
+          <Close />
+        </el-icon>
       </div>
     </div>
 
@@ -132,9 +177,13 @@
     <div v-if="pendingVideos.length > 0" class="video-preview-bar">
       <div v-for="(video, index) in pendingVideos" :key="index" class="preview-item video-preview-item">
         <video :src="video.url" class="preview-video" />
-        <el-icon class="preview-duration"><Clock /></el-icon>
+        <el-icon class="preview-duration">
+          <Clock />
+        </el-icon>
         <span class="preview-duration-text">{{ formatDuration(video.duration) }}</span>
-        <el-icon class="preview-remove" @click="removeVideo(index)"><Close /></el-icon>
+        <el-icon class="preview-remove" @click="removeVideo(index)">
+          <Close />
+        </el-icon>
       </div>
     </div>
 
@@ -148,10 +197,10 @@
         @keydown.enter.exact.prevent="executeSendMessage"
         @keydown.esc.stop="cancelEdit"
         @keydown.ctrl.enter.stop="insertNewLine"
-        @keydown.@stop="openAtMemberPicker"
+        @keydown.shift.2.stop="openAtMemberPicker"
         @paste="processPaste"
         @input="handleInput"
-      ></div>
+      />
 
       <!-- @成员选择器 -->
       <AtMemberPicker
@@ -195,10 +244,14 @@
           class="card-picker-item"
           @click="selectCardContact(contact)"
         >
-          <img :src="contact.avatar || '/avatars/default.png'" class="card-avatar" />
+          <img :src="contact.avatar || '/avatars/default.png'" class="card-avatar">
           <div class="card-info">
-            <div class="card-name">{{ contact.name }}</div>
-            <div class="card-dept">{{ contact.department || '' }}</div>
+            <div class="card-name">
+              {{ contact.name }}
+            </div>
+            <div class="card-dept">
+              {{ contact.department || '' }}
+            </div>
           </div>
         </div>
         <div v-if="filteredContacts.length === 0" class="card-empty">
@@ -222,15 +275,31 @@
           <el-input v-model="locationForm.address" placeholder="如：北京市朝阳区xxx路" maxlength="100" />
         </el-form-item>
         <el-form-item label="经度">
-          <el-input-number v-model="locationForm.latitude" :precision="6" :step="0.000001" placeholder="纬度" style="width: 100%" />
+          <el-input-number
+            v-model="locationForm.latitude"
+            :precision="6"
+            :step="0.000001"
+            placeholder="纬度"
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="纬度">
-          <el-input-number v-model="locationForm.longitude" :precision="6" :step="0.000001" placeholder="经度" style="width: 100%" />
+          <el-input-number
+            v-model="locationForm.longitude"
+            :precision="6"
+            :step="0.000001"
+            placeholder="经度"
+            style="width: 100%"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="locationPickerVisible = false">取消</el-button>
-        <el-button type="primary" @click="sendLocation">发送</el-button>
+        <el-button @click="locationPickerVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="sendLocation">
+          发送
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -240,12 +309,13 @@
 /**
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
-import { ref, computed, watch, onMounted, nextTick } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue';
-import { getContacts } from '@/api/im/contact';
-import { getGroupMembers } from '@/api/im/group';
-import AtMemberPicker from './AtMemberPicker.vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue'
+import { getContacts } from '@/api/im/contact'
+import { getGroupMembers } from '@/api/im/group'
+import { uploadImage, uploadFile, initChunkUpload, uploadChunk, mergeChunks } from '@/api/im/file'
+import AtMemberPicker from './AtMemberPicker.vue'
 
 const props = defineProps({
   replyingMessage: Object,
@@ -255,71 +325,93 @@ const props = defineProps({
     type: String,
     default: ''
   }
-});
+})
 
-const emit = defineEmits(['send', 'clear-reply', 'update:modelValue', 'edit-save', 'edit-cancel']);
+const emit = defineEmits(['send', 'clear-reply', 'update:modelValue', 'edit-save', 'edit-cancel'])
 
-const editorRef = ref(null);
-const hasContent = ref(false);
-const emojiPickerVisible = ref(false);
-const pendingImages = ref([]);
-const pendingVideos = ref([]);
-const isDragover = ref(false);
-let isInternalSet = false; // 防止 watch 设置时触发 handleInput 冒泡
-const isEditMode = ref(false); // 编辑模式标识
+const editorRef = ref(null)
+const hasContent = ref(false)
+const emojiPickerVisible = ref(false)
+const pendingImages = ref([])
+const pendingVideos = ref([])
+const isDragover = ref(false)
+
+// 拖拽上传状态
+const dragUploadingFiles = ref([]) // { file, progress, status, fileType, result }
+let dragUploadAbortController = null // 取消上传的控制器
+
+// 拖拽进度计算属性
+const dragProgressPercentage = computed(() => {
+  if (dragUploadingFiles.value.length === 0) return 0
+  const total = dragUploadingFiles.value.reduce((sum, f) => sum + f.progress, 0)
+  return Math.round(total / dragUploadingFiles.value.length)
+})
+
+const dragProgressText = computed(() => {
+  const completed = dragUploadingFiles.value.filter(f => f.status === 'completed').length
+  const uploading = dragUploadingFiles.value.filter(f => f.status === 'uploading').length
+  const failed = dragUploadingFiles.value.filter(f => f.status === 'failed').length
+  const parts = []
+  if (completed > 0) parts.push(`${completed} 完成`)
+  if (uploading > 0) parts.push(`${uploading} 上传中`)
+  if (failed > 0) parts.push(`${failed} 失败`)
+  return parts.join(' · ')
+})
+
+let isInternalSet = false // 防止 watch 设置时触发 handleInput 冒泡
+const isEditMode = ref(false) // 编辑模式标识
 
 // 录音状态
-const isRecording = ref(false);
-const recordingDuration = ref(0);
-let mediaRecorder = null;
-let recordedChunks = [];
-let recordingTimer = null;
+const isRecording = ref(false)
+const recordingDuration = ref(0)
+let mediaRecorder = null
+let recordedChunks = []
+let recordingTimer = null
 
 // 名片选择状态
-const cardPickerVisible = ref(false);
-const cardSearchKeyword = ref('');
-const contactList = ref([]);
+const cardPickerVisible = ref(false)
+const cardSearchKeyword = ref('')
+const contactList = ref([])
 
 // 位置选择状态
-const locationPickerVisible = ref(false);
+const locationPickerVisible = ref(false)
 const locationForm = ref({
   name: '',
   address: '',
   latitude: 39.9042,
   longitude: 116.4074
-});
+})
 
 // @成员选择状态
-const atMemberPickerVisible = ref(false);
-const atPickerPosition = ref({ top: 0, left: 0 });
-const groupMembers = ref([]);
-const currentSessionId = ref(null);
+const atMemberPickerVisible = ref(false)
+const atPickerPosition = ref({ top: 0, left: 0 })
+const groupMembers = ref([])
 
 // 监听外部草稿变化（会话切换时恢复草稿）
 watch(() => props.modelValue, (newVal) => {
-  if (!editorRef.value) return;
-  const currentText = editorRef.value.innerText;
+  if (!editorRef.value) return
+  const currentText = editorRef.value.innerText
   if (currentText !== newVal) {
-    isInternalSet = true;
-    editorRef.value.innerText = newVal || '';
-    hasContent.value = !!newVal;
+    isInternalSet = true
+    editorRef.value.innerText = newVal || ''
+    hasContent.value = !!newVal
   }
-});
+})
 
 // 监听编辑消息变化（进入/退出编辑模式）
 watch(() => props.editingMessage, (newVal) => {
   if (newVal) {
-    isEditMode.value = true;
-    isInternalSet = true;
+    isEditMode.value = true
+    isInternalSet = true
     if (editorRef.value) {
-      editorRef.value.innerText = newVal.content || '';
-      hasContent.value = !!newVal.content;
+      editorRef.value.innerText = newVal.content || ''
+      hasContent.value = !!newVal.content
     }
-    nextTick(() => editorRef.value?.focus());
+    nextTick(() => editorRef.value?.focus())
   } else {
-    isEditMode.value = false;
+    isEditMode.value = false
   }
-});
+})
 
 // 常用表情列表
 const emojiList = [
@@ -328,250 +420,246 @@ const emojiList = [
   '😣', '😥', '😮', '🤐', '😯', '😪', '😫', '😴', '😌', '😛', '😜', '😝',
   '🤤', '😒', '😓', '😔', '😕', '🙃', '🤑', '😲', '🙁', '😖', '😞', '😟',
   '😤', '😢', '😭', '😦', '😧', '😨', '😩', '🤯', '😬', '😰', '😱', '👍', '👎'
-];
+]
 
 // 是否可以发送（有文字或有图片或有视频）
 const canSend = computed(() => {
-  return hasContent.value || pendingImages.value.length > 0 || pendingVideos.value.length > 0;
-});
+  return hasContent.value || pendingImages.value.length > 0 || pendingVideos.value.length > 0
+})
 
 const handleInput = () => {
   if (isInternalSet) {
-    isInternalSet = false;
-    return;
+    isInternalSet = false
+    return
   }
-  const text = editorRef.value.innerText;
-  hasContent.value = !!text.trim();
-  emit('update:modelValue', text);
-};
+  const text = editorRef.value.innerText
+  hasContent.value = !!text.trim()
+  emit('update:modelValue', text)
+}
 
 // 插入表情
 const insertEmoji = (emoji) => {
-  if (!editorRef.value) return;
-  editorRef.value.innerText += emoji;
-  editorRef.value.focus();
-  hasContent.value = true;
-  emojiPickerVisible.value = false;
-  emit('update:modelValue', editorRef.value.innerText);
-};
+  if (!editorRef.value) return
+  editorRef.value.innerText += emoji
+  editorRef.value.focus()
+  hasContent.value = true
+  emojiPickerVisible.value = false
+  emit('update:modelValue', editorRef.value.innerText)
+}
 
 // 插入换行符
 const insertNewLine = () => {
-  if (!editorRef.value) return;
-  document.execCommand('insertHTML', false, '<br>');
-};
+  if (!editorRef.value) return
+  document.execCommand('insertHTML', false, '<br>')
+}
 
 // ========== @成员功能 ==========
 // 打开@成员选择器
 const openAtMemberPicker = async () => {
   // 获取当前会话的群成员
   try {
-    const session = await getCurrentSession();
-    if (!session) return;
+    const session = await getCurrentSession()
+    if (!session) return
 
-    const sessionId = session.id;
-    const isGroup = session.type === 'GROUP';
+    const isGroup = session.type === 'GROUP'
 
     if (isGroup && session.targetId) {
       // 加载群成员
-      const res = await getGroupMembers(session.targetId);
+      const res = await getGroupMembers(session.targetId)
       if (res.code === 200) {
         groupMembers.value = (res.data || []).map(m => ({
           userId: m.userId,
           nickname: m.groupNickname || m.userName,
           avatar: m.userAvatar,
           role: m.role
-        }));
+        }))
       }
     }
 
     // 计算选择器位置
-    calculateAtPickerPosition();
-    atMemberPickerVisible.value = true;
+    calculateAtPickerPosition()
+    atMemberPickerVisible.value = true
   } catch (e) {
-    console.error('获取群成员失败', e);
-    ElMessage.error('获取成员列表失败');
+    console.error('获取群成员失败', e)
+    ElMessage.error('获取成员列表失败')
   }
-};
+}
 
 // 获取当前会话
 const getCurrentSession = () => {
-  return Promise.resolve(props.session || null);
-};
+  return Promise.resolve(props.session || null)
+}
 
 // 计算@选择器位置
 const calculateAtPickerPosition = () => {
   if (!editorRef.value) {
-    atPickerPosition.value = { top: -300, left: 0 };
-    return;
+    atPickerPosition.value = { top: -300, left: 0 }
+    return
   }
-
-  const rect = editorRef.value.getBoundingClientRect();
-  const wrapperRect = editorRef.value.closest('.chat-input-wrapper').getBoundingClientRect();
 
   atPickerPosition.value = {
     top: -290,  // 固定高度 300px，减去一些边距
     left: 16     // 与输入框左边距对齐
-  };
-};
+  }
+}
 
 // 处理@成员选择
 const handleAtMemberSelect = (member) => {
-  if (!editorRef.value) return;
+  if (!editorRef.value) return
 
   // 获取当前光标位置之前的文本
-  const selection = window.getSelection();
-  if (!selection.rangeCount) return;
+  const selection = window.getSelection()
+  if (!selection.rangeCount) return
 
-  const range = selection.getRangeAt(0);
-  const textBeforeCursor = range.startContainer.textContent?.slice(0, range.startOffset) || '';
+  const range = selection.getRangeAt(0)
+  const textBeforeCursor = range.startContainer.textContent?.slice(0, range.startOffset) || ''
 
   // 查找最后一个 @ 位置
-  const atIndex = textBeforeCursor.lastIndexOf('@');
-  if (atIndex === -1) return;
+  const atIndex = textBeforeCursor.lastIndexOf('@')
+  if (atIndex === -1) return
 
   // 删除 @ 及其后面的内容，并插入 @昵称
-  const textAfterAt = textBeforeCursor.slice(atIndex);
-  const textNode = range.startContainer;
+  const textNode = range.startContainer
 
   // 创建新文本：@昵称 + 空格
-  const mentionText = `@${member.nickname} `;
+  const mentionText = `@${member.nickname} `
 
   // 使用 DOM 操作替换
-  textNode.textContent = textBeforeCursor.slice(0, atIndex) + mentionText;
+  textNode.textContent = textBeforeCursor.slice(0, atIndex) + mentionText
 
   // 移动光标到插入文本之后
-  const newRange = document.createRange();
-  newRange.setStart(textNode, textNode.textContent.length);
-  newRange.collapse(true);
-  selection.removeAllRanges();
-  selection.addRange(newRange);
+  const newRange = document.createRange()
+  newRange.setStart(textNode, textNode.textContent.length)
+  newRange.collapse(true)
+  selection.removeAllRanges()
+  selection.addRange(newRange)
 
   // 更新内容
-  hasContent.value = true;
-  emit('update:modelValue', editorRef.value.innerText);
+  hasContent.value = true
+  emit('update:modelValue', editorRef.value.innerText)
 
   // 关闭选择器
-  atMemberPickerVisible.value = false;
-};
+  atMemberPickerVisible.value = false
+}
+
 
 const processPaste = async (e) => {
-  const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+  const items = (e.clipboardData || e.originalEvent.clipboardData).items
   for (const item of items) {
     if (item.type.indexOf('image') !== -1) {
-      const file = item.getAsFile();
-      addPendingImage(file);
-      e.preventDefault();
+      const file = item.getAsFile()
+      addPendingImage(file)
+      e.preventDefault()
     }
   }
-};
+}
 
 const executeSendMessage = () => {
   // 编辑模式：直接触发保存
   if (isEditMode.value) {
-    const content = editorRef.value.innerText.trim();
+    const content = editorRef.value.innerText.trim()
     if (content) {
-      emit('edit-save', { content });
+      emit('edit-save', { content })
     }
-    return;
+    return
   }
 
   // 发送图片
   if (pendingImages.value.length > 0) {
     pendingImages.value.forEach(img => {
-      emit('send', { type: 'IMAGE', file: img.file });
-    });
-    pendingImages.value = [];
+      emit('send', { type: 'IMAGE', file: img.file })
+    })
+    pendingImages.value = []
   }
 
   // 发送视频
   if (pendingVideos.value.length > 0) {
     pendingVideos.value.forEach(video => {
-      emit('send', { type: 'VIDEO', file: video.file, duration: video.duration });
-    });
-    pendingVideos.value = [];
+      emit('send', { type: 'VIDEO', file: video.file, duration: video.duration })
+    })
+    pendingVideos.value = []
   }
 
   // 发送文字
-  const content = editorRef.value.innerText.trim();
+  const content = editorRef.value.innerText.trim()
   if (content) {
-    emit('send', { type: 'TEXT', content: content });
-    editorRef.value.innerHTML = '';
+    emit('send', { type: 'TEXT', content })
+    editorRef.value.innerHTML = ''
   }
 
-  hasContent.value = false;
-  emit('update:modelValue', '');
-};
+  hasContent.value = false
+  emit('update:modelValue', '')
+}
 
 // 取消编辑
 const cancelEdit = () => {
-  emit('edit-cancel');
-};
+  emit('edit-cancel')
+}
 
 // 处理图片选择
 const processImageSelect = (file) => {
-  addPendingImage(file.raw);
-};
+  addPendingImage(file.raw)
+}
 
 // 处理文件选择
 const processFileSelect = (file) => {
-  emit('send', { type: 'FILE', file: file.raw, fileName: file.name });
-};
+  emit('send', { type: 'FILE', file: file.raw, fileName: file.name })
+}
 
 // 处理视频选择
 const processVideoSelect = (file) => {
-  addPendingVideo(file.raw);
-};
+  addPendingVideo(file.raw)
+}
 
 // 添加待发送视频
 const addPendingVideo = (file) => {
-  const url = URL.createObjectURL(file);
+  const url = URL.createObjectURL(file)
   // 获取视频时长
-  const video = document.createElement('video');
-  video.preload = 'metadata';
+  const video = document.createElement('video')
+  video.preload = 'metadata'
   video.onloadedmetadata = () => {
-    const duration = Math.floor(video.duration);
-    pendingVideos.value.push({ file, url, duration });
-    URL.revokeObjectURL(url);
-  };
+    const duration = Math.floor(video.duration)
+    pendingVideos.value.push({ file, url, duration })
+    URL.revokeObjectURL(url)
+  }
   video.onerror = () => {
-    pendingVideos.value.push({ file, url, duration: 0 });
-  };
-  video.src = url;
-};
+    pendingVideos.value.push({ file, url, duration: 0 })
+  }
+  video.src = url
+}
 
 // 移除待发送视频
 const removeVideo = (index) => {
-  URL.revokeObjectURL(pendingVideos.value[index].url);
-  pendingVideos.value.splice(index, 1);
-};
+  URL.revokeObjectURL(pendingVideos.value[index].url)
+  pendingVideos.value.splice(index, 1)
+}
 
 // 添加待发送图片
 const addPendingImage = (file) => {
-  const url = URL.createObjectURL(file);
-  pendingImages.value.push({ file, url });
-};
+  const url = URL.createObjectURL(file)
+  pendingImages.value.push({ file, url })
+}
 
 // 移除待发送图片
 const removeImage = (index) => {
-  URL.revokeObjectURL(pendingImages.value[index].url);
-  pendingImages.value.splice(index, 1);
-};
+  URL.revokeObjectURL(pendingImages.value[index].url)
+  pendingImages.value.splice(index, 1)
+}
 
 // 过滤联系人
 const filteredContacts = computed(() => {
-  if (!cardSearchKeyword.value) return contactList.value;
-  const keyword = cardSearchKeyword.value.toLowerCase();
+  if (!cardSearchKeyword.value) return contactList.value
+  const keyword = cardSearchKeyword.value.toLowerCase()
   return contactList.value.filter(c =>
     c.name?.toLowerCase().includes(keyword) ||
     c.department?.toLowerCase().includes(keyword)
-  );
-});
+  )
+})
 
 // 打开名片选择器
 const openCardPicker = async () => {
-  cardSearchKeyword.value = '';
-  cardPickerVisible.value = true;
+  cardSearchKeyword.value = ''
+  cardPickerVisible.value = true
   try {
     const res = await getContacts()
     if (res.code === 200) {
@@ -583,11 +671,11 @@ const openCardPicker = async () => {
     ElMessage.error('获取联系人失败')
     contactList.value = []
   }
-};
+}
 
 // 选择联系人发送名片
 const selectCardContact = (contact) => {
-  cardPickerVisible.value = false;
+  cardPickerVisible.value = false
   emit('send', {
     type: 'CARD',
     card: {
@@ -597,8 +685,8 @@ const selectCardContact = (contact) => {
       userAvatar: contact.avatar,
       department: contact.department || ''
     }
-  });
-};
+  })
+}
 
 // 打开位置选择器
 const openLocationPicker = () => {
@@ -607,16 +695,16 @@ const openLocationPicker = () => {
     address: '',
     latitude: 39.9042,
     longitude: 116.4074
-  };
-  locationPickerVisible.value = true;
-};
+  }
+  locationPickerVisible.value = true
+}
 
 // 发送位置
 const sendLocation = () => {
   if (!locationForm.value.name.trim()) {
-    return;
+    return
   }
-  locationPickerVisible.value = false;
+  locationPickerVisible.value = false
   emit('send', {
     type: 'LOCATION',
     location: {
@@ -625,107 +713,271 @@ const sendLocation = () => {
       latitude: locationForm.value.latitude,
       longitude: locationForm.value.longitude
     }
-  });
-};
+  })
+}
 
-const clearReply = () => emit('clear-reply');
+const clearReply = () => emit('clear-reply')
 
 // 拖拽上传
 const handleDragOver = (e) => {
-  const hasFiles = e.dataTransfer?.types.includes('Files');
+  const hasFiles = e.dataTransfer?.types.includes('Files')
   if (hasFiles) {
-    isDragover.value = true;
+    isDragover.value = true
   }
-};
+}
 
 const handleDragLeave = (e) => {
   // 仅当离开整个输入区时才隐藏遮罩，防止子元素触发闪烁
   if (!e.currentTarget.contains(e.relatedTarget)) {
-    isDragover.value = false;
+    isDragover.value = false
   }
-};
+}
 
 const handleDrop = (e) => {
-  isDragover.value = false;
-  const files = e.dataTransfer?.files;
-  if (!files || files.length === 0) return;
+  isDragover.value = false
+  const files = e.dataTransfer?.files
+  if (!files || files.length === 0) return
 
   for (const file of files) {
-    if (file.type.startsWith('image/')) {
-      addPendingImage(file);
-    } else if (file.type.startsWith('video/')) {
-      addPendingVideo(file);
+    const fileType = getFileTypeByExtension(file)
+
+    if (fileType === 'image') {
+      addPendingImage(file)
+    } else if (fileType === 'video') {
+      addPendingVideo(file)
     } else {
-      emit('send', { type: 'FILE', file, fileName: file.name });
+      // 其他文件：直接发送，使用分片上传（> 5MB）
+      handleFileUpload(file, file.name)
     }
   }
-};
+}
+
+// 根据文件扩展名判断文件类型
+const getFileTypeByExtension = (file) => {
+  const ext = file.name?.split('.').pop()?.toLowerCase() || ''
+
+  // 图片类型
+  const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg', 'ico']
+  if (imageExts.includes(ext) || file.type.startsWith('image/')) {
+    return 'image'
+  }
+
+  // 视频类型
+  const videoExts = ['mp4', 'mov', 'avi', 'webm', 'mkv', 'flv', 'wmv', 'mpeg']
+  if (videoExts.includes(ext) || file.type.startsWith('video/')) {
+    return 'video'
+  }
+
+  return 'file'
+}
+
+// 处理文件上传（带进度反馈）
+const handleFileUpload = async (file, fileName) => {
+  const fileEntry = {
+    file,
+    fileName,
+    progress: 0,
+    status: 'uploading',
+    fileType: getFileTypeByExtension(file)
+  }
+
+  dragUploadingFiles.value.push(fileEntry)
+  dragUploadingFiles.value = [...dragUploadingFiles.value]
+
+  try {
+    // 大文件（> 5MB）使用分片上传
+    const isLargeFile = file.size > 5 * 1024 * 1024
+
+    if (isLargeFile) {
+      await uploadLargeFileWithProgress(file, fileName, (progress) => {
+        fileEntry.progress = progress
+        dragUploadingFiles.value = [...dragUploadingFiles.value]
+      })
+    } else {
+      await uploadSmallFileWithProgress(file, fileName, (progress) => {
+        fileEntry.progress = progress
+        dragUploadingFiles.value = [...dragUploadingFiles.value]
+      })
+    }
+
+    fileEntry.status = 'completed'
+    fileEntry.progress = 100
+    dragUploadingFiles.value = [...dragUploadingFiles.value]
+
+    // 上传成功后发送消息
+    emit('send', { type: 'FILE', file, fileName })
+  } catch (error) {
+    console.error('文件上传失败:', error)
+    fileEntry.status = 'failed'
+    dragUploadingFiles.value = [...dragUploadingFiles.value]
+    ElMessage.error(`${fileName} 上传失败`)
+  } finally {
+    // 3秒后移除已完成/失败的上传记录
+    setTimeout(() => {
+      dragUploadingFiles.value = dragUploadingFiles.value.filter(f => f.status !== 'completed' && f.status !== 'failed')
+    }, 3000)
+  }
+}
+
+// 小文件普通上传（带进度）
+const uploadSmallFileWithProgress = (file, fileName, onProgress) => {
+  return new Promise((resolve, reject) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    if (fileName) {
+      formData.append('fileName', fileName)
+    }
+
+    // 模拟进度（实际进度由 axios onUploadProgress 提供）
+    let progress = 0
+    const progressTimer = setInterval(() => {
+      progress += 10
+      if (progress < 90) {
+        onProgress(progress)
+      }
+    }, 100)
+
+    uploadFile(formData)
+      .then(res => {
+        clearInterval(progressTimer)
+        onProgress(100)
+        resolve(res)
+      })
+      .catch(err => {
+        clearInterval(progressTimer)
+        reject(err)
+      })
+  })
+}
+
+// 大文件分片上传（带进度）
+const uploadLargeFileWithProgress = async (file, fileName, onProgress) => {
+  const chunkSize = 2 * 1024 * 1024 // 2MB per chunk
+  const totalChunks = Math.ceil(file.size / chunkSize)
+
+  // 计算文件 MD5（简化版：使用文件名+大小+时间戳作为标识）
+  const fileMd5 = await calculateFileMd5(file)
+
+  // 初始化分片上传
+  const initRes = await initChunkUpload({
+    fileName,
+    fileSize: file.size,
+    fileMd5,
+    chunkSize,
+    totalChunks,
+    conversationId: null
+  })
+
+  if (initRes.code !== 200) {
+    throw new Error(initRes.message || '初始化分片上传失败')
+  }
+
+  const uploadId = initRes.data.uploadId
+
+  // 上传每个分片
+  let completedChunks = 0
+
+  for (let i = 1; i <= totalChunks; i++) {
+    const start = (i - 1) * chunkSize
+    const end = Math.min(start + chunkSize, file.size)
+    const chunk = file.slice(start, end)
+
+    await uploadChunk(uploadId, i, chunk, (progressEvent) => {
+      // 计算整体进度
+      const chunkProgress = progressEvent.loaded / progressEvent.total
+      const totalProgress = ((completedChunks + chunkProgress) / totalChunks) * 100
+      onProgress(Math.round(totalProgress))
+    })
+
+    completedChunks++
+    onProgress(Math.round((completedChunks / totalChunks) * 100))
+  }
+
+  // 合并分片
+  const mergeRes = await mergeChunks(uploadId)
+
+  if (mergeRes.code !== 200) {
+    throw new Error(mergeRes.message || '合并分片失败')
+  }
+
+  return mergeRes
+}
+
+// 简化版文件 MD5 计算（使用 Web Crypto API）
+const calculateFileMd5 = async (file) => {
+  // 使用 File 对象直接计算 MD5
+  const buffer = await file.arrayBuffer()
+  const hashBuffer = await crypto.subtle.digest('SHA-256', buffer)
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  return hashHex
+}
 
 // 录音
 const toggleRecording = async () => {
   if (isRecording.value) {
-    stopRecording();
+    stopRecording()
   } else {
-    await startRecording();
+    await startRecording()
   }
-};
+}
 
 const startRecording = async () => {
   try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-    recordedChunks = [];
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+    recordedChunks = []
 
     mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) recordedChunks.push(e.data);
-    };
+      if (e.data.size > 0) recordedChunks.push(e.data)
+    }
 
-    mediaRecorder.start();
-    isRecording.value = true;
-    recordingDuration.value = 0;
+    mediaRecorder.start()
+    isRecording.value = true
+    recordingDuration.value = 0
 
     recordingTimer = setInterval(() => {
-      recordingDuration.value++;
-    }, 1000);
+      recordingDuration.value++
+    }, 1000)
   } catch (e) {
-    console.error('无法访问麦克风', e);
+    console.error('无法访问麦克风', e)
     ElMessage.error('无法访问麦克风，请检查权限设置')
   }
-};
+}
 
 const stopRecording = () => {
-  if (!mediaRecorder || mediaRecorder.state === 'inactive') return;
-  mediaRecorder.stop();
-  mediaRecorder.stream.getTracks().forEach(t => t.stop());
-  clearInterval(recordingTimer);
-  isRecording.value = false;
-};
+  if (!mediaRecorder || mediaRecorder.state === 'inactive') return
+  mediaRecorder.stop()
+  mediaRecorder.stream.getTracks().forEach(t => t.stop())
+  clearInterval(recordingTimer)
+  isRecording.value = false
+}
 
 const cancelRecording = () => {
-  stopRecording();
-  recordedChunks = [];
-  recordingDuration.value = 0;
-};
+  stopRecording()
+  recordedChunks = []
+  recordingDuration.value = 0
+}
 
 const sendRecording = () => {
-  if (recordedChunks.length === 0) return;
-  const blob = new Blob(recordedChunks, { type: 'audio/webm' });
-  const file = new File([blob], `录音_${formatDuration(recordingDuration.value)}.webm`, { type: 'audio/webm' });
-  emit('send', { type: 'VOICE', file });
-  recordedChunks = [];
-  recordingDuration.value = 0;
-  stopRecording();
-};
+  if (recordedChunks.length === 0) return
+  const blob = new Blob(recordedChunks, { type: 'audio/webm' })
+  const file = new File([blob], `录音_${formatDuration(recordingDuration.value)}.webm`, { type: 'audio/webm' })
+  emit('send', { type: 'VOICE', file })
+  recordedChunks = []
+  recordingDuration.value = 0
+  stopRecording()
+}
 
 const formatDuration = (seconds) => {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${m}:${s.toString().padStart(2, '0')}`;
-};
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return `${m}:${s.toString().padStart(2, '0')}`
+}
 
 onMounted(() => {
-  editorRef.value?.focus();
-});
+  editorRef.value?.focus()
+})
 </script>
 
 <style scoped>
@@ -735,6 +987,7 @@ onMounted(() => {
   background-color: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
   position: relative;
+  background-image: linear-gradient(180deg, rgba(39, 126, 251, 0.03), transparent 36%);
 }
 
 /* 拖拽上传遮罩 */
@@ -757,6 +1010,54 @@ onMounted(() => {
 
 .drag-icon {
   font-size: 32px;
+}
+
+/* 拖拽上传进度遮罩 */
+.drag-progress-mask {
+  position: absolute;
+  inset: 0;
+  background: var(--dt-bg-card);
+  border: 2px solid var(--dt-brand-color);
+  border-radius: var(--dt-radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.drag-progress-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+  width: 280px;
+}
+
+.drag-progress-icon {
+  font-size: 32px;
+  color: var(--dt-brand-color);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.drag-progress-text {
+  font-size: var(--dt-font-size-base);
+  font-weight: 500;
+  color: var(--dt-text-primary);
+}
+
+.drag-progress-bar {
+  width: 100%;
+}
+
+.drag-progress-detail {
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-tertiary);
 }
 
 .chat-input-wrapper.is-dragover {
@@ -829,10 +1130,11 @@ onMounted(() => {
 
 /* 工具栏 - 钉钉风格 */
 .toolbar {
-  height: 48px;
+  min-height: 48px;
   padding: 0 16px;
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: 8px;
   border-bottom: 1px solid var(--dt-border-light);
 }
@@ -1206,4 +1508,110 @@ onMounted(() => {
 /* 滚动条美化 */
 .input-main::-webkit-scrollbar { width: 4px; }
 .input-main::-webkit-scrollbar-thumb { background: var(--dt-scrollbar-thumb-bg); border-radius: var(--dt-radius-sm); }
+
+@media (max-width: 768px) {
+  .reply-preview-bar,
+  .edit-mode-bar {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+
+  .toolbar {
+    padding: 6px 12px;
+    gap: 4px;
+  }
+
+  .tool-icon {
+    padding: 6px;
+    font-size: 18px;
+  }
+
+  .image-preview-bar,
+  .video-preview-bar {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .input-main {
+    padding-left: 16px;
+    padding-right: 16px;
+    min-height: 88px;
+  }
+
+  .input-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .reply-preview-bar,
+  .edit-mode-bar {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .reply-content,
+  .edit-mode-hint {
+    min-width: 0;
+  }
+
+  .toolbar {
+    padding: 6px 10px;
+  }
+
+  .emoji-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
+
+  .preview-item {
+    width: 64px;
+    height: 64px;
+  }
+
+  .video-preview-item {
+    width: 88px;
+    height: 60px;
+  }
+
+  .input-main {
+    padding-left: 12px;
+    padding-right: 12px;
+    min-height: 80px;
+  }
+
+  .rich-editor {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .input-footer {
+    height: auto;
+    gap: 10px;
+    padding: 0 12px 12px;
+    align-items: center;
+  }
+
+  .tip {
+    flex: 1;
+    line-height: 1.4;
+  }
+
+  .send-btn {
+    width: 60px;
+    height: 30px;
+  }
+
+  .recording-bar {
+    height: auto;
+    gap: 10px;
+    padding: 10px 12px;
+    flex-wrap: wrap;
+  }
+
+  .recording-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
 </style>
