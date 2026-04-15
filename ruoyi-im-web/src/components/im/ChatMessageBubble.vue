@@ -866,7 +866,7 @@ onBeforeUnmount(() => {
 
   span {
     padding: 4px 12px;
-    border-radius: 999px;
+    border-radius: var(--dt-radius-full);
     background: rgba(255, 255, 255, 0.78);
     border: 1px solid var(--dt-border-lighter);
     box-shadow: var(--dt-shadow-1);
@@ -977,7 +977,7 @@ onBeforeUnmount(() => {
   max-width: 100%;
   min-height: 40px;
   padding: 10px 14px;
-  border-radius: 18px;
+  border-radius: var(--dt-radius-2xl);
   line-height: 1.6;
   font-size: 14px;
   word-break: break-word;
@@ -1049,7 +1049,7 @@ onBeforeUnmount(() => {
   min-width: 120px;
   max-width: min(320px, 100%);
   max-height: 400px;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-2xl);
   display: block;
   object-fit: cover;
 }
@@ -1064,7 +1064,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-2xl);
   color: var(--dt-text-tertiary);
   background: var(--dt-bg-placeholder);
 }
@@ -1075,7 +1075,7 @@ onBeforeUnmount(() => {
 .file-content,
 .card-content {
   overflow: hidden;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-2xl);
 }
 
 .video-content {
@@ -1113,7 +1113,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-full);
   background: rgba(255, 255, 255, 0.88);
   color: var(--dt-text-primary);
 }
@@ -1123,7 +1123,7 @@ onBeforeUnmount(() => {
   right: 10px;
   bottom: 10px;
   padding: 3px 7px;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-full);
   color: var(--dt-text-white);
   background: var(--dt-overlay-bg);
   font-size: 12px;
@@ -1301,7 +1301,7 @@ onBeforeUnmount(() => {
 .card-tag {
   flex-shrink: 0;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-full);
   font-size: 11px;
   color: var(--dt-brand-color);
   background: rgba(39, 126, 251, 0.12);
@@ -1329,7 +1329,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-full);
   background: var(--dt-brand-color);
   transform: translate(-50%, -50%);
 }
@@ -1485,7 +1485,7 @@ onBeforeUnmount(() => {
   align-items: center;
   gap: 4px;
   padding: 4px 8px;
-  border-radius: 999px;
+  border-radius: var(--dt-radius-full);
   color: var(--dt-text-secondary);
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(23, 26, 29, 0.06);
@@ -1515,7 +1515,7 @@ onBeforeUnmount(() => {
   position: fixed;
   min-width: 164px;
   padding: 6px;
-  border-radius: 16px;
+  border-radius: var(--dt-radius-2xl);
   border: 1px solid rgba(23, 26, 29, 0.08);
   background: rgba(255, 255, 255, 0.98);
   box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
@@ -1563,7 +1563,7 @@ onBeforeUnmount(() => {
 
   .message-bubble {
     padding: 10px 12px;
-    border-radius: 16px;
+    border-radius: var(--dt-radius-2xl);
   }
 
   .content-img,
