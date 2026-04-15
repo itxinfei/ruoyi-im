@@ -43,19 +43,7 @@
 
           <div v-loading="messageStatsLoading" class="panel-body">
             <template v-if="messageStats.totalMessages > 0">
-              <div class="total-line">
-                <span>总消息数</span>
-                <strong>{{ messageStats.totalMessages }}</strong>
-              </div>
-              <div class="bars">
-                <div v-for="item in messageBars" :key="item.key" class="bar-item">
-                  <span class="bar-name">{{ item.label }}</span>
-                  <div class="bar-track">
-                    <div class="bar-fill" :class="item.className" :style="{ width: item.percent + '%' }" />
-                  </div>
-                  <span class="bar-value">{{ item.value }}</span>
-                </div>
-              </div>
+              <div ref="messageChartRef" class="chart-container" />
             </template>
             <el-empty v-else description="暂无消息统计" :image-size="88" />
           </div>
@@ -78,23 +66,7 @@
 
           <div v-loading="userStatsLoading" class="panel-body">
             <template v-if="userStats.total > 0">
-              <div class="legend-list">
-                <div class="legend-item">
-                  <span class="dot super" />
-                  <span>超级管理员</span>
-                  <strong>{{ userStats.superAdminCount || 0 }}</strong>
-                </div>
-                <div class="legend-item">
-                  <span class="dot admin" />
-                  <span>管理员</span>
-                  <strong>{{ userStats.adminCount || 0 }}</strong>
-                </div>
-                <div class="legend-item">
-                  <span class="dot user" />
-                  <span>普通用户</span>
-                  <strong>{{ userStats.userCount || 0 }}</strong>
-                </div>
-              </div>
+              <div ref="userChartRef" class="chart-container" />
             </template>
             <el-empty v-else description="暂无角色统计" :image-size="88" />
           </div>
@@ -105,10 +77,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { User, Star, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
+import * as echarts from 'echarts'
 
 const overview = ref({
   totalUsers: 0,
@@ -133,6 +106,11 @@ const userStats = ref({
   userCount: 0
 })
 
+const messageChartRef = ref(null)
+const userChartRef = ref(null)
+let messageChart = null
+let userChart = null
+
 const metrics = computed(() => ([
   { key: 'users', label: '总用户数', value: overview.value.totalUsers || 0, icon: User, iconClass: 'users' },
   { key: 'active', label: '活跃用户', value: overview.value.activeUsers || 0, icon: Star, iconClass: 'active' },
@@ -140,21 +118,136 @@ const metrics = computed(() => ([
   { key: 'today', label: '今日消息', value: overview.value.todayMessages || 0, icon: ChatLineSquare, iconClass: 'messages' }
 ]))
 
-const messageBars = computed(() => {
+const initMessageChart = () => {
+  if (!messageChartRef.value) return
+  if (messageChart) messageChart.dispose()
+  messageChart = echarts.init(messageChartRef.value)
+  updateMessageChart()
+}
+
+const updateMessageChart = () => {
+  if (!messageChart) return
   const total = messageStats.value.totalMessages || 0
-  const make = (key, label, value, className) => ({
-    key,
-    label,
-    value,
-    className,
-    percent: total > 0 ? Math.round((value / total) * 100) : 0
-  })
-  return [
-    make('text', '文本', messageStats.value.textMessages || 0, 'text'),
-    make('image', '图片', messageStats.value.imageMessages || 0, 'image'),
-    make('file', '文件', messageStats.value.fileMessages || 0, 'file')
-  ]
-})
+  const option = {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
+    },
+    legend: {
+      orient: 'horizontal',
+      bottom: 0,
+      textStyle: { color: 'var(--dt-text-secondary)', fontSize: 12 }
+    },
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderRadius: 4,
+        borderColor: 'var(--dt-bg-card)',
+        borderWidth: 2
+      },
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 14, fontWeight: 'bold' }
+      },
+      data: [
+        { value: messageStats.value.textMessages || 0, name: '文本', itemStyle: { color: 'var(--dt-brand-color)' } },
+        { value: messageStats.value.imageMessages || 0, name: '图片', itemStyle: { color: 'var(--dt-success-color)' } },
+        { value: messageStats.value.fileMessages || 0, name: '文件', itemStyle: { color: 'var(--dt-warning-color)' } }
+      ]
+    }],
+    graphic: [{
+      type: 'text',
+      left: 'center',
+      top: '38%',
+      style: {
+        text: total.toString(),
+        textAlign: 'center',
+        fill: 'var(--dt-text-primary)',
+        fontSize: 24,
+        fontWeight: 'bold'
+      }
+    }, {
+      type: 'text',
+      left: 'center',
+      top: '52%',
+      style: {
+        text: '总消息数',
+        textAlign: 'center',
+        fill: 'var(--dt-text-tertiary)',
+        fontSize: 12
+      }
+    }]
+  }
+  messageChart.setOption(option)
+}
+
+const initUserChart = () => {
+  if (!userChartRef.value) return
+  if (userChart) userChart.dispose()
+  userChart = echarts.init(userChartRef.value)
+  updateUserChart()
+}
+
+const updateUserChart = () => {
+  if (!userChart) return
+  const option = {
+    tooltip: {
+      trigger: 'item',
+      formatter: '{b}: {c} ({d}%)'
+    },
+    legend: {
+      orient: 'horizontal',
+      bottom: 0,
+      textStyle: { color: 'var(--dt-text-secondary)', fontSize: 12 }
+    },
+    series: [{
+      type: 'pie',
+      radius: ['40%', '70%'],
+      center: ['50%', '45%'],
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderRadius: 4,
+        borderColor: 'var(--dt-bg-card)',
+        borderWidth: 2
+      },
+      label: { show: false },
+      emphasis: {
+        label: { show: true, fontSize: 14, fontWeight: 'bold' }
+      },
+      data: [
+        { value: userStats.value.superAdminCount || 0, name: '超级管理员', itemStyle: { color: 'var(--dt-error-color)' } },
+        { value: userStats.value.adminCount || 0, name: '管理员', itemStyle: { color: 'var(--dt-warning-color)' } },
+        { value: userStats.value.userCount || 0, name: '普通用户', itemStyle: { color: 'var(--dt-text-tertiary)' } }
+      ]
+    }],
+    graphic: [{
+      type: 'text',
+      left: 'center',
+      top: '38%',
+      style: {
+        text: (userStats.value.total || 0).toString(),
+        textAlign: 'center',
+        fill: 'var(--dt-text-primary)',
+        fontSize: 24,
+        fontWeight: 'bold'
+      }
+    }, {
+      type: 'text',
+      left: 'center',
+      top: '52%',
+      style: {
+        text: '总用户数',
+        textAlign: 'center',
+        fill: 'var(--dt-text-tertiary)',
+        fontSize: 12
+      }
+    }]
+  }
+  userChart.setOption(option)
+}
 
 const loadOverview = async () => {
   try {
@@ -170,6 +263,8 @@ const loadMessageStats = async () => {
   try {
     const res = await getMessageAdminStats({})
     if (res.code === 200) messageStats.value = res.data || {}
+    await nextTick()
+    updateMessageChart()
   } catch (error) {
     ElMessage.error('加载消息统计失败')
   } finally {
@@ -189,6 +284,8 @@ const loadUserStats = async () => {
         userCount: res.data.userCount || (res.data.total || 0)
       }
     }
+    await nextTick()
+    updateUserChart()
   } catch (error) {
     ElMessage.error('加载用户统计失败')
   } finally {
@@ -198,6 +295,9 @@ const loadUserStats = async () => {
 
 onMounted(async () => {
   await Promise.all([loadOverview(), loadMessageStats(), loadUserStats()])
+  await nextTick()
+  initMessageChart()
+  initUserChart()
 })
 </script>
 
@@ -267,88 +367,14 @@ onMounted(async () => {
 }
 
 .panel-body {
-  min-height: 240px;
-}
-
-.total-line {
+  min-height: 280px;
   display: flex;
-  justify-content: space-between;
-  margin-bottom: var(--dt-spacing-lg);
-  padding-bottom: var(--dt-spacing-sm);
-  border-bottom: 1px solid var(--dt-border-light);
-  color: var(--dt-text-secondary);
-}
-
-.total-line strong {
-  color: var(--dt-text-primary);
-}
-
-.bars {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dt-spacing-md);
-}
-
-.bar-item {
-  display: grid;
-  grid-template-columns: 48px 1fr 56px;
   align-items: center;
-  gap: var(--dt-spacing-sm);
+  justify-content: center;
 }
 
-.bar-track {
-  height: 12px;
-  border-radius: var(--dt-radius-full);
-  background: var(--dt-bg-body);
-  overflow: hidden;
-}
-
-.bar-fill {
-  height: 100%;
-  border-radius: var(--dt-radius-full);
-}
-
-.bar-fill.text { background: var(--dt-brand-color); }
-.bar-fill.image { background: var(--dt-success-color); }
-.bar-fill.file { background: var(--dt-warning-color); }
-
-.bar-name,
-.bar-value {
-  color: var(--dt-text-tertiary);
-  font-size: var(--dt-font-size-sm);
-}
-
-.legend-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--dt-spacing-md);
-}
-
-.legend-item {
-  display: grid;
-  grid-template-columns: 12px 1fr auto;
-  align-items: center;
-  gap: var(--dt-spacing-sm);
-  padding: var(--dt-spacing-md);
-  background: var(--dt-bg-body);
-  border-radius: var(--dt-radius-md);
-}
-
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.dot.super { background: var(--dt-error-color); }
-.dot.admin { background: var(--dt-warning-color); }
-.dot.user { background: var(--dt-text-tertiary); }
-
-.legend-item span {
-  color: var(--dt-text-secondary);
-}
-
-.legend-item strong {
-  color: var(--dt-text-primary);
+.chart-container {
+  width: 100%;
+  height: 260px;
 }
 </style>
