@@ -740,7 +740,7 @@ h1 {
   }
 
   .field-label {
-    color: #d1d5db;
+    color: var(--dt-text-tertiary);
   }
 
   .field-input-wrapper {
