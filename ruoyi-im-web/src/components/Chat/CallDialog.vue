@@ -124,14 +124,29 @@
           </button>
         </div>
 
-        <!-- 结束/超时 -->
+        <!-- 结束/超时/异常 -->
         <div v-else class="console-group">
-          <button class="console-btn" @click="close">
-            <div class="icon-circle gray">
-              <el-icon><Close /></el-icon>
-            </div>
-            <span>关闭</span>
-          </button>
+          <!-- 通话异常状态 -->
+          <div v-if="status === 'reconnecting'" class="reconnect-hint">
+            <span class="reconnect-dot"></span>
+            <span>网络不稳定，正在重连...</span>
+          </div>
+          <div v-else-if="status === 'reconnect_failed'" class="reconnect-actions">
+            <button class="console-btn" @click="handleReconnect">
+              <div class="icon-circle">
+                <el-icon><RefreshRight /></el-icon>
+              </div>
+              <span>重新拨打</span>
+            </button>
+          </div>
+          <div v-else>
+            <button class="console-btn" @click="close">
+              <div class="icon-circle gray">
+                <el-icon><Close /></el-icon>
+              </div>
+              <span>关闭</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -145,7 +160,7 @@ import { ref, computed, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   PhoneFilled, CloseBold, Microphone, VideoCamera,
-  VideoCameraFilled, Close, Mute
+  VideoCameraFilled, Close, Mute, RefreshRight
 } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
@@ -178,8 +193,20 @@ let timeoutTimer = null
 
 const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
 
-const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection } = useWebRTC({
+const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection, manualReconnect } = useWebRTC({
   sendSignal: (action, data) => sendMessage({ type: 'call', data: { action, ...data } }),
+  onConnectionStateChange: (state) => {
+    console.log('通话连接状态变化:', state)
+    if (state === 'reconnecting') {
+      status.value = 'reconnecting'
+    } else if (state === 'reconnect_failed') {
+      status.value = 'reconnect_failed'
+      ElMessage.warning('通话连接中断，正在为您重新拨打...')
+    }
+  },
+  onIceConnectionStateChange: (iceState) => {
+    console.log('ICE连接状态:', iceState)
+  },
   localVideo: localVideoRef, remoteVideo: remoteVideoRef, remoteAudio: remoteAudioRef
 })
 
@@ -190,6 +217,8 @@ const statusText = computed(() => {
     case 'talking': return '正在通话'
     case 'hanging_up': return '通话已结束'
     case 'timeout': return '对方无应答'
+    case 'reconnecting': return '网络不稳定，正在重连...'
+    case 'reconnect_failed': return '通话中断'
     default: return ''
   }
 })
@@ -339,7 +368,46 @@ const handleCancel = async () => {
 }
 
 const startTimer = () => { timer = setInterval(() => { duration.value++ }, 1000) }
-const end = () => { clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()); closePeerConnection(); status.value = 'hanging_up'; setTimeout(() => { visible.value = false }, 1500) }
+const end = () => {
+  clearInterval(timer)
+  if (localStream) localStream.getTracks().forEach(t => t.stop())
+  closePeerConnection()
+  // 异常状态下不自动关闭，等待用户操作
+  if (!['reconnecting', 'reconnect_failed'].includes(status.value)) {
+    status.value = 'hanging_up'
+    setTimeout(() => { visible.value = false }, 1500)
+  }
+}
+
+/**
+ * 处理重新拨打
+ * 当通话异常中断时，用户点击重新拨打按钮
+ */
+const handleReconnect = async () => {
+  if (!peerId.value) return
+
+  try {
+    // 先结束当前通话
+    await endCall(callId.value)
+  } catch (error) {
+    console.error('结束原通话失败:', error)
+  }
+
+  // 重置状态
+  status.value = 'calling'
+  duration.value = 0
+  callId.value = `call-${Date.now()}`
+
+  // 重新获取媒体流并发起呼叫
+  if (await getMediaStream(type.value === 'video')) {
+    await createOffer(callId.value, peerId.value, localStream)
+    startTimeout()
+  } else {
+    ElMessage.error('无法获取媒体设备，请检查摄像头和麦克风权限')
+    status.value = 'reconnect_failed'
+  }
+}
+
 const close = () => { visible.value = false }
 
 onUnmounted(() => {
@@ -427,5 +495,34 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
   &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); } .el-icon { transform: rotate(135deg); } }
   &.active .icon-circle { background: var(--dt-text-white); color: var(--dt-text-primary); }
   .icon-circle.gray { background: var(--dt-text-tertiary-dark); }
+}
+
+// 重新连接提示
+.reconnect-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+  color: var(--dt-text-white);
+  font-size: var(--dt-font-size-sm);
+  opacity: 0.8;
+
+  .reconnect-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--dt-warning-color);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+// 重连操作区
+.reconnect-actions {
+  display: flex;
+  justify-content: center;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
 }
 </style>

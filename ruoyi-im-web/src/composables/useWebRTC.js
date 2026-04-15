@@ -5,13 +5,20 @@ import { ElMessage } from 'element-plus'
  * WebRTC 音视频通话核心组合式函数
  * @param {Object} options 配置项
  * @param {Function} options.sendSignal 发送信令的回调函数
+ * @param {Function} options.onConnectionStateChange 连接状态变化回调
+ * @param {Function} options.onIceConnectionStateChange ICE连接状态变化回调
  * @param {HTMLVideoElement} options.localVideo 本地视频元素
  * @param {HTMLVideoElement} options.remoteVideo 远端视频元素
  * @param {HTMLAudioElement} options.remoteAudio 远端音频元素
  */
-export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
+export function useWebRTC({ sendSignal, onConnectionStateChange, onIceConnectionStateChange, remoteVideo, remoteAudio }) {
   const peerConnection = ref(null)
   const isConnected = ref(false)
+  let reconnectTimer = null
+  let disconnectTimer = null
+  let reconnectAttempts = 0
+  const MAX_RECONNECT_ATTEMPTS = 3
+  const SHORT_DISCONNECT_THRESHOLD = 3000 // 3秒内断线自动重连
 
   // ICE 服务器配置（生产环境建议使用 STUN/TURN 服务器）
   // TURN 服务器用于解决对称型 NAT 限制问题，保证内网用户也能建立通话
@@ -25,12 +32,29 @@ export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
   }
 
   /**
+   * 清理重连定时器
+   */
+  const clearReconnectTimers = () => {
+    if (reconnectTimer) {
+      clearTimeout(reconnectTimer)
+      reconnectTimer = null
+    }
+    if (disconnectTimer) {
+      clearTimeout(disconnectTimer)
+      disconnectTimer = null
+    }
+  }
+
+  /**
    * 初始化 PeerConnection
    */
   const initPeerConnection = (callId, peerId) => {
     if (peerConnection.value) {
       closePeerConnection()
     }
+
+    clearReconnectTimers()
+    reconnectAttempts = 0
 
     const pc = new RTCPeerConnection(rtcConfig)
 
@@ -55,20 +79,99 @@ export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
         remoteAudio.value.srcObject = stream
       }
       isConnected.value = true
+      reconnectAttempts = 0
+      clearReconnectTimers()
+      onConnectionStateChange?.('connected')
     }
 
     // 监听连接状态
     pc.onconnectionstatechange = () => {
       console.log('WebRTC 连接状态:', pc.connectionState)
+      onConnectionStateChange?.(pc.connectionState)
+
       if (pc.connectionState === 'connected') {
         isConnected.value = true
+        reconnectAttempts = 0
+        clearReconnectTimers()
       } else if (['disconnected', 'failed', 'closed'].includes(pc.connectionState)) {
         isConnected.value = false
       }
     }
 
+    // 监听 ICE 连接状态（更精确的连接状态监测）
+    pc.oniceconnectionstatechange = () => {
+      console.log('ICE 连接状态:', pc.iceConnectionState)
+      onIceConnectionStateChange?.(pc.iceConnectionState)
+
+      if (pc.iceConnectionState === 'connected') {
+        reconnectAttempts = 0
+        clearReconnectTimers()
+      } else if (pc.iceConnectionState === 'disconnected') {
+        // 短时断线：启动计时器，3秒内恢复则不提示用户
+        clearReconnectTimers()
+        disconnectTimer = setTimeout(() => {
+          // 3秒后仍未恢复，触发长时断线处理
+          onConnectionStateChange?.('reconnecting')
+        }, SHORT_DISCONNECT_THRESHOLD)
+      } else if (pc.iceConnectionState === 'failed') {
+        // ICE连接失败，尝试重连
+        handleReconnect(callId, peerId)
+      }
+    }
+
     peerConnection.value = pc
     return pc
+  }
+
+  /**
+   * 处理断线重连
+   * 业务规则 C-009：短时断线(<3s)自动重连；长时断线提示重拨
+   */
+  const handleReconnect = (callId, peerId) => {
+    clearReconnectTimers()
+
+    if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      console.warn('已达到最大重连次数，重连失败')
+      onConnectionStateChange?.('reconnect_failed')
+      return
+    }
+
+    reconnectAttempts++
+    console.log(`正在进行第 ${reconnectAttempts} 次重连...`)
+
+    // 尝试重新建立连接
+    if (peerConnection.value) {
+      // 尝试ICE重连
+      peerConnection.value.createOffer()
+        .then(offer => peerConnection.value.setLocalDescription(offer))
+        .then(() => {
+          sendSignal('offer', {
+            callId,
+            toUserId: peerId,
+            sdp: peerConnection.value.localDescription,
+            isReconnect: true
+          })
+        })
+        .catch(e => {
+          console.error('重连失败:', e)
+          onConnectionStateChange?.('reconnect_failed')
+        })
+    }
+  }
+
+  /**
+   * 主动发起重连（由用户触发）
+   */
+  const manualReconnect = (callId, peerId, localStream) => {
+    reconnectAttempts = 0
+    if (peerConnection.value) {
+      closePeerConnection()
+    }
+    const pc = initPeerConnection(callId, peerId)
+    localStream.getTracks().forEach(track => {
+      pc.addTrack(track, localStream)
+    })
+    createOffer(callId, peerId, localStream)
   }
 
   /**
@@ -153,6 +256,7 @@ export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
    * 关闭连接
    */
   const closePeerConnection = () => {
+    clearReconnectTimers()
     if (peerConnection.value) {
       peerConnection.value.close()
       peerConnection.value = null
@@ -170,6 +274,7 @@ export function useWebRTC({ sendSignal, remoteVideo, remoteAudio }) {
     createAnswer,
     handleAnswer,
     handleCandidate,
-    closePeerConnection
+    closePeerConnection,
+    manualReconnect
   }
 }
