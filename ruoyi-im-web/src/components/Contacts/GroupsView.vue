@@ -175,7 +175,7 @@ onMounted(() => {
 
 .group-item {
   background: var(--dt-bg-card);
-  border-radius: 8px;
+  border-radius: var(--dt-radius-lg);
   padding: 12px 16px;
   display: flex;
   align-items: center;
