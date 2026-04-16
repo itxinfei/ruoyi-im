@@ -199,7 +199,7 @@ const handleListScroll = async (listEl) => {
 
     // 获取当前消息列表的第一条消息 ID
     const firstMessage = messages.value[0]
-    const lastId = firstMessage?.id
+    const lastId = firstMessage?.messageId
 
     if (!lastId) return
 
@@ -410,7 +410,7 @@ const processSendMessage = async (payload) => {
     sessionId: currentSession.value.id,
     content,
     type: messageType,
-    replyToMessageId: replyingMessage.value?.id || null
+    replyToMessageId: replyingMessage.value?.messageId || null
   }
 
   replyingMessage.value = null
