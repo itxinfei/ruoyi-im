@@ -164,12 +164,12 @@ service.interceptors.response.use(
        */
       if (status === 401 && !error.config._retry) {
         // 如果是登出或刷新接口本身报 401，严禁重试，直接清理跳转
-        const isAuthService = error.config.url.includes('/auth/logout') || error.config.url.includes('/auth/refresh');
+        const isAuthService = error.config.url.includes('/auth/logout') || error.config.url.includes('/auth/refresh')
         if (isAuthService) {
-          tokenManager.clearAll();
-          csrfManager.clearToken();
-          window.location.href = '/login';
-          return Promise.reject(error);
+          tokenManager.clearAll()
+          csrfManager.clearToken()
+          window.location.href = '/login'
+          return Promise.reject(error)
         }
 
         // 标记为已重试过，防止无限循环

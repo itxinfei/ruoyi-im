@@ -1,4 +1,4 @@
-import request from '@/api/request';
+import request from '@/api/request'
 
 /**
  * 待办任务模块 API (纯 JS 规范)
@@ -12,8 +12,8 @@ export const todoApi = {
     return request({
       url: '/api/im/todo/list',
       method: 'get',
-      params: params
-    });
+      params
+    })
   },
 
   /**
@@ -23,8 +23,8 @@ export const todoApi = {
     return request({
       url: '/api/im/todo',
       method: 'post',
-      data: data
-    });
+      data
+    })
   },
 
   /**
@@ -34,7 +34,7 @@ export const todoApi = {
     return request({
       url: `/api/im/todo/${id}/toggle`,
       method: 'put'
-    });
+    })
   },
 
   /**
@@ -44,6 +44,6 @@ export const todoApi = {
     return request({
       url: `/api/im/todo/${id}`,
       method: 'delete'
-    });
+    })
   }
-};
+}

@@ -1,4 +1,4 @@
-import request from '@/api/request';
+import request from '@/api/request'
 
 /**
  * 群文件模块 API (纯 JS 规范)
@@ -18,7 +18,7 @@ export const groupFileApi = {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
-    });
+    })
   },
 
   /**
@@ -31,7 +31,7 @@ export const groupFileApi = {
       url: '/api/im/group/file/list',
       method: 'post',
       data: payload
-    });
+    })
   },
 
   /**
@@ -43,7 +43,7 @@ export const groupFileApi = {
     return request({
       url: `/api/im/group/file/statistics/${groupId}`,
       method: 'get'
-    });
+    })
   },
 
   /**
@@ -55,7 +55,7 @@ export const groupFileApi = {
     return request({
       url: `/api/im/group/file/${groupFileId}`,
       method: 'delete'
-    });
+    })
   },
 
   /**
@@ -67,6 +67,6 @@ export const groupFileApi = {
     return request({
       url: `/api/im/group/file/download/${groupFileId}`,
       method: 'get'
-    });
+    })
   }
-};
+}

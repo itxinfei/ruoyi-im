@@ -1,4 +1,4 @@
-import request from '@/utils/request';
+import request from '@/utils/request'
 
 /**
  * 消息模块核心 API (纯 JS 规范)
@@ -15,7 +15,7 @@ export const messageApi = {
       url: '/api/message/send',
       method: 'post',
       data: payload
-    });
+    })
   },
 
   /**
@@ -27,26 +27,26 @@ export const messageApi = {
     return request({
       url: '/api/message/list',
       method: 'get',
-      params: params
-    });
+      params
+    })
   },
 
   /**
    * 撤回消息 (2分钟内)
-   * @param {Long} messageId 
+   * @param {Long} messageId
    * @returns {Promise} AjaxResult
    */
   revoke: (messageId) => {
     return request({
       url: `/api/message/${messageId}/revoke`,
       method: 'put'
-    });
+    })
   },
 
   /**
    * 编辑消息 (5分钟内)
-   * @param {Long} messageId 
-   * @param {String} newContent 
+   * @param {Long} messageId
+   * @param {String} newContent
    * @returns {Promise} AjaxResult
    */
   edit: (messageId, newContent) => {
@@ -54,7 +54,7 @@ export const messageApi = {
       url: `/api/message/${messageId}/edit`,
       method: 'put',
       data: { content: newContent }
-    });
+    })
   },
 
   /**
@@ -67,12 +67,12 @@ export const messageApi = {
       url: '/api/message/read',
       method: 'post',
       data: payload
-    });
+    })
   },
 
   /**
    * 解析 URL 元数据 (Doc-33 §4.7)
-   * @param {String} url 
+   * @param {String} url
    * @returns {Promise} AjaxResult
    */
   parseUrl: (url) => {
@@ -80,6 +80,6 @@ export const messageApi = {
       url: '/api/im/url/parse',
       method: 'get',
       params: { url }
-    });
+    })
   }
-};
+}

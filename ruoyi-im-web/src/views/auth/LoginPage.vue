@@ -44,16 +44,20 @@
             <div class="logo-glow" />
           </div>
           <h1>欢迎回来</h1>
-          <p class="subtitle">登录您的账户继续协作</p>
+          <p class="subtitle">
+            登录您的账户继续协作
+          </p>
         </div>
 
         <!-- 表单 -->
-        <form @submit.prevent="handleLogin" class="login-form">
+        <form class="login-form" @submit.prevent="handleLogin">
           <!-- 用户名输入 -->
           <div class="field-group" :class="{ focused: usernameFocused, filled: loginForm.username }">
             <label class="field-label">用户名</label>
             <div class="field-input-wrapper">
-              <el-icon class="field-icon"><User /></el-icon>
+              <el-icon class="field-icon">
+                <User />
+              </el-icon>
               <input
                 v-model="loginForm.username"
                 type="text"
@@ -61,7 +65,7 @@
                 autocomplete="username"
                 @focus="usernameFocused = true"
                 @blur="usernameFocused = false"
-              />
+              >
             </div>
           </div>
 
@@ -69,7 +73,9 @@
           <div class="field-group" :class="{ focused: passwordFocused, filled: loginForm.password }">
             <label class="field-label">密码</label>
             <div class="field-input-wrapper">
-              <el-icon class="field-icon"><Lock /></el-icon>
+              <el-icon class="field-icon">
+                <Lock />
+              </el-icon>
               <input
                 v-model="loginForm.password"
                 :type="showPassword ? 'text' : 'password'"
@@ -77,7 +83,7 @@
                 autocomplete="current-password"
                 @focus="passwordFocused = true"
                 @blur="passwordFocused = false"
-              />
+              >
               <button type="button" class="password-toggle" @click="showPassword = !showPassword">
                 <el-icon>
                   <View v-if="!showPassword" />
@@ -90,15 +96,22 @@
           <!-- 选项行 -->
           <div class="options-row">
             <label class="checkbox-wrapper">
-              <input type="checkbox" v-model="loginForm.rememberMe" />
+              <input v-model="loginForm.rememberMe" type="checkbox">
               <span class="checkbox-custom" />
               <span class="checkbox-label">记住我</span>
             </label>
-            <button type="button" class="link-btn" @click="handleForgotPassword">忘记密码？</button>
+            <button type="button" class="link-btn" @click="handleForgotPassword">
+              忘记密码？
+            </button>
           </div>
 
           <!-- 登录按钮 -->
-          <button type="submit" class="btn-login" :class="{ loading }" :disabled="loading">
+          <button
+            type="submit"
+            class="btn-login"
+            :class="{ loading }"
+            :disabled="loading"
+          >
             <span v-if="!loading" class="btn-text">
               登录
               <el-icon class="btn-arrow"><ArrowRight /></el-icon>
@@ -114,14 +127,15 @@
         <!-- 底部信息 -->
         <div class="login-footer">
           <span>还没有账户？</span>
-          <button type="button" class="link-btn">联系管理员</button>
+          <button type="button" class="link-btn">
+            联系管理员
+          </button>
         </div>
       </div>
-
     </div>
 
     <!-- 主题切换 -->
-    <button class="theme-toggle" @click="toggleTheme" :title="isDark ? '切换到亮色模式' : '切换到暗色模式'">
+    <button class="theme-toggle" :title="isDark ? '切换到亮色模式' : '切换到暗色模式'" @click="toggleTheme">
       <el-icon>
         <Sunny v-if="isDark" />
         <Moon v-else />
