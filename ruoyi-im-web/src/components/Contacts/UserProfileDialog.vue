@@ -148,7 +148,9 @@ const handleEditRemark = () => {
     await updateUser(props.userId, { remarkName: value })
     userDetail.value.remarkName = value
     ElMessage.success('备注已更新')
-  }).catch(() => {})
+  }).catch(() => {
+    // 用户取消操作，不需要处理
+  })
 }
 
 watch(() => props.modelValue, (val) => { visible.value = val; if (val && props.userId) loadUserDetail() })

@@ -530,9 +530,11 @@ const handleAppClick = async (app) => {
     } else if (app.action === 'report') {
       activeMenu.value = 'report'
     } else if (app.action === 'meeting') {
-      emit('switch-module', 'chat')
+      // 会议跳转到日历模块
+      emit('switch-module', 'calendar')
     } else {
-      ElMessage.info(`${app.label}功能开发中`)
+      // 未知的 action 类型，跳转到消息页面
+      emit('switch-module', 'chat')
     }
     return
   }
