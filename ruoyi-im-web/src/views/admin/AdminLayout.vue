@@ -148,7 +148,7 @@ const logout = () => {
 }
 
 .admin-aside {
-  background: linear-gradient(180deg, var(--dt-bg-body-dark) 0%, var(--dt-bg-card-dark) 100%);
+  background: var(--dt-bg-body-dark);
   border-right: 1px solid var(--dt-border-light);
 }
 
@@ -203,7 +203,7 @@ const logout = () => {
 }
 
 :deep(.admin-menu .el-menu-item.is-active) {
-  background: linear-gradient(90deg, var(--dt-brand-color) 0%, var(--dt-brand-hover) 100%);
+  background: var(--dt-brand-color);
 }
 
 .admin-header {
