@@ -309,7 +309,7 @@
 /**
  * ChatInputArea.vue (对齐钉钉无边框沉浸式输入 & 状态驱动发送按钮 + 表情选择器 + 图片预览)
  */
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue'
 import { getContacts } from '@/api/im/contact'
@@ -977,6 +977,18 @@ const formatDuration = (seconds) => {
 
 onMounted(() => {
   editorRef.value?.focus()
+})
+
+// 组件卸载时清理定时器
+onBeforeUnmount(() => {
+  if (recordingTimer) {
+    clearInterval(recordingTimer)
+    recordingTimer = null
+  }
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+    mediaRecorder.stop()
+    mediaRecorder.stream.getTracks().forEach(t => t.stop())
+  }
 })
 </script>
 
