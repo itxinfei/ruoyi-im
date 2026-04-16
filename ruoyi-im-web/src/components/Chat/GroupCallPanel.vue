@@ -164,7 +164,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick } from 'vue'
+import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Phone, Microphone, Mute, VideoCamera, VideoCameraFilled,
@@ -566,6 +566,11 @@ const loadGroupMembers = async (memberIds) => {
     console.error('加载群组成员失败:', e)
   }
 }
+
+// 组件卸载时清理定时器
+onBeforeUnmount(() => {
+  stopTimer()
+})
 
 defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callId, status })
 </script>
