@@ -24,36 +24,22 @@
     />
 
     <!-- 2. 消息列表区 -->
-    <div ref="listRef" class="message-list-viewport" @scroll="handleScroll">
-      <div class="message-list-content">
-        <div
-          v-for="(msg, index) in messages"
-          :key="msg.clientMsgId || msg.messageId"
-          :data-message-id="msg.messageId"
-          :class="['message-item-wrapper', { 'is-selected': isMessageSelected(msg) }]"
-          @click="handleMessageClick(msg)"
-        >
-          <div v-if="isSelectionMode" class="message-checkbox">
-            <el-checkbox :model-value="isMessageSelected(msg)" />
-          </div>
-          <ChatMessageBubble
-            :message="msg"
-            :is-me="msg.isSelf"
-            :is-grouped="checkIsGrouped(msg, index)"
-            :show-time="checkShowTime(msg, index)"
-            :quoted-message="msg.quotedMessage || getQuotedMessage(msg)"
-            @reply="processReply"
-            @forward="processForward"
-            @recall="processRecall"
-            @delete="processDelete"
-            @favorite="processFavorite"
-            @reaction="processReaction"
-            @read-detail="handleReadDetail"
-            @edit="handleEdit"
-          />
-        </div>
-      </div>
-    </div>
+    <ChatMessageList
+      ref="messageListRef"
+      :messages="messages"
+      :is-selection-mode="isSelectionMode"
+      :selected-messages="selectedMessages"
+      @reply="processReply"
+      @forward="processForward"
+      @recall="processRecall"
+      @delete="processDelete"
+      @favorite="processFavorite"
+      @reaction="processReaction"
+      @read-detail="handleReadDetail"
+      @edit="handleEdit"
+      @scroll-top="handleListScroll"
+      @select-message="handleMessageClick"
+    />
 
     <!-- 3. 输入区 -->
     <ChatInputArea
@@ -107,6 +93,7 @@ import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
 import SelectionHeader from './ChatWindow/SelectionHeader.vue'
+import ChatMessageList from './ChatWindow/ChatMessageList.vue'
 
 const store = useStore()
 
@@ -114,7 +101,7 @@ const store = useStore()
 const { onMessage, onRead, onCall, connect, cleanup } = useImWebSocket()
 
 // 2. 基础状态
-const listRef = ref(null)
+const messageListRef = ref(null)
 const callDialogRef = ref(null)
 const forwardDialogRef = ref(null)
 const detailDrawerVisible = ref(false)
@@ -201,15 +188,15 @@ const handleIncomingCall = (payload) => {
 }
 
 // 6. 触顶加载历史消息
-const handleScroll = async () => {
-  if (!listRef.value || isLoadingMore.value) return
+const handleListScroll = async (listEl) => {
+  if (!listEl || isLoadingMore.value) return
   // 滚动到顶部附近（100px 内）
-  if (listRef.value.scrollTop < 100) {
+  if (listEl.scrollTop < 100) {
     const sessionId = currentSession.value?.id
     if (!sessionId) return
 
     // 记录当前滚动高度
-    const oldScrollHeight = listRef.value.scrollHeight
+    const oldScrollHeight = listEl.scrollHeight
 
     // 获取当前消息列表的第一条消息 ID
     const firstMessage = messages.value[0]
@@ -227,9 +214,9 @@ const handleScroll = async () => {
       })
       // 加载完成后，保持滚动条位置不变
       nextTick(() => {
-        if (listRef.value) {
-          const newScrollHeight = listRef.value.scrollHeight
-          listRef.value.scrollTop = newScrollHeight - oldScrollHeight
+        if (listEl) {
+          const newScrollHeight = listEl.scrollHeight
+          listEl.scrollTop = newScrollHeight - oldScrollHeight
         }
       })
     } finally {
@@ -469,8 +456,9 @@ const processSendMessage = async (payload) => {
 
 const scrollToBottom = () => {
   nextTick(() => {
-    if (listRef.value) {
-      listRef.value.scrollTop = listRef.value.scrollHeight
+    const el = messageListRef.value?.listRef
+    if (el) {
+      el.scrollTop = el.scrollHeight
     }
   })
 }
@@ -478,8 +466,9 @@ const scrollToBottom = () => {
 // 滚动到顶部
 const scrollToTop = () => {
   nextTick(() => {
-    if (listRef.value) {
-      listRef.value.scrollTop = 0
+    const el = messageListRef.value?.listRef
+    if (el) {
+      el.scrollTop = 0
     }
   })
 }
@@ -598,12 +587,13 @@ const handleHeaderCommand = async (command) => {
 
 // 滚动到艾特我的消息
 const scrollToMentionMe = () => {
-  if (!listRef.value) return
+  const listEl = messageListRef.value?.listRef
+  if (!listEl) return
   const mentionMsg = messages.value.find(msg =>
     msg.content && msg.content.includes(`@${store.state.im?.currentUser?.name || store.state.im?.currentUser?.nickname || ''}`)
   )
   if (mentionMsg) {
-    const el = listRef.value.querySelector(`[data-message-id="${mentionMsg.messageId}"]`)
+    const el = listEl.querySelector(`[data-message-id="${mentionMsg.messageId}"]`)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       ElMessage.success('已定位到艾特消息')
@@ -734,16 +724,17 @@ const handleSearchSelect = (res) => {
 
 // 滚动到指定消息
 const scrollToMessage = (messageId) => {
-  if (!listRef.value) return
+  const listEl = messageListRef.value?.listRef
+  if (!listEl) return
   // Try both id field names used by the backend
-  const el = listRef.value.querySelector(`[data-message-id="${messageId}"]`)
+  const el = listEl.querySelector(`[data-message-id="${messageId}"]`)
   if (el) {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   } else {
     // Fallback: find by index in messages array
     const index = messages.value.findIndex(m => m.messageId === messageId)
     if (index !== -1) {
-      const allItems = listRef.value.querySelectorAll('[data-message-id]')
+      const allItems = listEl.querySelectorAll('[data-message-id]')
       if (allItems[index]) {
         allItems[index].scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
@@ -852,45 +843,6 @@ const scrollToMessage = (messageId) => {
   color: var(--dt-brand-color);
 }
 
-/* 消息多选样式 */
-.message-item-wrapper {
-  position: relative;
-  cursor: pointer;
-  padding: 4px var(--dt-spacing-md);
-  margin: 2px 0;
-  border-radius: var(--dt-radius-xl);
-  transition: background-color var(--dt-transition-fast), transform var(--dt-transition-fast);
-}
-
-.message-item-wrapper:hover {
-  background-color: rgba(255, 255, 255, 0.42);
-}
-
-.message-item-wrapper.is-selected {
-  background-color: rgba(39, 126, 251, 0.08);
-}
-
-.message-checkbox {
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
-}
-
-.message-list-viewport {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  background-color: transparent;
-  padding: 14px var(--dt-chat-gutter) 20px;
-}
-
-.message-list-content {
-  width: min(100%, var(--dt-chat-content-max-width));
-  margin: 0 auto;
-}
-
 /* 对齐钉钉输入区高度约束: 最低 180px，最高不超过聊天区的 40% */
 :deep(.chat-input-wrapper) {
   min-height: var(--dt-input-min-height);
@@ -902,9 +854,7 @@ const scrollToMessage = (messageId) => {
 }
 
 @media (max-width: 960px) {
-  .chat-header,
-  .selection-header,
-  .message-list-viewport {
+  .chat-header {
     padding-left: var(--dt-chat-gutter-compact);
     padding-right: var(--dt-chat-gutter-compact);
   }
@@ -929,15 +879,6 @@ const scrollToMessage = (messageId) => {
   .header-right .el-icon {
     font-size: 17px;
     padding: 6px;
-  }
-
-  .message-list-viewport {
-    padding: 10px 10px 12px;
-  }
-
-  .message-item-wrapper {
-    padding-left: 4px;
-    padding-right: 4px;
   }
 
   :deep(.chat-input-wrapper) {
