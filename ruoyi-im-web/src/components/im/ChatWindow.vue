@@ -84,7 +84,6 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { uploadImage, uploadFile } from '@/api/im/file'
 import { initiateCall } from '@/api/im/videoCall'
-import ChatMessageBubble from './ChatMessageBubble.vue'
 import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue'
 import ChatInputArea from './ChatInputArea.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
@@ -261,32 +260,8 @@ onUnmounted(() => {
   window.removeEventListener('main:scroll-to-top', scrollToTop)
 })
 
-const checkIsGrouped = (msg, index) => {
-  if (index === 0 || !msg) return false
-  const prevMsg = messages.value[index - 1]
-  if (!prevMsg || !msg.sendTime || !prevMsg.sendTime) return false
-
-  const timeDiff = (new Date(msg.sendTime).getTime() - new Date(prevMsg.sendTime).getTime()) / 1000
-  return msg.senderId === prevMsg.senderId && timeDiff < 60 // 钉钉通常为 1 分钟内收纳
-}
-
-const checkShowTime = (msg, index) => {
-  if (index === 0 || !msg) return true
-  const prevMsg = messages.value[index - 1]
-  if (!prevMsg || !msg.sendTime || !prevMsg.sendTime) return true
-
-  const timeDiff = (new Date(msg.sendTime).getTime() - new Date(prevMsg.sendTime).getTime()) / 1000
-  return timeDiff > 300 // 5 分钟显示一次时间线
-}
-
 const processReply = (message) => {
   replyingMessage.value = message
-}
-
-// 获取被引用的消息
-const getQuotedMessage = (msg) => {
-  if (!msg.replyToMessageId) return null
-  return messages.value.find(m => m.messageId === msg.replyToMessageId)
 }
 
 // 处理转发
@@ -617,10 +592,6 @@ const cancelSelection = () => {
   selectedMessages.value.clear()
 }
 
-const isMessageSelected = (msg) => {
-  return selectedMessages.value.has(msg.messageId)
-}
-
 const handleMessageClick = (msg) => {
   if (!isSelectionMode.value) return
   if (selectedMessages.value.has(msg.messageId)) {
@@ -752,97 +723,6 @@ const scrollToMessage = (messageId) => {
   background-color: var(--dt-bg-chat);
 }
 
-.chat-header {
-  height: var(--dt-chat-header-height); /* 钉钉规范：56px */
-  padding: 0 var(--dt-chat-gutter);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--dt-border-light);
-  flex-shrink: 0;
-  background: var(--dt-bg-card);
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: var(--dt-spacing-sm);
-  cursor: pointer;
-  padding: var(--dt-spacing-sm) var(--dt-spacing-xs);
-  border-radius: var(--dt-radius-lg);
-  transition: background-color var(--dt-transition-fast);
-}
-
-.header-left:hover {
-  background: var(--dt-bg-hover);
-}
-
-.title {
-  font-size: 17px;  /* 钉钉规范：头部标题17px */
-  font-weight: 600;
-  color: var(--dt-text-primary);
-}
-
-.member-count {
-  font-size: var(--dt-font-size-sm);
-  color: var(--dt-text-secondary);
-}
-
-.header-right {
-  display: flex;
-  gap: var(--dt-spacing-xs);
-  color: var(--dt-text-tertiary);
-}
-
-.header-right .el-icon {
-  cursor: pointer;
-  font-size: var(--dt-font-size-xl);
-  padding: var(--dt-spacing-sm);
-  border-radius: var(--dt-radius-lg);
-  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
-}
-
-.header-right .el-icon:hover {
-  background-color: var(--dt-bg-hover);
-  color: var(--dt-brand-color);
-}
-
-.header-right .el-icon:active {
-  background-color: var(--dt-brand-bg);
-}
-
-/* 下拉菜单 - 钉钉风格 */
-.header-right :deep(.el-dropdown-menu) {
-  padding: var(--dt-spacing-xs);
-  border-radius: var(--dt-radius-xl);
-  border: 1px solid var(--dt-border-light);
-  box-shadow: var(--dt-shadow-3);
-}
-
-.header-right :deep(.el-dropdown-menu__item) {
-  padding: var(--dt-spacing-sm) var(--dt-spacing-md);
-  border-radius: var(--dt-radius-lg);
-  font-size: var(--dt-font-size-base);
-  color: var(--dt-text-primary);
-  display: flex;
-  align-items: center;
-  gap: var(--dt-spacing-sm);
-}
-
-.header-right :deep(.el-dropdown-menu__item:hover) {
-  background-color: var(--dt-bg-hover);
-  color: var(--dt-brand-color);
-}
-
-.header-right :deep(.el-dropdown-menu__item .el-icon) {
-  font-size: var(--dt-font-size-lg);
-  color: var(--dt-text-secondary);
-}
-
-.header-right :deep(.el-dropdown-menu__item:hover .el-icon) {
-  color: var(--dt-brand-color);
-}
-
 /* 对齐钉钉输入区高度约束: 最低 180px，最高不超过聊天区的 40% */
 :deep(.chat-input-wrapper) {
   min-height: var(--dt-input-min-height);
@@ -854,11 +734,6 @@ const scrollToMessage = (messageId) => {
 }
 
 @media (max-width: 960px) {
-  .chat-header {
-    padding-left: var(--dt-chat-gutter-compact);
-    padding-right: var(--dt-chat-gutter-compact);
-  }
-
   :deep(.chat-input-wrapper) {
     margin-left: var(--dt-chat-gutter-compact);
     margin-right: var(--dt-chat-gutter-compact);
@@ -867,20 +742,6 @@ const scrollToMessage = (messageId) => {
 }
 
 @media (max-width: 640px) {
-  .chat-header {
-    padding-left: 12px;
-    padding-right: 12px;
-  }
-
-  .header-right {
-    gap: 0;
-  }
-
-  .header-right .el-icon {
-    font-size: 17px;
-    padding: 6px;
-  }
-
   :deep(.chat-input-wrapper) {
     margin: 0 10px 10px;
     border-radius: var(--dt-radius-2xl);
