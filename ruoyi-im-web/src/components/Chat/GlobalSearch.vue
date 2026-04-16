@@ -1,7 +1,7 @@
 <template>
   <div class="global-search-container">
     <div v-if="visible" class="search-overlay" @click="close" />
-    <div v-show="visible" class="search-results-panel shadow-xl">
+    <div v-show="visible" class="search-results-panel">
       <!-- 搜索历史 -->
       <div v-if="!keyword" class="search-initial">
         <div v-if="history.length > 0" class="search-section">

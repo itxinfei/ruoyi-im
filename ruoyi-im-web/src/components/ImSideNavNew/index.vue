@@ -290,7 +290,7 @@ const handleToggleTheme = () => {
 .user-avatar {
   width: var(--dt-avatar-size-md);
   height: var(--dt-avatar-size-md);
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-sm);
   border: none;
   position: absolute;
   top: 50%;

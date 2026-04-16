@@ -435,7 +435,7 @@ onMounted(() => { if (store.state.user?.token) loadFriends() })
 .member-card-ding {
   background: var(--dt-bg-card);
   padding: 16px;
-  border-radius: var(--dt-radius-xl);
+  border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
