@@ -412,7 +412,7 @@ watch(visible, (val) => {
     }
 
     &:hover {
-      background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      background: var(--dt-brand-color);
       color: var(--dt-text-white);
       box-shadow: var(--dt-shadow-3);
 
@@ -422,7 +422,7 @@ watch(visible, (val) => {
     }
 
     &.active {
-      background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      background: var(--dt-brand-color);
       color: var(--dt-text-white);
       font-weight: 600;
       box-shadow: var(--dt-shadow-4);
@@ -455,7 +455,7 @@ watch(visible, (val) => {
 
 .account-section {
   .account-card {
-    background: linear-gradient(135deg, var(--dt-bg-body) 0%, var(--dt-bg-card) 100%);
+    background: var(--dt-bg-card);
     border-radius: var(--dt-radius-2xl);
     padding: var(--dt-spacing-2xl);
     border: 1.5px solid var(--dt-border-light);
@@ -467,10 +467,10 @@ watch(visible, (val) => {
       gap: 24px;
       margin-bottom: 32px;
 
-      .avatar-wrapper {
+            .avatar-wrapper {
         position: relative;
         padding: 4px;
-        background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+        background: var(--dt-brand-color);
         border-radius: 50%;
         box-shadow: var(--dt-shadow-brand-strong);
 
@@ -533,7 +533,7 @@ watch(visible, (val) => {
         font-weight: 600;
 
         &.primary-btn {
-          background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+          background: var(--dt-brand-color);
           border: none;
           color: var(--dt-text-white);
           box-shadow: var(--dt-shadow-4);
@@ -642,13 +642,13 @@ watch(visible, (val) => {
     text-align: center;
     border: 1.5px solid var(--dt-border-light);
 
-    .app-logo {
+        .app-logo {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       width: 96px;
       height: 96px;
-      background: linear-gradient(160deg, var(--dt-brand-color) 0%, var(--dt-brand-active) 100%);
+      background: var(--dt-brand-color);
       border-radius: var(--dt-radius-2xl);
       margin-bottom: 24px;
       box-shadow: var(--dt-shadow-brand-strong);

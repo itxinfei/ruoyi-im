@@ -957,7 +957,7 @@ onBeforeUnmount(() => {
   gap: 4px;
   border: none;
   color: var(--dt-text-white);
-  background: linear-gradient(180deg, #ff7b7b 0%, #f53f3f 100%);
+  background: var(--dt-error-color);
   opacity: 0;
   transition: opacity var(--dt-transition-fast);
 
@@ -1020,9 +1020,8 @@ onBeforeUnmount(() => {
 
 .is-me .message-bubble {
   color: var(--dt-text-white);
-  background: linear-gradient(180deg, #3b92ff 0%, #277efb 100%);
+  background: var(--dt-brand-color);
   border-top-right-radius: 8px;
-  box-shadow: 0 10px 24px rgba(39, 126, 251, 0.22);
 }
 
 .quoted-message-preview {
@@ -1424,10 +1423,9 @@ onBeforeUnmount(() => {
   gap: 6px;
   padding: 6px 8px;
   border-radius: var(--dt-radius-lg);
-  background: rgba(255, 255, 255, 0.96);
-  border: 1px solid rgba(23, 26, 29, 0.08);
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
   box-shadow: var(--dt-shadow-2);
-  backdrop-filter: blur(12px);
   z-index: 3;
 }
 
@@ -1533,10 +1531,9 @@ onBeforeUnmount(() => {
   min-width: 164px;
   padding: 6px;
   border-radius: var(--dt-radius-2xl);
-  border: 1px solid rgba(23, 26, 29, 0.08);
-  background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
-  backdrop-filter: blur(14px);
+  border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card);
+  box-shadow: var(--dt-shadow-2);
   z-index: 1999;
 }
 

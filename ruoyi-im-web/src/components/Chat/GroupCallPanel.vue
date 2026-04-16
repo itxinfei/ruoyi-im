@@ -733,7 +733,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     left: 0;
     right: 0;
     padding: 8px;
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+    background: rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: space-between;

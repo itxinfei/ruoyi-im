@@ -820,9 +820,7 @@ const scrollToMessage = (messageId) => {
   flex-direction: column;
   height: 100%;
   position: relative;
-  background:
-    radial-gradient(circle at top, rgba(39, 126, 251, 0.08), transparent 26%),
-    linear-gradient(180deg, var(--dt-chat-window-header-bg) 0%, var(--dt-bg-chat) 18%);
+  background-color: var(--dt-bg-chat);
 }
 
 .chat-header {
@@ -833,8 +831,7 @@ const scrollToMessage = (messageId) => {
   justify-content: space-between;
   border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(16px);
+  background: var(--dt-bg-card);
 }
 
 .header-left {

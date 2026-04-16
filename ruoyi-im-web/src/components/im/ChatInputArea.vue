@@ -998,7 +998,6 @@ onBeforeUnmount(() => {
   background-color: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
   position: relative;
-  background-image: linear-gradient(180deg, rgba(39, 126, 251, 0.03), transparent 36%);
 }
 
 /* 拖拽上传遮罩 */
