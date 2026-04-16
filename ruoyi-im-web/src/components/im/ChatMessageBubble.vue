@@ -63,7 +63,7 @@
                 ]"
               >
                 <div v-if="messageType === 'TEXT' && !isPureUrlMessage" class="text-content">
-                  <template v-for="(part, index) in parsedTextParts" :key="index">
+                  <template v-for="(part, index) in parsedTextParts" :key="`part-${index}`">
                     <a
                       v-if="part.isLink"
                       :href="part.text"

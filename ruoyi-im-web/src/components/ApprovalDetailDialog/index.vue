@@ -575,7 +575,6 @@ const confirmAction = async () => {
 
 .flow-item.active .flow-dot {
   background: var(--dt-brand-color);
-  box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.2);
 }
 
 .flow-content {

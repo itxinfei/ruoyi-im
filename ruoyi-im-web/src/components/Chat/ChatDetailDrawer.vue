@@ -655,7 +655,6 @@ const handleShowAnnouncement = async () => {
 .im-detail-drawer {
   :deep(.el-drawer) {
     background: var(--dt-bg-body);
-    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.1);  /* 抽屉阴影 */
     transition: transform var(--dt-transition-base);
   }
 

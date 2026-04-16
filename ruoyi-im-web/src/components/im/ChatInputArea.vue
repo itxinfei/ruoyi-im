@@ -165,7 +165,7 @@
 
     <!-- 图片预览区 -->
     <div v-if="pendingImages.length > 0" class="image-preview-bar">
-      <div v-for="(img, index) in pendingImages" :key="index" class="preview-item">
+      <div v-for="(img, index) in pendingImages" :key="`img-${index}`" class="preview-item">
         <el-image :src="img.url" fit="cover" class="preview-img" />
         <el-icon class="preview-remove" @click="removeImage(index)">
           <Close />
@@ -175,7 +175,7 @@
 
     <!-- 视频预览区 -->
     <div v-if="pendingVideos.length > 0" class="video-preview-bar">
-      <div v-for="(video, index) in pendingVideos" :key="index" class="preview-item video-preview-item">
+      <div v-for="(video, index) in pendingVideos" :key="`video-${index}`" class="preview-item video-preview-item">
         <video :src="video.url" class="preview-video" />
         <el-icon class="preview-duration">
           <Clock />

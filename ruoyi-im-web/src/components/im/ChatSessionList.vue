@@ -686,7 +686,6 @@ const handleGlobalClick = () => {
   height: 16px;
   padding: 0 4px;
   text-align: center;
-  box-shadow: 0 1px 3px rgba(255, 77, 79, 0.25);
 }
 
 /* 钉钉规范：1-9 数字圆形，10+ 数字胶囊 */

@@ -978,7 +978,6 @@ onUnmounted(() => {
   border-radius: var(--dt-radius-full);
   @include flex-center;
   font-weight: var(--dt-font-weight-semibold);
-  box-shadow: 0 2px 4px rgba(245, 63, 63, 0.3);
 }
 
 // ============================================================================
@@ -1186,7 +1185,6 @@ onUnmounted(() => {
     border-radius: var(--dt-radius-full);
     @include flex-center;
     font-weight: var(--dt-font-weight-bold);
-    box-shadow: 0 2px 4px rgba(245, 63, 63, 0.4);
   }
 }
 

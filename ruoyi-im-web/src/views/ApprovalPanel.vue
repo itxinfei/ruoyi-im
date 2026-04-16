@@ -329,7 +329,6 @@ onMounted(() => {
 
 .approval-item:hover {
   border-color: var(--dt-brand-light);
-  box-shadow: 0 4px 12px rgba(39, 126, 251, 0.1);
 }
 
 .approval-avatar {

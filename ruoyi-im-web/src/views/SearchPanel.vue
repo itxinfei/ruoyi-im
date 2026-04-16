@@ -297,7 +297,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { globalSearch, getHotKeywords } from '@/api/im/search'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
@@ -509,6 +509,10 @@ onMounted(() => {
   loadSearchHistory()
   if (scopeSession.value?.sessionId) scopeMode.value = 'session'
   if (keyword.value.trim()) handleSearch()
+})
+
+onBeforeUnmount(() => {
+  if (searchTimer) clearTimeout(searchTimer)
 })
 
 const downloadFile = (file) => {
