@@ -81,8 +81,10 @@ import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { User, Star, ChatDotRound, ChatLineSquare } from '@element-plus/icons-vue'
 import { getOverview, getUserStats, getMessageAdminStats } from '@/api/admin'
-import * as echarts from 'echarts'
 import { useTheme } from '@/composables/useTheme'
+
+// 动态导入 echarts，减少初始包体积
+let echarts = null
 
 const { isDark } = useTheme()
 
@@ -114,6 +116,14 @@ const userChartRef = ref(null)
 let messageChart = null
 let userChart = null
 
+// 动态加载 echarts
+const loadEcharts = async () => {
+  if (!echarts) {
+    echarts = await import('echarts')
+  }
+  return echarts
+}
+
 const metrics = computed(() => ([
   { key: 'users', label: '总用户数', value: overview.value.totalUsers || 0, icon: User, iconClass: 'users' },
   { key: 'active', label: '活跃用户', value: overview.value.activeUsers || 0, icon: Star, iconClass: 'active' },
@@ -126,10 +136,11 @@ const getDarkModeColor = (lightVar, darkVar) => {
   return isDark.value ? darkVar : lightVar
 }
 
-const initMessageChart = () => {
+const initMessageChart = async () => {
   if (!messageChartRef.value) return
   if (messageChart) messageChart.dispose()
-  messageChart = echarts.init(messageChartRef.value)
+  const echartsLib = await loadEcharts()
+  messageChart = echartsLib.init(messageChartRef.value)
   updateMessageChart()
 }
 
@@ -193,10 +204,11 @@ const updateMessageChart = () => {
   messageChart.setOption(option)
 }
 
-const initUserChart = () => {
+const initUserChart = async () => {
   if (!userChartRef.value) return
   if (userChart) userChart.dispose()
-  userChart = echarts.init(userChartRef.value)
+  const echartsLib = await loadEcharts()
+  userChart = echartsLib.init(userChartRef.value)
   updateUserChart()
 }
 
