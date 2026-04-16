@@ -576,7 +576,6 @@ onMounted(() => {
   border: 1px solid var(--dt-border-lighter);
 
   &:hover {
-    box-shadow: var(--dt-shadow-card-hover);
     border-color: var(--dt-brand-light);
 
     .contact-actions {

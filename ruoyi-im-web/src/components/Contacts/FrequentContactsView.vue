@@ -250,7 +250,6 @@ onMounted(() => {
   position: relative;
 
   &:hover {
-    box-shadow: var(--dt-shadow-card-hover);
     border-color: var(--dt-brand-light);
 
     .action-section {

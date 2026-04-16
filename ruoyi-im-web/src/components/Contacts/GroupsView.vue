@@ -188,7 +188,7 @@ onMounted(() => {
 }
 
 .group-item:hover {
-  box-shadow: var(--dt-shadow-2);
+  border-color: var(--dt-brand-light);
 }
 
 .group-info {
