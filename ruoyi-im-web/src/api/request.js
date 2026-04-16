@@ -70,7 +70,7 @@ service.interceptors.request.use(
     // 如果 token 即将过期，自动刷新
     if (token && tokenManager.shouldRefreshToken() && !config.skipTokenRefresh) {
       try {
-        console.log('Token 即将过期，自动刷新中...')
+        console.debug('Token 即将过期，自动刷新中...')
         token = await tokenManager.autoRefreshToken(refreshToken)
         if (!token) {
           console.warn('Token 刷新失败，取消请求')
@@ -157,7 +157,7 @@ service.interceptors.response.use(
       const { status, data } = error.response
 
       // 打印更详细的错误信息
-      console.log('错误详情:', data)
+      console.debug('错误详情:', data)
 
       /**
        * 401: Token 过期或无效，尝试刷新 token 并重试
@@ -227,7 +227,7 @@ service.interceptors.response.use(
               error.config.headers['X-CSRF-Token'] = newCsrfToken
             }
 
-            console.log('使用新 CSRF token 重试请求')
+            console.debug('使用新 CSRF token 重试请求')
             return service.request(error.config)
           }
         } catch (refreshError) {
