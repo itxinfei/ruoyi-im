@@ -16,7 +16,9 @@
           :class="{ active: activeMenu === item.id }"
           @click="activeMenu = item.id"
         >
-          <el-icon class="tab-icon"><component :is="item.icon" /></el-icon>
+          <el-icon class="tab-icon">
+            <component :is="item.icon" />
+          </el-icon>
           <span>{{ item.label }}</span>
         </div>
       </div>

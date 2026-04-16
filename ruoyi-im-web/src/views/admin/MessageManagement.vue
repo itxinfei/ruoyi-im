@@ -96,9 +96,24 @@
         @selection-change="handleSelectionChange"
       >
         <el-table-column type="selection" width="48" />
-        <el-table-column prop="id" label="消息ID" width="88" sortable />
-        <el-table-column prop="senderId" label="发送者ID" width="98" sortable />
-        <el-table-column prop="messageType" label="类型" width="90" sortable>
+        <el-table-column
+          prop="id"
+          label="消息ID"
+          width="88"
+          sortable
+        />
+        <el-table-column
+          prop="senderId"
+          label="发送者ID"
+          width="98"
+          sortable
+        />
+        <el-table-column
+          prop="messageType"
+          label="类型"
+          width="90"
+          sortable
+        >
           <template #default="{ row }">
             <el-tag :type="getTypeTag(row.messageType)">
               {{ getTypeLabel(row.messageType) }}
@@ -115,8 +130,18 @@
             {{ renderPreview(row) }}
           </template>
         </el-table-column>
-        <el-table-column prop="conversationId" label="会话ID" width="98" sortable />
-        <el-table-column prop="createTime" label="发送时间" width="180" sortable />
+        <el-table-column
+          prop="conversationId"
+          label="会话ID"
+          width="98"
+          sortable
+        />
+        <el-table-column
+          prop="createTime"
+          label="发送时间"
+          width="180"
+          sortable
+        />
         <el-table-column label="状态" width="90" sortable>
           <template #default="{ row }">
             <el-tag v-if="row.isRevoked === 1" type="info">

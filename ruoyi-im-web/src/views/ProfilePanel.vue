@@ -118,7 +118,9 @@
         <div class="info-card">
           <div class="info-row clickable" @click="showPasswordDialog = true">
             <span class="label">修改登录密码</span>
-            <el-icon class="arrow"><Refresh /></el-icon>
+            <el-icon class="arrow">
+              <Refresh />
+            </el-icon>
           </div>
         </div>
       </div>
@@ -133,13 +135,28 @@
     >
       <el-form label-position="top">
         <el-form-item label="当前旧密码">
-          <el-input v-model="passwordForm.oldPassword" type="password" show-password placeholder="请输入当前密码" />
+          <el-input
+            v-model="passwordForm.oldPassword"
+            type="password"
+            show-password
+            placeholder="请输入当前密码"
+          />
         </el-form-item>
         <el-form-item label="新密码">
-          <el-input v-model="passwordForm.newPassword" type="password" show-password placeholder="请输入新密码（至少6位）" />
+          <el-input
+            v-model="passwordForm.newPassword"
+            type="password"
+            show-password
+            placeholder="请输入新密码（至少6位）"
+          />
         </el-form-item>
         <el-form-item label="确认新密码">
-          <el-input v-model="passwordForm.confirmPassword" type="password" show-password placeholder="请再次输入新密码" />
+          <el-input
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            show-password
+            placeholder="请再次输入新密码"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -225,7 +242,7 @@ const handlePasswordUpdate = async () => {
     ElMessage.warning('新密码长度不能少于6位')
     return
   }
-  
+
   try {
     passwordLoading.value = true
     const res = await changePassword(

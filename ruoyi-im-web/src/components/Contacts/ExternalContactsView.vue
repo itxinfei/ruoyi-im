@@ -51,14 +51,25 @@
     <!-- 联系人列表 -->
     <div class="view-content">
       <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
       <div v-else-if="filteredContacts.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><UserFilled /></el-icon>
-        <p class="empty-text">{{ searchKeyword ? '未找到匹配的联系人' : '暂无外部联系人' }}</p>
-        <el-button v-if="!searchKeyword" type="primary" size="small" @click="showAddDialog = true">
+        <el-icon class="empty-icon">
+          <UserFilled />
+        </el-icon>
+        <p class="empty-text">
+          {{ searchKeyword ? '未找到匹配的联系人' : '暂无外部联系人' }}
+        </p>
+        <el-button
+          v-if="!searchKeyword"
+          type="primary"
+          size="small"
+          @click="showAddDialog = true"
+        >
           添加联系人
         </el-button>
       </div>
@@ -79,7 +90,9 @@
           <div class="contact-info">
             <div class="contact-name">
               <span class="name">{{ contact.name }}</span>
-              <el-icon v-if="contact.starred" class="starred-icon"><StarFilled /></el-icon>
+              <el-icon v-if="contact.starred" class="starred-icon">
+                <StarFilled />
+              </el-icon>
             </div>
             <div class="contact-meta">
               <span v-if="contact.company" class="company">{{ contact.company }}</span>
@@ -102,13 +115,22 @@
               </el-icon>
             </el-button>
             <el-dropdown trigger="click" @command="handleCommand($event, contact)">
-              <el-button text circle size="small" @click.stop>
+              <el-button
+                text
+                circle
+                size="small"
+                @click.stop
+              >
                 <el-icon><MoreFilled /></el-icon>
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="edit">编辑</el-dropdown-item>
-                  <el-dropdown-item command="delete" divided>删除</el-dropdown-item>
+                  <el-dropdown-item command="edit">
+                    编辑
+                  </el-dropdown-item>
+                  <el-dropdown-item command="delete" divided>
+                    删除
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -146,7 +168,12 @@
           <el-input v-model="formData.email" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item label="分组" prop="groupId">
-          <el-select v-model="formData.groupId" placeholder="选择分组" clearable style="width: 100%">
+          <el-select
+            v-model="formData.groupId"
+            placeholder="选择分组"
+            clearable
+            style="width: 100%"
+          >
             <el-option
               v-for="group in groups"
               :key="group.id"
@@ -165,7 +192,9 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showAddDialog = false">取消</el-button>
+        <el-button @click="showAddDialog = false">
+          取消
+        </el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
           {{ editingContact ? '保存' : '添加' }}
         </el-button>
@@ -187,29 +216,35 @@
             :size="72"
             shape="square"
           />
-          <div class="detail-name">{{ currentContact.name }}</div>
-          <div class="detail-company" v-if="currentContact.company">
+          <div class="detail-name">
+            {{ currentContact.name }}
+          </div>
+          <div v-if="currentContact.company" class="detail-company">
             {{ currentContact.company }} · {{ currentContact.position || '职位未知' }}
           </div>
         </div>
         <div class="detail-info">
-          <div class="info-item" v-if="currentContact.mobile">
+          <div v-if="currentContact.mobile" class="info-item">
             <span class="label">手机</span>
             <span class="value">{{ currentContact.mobile }}</span>
           </div>
-          <div class="info-item" v-if="currentContact.email">
+          <div v-if="currentContact.email" class="info-item">
             <span class="label">邮箱</span>
             <span class="value">{{ currentContact.email }}</span>
           </div>
-          <div class="info-item" v-if="currentContact.remark">
+          <div v-if="currentContact.remark" class="info-item">
             <span class="label">备注</span>
             <span class="value">{{ currentContact.remark }}</span>
           </div>
         </div>
       </div>
       <template #footer>
-        <el-button @click="handleEditFromDetail">编辑</el-button>
-        <el-button type="primary" @click="showDetailDialog = false">关闭</el-button>
+        <el-button @click="handleEditFromDetail">
+          编辑
+        </el-button>
+        <el-button type="primary" @click="showDetailDialog = false">
+          关闭
+        </el-button>
       </template>
     </el-dialog>
   </div>

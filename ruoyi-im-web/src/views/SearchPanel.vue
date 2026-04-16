@@ -3,7 +3,9 @@
     <!-- 搜索头部 -->
     <div class="search-header">
       <div class="search-input-wrapper">
-        <el-icon class="search-icon"><Search /></el-icon>
+        <el-icon class="search-icon">
+          <Search />
+        </el-icon>
         <input
           v-model="keyword"
           type="text"
@@ -13,7 +15,9 @@
           @input="handleInstantSearch"
           @keyup.enter="handleSearch"
         >
-        <el-icon v-if="keyword" class="clear-icon" @click="clearSearch"><Close /></el-icon>
+        <el-icon v-if="keyword" class="clear-icon" @click="clearSearch">
+          <Close />
+        </el-icon>
       </div>
       <div class="search-scope">
         <div class="scope-tabs">
@@ -64,7 +68,9 @@
               class="history-item"
               @click="searchWithKeyword(item)"
             >
-              <el-icon class="history-icon"><Clock /></el-icon>
+              <el-icon class="history-icon">
+                <Clock />
+              </el-icon>
               <span class="history-text">{{ item }}</span>
             </div>
           </div>

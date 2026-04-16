@@ -28,7 +28,9 @@
         </div>
 
         <div class="call-info">
-          <div class="call-name">{{ record.targetName || '未知' }}</div>
+          <div class="call-name">
+            {{ record.targetName || '未知' }}
+          </div>
           <div class="call-meta">
             <span class="call-type">
               <el-icon v-if="record.callType === 'VIDEO'" class="meta-icon"><VideoCamera /></el-icon>

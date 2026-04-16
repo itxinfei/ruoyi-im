@@ -5,8 +5,12 @@
 
     <!-- 播放按钮 -->
     <button class="play-btn" @click="togglePlay">
-      <el-icon v-if="!isPlaying" class="play-icon"><VideoPlay /></el-icon>
-      <el-icon v-else class="play-icon"><VideoPause /></el-icon>
+      <el-icon v-if="!isPlaying" class="play-icon">
+        <VideoPlay />
+      </el-icon>
+      <el-icon v-else class="play-icon">
+        <VideoPause />
+      </el-icon>
     </button>
 
     <!-- 动态波形图 -->

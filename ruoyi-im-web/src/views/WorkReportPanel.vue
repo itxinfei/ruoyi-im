@@ -16,7 +16,9 @@
     <el-row :gutter="12" class="stats-row">
       <el-col :xs="24" :sm="8">
         <div class="stat-card">
-          <div class="stat-icon today"><el-icon><Calendar /></el-icon></div>
+          <div class="stat-icon today">
+            <el-icon><Calendar /></el-icon>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ stats.todayCount || 0 }}</span>
             <span class="stat-label">今日日志</span>
@@ -25,7 +27,9 @@
       </el-col>
       <el-col :xs="24" :sm="8">
         <div class="stat-card">
-          <div class="stat-icon week"><el-icon><Clock /></el-icon></div>
+          <div class="stat-icon week">
+            <el-icon><Clock /></el-icon>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ stats.weekCount || 0 }}</span>
             <span class="stat-label">本周日志</span>
@@ -34,7 +38,9 @@
       </el-col>
       <el-col :xs="24" :sm="8">
         <div class="stat-card">
-          <div class="stat-icon pending"><el-icon><Stamp /></el-icon></div>
+          <div class="stat-icon pending">
+            <el-icon><Stamp /></el-icon>
+          </div>
           <div class="stat-info">
             <span class="stat-value">{{ stats.pendingApproval || 0 }}</span>
             <span class="stat-label">待我审批</span>
@@ -57,9 +63,9 @@
         v-model="searchKeyword"
         placeholder="搜索工作内容"
         clearable
+        style="max-width: 320px;"
         @keyup.enter="handleSearch"
         @clear="handleSearch"
-        style="max-width: 320px;"
       >
         <template #append>
           <el-button :icon="Search" @click="handleSearch" />
@@ -73,17 +79,21 @@
         end-placeholder="结束日期"
         format="YYYY-MM-DD"
         value-format="YYYY-MM-DD"
-        @change="handleSearch"
         style="width: 260px;"
+        @change="handleSearch"
       />
     </div>
 
     <!-- 日志列表 -->
     <div v-loading="loading" class="report-list">
       <div v-if="!reportList.length && !loading" class="empty-state">
-        <el-icon class="empty-icon"><Document /></el-icon>
+        <el-icon class="empty-icon">
+          <Document />
+        </el-icon>
         <p>暂无日志记录</p>
-        <el-button type="primary" plain @click="openCreateDialog">写第一篇日志</el-button>
+        <el-button type="primary" plain @click="openCreateDialog">
+          写第一篇日志
+        </el-button>
       </div>
 
       <div
@@ -105,7 +115,9 @@
               {{ report.statusName || report.status }}
             </span>
           </div>
-          <p class="card-content">{{ report.workContent || '暂无工作内容' }}</p>
+          <p class="card-content">
+            {{ report.workContent || '暂无工作内容' }}
+          </p>
           <div class="card-meta">
             <span class="meta-item">
               <el-icon><Clock /></el-icon>
@@ -125,7 +137,9 @@
             </span>
           </div>
           <div v-if="report.visibility" class="card-visibility">
-            <el-tag size="small" effect="plain">{{ report.visibilityName || report.visibility }}</el-tag>
+            <el-tag size="small" effect="plain">
+              {{ report.visibilityName || report.visibility }}
+            </el-tag>
           </div>
         </div>
         <div class="card-arrow">
@@ -155,7 +169,12 @@
       append-to-body
       destroy-on-close
     >
-      <el-form ref="createFormRef" :model="createForm" :rules="createRules" label-position="top">
+      <el-form
+        ref="createFormRef"
+        :model="createForm"
+        :rules="createRules"
+        label-position="top"
+      >
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="日志类型" prop="reportType">
@@ -238,9 +257,15 @@
       </el-form>
 
       <template #footer>
-        <el-button @click="createDialogVisible = false">取消</el-button>
-        <el-button @click="handleSaveDraft">保存草稿</el-button>
-        <el-button type="primary" :loading="submitting" @click="handleSubmitReport">提交日志</el-button>
+        <el-button @click="createDialogVisible = false">
+          取消
+        </el-button>
+        <el-button @click="handleSaveDraft">
+          保存草稿
+        </el-button>
+        <el-button type="primary" :loading="submitting" @click="handleSubmitReport">
+          提交日志
+        </el-button>
       </template>
     </el-dialog>
 
@@ -269,13 +294,38 @@
           </div>
           <div class="detail-actions">
             <template v-if="activeTab === 'my' || activeTab === 'submitted'">
-              <el-button v-if="currentReport.status === 'DRAFT'" type="primary" size="small" @click="handleEditReport">编辑</el-button>
-              <el-button v-if="currentReport.status === 'DRAFT'" type="primary" size="small" @click="handleSubmitReport">提交</el-button>
-              <el-button v-if="currentReport.status === 'DRAFT'" type="danger" size="small" @click="handleDeleteReport">删除</el-button>
+              <el-button
+                v-if="currentReport.status === 'DRAFT'"
+                type="primary"
+                size="small"
+                @click="handleEditReport"
+              >
+                编辑
+              </el-button>
+              <el-button
+                v-if="currentReport.status === 'DRAFT'"
+                type="primary"
+                size="small"
+                @click="handleSubmitReport"
+              >
+                提交
+              </el-button>
+              <el-button
+                v-if="currentReport.status === 'DRAFT'"
+                type="danger"
+                size="small"
+                @click="handleDeleteReport"
+              >
+                删除
+              </el-button>
             </template>
             <template v-if="activeTab === 'pending'">
-              <el-button type="success" size="small" @click="handleApprove(true)">通过</el-button>
-              <el-button type="danger" size="small" @click="handleApprove(false)">退回</el-button>
+              <el-button type="success" size="small" @click="handleApprove(true)">
+                通过
+              </el-button>
+              <el-button type="danger" size="small" @click="handleApprove(false)">
+                退回
+              </el-button>
             </template>
           </div>
         </div>
@@ -299,25 +349,39 @@
 
         <!-- 工作内容 -->
         <div class="detail-section">
-          <div class="section-label"><el-icon><Document /></el-icon> 工作内容</div>
-          <div class="section-content">{{ currentReport.workContent || '暂无' }}</div>
+          <div class="section-label">
+            <el-icon><Document /></el-icon> 工作内容
+          </div>
+          <div class="section-content">
+            {{ currentReport.workContent || '暂无' }}
+          </div>
         </div>
 
         <!-- 明日计划 -->
         <div v-if="currentReport.tomorrowPlan" class="detail-section">
-          <div class="section-label"><el-icon><Timer /></el-icon> 明日计划</div>
-          <div class="section-content">{{ currentReport.tomorrowPlan }}</div>
+          <div class="section-label">
+            <el-icon><Timer /></el-icon> 明日计划
+          </div>
+          <div class="section-content">
+            {{ currentReport.tomorrowPlan }}
+          </div>
         </div>
 
         <!-- 备注问题 -->
         <div v-if="currentReport.issues" class="detail-section">
-          <div class="section-label"><el-icon><Warning /></el-icon> 备注问题</div>
-          <div class="section-content">{{ currentReport.issues }}</div>
+          <div class="section-label">
+            <el-icon><Warning /></el-icon> 备注问题
+          </div>
+          <div class="section-content">
+            {{ currentReport.issues }}
+          </div>
         </div>
 
         <!-- 审批信息 -->
         <div v-if="currentReport.approverName" class="detail-section approval-info">
-          <div class="section-label"><el-icon><Stamp /></el-icon> 审批结果</div>
+          <div class="section-label">
+            <el-icon><Stamp /></el-icon> 审批结果
+          </div>
           <div class="approval-content">
             <span class="approval-result" :class="currentReport.status === 'APPROVED' ? 'success' : 'danger'">
               {{ currentReport.status === 'APPROVED' ? '已通过' : '已退回' }}
@@ -359,14 +423,23 @@
         <!-- 评论列表 -->
         <div v-if="currentReport.comments?.length" class="comment-list">
           <div v-for="comment in currentReport.comments" :key="comment.id" class="comment-item">
-            <DingtalkAvatar :src="comment.userAvatar" :name="comment.userName" :size="32" shape="circle" />
+            <DingtalkAvatar
+              :src="comment.userAvatar"
+              :name="comment.userName"
+              :size="32"
+              shape="circle"
+            />
             <div class="comment-body">
               <div class="comment-header">
                 <span class="comment-author">{{ comment.userName }}</span>
                 <span class="comment-time">{{ comment.createTime }}</span>
               </div>
-              <div v-if="comment.parentContent" class="comment-quote">回复：{{ comment.parentContent }}</div>
-              <div class="comment-content">{{ comment.content }}</div>
+              <div v-if="comment.parentContent" class="comment-quote">
+                回复：{{ comment.parentContent }}
+              </div>
+              <div class="comment-content">
+                {{ comment.content }}
+              </div>
             </div>
           </div>
         </div>
@@ -382,7 +455,12 @@
             maxlength="200"
             show-word-limit
           />
-          <el-button type="primary" size="small" :loading="commentLoading" @click="handleAddComment">
+          <el-button
+            type="primary"
+            size="small"
+            :loading="commentLoading"
+            @click="handleAddComment"
+          >
             发送
           </el-button>
         </div>

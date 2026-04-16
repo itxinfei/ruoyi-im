@@ -338,7 +338,7 @@ const isDragover = ref(false)
 
 // 拖拽上传状态
 const dragUploadingFiles = ref([]) // { file, progress, status, fileType, result }
-let dragUploadAbortController = null // 取消上传的控制器
+const dragUploadAbortController = null // 取消上传的控制器
 
 // 拖拽进度计算属性
 const dragProgressPercentage = computed(() => {

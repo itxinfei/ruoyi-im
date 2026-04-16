@@ -6,10 +6,12 @@
     </div>
 
     <!-- 设置内容区 -->
-    <div class="settings-content custom-scrollbar" v-loading="loading">
+    <div v-loading="loading" class="settings-content custom-scrollbar">
       <!-- 通用设置 -->
       <div class="settings-section">
-        <div class="section-title">通用设置</div>
+        <div class="section-title">
+          通用设置
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="setting-info">
@@ -44,7 +46,9 @@
 
       <!-- 通知设置 -->
       <div class="settings-section">
-        <div class="section-title">通知设置</div>
+        <div class="section-title">
+          通知设置
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="setting-info">
@@ -93,7 +97,9 @@
 
       <!-- 隐私设置 -->
       <div class="settings-section">
-        <div class="section-title">隐私设置</div>
+        <div class="section-title">
+          隐私设置
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="setting-info">
@@ -135,7 +141,9 @@
 
       <!-- 快捷键设置 -->
       <div class="settings-section">
-        <div class="section-title">快捷键设置</div>
+        <div class="section-title">
+          快捷键设置
+        </div>
         <div class="settings-card">
           <div class="setting-row">
             <div class="setting-info">
@@ -194,17 +202,29 @@
 
       <!-- 黑名单管理 -->
       <div class="settings-section">
-        <div class="section-title">黑名单</div>
+        <div class="section-title">
+          黑名单
+        </div>
         <div class="settings-card">
           <div v-if="blockedUsers.length === 0" class="empty-blocked">
             <span>暂无黑名单用户</span>
           </div>
           <div v-for="user in blockedUsers" :key="user.userId" class="blocked-user-row">
             <div class="user-info">
-              <DingtalkAvatar :src="user.avatar" :name="user.nickname || '用户'" :size="32" shape="square" />
+              <DingtalkAvatar
+                :src="user.avatar"
+                :name="user.nickname || '用户'"
+                :size="32"
+                shape="square"
+              />
               <span class="username">{{ user.nickname || '用户' + user.userId }}</span>
             </div>
-            <el-button type="danger" plain size="small" @click="handleUnblock(user.userId)">
+            <el-button
+              type="danger"
+              plain
+              size="small"
+              @click="handleUnblock(user.userId)"
+            >
               解除拉黑
             </el-button>
           </div>
@@ -213,7 +233,9 @@
 
       <!-- 通话记录 -->
       <div class="settings-section">
-        <div class="section-title">通话记录</div>
+        <div class="section-title">
+          通话记录
+        </div>
         <div class="settings-card">
           <div v-if="callHistoryLoading" class="call-history-loading">
             <span>加载中...</span>

@@ -34,7 +34,9 @@
             :class="{ active: activeFolder === folder.key }"
             @click="activeFolder = folder.key"
           >
-            <el-icon class="folder-icon"><component :is="folder.iconEl" /></el-icon>
+            <el-icon class="folder-icon">
+              <component :is="folder.iconEl" />
+            </el-icon>
             <span class="folder-label">{{ folder.label }}</span>
             <span v-if="folder.count > 0" class="folder-count">{{ folder.count }}</span>
           </div>
@@ -45,7 +47,9 @@
           <!-- 搜索结果提示 -->
           <div v-if="isSearchMode" class="search-result-tip">
             <span>搜索"{{ searchKeyword }}"的结果 ({{ searchResults.length }} 封邮件)</span>
-            <el-button text size="small" @click="handleSearchClear">清除搜索</el-button>
+            <el-button text size="small" @click="handleSearchClear">
+              清除搜索
+            </el-button>
           </div>
 
           <div v-if="loading" class="loading-state">
@@ -56,7 +60,9 @@
           </div>
 
           <div v-else-if="displayEmails.length === 0" class="empty-state">
-            <el-icon class="empty-icon"><Message /></el-icon>
+            <el-icon class="empty-icon">
+              <Message />
+            </el-icon>
             <p class="empty-text">
               {{ isSearchMode ? '未找到匹配的邮件' : '暂无邮件' }}
             </p>

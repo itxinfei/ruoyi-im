@@ -13,7 +13,9 @@
       <el-tab-pane label="收到的 DING" name="received">
         <div v-loading="receivedLoading" class="ding-list custom-scrollbar">
           <div v-if="!receivedLoading && receivedDings.length === 0" class="empty-state">
-            <el-icon :size="48"><Bell /></el-icon>
+            <el-icon :size="48">
+              <Bell />
+            </el-icon>
             <span>暂无收到的 DING</span>
           </div>
           <div
@@ -23,22 +25,38 @@
           >
             <div class="ding-card-header">
               <div class="sender-info">
-                <DingtalkAvatar :src="ding.senderAvatar" :name="ding.senderName" :size="36" shape="square" />
+                <DingtalkAvatar
+                  :src="ding.senderAvatar"
+                  :name="ding.senderName"
+                  :size="36"
+                  shape="square"
+                />
                 <div class="sender-detail">
                   <span class="sender-name">{{ ding.senderName }}</span>
                   <span class="send-time">{{ formatTime(ding.sendTime) }}</span>
                 </div>
               </div>
-              <el-tag v-if="ding.priority === 'URGENT'" type="danger" size="small">紧急</el-tag>
-              <el-tag v-else type="info" size="small">普通</el-tag>
+              <el-tag v-if="ding.priority === 'URGENT'" type="danger" size="small">
+                紧急
+              </el-tag>
+              <el-tag v-else type="info" size="small">
+                普通
+              </el-tag>
             </div>
-            <div class="ding-content">{{ ding.content }}</div>
+            <div class="ding-content">
+              {{ ding.content }}
+            </div>
             <div class="ding-stats">
               <span><el-icon><View /></el-icon> 已读 {{ ding.readCount || 0 }}/{{ ding.sendCount || 0 }}</span>
               <span><el-icon><SuccessFilled /></el-icon> 确认 {{ ding.confirmedCount || 0 }}</span>
             </div>
             <div class="ding-actions">
-              <el-button v-if="!ding.isRead" type="primary" size="small" @click="handleRead(ding)">
+              <el-button
+                v-if="!ding.isRead"
+                type="primary"
+                size="small"
+                @click="handleRead(ding)"
+              >
                 标为已读
               </el-button>
               <el-button type="success" size="small" @click="handleConfirm(ding)">
@@ -52,7 +70,9 @@
       <el-tab-pane label="发出的 DING" name="sent">
         <div v-loading="sentLoading" class="ding-list custom-scrollbar">
           <div v-if="!sentLoading && sentDings.length === 0" class="empty-state">
-            <el-icon :size="48"><Promotion /></el-icon>
+            <el-icon :size="48">
+              <Promotion />
+            </el-icon>
             <span>暂无发出的 DING</span>
           </div>
           <div
@@ -62,14 +82,24 @@
           >
             <div class="ding-card-header">
               <div class="ding-type">
-                <el-tag v-if="ding.dingType === 'APP'" size="small">应用内</el-tag>
-                <el-tag v-else-if="ding.dingType === 'SMS'" size="small">短信</el-tag>
-                <el-tag v-else-if="ding.dingType === 'CALL'" size="small">电话</el-tag>
-                <el-tag v-if="ding.priority === 'URGENT'" type="danger" size="small">紧急</el-tag>
+                <el-tag v-if="ding.dingType === 'APP'" size="small">
+                  应用内
+                </el-tag>
+                <el-tag v-else-if="ding.dingType === 'SMS'" size="small">
+                  短信
+                </el-tag>
+                <el-tag v-else-if="ding.dingType === 'CALL'" size="small">
+                  电话
+                </el-tag>
+                <el-tag v-if="ding.priority === 'URGENT'" type="danger" size="small">
+                  紧急
+                </el-tag>
               </div>
               <span class="send-time">{{ formatTime(ding.sendTime) }}</span>
             </div>
-            <div class="ding-content">{{ ding.content }}</div>
+            <div class="ding-content">
+              {{ ding.content }}
+            </div>
             <div class="ding-stats">
               <span><el-icon><View /></el-icon> 已读 {{ ding.readCount || 0 }}/{{ ding.sendCount || 0 }}</span>
               <span><el-icon><SuccessFilled /></el-icon> 确认 {{ ding.confirmedCount || 0 }}</span>
@@ -101,15 +131,25 @@
       <el-form :model="dingForm" label-width="80px">
         <el-form-item label="DING 类型">
           <el-radio-group v-model="dingForm.dingType">
-            <el-radio label="APP">应用内提醒</el-radio>
-            <el-radio label="SMS">短信提醒</el-radio>
-            <el-radio label="CALL">电话提醒</el-radio>
+            <el-radio label="APP">
+              应用内提醒
+            </el-radio>
+            <el-radio label="SMS">
+              短信提醒
+            </el-radio>
+            <el-radio label="CALL">
+              电话提醒
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="优先级">
           <el-radio-group v-model="dingForm.priority">
-            <el-radio label="URGENT">紧急</el-radio>
-            <el-radio label="NORMAL">普通</el-radio>
+            <el-radio label="URGENT">
+              紧急
+            </el-radio>
+            <el-radio label="NORMAL">
+              普通
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="会话">
@@ -123,12 +163,21 @@
           </el-select>
         </el-form-item>
         <el-form-item label="内容">
-          <el-input v-model="dingForm.content" type="textarea" rows="3" placeholder="请输入 DING 内容" />
+          <el-input
+            v-model="dingForm.content"
+            type="textarea"
+            rows="3"
+            placeholder="请输入 DING 内容"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showSendDialog = false">取消</el-button>
-        <el-button type="primary" @click="handleSendDing">发送</el-button>
+        <el-button @click="showSendDialog = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="handleSendDing">
+          发送
+        </el-button>
       </template>
     </el-dialog>
 
@@ -139,11 +188,22 @@
       </div>
       <div v-else class="receipt-list">
         <div v-for="receipt in receipts" :key="receipt.userId" class="receipt-item">
-          <DingtalkAvatar :src="receipt.userAvatar" :name="receipt.userName" :size="32" shape="square" />
+          <DingtalkAvatar
+            :src="receipt.userAvatar"
+            :name="receipt.userName"
+            :size="32"
+            shape="square"
+          />
           <span class="receipt-name">{{ receipt.userName }}</span>
-          <el-tag v-if="receipt.status === 'READ'" type="success" size="small">已读</el-tag>
-          <el-tag v-else-if="receipt.status === 'CONFIRMED'" type="primary" size="small">已确认</el-tag>
-          <el-tag v-else type="info" size="small">未读</el-tag>
+          <el-tag v-if="receipt.status === 'READ'" type="success" size="small">
+            已读
+          </el-tag>
+          <el-tag v-else-if="receipt.status === 'CONFIRMED'" type="primary" size="small">
+            已确认
+          </el-tag>
+          <el-tag v-else type="info" size="small">
+            未读
+          </el-tag>
         </div>
       </div>
     </el-dialog>

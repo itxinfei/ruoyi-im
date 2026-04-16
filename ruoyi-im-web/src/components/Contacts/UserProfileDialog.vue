@@ -84,9 +84,15 @@
           </el-button>
           <template #dropdown>
             <el-dropdown-menu>
-              <el-dropdown-item command="star">设为星标</el-dropdown-item>
-              <el-dropdown-item command="block">加入黑名单</el-dropdown-item>
-              <el-dropdown-item command="remark">设置备注</el-dropdown-item>
+              <el-dropdown-item command="star">
+                设为星标
+              </el-dropdown-item>
+              <el-dropdown-item command="block">
+                加入黑名单
+              </el-dropdown-item>
+              <el-dropdown-item command="remark">
+                设置备注
+              </el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>

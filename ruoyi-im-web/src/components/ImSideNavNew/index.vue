@@ -31,15 +31,21 @@
     <!-- 底部功能区 -->
     <div class="nav-bottom">
       <div class="nav-item" @click="switchModule('search')">
-        <el-icon :size="20"><Search /></el-icon>
+        <el-icon :size="20">
+          <Search />
+        </el-icon>
         <span class="nav-label">搜索</span>
       </div>
       <div class="nav-item" @click="openSystemSettings">
-        <el-icon :size="20"><Setting /></el-icon>
+        <el-icon :size="20">
+          <Setting />
+        </el-icon>
         <span class="nav-label">设置</span>
       </div>
       <div class="nav-item" @click="handleToggleTheme">
-        <el-icon :size="20"><Sunny v-if="isDark" /><Moon v-else /></el-icon>
+        <el-icon :size="20">
+          <Sunny v-if="isDark" /><Moon v-else />
+        </el-icon>
         <span class="nav-label">{{ isDark ? '亮色' : '暗黑' }}</span>
       </div>
     </div>

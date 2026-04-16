@@ -58,8 +58,12 @@
               </el-button>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item command="save">保存当前布局</el-dropdown-item>
-                  <el-dropdown-item command="reset">重置布局</el-dropdown-item>
+                  <el-dropdown-item command="save">
+                    保存当前布局
+                  </el-dropdown-item>
+                  <el-dropdown-item command="reset">
+                    重置布局
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -162,18 +166,18 @@
             </div>
           </div>
           <div class="attendance-actions">
-            <el-button 
-              type="primary" 
-              size="large" 
+            <el-button
+              type="primary"
+              size="large"
               :disabled="attendanceStatus.checkedIn"
               :loading="loading"
               @click="handlePunch('in')"
             >
               上班打卡
             </el-button>
-            <el-button 
-              type="success" 
-              size="large" 
+            <el-button
+              type="success"
+              size="large"
               :disabled="!attendanceStatus.checkedIn || attendanceStatus.checkedOut"
               :loading="loading"
               @click="handlePunch('out')"
@@ -252,12 +256,19 @@
         </header>
         <div class="schedule-content">
           <div v-if="scheduleList.length > 0" class="schedule-list">
-            <div v-for="schedule in scheduleList.slice(0, 5)" :key="schedule.id" class="schedule-item" @click="handleScheduleClick(schedule)">
+            <div
+              v-for="schedule in scheduleList.slice(0, 5)"
+              :key="schedule.id"
+              class="schedule-item"
+              @click="handleScheduleClick(schedule)"
+            >
               <div class="schedule-time">
                 {{ schedule.startTime?.substring(5, 16) || '' }}
               </div>
               <div class="schedule-info">
-                <p class="schedule-title">{{ schedule.title }}</p>
+                <p class="schedule-title">
+                  {{ schedule.title }}
+                </p>
                 <span v-if="schedule.location" class="schedule-location">{{ schedule.location }}</span>
               </div>
             </div>
@@ -292,7 +303,12 @@
     <CreateApprovalDialog v-model="showApprovalDialog" @success="loadApprovals" />
 
     <!-- 周报对话框 -->
-    <el-dialog v-model="showReportDialog" title="写周报" width="520px" append-to-body>
+    <el-dialog
+      v-model="showReportDialog"
+      title="写周报"
+      width="520px"
+      append-to-body
+    >
       <el-form label-position="top">
         <el-form-item label="周期">
           <el-date-picker
@@ -331,8 +347,12 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showReportDialog = false">取消</el-button>
-        <el-button type="primary" :loading="reportLoading" @click="handleSubmitReport">提交周报</el-button>
+        <el-button @click="showReportDialog = false">
+          取消
+        </el-button>
+        <el-button type="primary" :loading="reportLoading" @click="handleSubmitReport">
+          提交周报
+        </el-button>
       </template>
     </el-dialog>
   </div>
@@ -442,7 +462,7 @@ const transformApp = (app) => {
     label: app.name,
     elIcon: iconInfo.component,
     iconClass: iconInfo.class,
-    route: route,
+    route,
     action: route ? null : 'custom',
     appUrl: app.appUrl,
     appType: app.appType,

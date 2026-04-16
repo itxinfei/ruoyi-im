@@ -128,7 +128,7 @@
         <div v-else class="console-group">
           <!-- 通话异常状态 -->
           <div v-if="status === 'reconnecting'" class="reconnect-hint">
-            <span class="reconnect-dot"></span>
+            <span class="reconnect-dot" />
             <span>网络不稳定，正在重连...</span>
           </div>
           <div v-else-if="status === 'reconnect_failed'" class="reconnect-actions">

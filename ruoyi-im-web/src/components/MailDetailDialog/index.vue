@@ -58,7 +58,9 @@
               :key="file.name || `file-${index}`"
               class="attachment-item"
             >
-              <el-icon class="file-icon"><Document /></el-icon>
+              <el-icon class="file-icon">
+                <Document />
+              </el-icon>
               <span class="file-name">{{ file.name }}</span>
               <span class="file-size">{{ formatFileSize(file.size) }}</span>
               <el-button size="small" link @click="downloadAttachment(file)">

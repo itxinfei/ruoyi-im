@@ -18,13 +18,17 @@
               class="history-item"
               @click="handleSelect(item)"
             >
-              <el-icon class="text-sm mr-2"><Clock /></el-icon>
+              <el-icon class="text-sm mr-2">
+                <Clock />
+              </el-icon>
               <span class="truncate">{{ item }}</span>
             </div>
           </div>
         </div>
         <div class="search-placeholder">
-          <el-icon class="text-4xl mb-2 text-slate-300"><Search /></el-icon>
+          <el-icon class="text-4xl mb-2 text-slate-300">
+            <Search />
+          </el-icon>
           <p>搜索联系人、群组或聊天记录</p>
         </div>
       </div>
@@ -61,7 +65,9 @@
             @click="handleGroupClick(group)"
           >
             <div class="avatar bg-primary">
-              <el-icon class="text-sm"><ChatDotRound /></el-icon>
+              <el-icon class="text-sm">
+                <ChatDotRound />
+              </el-icon>
             </div>
             <span class="name">{{ group.name }}</span>
           </div>

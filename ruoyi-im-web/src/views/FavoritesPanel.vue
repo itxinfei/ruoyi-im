@@ -35,7 +35,9 @@
       </div>
 
       <div v-else-if="filteredFavorites.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><Star /></el-icon>
+        <el-icon class="empty-icon">
+          <Star />
+        </el-icon>
         <p class="empty-text">
           {{ searchKeyword ? '没有找到匹配的收藏' : '暂无收藏消息' }}
         </p>

@@ -32,7 +32,9 @@
       </div>
 
       <div v-else-if="approvals.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><Document /></el-icon>
+        <el-icon class="empty-icon">
+          <Document />
+        </el-icon>
         <p class="empty-text">
           暂无审批事项
         </p>

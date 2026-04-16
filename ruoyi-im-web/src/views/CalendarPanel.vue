@@ -12,11 +12,21 @@
       <!-- 迷你日历 -->
       <div class="mini-calendar">
         <div class="mini-calendar-header">
-          <el-button text circle size="small" @click="prevMonth">
+          <el-button
+            text
+            circle
+            size="small"
+            @click="prevMonth"
+          >
             <el-icon><ArrowLeft /></el-icon>
           </el-button>
           <span class="mini-calendar-title">{{ miniCalendarTitle }}</span>
-          <el-button text circle size="small" @click="nextMonth">
+          <el-button
+            text
+            circle
+            size="small"
+            @click="nextMonth"
+          >
             <el-icon><ArrowRight /></el-icon>
           </el-button>
         </div>
@@ -46,15 +56,23 @@
       <!-- 视图切换 -->
       <div class="view-switch">
         <el-radio-group v-model="currentView" size="small">
-          <el-radio-button value="month">月</el-radio-button>
-          <el-radio-button value="week">周</el-radio-button>
-          <el-radio-button value="day">日</el-radio-button>
+          <el-radio-button value="month">
+            月
+          </el-radio-button>
+          <el-radio-button value="week">
+            周
+          </el-radio-button>
+          <el-radio-button value="day">
+            日
+          </el-radio-button>
         </el-radio-group>
       </div>
 
       <!-- 日程分类筛选 -->
       <div class="calendar-filters">
-        <div class="filter-title">日程分类</div>
+        <div class="filter-title">
+          日程分类
+        </div>
         <el-checkbox-group v-model="selectedCategories" class="filter-list">
           <el-checkbox value="work">
             <span class="filter-dot work" />工作
@@ -77,7 +95,9 @@
       <!-- 工具栏 -->
       <header class="calendar-toolbar">
         <div class="toolbar-left">
-          <el-button text @click="goToday">今天</el-button>
+          <el-button text @click="goToday">
+            今天
+          </el-button>
           <el-button-group>
             <el-button @click="prevPeriod">
               <el-icon><ArrowLeft /></el-icon>
@@ -106,7 +126,9 @@
         <template v-if="currentView === 'month'">
           <div class="month-view">
             <div class="month-header">
-              <div v-for="d in weekDays" :key="d" class="month-header-cell">{{ d }}</div>
+              <div v-for="d in weekDays" :key="d" class="month-header-cell">
+                {{ d }}
+              </div>
             </div>
             <div class="month-body">
               <div
@@ -159,8 +181,12 @@
                 class="week-header-cell"
                 :class="{ 'today': day.isToday }"
               >
-                <div class="weekday">{{ day.weekDay }}</div>
-                <div class="day-num">{{ day.day }}</div>
+                <div class="weekday">
+                  {{ day.weekDay }}
+                </div>
+                <div class="day-num">
+                  {{ day.day }}
+                </div>
               </div>
             </div>
             <div class="week-body">
@@ -185,8 +211,12 @@
                     :style="getEventStyle(event)"
                     @click="openEventDetail(event)"
                   >
-                    <div class="event-time">{{ formatEventTime(event) }}</div>
-                    <div class="event-title">{{ event.title }}</div>
+                    <div class="event-time">
+                      {{ formatEventTime(event) }}
+                    </div>
+                    <div class="event-title">
+                      {{ event.title }}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -200,8 +230,12 @@
             <div class="day-header">
               <div class="time-gutter" />
               <div class="day-header-cell" :class="{ 'today': isToday(selectedDate) }">
-                <div class="weekday">{{ selectedWeekDay }}</div>
-                <div class="day-num">{{ selectedDate.getDate() }}</div>
+                <div class="weekday">
+                  {{ selectedWeekDay }}
+                </div>
+                <div class="day-num">
+                  {{ selectedDate.getDate() }}
+                </div>
               </div>
             </div>
             <div class="day-body">
@@ -220,8 +254,12 @@
                   :style="getEventStyle(event)"
                   @click="openEventDetail(event)"
                 >
-                  <div class="event-time">{{ formatEventTime(event) }}</div>
-                  <div class="event-title">{{ event.title }}</div>
+                  <div class="event-time">
+                    {{ formatEventTime(event) }}
+                  </div>
+                  <div class="event-title">
+                    {{ event.title }}
+                  </div>
                   <div v-if="event.location" class="event-location">
                     <el-icon><Location /></el-icon>
                     {{ event.location }}
@@ -311,8 +349,17 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button v-if="editingEvent" type="danger" text @click="handleDelete">删除</el-button>
-        <el-button @click="showCreateDialog = false">取消</el-button>
+        <el-button
+          v-if="editingEvent"
+          type="danger"
+          text
+          @click="handleDelete"
+        >
+          删除
+        </el-button>
+        <el-button @click="showCreateDialog = false">
+          取消
+        </el-button>
         <el-button type="primary" :loading="submitting" @click="handleSubmit">
           {{ editingEvent ? '保存' : '创建' }}
         </el-button>
@@ -329,7 +376,9 @@
       <div v-if="currentEvent" class="event-detail">
         <div class="detail-header">
           <div class="detail-category" :class="currentEvent.category" />
-          <h3 class="detail-title">{{ currentEvent.title }}</h3>
+          <h3 class="detail-title">
+            {{ currentEvent.title }}
+          </h3>
         </div>
         <div class="detail-info">
           <div class="info-row">
@@ -351,9 +400,15 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="openShareDialog">分享</el-button>
-        <el-button @click="openEditDialog">编辑</el-button>
-        <el-button type="primary" @click="showDetailDialog = false">关闭</el-button>
+        <el-button @click="openShareDialog">
+          分享
+        </el-button>
+        <el-button @click="openEditDialog">
+          编辑
+        </el-button>
+        <el-button type="primary" @click="showDetailDialog = false">
+          关闭
+        </el-button>
       </template>
     </el-dialog>
 

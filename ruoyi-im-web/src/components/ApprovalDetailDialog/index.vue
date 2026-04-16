@@ -156,16 +156,23 @@
       <div class="cc-form">
         <!-- 已选抄送用户 -->
         <div v-if="ccUsers.length > 0" class="cc-selected">
-          <div class="cc-label">已选择 {{ ccUsers.length }} 人</div>
+          <div class="cc-label">
+            已选择 {{ ccUsers.length }} 人
+          </div>
           <div class="cc-tags">
             <el-tag
               v-for="user in ccUsers"
               :key="user.id"
               closable
-              @close="handleRemoveCcUser(user.id)"
               class="cc-tag"
+              @close="handleRemoveCcUser(user.id)"
             >
-              <DingtalkAvatar :src="user.avatar" :name="user.name" :size="16" shape="circle" />
+              <DingtalkAvatar
+                :src="user.avatar"
+                :name="user.name"
+                :size="16"
+                shape="circle"
+              />
               {{ user.name }}
             </el-tag>
           </div>
@@ -180,7 +187,9 @@
           class="cc-search"
         >
           <template #suffix>
-            <el-icon v-if="ccSearchLoading" class="is-loading"><Loading /></el-icon>
+            <el-icon v-if="ccSearchLoading" class="is-loading">
+              <Loading />
+            </el-icon>
           </template>
         </el-input>
 
@@ -192,7 +201,12 @@
             class="cc-result-item"
             @click="handleAddCcUser(user)"
           >
-            <DingtalkAvatar :src="user.avatar || user.userAvatar" :name="user.name || user.userName" :size="32" shape="circle" />
+            <DingtalkAvatar
+              :src="user.avatar || user.userAvatar"
+              :name="user.name || user.userName"
+              :size="32"
+              shape="circle"
+            />
             <span class="cc-result-name">{{ user.name || user.userName }}</span>
           </div>
         </div>
@@ -201,8 +215,12 @@
         </div>
       </div>
       <template #footer>
-        <el-button @click="showCcDialog = false">取消</el-button>
-        <el-button type="primary" @click="confirmCc">确认抄送</el-button>
+        <el-button @click="showCcDialog = false">
+          取消
+        </el-button>
+        <el-button type="primary" @click="confirmCc">
+          确认抄送
+        </el-button>
       </template>
     </el-dialog>
   </el-dialog>

@@ -17,7 +17,9 @@
             :class="{ active: activeNav === nav.id }"
             @click="activeNav = nav.id"
           >
-            <el-icon class="nav-icon"><component :is="getNavIcon(nav.icon)" /></el-icon>
+            <el-icon class="nav-icon">
+              <component :is="getNavIcon(nav.icon)" />
+            </el-icon>
             <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
@@ -33,7 +35,9 @@
             :class="{ active: activeNav === nav.id }"
             @click="activeNav = nav.id"
           >
-            <el-icon class="nav-icon"><component :is="getNavIcon(nav.icon)" /></el-icon>
+            <el-icon class="nav-icon">
+              <component :is="getNavIcon(nav.icon)" />
+            </el-icon>
             <span class="nav-label">{{ nav.label }}</span>
           </div>
         </div>
@@ -79,7 +83,9 @@
           </h2>
           <div class="header-divider" />
           <div class="search-box">
-            <el-icon class="search-icon"><Search /></el-icon>
+            <el-icon class="search-icon">
+              <Search />
+            </el-icon>
             <input
               v-model="searchQuery"
               class="search-input"
@@ -118,7 +124,9 @@
       <div class="docs-content">
         <!-- 空状态 -->
         <div v-if="!loading && files.length === 0" class="empty-state">
-          <el-icon class="empty-icon"><FolderOpened /></el-icon>
+          <el-icon class="empty-icon">
+            <FolderOpened />
+          </el-icon>
           <p class="empty-text">
             {{ searchQuery ? '没有找到匹配的文档' : '暂无文档' }}
           </p>
@@ -180,44 +188,60 @@
                     </button>
                     <template #dropdown>
                       <el-dropdown-menu>
-                        <el-dropdown-item command="view" :icon="View">查看</el-dropdown-item>
+                        <el-dropdown-item command="view" :icon="View">
+                          查看
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="file.documentType === 'TEXT' && activeNav !== 'trash'"
                           command="edit"
                           :icon="Edit"
-                        >编辑</el-dropdown-item>
+                        >
+                          编辑
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="activeNav !== 'trash' && !file.cloudFileId"
                           command="share"
                           :icon="Share"
-                        >分享</el-dropdown-item>
+                        >
+                          分享
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="activeNav !== 'trash' && file.documentType !== 'FOLDER' && !file.cloudFileId"
                           :command="file.isStarred ? 'unstar' : 'star'"
                           :icon="file.isStarred ? StarFilled : Star"
-                        >{{ file.isStarred ? '取消收藏' : '收藏' }}</el-dropdown-item>
+                        >
+                          {{ file.isStarred ? '取消收藏' : '收藏' }}
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="activeNav !== 'trash'"
                           command="rename"
                           :icon="EditPen"
-                        >重命名</el-dropdown-item>
+                        >
+                          重命名
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="activeNav !== 'trash'"
                           command="delete"
                           :icon="Delete"
                           divided
-                        >删除</el-dropdown-item>
+                        >
+                          删除
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="activeNav === 'trash'"
                           command="restore"
                           :icon="Refresh"
-                        >恢复</el-dropdown-item>
+                        >
+                          恢复
+                        </el-dropdown-item>
                         <el-dropdown-item
                           v-if="activeNav === 'trash'"
                           command="permanent"
                           :icon="Delete"
                           divided
-                        >永久删除</el-dropdown-item>
+                        >
+                          永久删除
+                        </el-dropdown-item>
                       </el-dropdown-menu>
                     </template>
                   </el-dropdown>
@@ -235,7 +259,12 @@
       @saved="handleFileSaved"
     />
     <!-- 分享文档弹窗 -->
-    <el-dialog v-model="showShareDialog" title="分享文档" width="440px" append-to-body>
+    <el-dialog
+      v-model="showShareDialog"
+      title="分享文档"
+      width="440px"
+      append-to-body
+    >
       <el-form label-position="top">
         <el-form-item label="分享给用户">
           <el-input v-model="shareForm.targetUserId" placeholder="请输入用户ID" clearable />
@@ -248,8 +277,12 @@
         </el-form-item>
       </el-form>
       <template #footer>
-        <el-button @click="showShareDialog = false">取消</el-button>
-        <el-button type="primary" :loading="shareLoading" @click="handleShareConfirm">分享</el-button>
+        <el-button @click="showShareDialog = false">
+          取消
+        </el-button>
+        <el-button type="primary" :loading="shareLoading" @click="handleShareConfirm">
+          分享
+        </el-button>
       </template>
     </el-dialog>
     <!-- 隐藏的文件上传输入框 -->
@@ -484,11 +517,11 @@ const getNavIcon = (icon) => {
 // 文件图标 Element Plus 组件名
 const getFileIconEl = (icon) => {
   const map = {
-    'Document': Document,
-    'Picture': Picture,
-    'VideoCamera': VideoCamera,
-    'Microphone': Microphone,
-    'Folder': Folder
+    Document,
+    Picture,
+    VideoCamera,
+    Microphone,
+    Folder
   }
   return map[icon] || Document
 }

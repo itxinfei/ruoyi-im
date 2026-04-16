@@ -10,7 +10,9 @@
       <div class="sidebar-content">
         <!-- 状态筛选 -->
         <div class="nav-section">
-          <div class="nav-section-title">状态</div>
+          <div class="nav-section-title">
+            状态
+          </div>
           <div
             v-for="tab in statusTabs"
             :key="tab.key"
@@ -18,7 +20,9 @@
             :class="{ active: activeFilter === tab.key }"
             @click="activeFilter = tab.key"
           >
-            <el-icon class="nav-icon"><component :is="tab.iconEl" /></el-icon>
+            <el-icon class="nav-icon">
+              <component :is="tab.iconEl" />
+            </el-icon>
             <span class="nav-label">{{ tab.label }}</span>
             <div v-if="getCount(tab.key) > 0" class="nav-badge">
               {{ getCount(tab.key) }}
@@ -28,7 +32,9 @@
 
         <!-- 分类筛选 -->
         <div class="nav-section">
-          <div class="nav-section-title">分类</div>
+          <div class="nav-section-title">
+            分类
+          </div>
           <div
             v-for="cat in categoryTabs"
             :key="cat.key"
@@ -36,7 +42,9 @@
             :class="{ active: activeFilter === cat.key }"
             @click="activeFilter = cat.key"
           >
-            <el-icon class="nav-icon"><component :is="cat.iconEl" /></el-icon>
+            <el-icon class="nav-icon">
+              <component :is="cat.iconEl" />
+            </el-icon>
             <span class="nav-label">{{ cat.label }}</span>
             <div v-if="getCategoryCount(cat.key) > 0" class="nav-badge cat">
               {{ getCategoryCount(cat.key) }}
@@ -62,7 +70,9 @@
         </div>
         <div class="header-right">
           <div class="search-box">
-            <el-icon class="search-icon"><Search /></el-icon>
+            <el-icon class="search-icon">
+              <Search />
+            </el-icon>
             <input
               v-model="searchQuery"
               class="search-input"
@@ -95,7 +105,9 @@
           >
             <div class="todo-checkbox" @click.stop="handleToggle(todo)">
               <div class="checkbox-inner" :class="{ checked: todo.status === 'COMPLETED' }">
-                <el-icon v-if="todo.status === 'COMPLETED'"><Check /></el-icon>
+                <el-icon v-if="todo.status === 'COMPLETED'">
+                  <Check />
+                </el-icon>
               </div>
             </div>
             <div class="todo-main-info">

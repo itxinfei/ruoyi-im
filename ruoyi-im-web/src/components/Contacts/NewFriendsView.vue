@@ -18,7 +18,9 @@
       </div>
 
       <div v-else-if="requests.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><Plus /></el-icon>
+        <el-icon class="empty-icon">
+          <Plus />
+        </el-icon>
         <p class="empty-text">
           暂无新的好友申请
         </p>

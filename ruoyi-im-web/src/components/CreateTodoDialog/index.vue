@@ -7,20 +7,40 @@
     destroy-on-close
     append-to-body
   >
-    <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
+    <el-form
+      ref="formRef"
+      :model="form"
+      :rules="rules"
+      label-position="top"
+    >
       <el-form-item label="任务标题" prop="title">
-        <el-input v-model="form.title" placeholder="请输入任务标题" maxlength="100" show-word-limit />
+        <el-input
+          v-model="form.title"
+          placeholder="请输入任务标题"
+          maxlength="100"
+          show-word-limit
+        />
       </el-form-item>
 
       <el-form-item label="任务描述" prop="description">
-        <el-input v-model="form.description" type="textarea" :rows="3" placeholder="请输入任务描述" maxlength="500" />
+        <el-input
+          v-model="form.description"
+          type="textarea"
+          :rows="3"
+          placeholder="请输入任务描述"
+          maxlength="500"
+        />
       </el-form-item>
 
       <div class="form-row">
         <el-form-item label="优先级" prop="priority" class="form-item-half">
           <el-radio-group v-model="form.priority">
-            <el-radio :label="2">普通</el-radio>
-            <el-radio :label="3">紧急</el-radio>
+            <el-radio :label="2">
+              普通
+            </el-radio>
+            <el-radio :label="3">
+              紧急
+            </el-radio>
           </el-radio-group>
         </el-form-item>
 
@@ -61,7 +81,9 @@
 
     <template #footer>
       <div class="dialog-footer">
-        <el-button @click="visible = false">取消</el-button>
+        <el-button @click="visible = false">
+          取消
+        </el-button>
         <el-button type="primary" :loading="saving" @click="handleSubmit">
           {{ isEdit ? '保存' : '创建' }}
         </el-button>

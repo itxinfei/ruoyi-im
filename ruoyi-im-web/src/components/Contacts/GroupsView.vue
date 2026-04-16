@@ -18,7 +18,9 @@
       </div>
 
       <div v-else-if="groups.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><UserFilled /></el-icon>
+        <el-icon class="empty-icon">
+          <UserFilled />
+        </el-icon>
         <p class="empty-text">
           暂无群组
         </p>

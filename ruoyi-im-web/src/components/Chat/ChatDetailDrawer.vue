@@ -368,26 +368,30 @@ const handleShowAnnouncement = async () => {
 <template>
   <el-drawer
     :model-value="modelValue"
-    @update:model-value="val => emit('update:modelValue', val)"
     title="会话详情"
     direction="rtl"
     size="320px"
     class="im-detail-drawer"
     :with-header="false"
+    @update:model-value="val => emit('update:modelValue', val)"
   >
-    <div class="drawer-content" v-loading="loading">
+    <div v-loading="loading" class="drawer-content">
       <!-- 头部：基本信息 -->
       <div class="section hero-section">
         <div class="hero-main">
-          <DingtalkAvatar 
-            :src="session.avatar" 
-            :name="session.name" 
-            :size="48" 
-            shape="square" 
+          <DingtalkAvatar
+            :src="session.avatar"
+            :name="session.name"
+            :size="48"
+            shape="square"
           />
           <div class="hero-info">
-            <h3 class="name">{{ session.name }}</h3>
-            <p class="sub">{{ session.type === 'GROUP' ? '群聊' : '单聊' }}</p>
+            <h3 class="name">
+              {{ session.name }}
+            </h3>
+            <p class="sub">
+              {{ session.type === 'GROUP' ? '群聊' : '单聊' }}
+            </p>
           </div>
         </div>
       </div>
@@ -399,9 +403,20 @@ const handleShowAnnouncement = async () => {
           <span class="count">{{ session.memberCount }}人</span>
         </div>
         <div class="member-grid">
-          <div v-for="m in members" :key="m.userId" class="member-item" @click="emit('show-user', m.userId)" @contextmenu="handleMemberRightClick($event, m)">
+          <div
+            v-for="m in members"
+            :key="m.userId"
+            class="member-item"
+            @click="emit('show-user', m.userId)"
+            @contextmenu="handleMemberRightClick($event, m)"
+          >
             <div class="avatar-wrapper">
-              <DingtalkAvatar :src="m.avatar" :name="m.nickname" :size="32" shape="square" />
+              <DingtalkAvatar
+                :src="m.avatar"
+                :name="m.nickname"
+                :size="32"
+                shape="square"
+              />
               <span v-if="m.role === 'OWNER'" class="role-badge owner"><el-icon><StarFilled /></el-icon></span>
               <span v-else-if="m.role === 'ADMIN'" class="role-badge admin"><el-icon><Microphone /></el-icon></span>
             </div>
@@ -409,16 +424,22 @@ const handleShowAnnouncement = async () => {
           </div>
           <!-- 查看更多 -->
           <div v-if="hasMoreMembers" class="member-item more-btn" @click="toggleShowAllMembers">
-            <div class="icon-box more-icon"><el-icon><More /></el-icon></div>
+            <div class="icon-box more-icon">
+              <el-icon><More /></el-icon>
+            </div>
             <span class="nickname">查看更多</span>
           </div>
           <!-- 收起 -->
           <div v-else-if="showAllMembers && allMembers.length > 12" class="member-item collapse-btn" @click="showAllMembers = false">
-            <div class="icon-box"><el-icon><ArrowUp /></el-icon></div>
+            <div class="icon-box">
+              <el-icon><ArrowUp /></el-icon>
+            </div>
             <span class="nickname">收起</span>
           </div>
           <div class="member-item add-btn">
-            <div class="icon-box"><el-icon><Plus /></el-icon></div>
+            <div class="icon-box">
+              <el-icon><Plus /></el-icon>
+            </div>
             <span class="nickname">邀请</span>
           </div>
         </div>
@@ -436,11 +457,21 @@ const handleShowAnnouncement = async () => {
         </div>
         <!-- 快捷操作 -->
         <div class="info-actions">
-          <el-button type="primary" plain size="small" @click="handleVoiceCall">
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="handleVoiceCall"
+          >
             <el-icon><Phone /></el-icon>
             语音通话
           </el-button>
-          <el-button type="primary" plain size="small" @click="handleVideoCall">
+          <el-button
+            type="primary"
+            plain
+            size="small"
+            @click="handleVideoCall"
+          >
             <el-icon><VideoCamera /></el-icon>
             视频通话
           </el-button>
@@ -449,11 +480,21 @@ const handleShowAnnouncement = async () => {
 
       <!-- 群组通话入口 -->
       <div v-if="session.type === 'GROUP'" class="section info-actions">
-        <el-button type="primary" plain size="small" @click="handleGroupCall('VOICE')">
+        <el-button
+          type="primary"
+          plain
+          size="small"
+          @click="handleGroupCall('VOICE')"
+        >
           <el-icon><Phone /></el-icon>
           语音通话
         </el-button>
-        <el-button type="primary" plain size="small" @click="handleGroupCall('VIDEO')">
+        <el-button
+          type="primary"
+          plain
+          size="small"
+          @click="handleGroupCall('VIDEO')"
+        >
           <el-icon><VideoCamera /></el-icon>
           视频通话
         </el-button>
@@ -502,8 +543,23 @@ const handleShowAnnouncement = async () => {
       <GroupFilePanel ref="groupFilePanelRef" :group-id="session.type === 'GROUP' ? session.targetId : null" />
 
       <div class="bottom-actions">
-        <el-button type="danger" plain class="w-full" @click="handleClearChat">清空聊天记录</el-button>
-        <el-button v-if="session.type === 'GROUP'" type="danger" plain class="w-full" @click="handleLeaveGroup">退出群聊</el-button>
+        <el-button
+          type="danger"
+          plain
+          class="w-full"
+          @click="handleClearChat"
+        >
+          清空聊天记录
+        </el-button>
+        <el-button
+          v-if="session.type === 'GROUP'"
+          type="danger"
+          plain
+          class="w-full"
+          @click="handleLeaveGroup"
+        >
+          退出群聊
+        </el-button>
       </div>
     </div>
 
@@ -521,11 +577,26 @@ const handleShowAnnouncement = async () => {
       append-to-body
       class="qr-code-dialog"
     >
-      <div class="qr-code-content" v-loading="qrCodeLoading">
-        <img v-if="qrCodeUrl" :src="qrCodeUrl" alt="群二维码" class="qr-code-image" />
-        <div v-else class="qr-code-empty">加载中...</div>
-        <p class="qr-code-tip">扫码加入群聊</p>
-        <el-button v-if="qrCodeUrl" type="primary" link size="small" @click="handleDownloadQrCode">
+      <div v-loading="qrCodeLoading" class="qr-code-content">
+        <img
+          v-if="qrCodeUrl"
+          :src="qrCodeUrl"
+          alt="群二维码"
+          class="qr-code-image"
+        >
+        <div v-else class="qr-code-empty">
+          加载中...
+        </div>
+        <p class="qr-code-tip">
+          扫码加入群聊
+        </p>
+        <el-button
+          v-if="qrCodeUrl"
+          type="primary"
+          link
+          size="small"
+          @click="handleDownloadQrCode"
+        >
           <el-icon><Download /></el-icon>
           下载二维码
         </el-button>
@@ -564,16 +635,20 @@ const handleShowAnnouncement = async () => {
       append-to-body
       class="announcement-dialog"
     >
-      <div class="announcement-list" v-if="announcements.length > 0">
+      <div v-if="announcements.length > 0" class="announcement-list">
         <div v-for="item in announcements" :key="item.id" class="announcement-item">
-          <div class="announcement-content">{{ item.content }}</div>
+          <div class="announcement-content">
+            {{ item.content }}
+          </div>
           <div class="announcement-meta">
             <span>{{ item.createBy }}</span>
             <span>{{ item.createTime }}</span>
           </div>
         </div>
       </div>
-      <div v-else class="announcement-empty">暂无公告</div>
+      <div v-else class="announcement-empty">
+        暂无公告
+      </div>
     </el-dialog>
   </el-drawer>
 </template>
@@ -602,7 +677,7 @@ const handleShowAnnouncement = async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  
+
   .section {
     background: var(--dt-bg-card);
     margin-bottom: 8px;

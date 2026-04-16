@@ -16,7 +16,7 @@
     </div>
 
     <!-- 成员列表 -->
-    <div class="picker-list" ref="listRef">
+    <div ref="listRef" class="picker-list">
       <div
         v-for="(member, index) in filteredMembers"
         :key="member.userId"
@@ -28,14 +28,16 @@
           :src="member.avatar || '/avatars/default.png'"
           class="member-avatar"
           alt="avatar"
-        />
+        >
         <div class="member-info">
           <span class="member-name">{{ member.nickname || member.name }}</span>
           <span v-if="member.role && member.role !== 'MEMBER'" class="member-role">
             {{ getRoleLabel(member.role) }}
           </span>
         </div>
-        <el-icon v-if="activeIndex === index" class="select-icon"><Check /></el-icon>
+        <el-icon v-if="activeIndex === index" class="select-icon">
+          <Check />
+        </el-icon>
       </div>
 
       <!-- 空状态 -->

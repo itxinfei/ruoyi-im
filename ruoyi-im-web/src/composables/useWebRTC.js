@@ -25,7 +25,7 @@ export function useWebRTC({ sendSignal, onConnectionStateChange, onIceConnection
   const rtcConfig = {
     iceServers: [
       { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
       // 可配置 TURN 服务器（需要替换为实际的 TURN 服务器地址和凭证）
       // { urls: 'turn:your-turn-server.com:3478', username: 'user', credential: 'pass' }
     ]

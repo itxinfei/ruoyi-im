@@ -20,14 +20,22 @@
     <!-- 联系人列表 -->
     <div class="view-content">
       <div v-if="loading" class="loading-state">
-        <el-icon class="is-loading"><Loading /></el-icon>
+        <el-icon class="is-loading">
+          <Loading />
+        </el-icon>
         <span>加载中...</span>
       </div>
 
       <div v-else-if="filteredContacts.length === 0" class="empty-state">
-        <el-icon class="empty-icon"><Clock /></el-icon>
-        <p class="empty-text">{{ searchKeyword ? '未找到匹配的联系人' : '暂无常用联系人' }}</p>
-        <p class="empty-hint">经常联系的成员会显示在这里</p>
+        <el-icon class="empty-icon">
+          <Clock />
+        </el-icon>
+        <p class="empty-text">
+          {{ searchKeyword ? '未找到匹配的联系人' : '暂无常用联系人' }}
+        </p>
+        <p class="empty-hint">
+          经常联系的成员会显示在这里
+        </p>
       </div>
 
       <div v-else class="contacts-grid">
@@ -48,8 +56,12 @@
             <div v-if="contact.online" class="online-dot" />
           </div>
           <div class="info-section">
-            <div class="contact-name">{{ contact.name || contact.userName }}</div>
-            <div class="contact-dept">{{ contact.departmentName || contact.position || '成员' }}</div>
+            <div class="contact-name">
+              {{ contact.name || contact.userName }}
+            </div>
+            <div class="contact-dept">
+              {{ contact.departmentName || contact.position || '成员' }}
+            </div>
           </div>
           <div class="action-section">
             <el-button

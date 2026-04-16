@@ -12,7 +12,9 @@
     <template #header>
       <div class="panel-header">
         <div class="header-left">
-          <el-icon class="call-icon"><Phone /></el-icon>
+          <el-icon class="call-icon">
+            <Phone />
+          </el-icon>
           <span class="title">群组通话</span>
           <el-tag :type="statusTagType" size="small" effect="dark">
             {{ statusLabel }}
@@ -67,9 +69,15 @@
           <div class="participant-overlay">
             <span class="participant-name">{{ participant.name }}</span>
             <div class="participant-badges">
-              <el-icon v-if="participant.isMuted" class="badge-icon muted"><Microphone /></el-icon>
-              <el-icon v-if="participant.cameraOff" class="badge-icon camera"><VideoCamera /></el-icon>
-              <el-icon v-if="participant.isScreenSharing" class="badge-icon screen"><Monitor /></el-icon>
+              <el-icon v-if="participant.isMuted" class="badge-icon muted">
+                <Microphone />
+              </el-icon>
+              <el-icon v-if="participant.cameraOff" class="badge-icon camera">
+                <VideoCamera />
+              </el-icon>
+              <el-icon v-if="participant.isScreenSharing" class="badge-icon screen">
+                <Monitor />
+              </el-icon>
             </div>
           </div>
 
@@ -133,12 +141,21 @@
       </el-button>
     </div>
     <div v-else-if="status === 'calling'" class="invite-section">
-      <el-tag type="warning" effect="plain">正在等待对方加入...</el-tag>
+      <el-tag type="warning" effect="plain">
+        正在等待对方加入...
+      </el-tag>
     </div>
 
     <!-- 邀请成员弹窗 -->
-    <el-dialog v-model="showInviteDialog" title="邀请成员" width="500px" append-to-body>
-      <div class="invite-tip">选择要邀请的成员（当前通话最多 {{ maxParticipants }} 人）</div>
+    <el-dialog
+      v-model="showInviteDialog"
+      title="邀请成员"
+      width="500px"
+      append-to-body
+    >
+      <div class="invite-tip">
+        选择要邀请的成员（当前通话最多 {{ maxParticipants }} 人）
+      </div>
       <el-checkbox-group v-model="selectedMemberIds">
         <el-checkbox
           v-for="member in groupMembers"
@@ -147,14 +164,23 @@
           :disabled="isMemberInCall(member.userId)"
         >
           <div class="member-item">
-            <DingtalkAvatar :src="member.avatar" :name="member.name" :size="32" shape="circle" />
+            <DingtalkAvatar
+              :src="member.avatar"
+              :name="member.name"
+              :size="32"
+              shape="circle"
+            />
             <span>{{ member.name }}</span>
-            <el-tag v-if="isMemberInCall(member.userId)" type="info" size="small">已在通话中</el-tag>
+            <el-tag v-if="isMemberInCall(member.userId)" type="info" size="small">
+              已在通话中
+            </el-tag>
           </div>
         </el-checkbox>
       </el-checkbox-group>
       <template #footer>
-        <el-button @click="showInviteDialog = false">取消</el-button>
+        <el-button @click="showInviteDialog = false">
+          取消
+        </el-button>
         <el-button type="primary" :disabled="!selectedMemberIds.length" @click="handleInvite">
           邀请 ({{ selectedMemberIds.length }})
         </el-button>

@@ -78,20 +78,37 @@
 
                 <div v-else-if="isPureUrlMessage" class="link-card is-inline" @click="openLink(pureUrl)">
                   <div v-if="urlMetadataLoading" class="link-loading">
-                    <el-icon class="is-loading"><Loading /></el-icon>
+                    <el-icon class="is-loading">
+                      <Loading />
+                    </el-icon>
                   </div>
                   <template v-else-if="urlMetadata">
-                    <img v-if="urlMetadata.imageUrl" :src="urlMetadata.imageUrl" class="link-image" alt="">
+                    <img
+                      v-if="urlMetadata.imageUrl"
+                      :src="urlMetadata.imageUrl"
+                      class="link-image"
+                      alt=""
+                    >
                     <div class="link-content">
-                      <div class="link-title">{{ urlMetadata.title || pureUrl }}</div>
-                      <div v-if="urlMetadata.description" class="link-desc">{{ urlMetadata.description }}</div>
-                      <div class="link-url">{{ formatDisplayUrl(pureUrl) }}</div>
+                      <div class="link-title">
+                        {{ urlMetadata.title || pureUrl }}
+                      </div>
+                      <div v-if="urlMetadata.description" class="link-desc">
+                        {{ urlMetadata.description }}
+                      </div>
+                      <div class="link-url">
+                        {{ formatDisplayUrl(pureUrl) }}
+                      </div>
                     </div>
                   </template>
                   <template v-else>
                     <div class="link-content">
-                      <div class="link-title">{{ pureUrl }}</div>
-                      <div class="link-url">{{ formatDisplayUrl(pureUrl) }}</div>
+                      <div class="link-title">
+                        {{ pureUrl }}
+                      </div>
+                      <div class="link-url">
+                        {{ formatDisplayUrl(pureUrl) }}
+                      </div>
                     </div>
                   </template>
                 </div>

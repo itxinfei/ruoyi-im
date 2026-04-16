@@ -33,7 +33,7 @@
       <span v-else class="avatar-text">{{ displayName }}</span>
     </template>
   </div>
-  </template>
+</template>
 
 <script setup>
 import { ref, computed, reactive } from 'vue'

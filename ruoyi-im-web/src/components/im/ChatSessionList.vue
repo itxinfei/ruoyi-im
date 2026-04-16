@@ -3,14 +3,16 @@
     <!-- 头部搜索与筛选 (对齐钉钉 8px 步进) -->
     <div class="panel-header">
       <div class="search-bar" :class="{ 'is-focused': isSearchFocused }">
-        <el-icon class="search-icon"><Search /></el-icon>
+        <el-icon class="search-icon">
+          <Search />
+        </el-icon>
         <input
-          type="text"
           v-model="searchKeyword"
+          type="text"
           placeholder="搜索"
           @focus="isSearchFocused = true"
           @blur="isSearchFocused = false"
-        />
+        >
       </div>
       <!-- 会话类型过滤 tabs -->
       <div class="session-tabs">
@@ -35,7 +37,7 @@
     </div>
 
     <!-- 会话列表区 -->
-    <div class="session-list" v-loading="loading">
+    <div v-loading="loading" class="session-list">
       <!-- 分类分组列表 -->
       <template v-for="group in groupedSessions" :key="group.type">
         <!-- 分类头部（可折叠） -->
@@ -67,7 +69,7 @@
             >
               <!-- 头像区 (对齐钉钉 4px 圆角) -->
               <div class="avatar-wrapper" @click.stop="handleAvatarClick(session)">
-                <img :src="session.avatar || '/avatars/default.png'" class="avatar" alt="avatar" />
+                <img :src="session.avatar || '/avatars/default.png'" class="avatar" alt="avatar">
                 <div v-if="session.unreadCount > 0" class="unread-badge" :class="getUnreadBadgeClass(session.unreadCount)">
                   {{ session.unreadCount > 99 ? '99+' : session.unreadCount }}
                 </div>
@@ -82,7 +84,9 @@
                 <div class="content-bottom">
                   <span v-if="session.draftContent" class="draft-tag">[草稿]</span>
                   <span class="last-message">{{ session.lastMessage }}</span>
-                  <el-icon v-if="session.isMuted" class="mute-icon" :size="14"><BellFilled /></el-icon>
+                  <el-icon v-if="session.isMuted" class="mute-icon" :size="14">
+                    <BellFilled />
+                  </el-icon>
                 </div>
               </div>
             </div>
@@ -92,7 +96,9 @@
 
       <!-- 空状态 -->
       <div v-if="!loading && filteredSessions.length === 0" class="empty-list">
-        <el-icon :size="48" color="var(--dt-border-lighter)"><ChatLineRound /></el-icon>
+        <el-icon :size="48" color="var(--dt-border-lighter)">
+          <ChatLineRound />
+        </el-icon>
         <p>暂无消息会话</p>
       </div>
     </div>
@@ -105,7 +111,9 @@
         :style="contextMenuStyle"
         @click.stop
       >
-        <div class="context-menu-header">移动到分组</div>
+        <div class="context-menu-header">
+          移动到分组
+        </div>
         <div
           class="context-menu-item"
           @click="moveSessionToGroup(contextMenuSession, null)"
@@ -166,7 +174,12 @@
               <el-button text size="small" @click="openGroupDialog(group)">
                 <el-icon><Edit /></el-icon>
               </el-button>
-              <el-button text size="small" type="danger" @click="handleDeleteGroup(group)">
+              <el-button
+                text
+                size="small"
+                type="danger"
+                @click="handleDeleteGroup(group)"
+              >
                 <el-icon><Delete /></el-icon>
               </el-button>
             </div>
@@ -184,17 +197,17 @@
  * 修复：数据初始化加载、色彩对齐、图标修正
  * 功能增强：会话分组管理（用户创建分组）
  */
-import { ref, computed, onMounted, reactive } from 'vue';
-import { useStore } from 'vuex';
-import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight, MoreFilled, FolderOpened, FolderAdd, Delete, Edit, Plus } from '@element-plus/icons-vue';
-import { ElMessage, ElMessageBox } from 'element-plus';
+import { ref, computed, onMounted, reactive } from 'vue'
+import { useStore } from 'vuex'
+import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight, MoreFilled, FolderOpened, FolderAdd, Delete, Edit, Plus } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-const store = useStore();
+const store = useStore()
 
 // 内部状态
-const isSearchFocused = ref(false);
-const searchKeyword = ref('');
-const filterType = ref('all');
+const isSearchFocused = ref(false)
+const searchKeyword = ref('')
+const filterType = ref('all')
 
 // 分类折叠状态
 const collapsedGroups = reactive({
@@ -202,92 +215,92 @@ const collapsedGroups = reactive({
   PRIVATE: false,
   GROUP: false,
   USER_GROUP: false
-});
+})
 
 // 会话分组相关状态
-const showGroupDialog = ref(false);
-const editingGroup = ref(null);
-const newGroupName = ref('');
-const contextMenuSession = ref(null);
-const contextMenuVisible = ref(false);
-const contextMenuStyle = ref({});
+const showGroupDialog = ref(false)
+const editingGroup = ref(null)
+const newGroupName = ref('')
+const contextMenuSession = ref(null)
+const contextMenuVisible = ref(false)
+const contextMenuStyle = ref({})
 
 // 分类定义
 const sessionGroups = [
   { type: 'PINNED', label: '置顶' },
   { type: 'PRIVATE', label: '单聊' },
   { type: 'GROUP', label: '群聊' }
-];
+]
 
 // 切换分组折叠状态
 const toggleGroup = (type) => {
-  collapsedGroups[type] = !collapsedGroups[type];
-};
+  collapsedGroups[type] = !collapsedGroups[type]
+}
 
 // 会话类型过滤 tabs
 const sessionTabs = [
   { label: '全部', value: 'all' },
   { label: '单聊', value: 'PRIVATE' },
   { label: '群聊', value: 'GROUP' }
-];
+]
 
 // 数据绑定 (对齐 Store 路径 im/session)
-const loading = computed(() => store.state.im?.session?.loading);
-const currentSession = computed(() => store.state.im?.session?.currentSession);
-const sessions = computed(() => store.getters['im/session/sortedSessions']);
+const loading = computed(() => store.state.im?.session?.loading)
+const currentSession = computed(() => store.state.im?.session?.currentSession)
+const sessions = computed(() => store.getters['im/session/sortedSessions'])
 
 // 会话分组相关
-const userSessionGroups = computed(() => store.getters['im/session/sessionGroups'] || []);
-const sessionsByGroup = (groupId) => store.getters['im/session/sessionsByGroup'](groupId);
+const userSessionGroups = computed(() => store.getters['im/session/sessionGroups'] || [])
+const sessionsByGroup = (groupId) => store.getters['im/session/sessionsByGroup'](groupId)
 
 const filteredSessions = computed(() => {
-  let list = sessions.value || [];
+  let list = sessions.value || []
   // 按类型过滤
   if (filterType.value !== 'all') {
-    list = list.filter(s => s.type === filterType.value);
+    list = list.filter(s => s.type === filterType.value)
   }
   // 按关键词过滤
   if (searchKeyword.value) {
-    list = list.filter(s => s.name?.toLowerCase().includes(searchKeyword.value.toLowerCase()));
+    list = list.filter(s => s.name?.toLowerCase().includes(searchKeyword.value.toLowerCase()))
   }
-  return list;
-});
+  return list
+})
 
 // 分组会话列表（钉钉分类设计：置顶 > 单聊 > 群聊 + 用户分组）
 const groupedSessions = computed(() => {
-  const list = filteredSessions.value;
+  const list = filteredSessions.value
 
   const typeGroups = sessionGroups.map(group => {
-    let groupSessions;
+    let groupSessions
 
     if (filterType.value !== 'all') {
       // 单一类型过滤时，只显示该类型的非置顶会话
-      groupSessions = list.filter(s => !s.isPinned && s.type === filterType.value);
+      groupSessions = list.filter(s => !s.isPinned && s.type === filterType.value)
     } else {
       // 全部类型时，按分组显示
       if (group.type === 'PINNED') {
-        groupSessions = list.filter(s => s.isPinned);
+        groupSessions = list.filter(s => s.isPinned)
       } else {
-        groupSessions = list.filter(s => !s.isPinned && s.type === group.type);
+        groupSessions = list.filter(s => !s.isPinned && s.type === group.type)
       }
     }
 
-    const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0);
+    const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
 
     return {
       type: group.type,
       label: group.label,
       sessions: groupSessions,
       unreadCount
-    };
-  });
+    }
+  })
 
   // 用户创建的分组（只在全部筛选时显示）
   if (filterType.value === 'all' && userSessionGroups.value.length > 0) {
     const userGroups = userSessionGroups.value.map(g => {
       // 该分组下的会话（排除已置顶的，置顶会话在置顶分组中显示）
-      const groupSessions = list.filter(s => !s.isPinned && s.groupId === g.id);
-      const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0);
+      const groupSessions = list.filter(s => !s.isPinned && s.groupId === g.id)
+      const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
       return {
         type: 'USER_GROUP_' + g.id,
         label: g.name,
@@ -295,94 +308,94 @@ const groupedSessions = computed(() => {
         unreadCount,
         groupId: g.id,
         isUserGroup: true
-      };
-    }).filter(g => g.sessions.length > 0);
+      }
+    }).filter(g => g.sessions.length > 0)
 
-    typeGroups.push(...userGroups);
+    typeGroups.push(...userGroups)
   }
 
-  return typeGroups;
-});
+  return typeGroups
+})
 
 // 初始化加载
 onMounted(() => {
-  store.dispatch('im/session/loadSessions');
-  store.dispatch('im/session/loadSessionGroups');
-});
+  store.dispatch('im/session/loadSessions')
+  store.dispatch('im/session/loadSessionGroups')
+})
 
 const selectSession = (session) => {
-  store.dispatch('im/session/selectSession', session);
-};
+  store.dispatch('im/session/selectSession', session)
+}
 
 // 头像点击事件
-const emit = defineEmits(['avatar-click', 'mention-user']);
+const emit = defineEmits(['avatar-click', 'mention-user'])
 
 const handleAvatarClick = (session) => {
   if (session.type === 'PRIVATE') {
     // 单聊：打开用户详情
-    emit('avatar-click', session);
+    emit('avatar-click', session)
   } else {
     // 群聊：@该成员或显示成员信息
-    emit('mention-user', session);
+    emit('mention-user', session)
   }
-};
+}
 
 // 未读角标圆角：1-9 圆形，10+ 胶囊
 const getUnreadBadgeClass = (count) => {
   if (count >= 10) {
-    return 'unread-badge-capsule';
+    return 'unread-badge-capsule'
   }
-  return 'unread-badge-circle';
-};
+  return 'unread-badge-circle'
+}
 
 const formatTime = (time) => {
-  if (!time) return '';
-  const date = new Date(time);
-  const now = new Date();
+  if (!time) return ''
+  const date = new Date(time)
+  const now = new Date()
 
   // 如果是今天，显示时间；否则显示日期
   if (date.toDateString() === now.toDateString()) {
     return date.getHours().toString().padStart(2, '0') + ':' +
-           date.getMinutes().toString().padStart(2, '0');
+           date.getMinutes().toString().padStart(2, '0')
   }
-  return (date.getMonth() + 1) + '/' + date.getDate();
-};
+  return (date.getMonth() + 1) + '/' + date.getDate()
+}
 
 // ============ 会话分组管理 ============
 
 // 打开分组管理对话框
 const openGroupDialog = (group = null) => {
-  editingGroup.value = group;
-  newGroupName.value = group ? group.name : '';
-  showGroupDialog.value = true;
-};
+  editingGroup.value = group
+  newGroupName.value = group ? group.name : ''
+  showGroupDialog.value = true
+}
 
 // 创建或更新分组
 const handleSaveGroup = async () => {
   if (!newGroupName.value.trim()) {
-    ElMessage.warning('分组名称不能为空');
-    return;
+    ElMessage.warning('分组名称不能为空')
+    return
   }
   try {
     if (editingGroup.value) {
       await store.dispatch('im/session/editSessionGroup', {
         id: editingGroup.value.id,
         name: newGroupName.value.trim()
-      });
-      ElMessage.success('分组名称已更新');
+      })
+      ElMessage.success('分组名称已更新')
     } else {
       await store.dispatch('im/session/addSessionGroup', {
         name: newGroupName.value.trim()
-      });
-      ElMessage.success('分组已创建');
+      })
+      ElMessage.success('分组已创建')
     }
-    showGroupDialog.value = false;
-    newGroupName.value = '';
-    editingGroup.value = null;
+    showGroupDialog.value = false
+    newGroupName.value = ''
+    editingGroup.value = null
   } catch (e) {
-    console.error('保存分组失败', e);
+    console.error('保存分组失败', e)
   }
-};
+}
 
 // 删除分组
 const handleDeleteGroup = async (group) => {
@@ -391,15 +404,15 @@ const handleDeleteGroup = async (group) => {
       `确定删除分组"${group.name}"？会话将移至未分组。`,
       '删除分组',
       { type: 'warning' }
-    );
-    await store.dispatch('im/session/removeSessionGroup', group.id);
-    ElMessage.success('分组已删除');
+    )
+    await store.dispatch('im/session/removeSessionGroup', group.id)
+    ElMessage.success('分组已删除')
   } catch (e) {
     if (e !== 'cancel') {
-      console.error('删除分组失败', e);
+      console.error('删除分组失败', e)
     }
   }
-};
+}
 
 // 将会话添加到分组
 const moveSessionToGroup = async (session, groupId) => {
@@ -409,42 +422,42 @@ const moveSessionToGroup = async (session, groupId) => {
       await store.dispatch('im/session/removeSessionFromGroup', {
         sessionId: session.id,
         groupId: session.groupId
-      });
+      })
     } else {
       await store.dispatch('im/session/addSessionToGroup', {
         sessionId: session.id,
         groupId
-      });
+      })
     }
-    contextMenuVisible.value = false;
+    contextMenuVisible.value = false
   } catch (e) {
-    console.error('移动会话失败', e);
+    console.error('移动会话失败', e)
   }
-};
+}
 
 // 右键菜单
 const handleContextMenu = (event, session) => {
-  event.preventDefault();
-  contextMenuSession.value = session;
-  contextMenuVisible.value = true;
+  event.preventDefault()
+  contextMenuSession.value = session
+  contextMenuVisible.value = true
   contextMenuStyle.value = {
     left: event.clientX + 'px',
     top: event.clientY + 'px'
-  };
-};
+  }
+}
 
 // 关闭右键菜单
 const closeContextMenu = () => {
-  contextMenuVisible.value = false;
-  contextMenuSession.value = null;
-};
+  contextMenuVisible.value = false
+  contextMenuSession.value = null
+}
 
 // 点击空白处关闭菜单
 const handleGlobalClick = () => {
   if (contextMenuVisible.value) {
-    closeContextMenu();
+    closeContextMenu()
   }
-};
+}
 </script>
 
 <style scoped>

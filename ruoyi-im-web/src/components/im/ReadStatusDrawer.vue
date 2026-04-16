@@ -9,7 +9,9 @@
     <!-- Header区 -->
     <header class="drawer-header">
       <span class="title">消息接收详情</span>
-      <el-icon class="close-icon" @click="visible = false"><Close /></el-icon>
+      <el-icon class="close-icon" @click="visible = false">
+        <Close />
+      </el-icon>
     </header>
 
     <div class="drawer-content">
@@ -17,28 +19,36 @@
         <el-tab-pane :label="`未读 (${unreadUsers.length})`" name="unread">
           <div class="user-list">
             <div v-for="user in unreadUsers" :key="user.userId" class="user-item">
-              <img :src="user.avatar || '/avatars/default.png'" class="user-avatar" alt="avatar" />
+              <img :src="user.avatar || '/avatars/default.png'" class="user-avatar" alt="avatar">
               <span class="user-name">{{ user.nickname }}</span>
             </div>
             <div v-if="unreadUsers.length === 0" class="empty-state">
-              <el-icon class="empty-icon"><Select /></el-icon>
-              <p class="empty-text">全部已读</p>
+              <el-icon class="empty-icon">
+                <Select />
+              </el-icon>
+              <p class="empty-text">
+                全部已读
+              </p>
             </div>
           </div>
         </el-tab-pane>
-        
+
         <el-tab-pane :label="`已读 (${readUsers.length})`" name="read">
           <div class="user-list">
             <div v-for="user in readUsers" :key="user.userId" class="user-item">
-              <img :src="user.avatar || '/avatars/default.png'" class="user-avatar" alt="avatar" />
+              <img :src="user.avatar || '/avatars/default.png'" class="user-avatar" alt="avatar">
               <div class="user-info">
                 <span class="user-name">{{ user.nickname }}</span>
                 <span class="read-time">{{ formatTime(user.readTime) }}</span>
               </div>
             </div>
             <div v-if="readUsers.length === 0" class="empty-state">
-              <el-icon class="empty-icon"><ChatLineSquare /></el-icon>
-              <p class="empty-text">暂无已读记录</p>
+              <el-icon class="empty-icon">
+                <ChatLineSquare />
+              </el-icon>
+              <p class="empty-text">
+                暂无已读记录
+              </p>
             </div>
           </div>
         </el-tab-pane>

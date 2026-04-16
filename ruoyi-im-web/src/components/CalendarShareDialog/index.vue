@@ -9,8 +9,15 @@
     <div class="share-form">
       <!-- 分享给用户 -->
       <div class="form-section">
-        <div class="section-title">分享给</div>
-        <el-form ref="formRef" :model="formData" :rules="formRules" label-position="top">
+        <div class="section-title">
+          分享给
+        </div>
+        <el-form
+          ref="formRef"
+          :model="formData"
+          :rules="formRules"
+          label-position="top"
+        >
           <el-form-item label="用户ID或姓名" prop="targetUserId">
             <el-select
               v-model="formData.targetUserId"
@@ -40,8 +47,12 @@
           </el-form-item>
           <el-form-item label="权限" prop="permission">
             <el-radio-group v-model="formData.permission">
-              <el-radio value="VIEW">只读</el-radio>
-              <el-radio value="EDIT">可编辑</el-radio>
+              <el-radio value="VIEW">
+                只读
+              </el-radio>
+              <el-radio value="EDIT">
+                可编辑
+              </el-radio>
             </el-radio-group>
           </el-form-item>
         </el-form>
@@ -49,7 +60,9 @@
 
       <!-- 已分享列表 -->
       <div v-if="shares.length > 0" class="form-section">
-        <div class="section-title">已分享 ({{ shares.length }})</div>
+        <div class="section-title">
+          已分享 ({{ shares.length }})
+        </div>
         <div class="share-list">
           <div v-for="share in shares" :key="share.id" class="share-item">
             <div class="share-user">
@@ -57,8 +70,12 @@
                 {{ share.targetUserName?.charAt(0) }}
               </el-avatar>
               <div class="user-info">
-                <div class="user-name">{{ share.targetUserName }}</div>
-                <div class="user-id">ID: {{ share.targetUserId }}</div>
+                <div class="user-name">
+                  {{ share.targetUserName }}
+                </div>
+                <div class="user-id">
+                  ID: {{ share.targetUserId }}
+                </div>
               </div>
             </div>
             <div class="share-actions">
@@ -86,7 +103,9 @@
     </div>
 
     <template #footer>
-      <el-button @click="visible = false">取消</el-button>
+      <el-button @click="visible = false">
+        取消
+      </el-button>
       <el-button type="primary" :loading="submitting" @click="handleSubmit">
         分享
       </el-button>

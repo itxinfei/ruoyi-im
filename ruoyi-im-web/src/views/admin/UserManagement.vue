@@ -90,11 +90,36 @@
         @selection-change="onSelectionChange"
       >
         <el-table-column type="selection" width="48" />
-        <el-table-column prop="id" label="ID" width="80" sortable />
-        <el-table-column prop="username" label="用户名" min-width="120" sortable />
-        <el-table-column prop="nickname" label="昵称" min-width="120" sortable />
-        <el-table-column prop="mobile" label="手机号" min-width="130" sortable />
-        <el-table-column prop="role" label="角色" width="120" sortable>
+        <el-table-column
+          prop="id"
+          label="ID"
+          width="80"
+          sortable
+        />
+        <el-table-column
+          prop="username"
+          label="用户名"
+          min-width="120"
+          sortable
+        />
+        <el-table-column
+          prop="nickname"
+          label="昵称"
+          min-width="120"
+          sortable
+        />
+        <el-table-column
+          prop="mobile"
+          label="手机号"
+          min-width="130"
+          sortable
+        />
+        <el-table-column
+          prop="role"
+          label="角色"
+          width="120"
+          sortable
+        >
           <template #default="{ row }">
             <el-tag v-if="row.role === 'SUPER_ADMIN'" type="danger">
               超级管理员
@@ -154,7 +179,12 @@
     </el-dialog>
 
     <!-- 导入用户对话框 -->
-    <el-dialog v-model="importDialogVisible" title="导入用户" width="500px" append-to-body>
+    <el-dialog
+      v-model="importDialogVisible"
+      title="导入用户"
+      width="500px"
+      append-to-body
+    >
       <div class="import-tip">
         <el-alert type="info" :closable="false" show-icon>
           <template #title>
@@ -169,7 +199,12 @@
           <li>角色可选值：USER（普通用户）, ADMIN（管理员）</li>
           <li>密码留空则使用默认密码 123456</li>
         </ul>
-        <el-button size="small" type="primary" link @click="downloadTemplate">
+        <el-button
+          size="small"
+          type="primary"
+          link
+          @click="downloadTemplate"
+        >
           <el-icon><Download /></el-icon>
           下载模板
         </el-button>
@@ -183,17 +218,25 @@
         accept=".csv"
         :on-change="handleFileChange"
       >
-        <el-icon class="el-icon--upload"><Upload /></el-icon>
+        <el-icon class="el-icon--upload">
+          <Upload />
+        </el-icon>
         <div class="el-upload__text">
           拖拽文件到此处，或 <em>点击上传</em>
         </div>
         <template #tip>
-          <div class="el-upload__tip">只能上传 CSV 文件</div>
+          <div class="el-upload__tip">
+            只能上传 CSV 文件
+          </div>
         </template>
       </el-upload>
       <template #footer>
-        <el-button @click="importDialogVisible = false">取消</el-button>
-        <el-button type="primary" :loading="importing" @click="confirmImport">确认导入</el-button>
+        <el-button @click="importDialogVisible = false">
+          取消
+        </el-button>
+        <el-button type="primary" :loading="importing" @click="confirmImport">
+          确认导入
+        </el-button>
       </template>
     </el-dialog>
 
