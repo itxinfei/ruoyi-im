@@ -278,7 +278,6 @@
       </div>
     </div>
     <ChangePasswordDialog v-model="showChangePassword" />
-    <EditProfileDialog v-model="showEditProfile" @success="handleProfileUpdated" />
   </el-dialog>
 </template>
 
@@ -289,18 +288,16 @@ import { useTheme } from '@/composables/useTheme'
 import { ElMessage } from 'element-plus'
 import { VideoPlay, Lock, Edit, Bell, Camera, Position, View, Document, Sunny, Moon, Monitor, Refresh } from '@element-plus/icons-vue'
 import ChangePasswordDialog from '@/components/Common/ChangePasswordDialog.vue'
-import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
 
 const props = defineProps({
   modelValue: Boolean
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'open-edit-profile'])
 
 const store = useStore()
 const visible = ref(false)
 const showChangePassword = ref(false)
-const showEditProfile = ref(false)
 const activeMenu = ref('account')
 const { themeMode, setThemeMode } = useTheme()
 
@@ -341,7 +338,7 @@ const testSound = () => {
 }
 
 const handleEditProfile = () => {
-  showEditProfile.value = true
+  emit('open-edit-profile')
 }
 
 const checkUpdate = () => {

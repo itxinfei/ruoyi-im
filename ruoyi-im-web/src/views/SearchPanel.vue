@@ -302,15 +302,17 @@ import { globalSearch, getHotKeywords } from '@/api/im/search'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
 import { Search, Close, Clock, ChatDotRound, User, Document } from '@element-plus/icons-vue'
+import { useSearchHistory } from '@/composables/useSearchHistory'
 
 const emit = defineEmits(['show-user', 'go-to-session', 'go-to-group'])
+
+const { history: searchHistory, addToHistory, clearHistory, loadScopeSession, saveScopeSession, loadKeyword, saveKeyword } = useSearchHistory()
 
 const keyword = ref('')
 const searchType = ref('all')
 const loading = ref(false)
 const searched = ref(false)
 const hotKeywords = ref([])
-const searchHistory = ref([])
 const results = ref({})
 const scopeSession = ref(null)
 const scopeMode = ref('global')
@@ -352,32 +354,19 @@ const loadHotKeywords = async () => {
   }
 }
 
-// 加载搜索历史
+// 加载搜索历史（由 useSearchHistory 初始化）
 const loadSearchHistory = () => {
-  try {
-    const saved = localStorage.getItem('im_search_history')
-    if (saved) searchHistory.value = JSON.parse(saved)
-  } catch (e) {
-    console.error('加载搜索历史失败', e)
-    ElMessage.error('加载搜索历史失败')
-  }
+  // 历史已通过 composable 初始化
 }
 
 // 保存到搜索历史
 const saveToHistory = (kw) => {
-  if (!kw || !kw.trim()) return
-  const trimmed = kw.trim()
-  const index = searchHistory.value.indexOf(trimmed)
-  if (index !== -1) searchHistory.value.splice(index, 1)
-  searchHistory.value.unshift(trimmed)
-  searchHistory.value = searchHistory.value.slice(0, 10)
-  localStorage.setItem('im_search_history', JSON.stringify(searchHistory.value))
+  addToHistory(kw)
 }
 
 // 清空搜索历史
 const clearSearchHistory = () => {
-  searchHistory.value = []
-  localStorage.removeItem('im_search_history')
+  clearHistory()
 }
 
 const handleSearch = async () => {
@@ -446,21 +435,11 @@ const clearSearch = () => {
 }
 
 const loadScope = () => {
-  try {
-    const raw = localStorage.getItem('im_search_scope_session')
-    if (raw) scopeSession.value = JSON.parse(raw)
-  } catch {
-    // 忽略解析错误
-  }
+  scopeSession.value = loadScopeSession()
 }
 
-const loadKeyword = () => {
-  try {
-    const raw = localStorage.getItem('im_search_keyword')
-    if (raw) keyword.value = raw
-  } catch {
-    // 忽略解析错误
-  }
+const initKeyword = () => {
+  keyword.value = loadKeyword()
 }
 
 const clearScope = () => {
@@ -505,7 +484,7 @@ const goToGroup = (group) => {
 
 onMounted(() => {
   loadScope()
-  loadKeyword()
+  initKeyword()
   loadSearchHistory()
   if (scopeSession.value?.sessionId) scopeMode.value = 'session'
   if (keyword.value.trim()) handleSearch()

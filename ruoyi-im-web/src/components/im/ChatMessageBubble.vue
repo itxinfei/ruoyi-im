@@ -226,7 +226,7 @@
                   class="read-status"
                   :class="message.isRead ? 'is-read' : 'is-unread'"
                   type="button"
-                  @click.stop="$emit('read-detail', message.messageId || message.id)"
+                  @click.stop="$emit('read-detail', message.messageId)"
                 >
                   {{ message.isRead ? '已读' : '未读' }}
                 </button>
@@ -616,7 +616,7 @@ const runAction = (key) => {
       emitDelete()
       break
     case 'read-detail':
-      emit('read-detail', props.message.messageId || props.message.id)
+      emit('read-detail', props.message.messageId)
       break
   }
 }

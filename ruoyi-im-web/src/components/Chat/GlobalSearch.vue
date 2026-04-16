@@ -7,7 +7,7 @@
         <div v-if="history.length > 0" class="search-section">
           <div class="section-header">
             <span>搜索历史</span>
-            <button class="clear-btn" @click="clearHistory">
+            <button class="clear-btn" @click="handleClearHistory">
               清空
             </button>
           </div>
@@ -115,6 +115,7 @@ import { Loading, Clock, Search, ChatDotRound } from '@element-plus/icons-vue'
 import { searchMessages } from '@/api/im/message'
 import { createConversation } from '@/api/im/conversation'
 import { highlightText } from '@/utils/htmlSanitizer'
+import { useSearchHistory } from '@/composables/useSearchHistory'
 
 const props = defineProps({
   visible: Boolean,
@@ -123,8 +124,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:visible', 'select'])
 const store = useStore()
-
-const history = ref([])
+const { history, addToHistory, clearHistory } = useSearchHistory()
 const messageResults = ref([])
 const loading = ref(false)
 
@@ -151,25 +151,13 @@ const noResults = computed(() => {
          messageResults.value.length === 0
 })
 
-// 加载历史记录
-const loadHistory = () => {
-  const saved = localStorage.getItem('im_search_history')
-  if (saved) history.value = JSON.parse(saved)
-}
-
 // 保存历史记录
 const saveToHistory = (kw) => {
-  if (!kw) return
-  const index = history.value.indexOf(kw)
-  if (index !== -1) history.value.splice(index, 1)
-  history.value.unshift(kw)
-  history.value = history.value.slice(0, 10)
-  localStorage.setItem('im_search_history', JSON.stringify(history.value))
+  addToHistory(kw)
 }
 
-const clearHistory = () => {
-  history.value = []
-  localStorage.removeItem('im_search_history')
+const handleClearHistory = () => {
+  clearHistory()
 }
 
 // 搜索消息 (防抖)

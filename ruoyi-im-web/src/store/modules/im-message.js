@@ -81,6 +81,21 @@ function isValidStatusTransition(currentStatus, newStatus) {
  */
 export const MESSAGE_ID_FIELD = 'messageId'
 
+// 消息 ID 标准化：如果消息只有 id 而无 messageId，则复制为 messageId
+function normalizeMessage(msg) {
+  if (!msg) return msg
+  const normalized = { ...msg }
+  if (normalized.id !== undefined && normalized.messageId === undefined) {
+    normalized.messageId = normalized.id
+  }
+  return normalized
+}
+
+// 批量标准化消息列表
+function normalizeMessages(messages) {
+  return messages.map(normalizeMessage)
+}
+
 // 简单UUID生成
 function generateUUID() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -118,14 +133,14 @@ export default {
     // 根据消息ID获取消息
     getMessageById: (state) => (sessionId, messageId) => {
       const messages = state.messages[sessionId] || []
-      return messages.find(m => (m.messageId || m.id) === messageId)
+      return messages.find(m => m.messageId === messageId)
     }
   },
 
   mutations: {
     // 设置消息列表
     SET_MESSAGES(state, { sessionId, messages }) {
-      state.messages[sessionId] = messages
+      state.messages[sessionId] = normalizeMessages(messages)
     },
 
     // 预加消息（历史消息加载更多）
@@ -133,7 +148,7 @@ export default {
       if (!state.messages[sessionId]) {
         state.messages[sessionId] = []
       }
-      state.messages[sessionId] = [...messages, ...state.messages[sessionId]]
+      state.messages[sessionId] = [...normalizeMessages(messages), ...state.messages[sessionId]]
     },
 
     // 添加单条消息
@@ -141,14 +156,14 @@ export default {
       if (!state.messages[sessionId]) {
         state.messages[sessionId] = []
       }
-      // 避免重复添加 (通过消息ID判断)
-      const msgId = message.messageId || message.id
-      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === msgId)
+      const normalized = normalizeMessage(message)
+      const msgId = normalized.messageId
+      const index = state.messages[sessionId].findIndex(m => m.messageId === msgId)
       if (index === -1) {
-        state.messages[sessionId].push(message)
+        state.messages[sessionId].push(normalized)
       } else {
         // 如果已存在，则更新 (比如编辑后)
-        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
+        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...normalized }
       }
     },
 
@@ -157,10 +172,10 @@ export default {
       if (!state.messages[sessionId]) {
         return
       }
-      const msgId = message.messageId || message.id
-      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === msgId)
+      const msgId = message.messageId
+      const index = state.messages[sessionId].findIndex(m => m.messageId === msgId)
       if (index !== -1) {
-        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...message }
+        state.messages[sessionId][index] = { ...state.messages[sessionId][index], ...normalizeMessage(message) }
       }
     },
 
@@ -169,7 +184,7 @@ export default {
       if (!state.messages[sessionId]) {
         return
       }
-      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      const index = state.messages[sessionId].findIndex(m => m.messageId === messageId)
       if (index !== -1) {
         state.messages[sessionId].splice(index, 1)
       }
@@ -180,7 +195,7 @@ export default {
       if (!state.messages[sessionId]) {
         return
       }
-      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      const index = state.messages[sessionId].findIndex(m => m.messageId === messageId)
       if (index !== -1) {
         const currentStatus = state.messages[sessionId][index].status
         // 验证状态转换
@@ -223,7 +238,7 @@ export default {
     // 更新消息表情反应
     UPDATE_MESSAGE_REACTIONS(state, { sessionId, messageId, reactions }) {
       if (!state.messages[sessionId]) return
-      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      const index = state.messages[sessionId].findIndex(m => m.messageId === messageId)
       if (index !== -1) {
         state.messages[sessionId][index] = {
           ...state.messages[sessionId][index],
@@ -235,7 +250,7 @@ export default {
     // 更新消息收藏状态
     UPDATE_MESSAGE_FAVORITE(state, { sessionId, messageId, isFavorited, favoriteId }) {
       if (!state.messages[sessionId]) return
-      const index = state.messages[sessionId].findIndex(m => (m.messageId || m.id) === messageId)
+      const index = state.messages[sessionId].findIndex(m => m.messageId === messageId)
       if (index !== -1) {
         state.messages[sessionId][index] = {
           ...state.messages[sessionId][index],
@@ -336,7 +351,7 @@ export default {
         // 查找该消息在哪个会话中 (通常是当前会话)
         const sessionId = rootState.session.currentSession?.id
         if (sessionId && rootState.message.messages[sessionId]) {
-          const editedMsg = { ...rootState.message.messages[sessionId].find(m => (m.messageId || m.id) === messageId), content, isEdited: true }
+          const editedMsg = { ...rootState.message.messages[sessionId].find(m => m.messageId === messageId), content, isEdited: true }
           commit('UPDATE_MESSAGE', { sessionId, message: editedMsg })
 
           // 如果是最后一条消息，更新会话列表
@@ -410,7 +425,7 @@ export default {
       // 需要找到该消息所属的会话ID并更新为撤回状态
       const sessionId = rootState.session.currentSession?.id
       if (sessionId && rootState.message.messages[sessionId]) {
-        const msg = rootState.message.messages[sessionId].find(m => (m.messageId || m.id) === messageId)
+        const msg = rootState.message.messages[sessionId].find(m => m.messageId === messageId)
         if (msg) {
           commit('UPDATE_MESSAGE_STATUS', {
             sessionId,

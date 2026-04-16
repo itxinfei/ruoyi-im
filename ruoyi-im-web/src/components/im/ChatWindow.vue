@@ -1,57 +1,15 @@
 <template>
   <div class="chat-window">
     <!-- 1. 聊天头部 -->
-    <header class="chat-header">
-      <div class="header-left" @click="showGroupInfo">
-        <h3 class="title">
-          {{ currentSession?.name || '聊天' }}
-        </h3>
-        <span v-if="currentSession?.memberCount" class="member-count">({{ currentSession.memberCount }})</span>
-      </div>
-      <div class="header-right">
-        <el-icon title="多选" @click="toggleSelectionMode">
-          <Operation />
-        </el-icon>
-        <el-icon title="搜索聊天记录" @click="showGlobalSearch = true">
-          <Search />
-        </el-icon>
-        <el-icon title="语音通话" @click="handleVoiceCall">
-          <Phone />
-        </el-icon>
-        <el-icon title="视频通话" @click="handleVideoCall">
-          <VideoCamera />
-        </el-icon>
-        <el-dropdown trigger="click" @command="handleHeaderCommand">
-          <el-icon title="更多">
-            <MoreFilled />
-          </el-icon>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="pin">
-                <el-icon><Top /></el-icon>
-                置顶会话
-              </el-dropdown-item>
-              <el-dropdown-item command="mute">
-                <el-icon><Bell /></el-icon>
-                消息免打扰
-              </el-dropdown-item>
-              <el-dropdown-item command="clear">
-                <el-icon><Delete /></el-icon>
-                清空聊天记录
-              </el-dropdown-item>
-              <el-dropdown-item command="mention">
-                <el-icon><User /></el-icon>
-                艾特我的消息
-              </el-dropdown-item>
-              <el-dropdown-item command="detail">
-                <el-icon><MoreFilled /></el-icon>
-                会话详情
-              </el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-    </header>
+    <ChatWindowHeader
+      :session="currentSession"
+      @show-detail="detailDrawerVisible = true"
+      @toggle-selection="toggleSelectionMode"
+      @open-search="showGlobalSearch = true"
+      @voice-call="handleVoiceCall"
+      @video-call="handleVideoCall"
+      @header-command="handleHeaderCommand"
+    />
 
     <!-- 1.5 多选模式顶部栏 -->
     <div v-if="isSelectionMode" class="selection-header">
@@ -85,8 +43,8 @@
       <div class="message-list-content">
         <div
           v-for="(msg, index) in messages"
-          :key="msg.clientMsgId || msg.id"
-          :data-message-id="msg.messageId || msg.id"
+          :key="msg.clientMsgId || msg.messageId"
+          :data-message-id="msg.messageId"
           :class="['message-item-wrapper', { 'is-selected': isMessageSelected(msg) }]"
           @click="handleMessageClick(msg)"
         >
@@ -152,7 +110,6 @@
 import { ref, computed, nextTick, onMounted, onUnmounted, watch } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Phone, VideoCamera, MoreFilled, Operation, Top, Bell, Delete, User } from '@element-plus/icons-vue'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { uploadImage, uploadFile } from '@/api/im/file'
 import { initiateCall } from '@/api/im/videoCall'
@@ -163,6 +120,7 @@ import CallDialog from '@/components/Chat/CallDialog.vue'
 import ReadStatusDrawer from '@/components/im/ReadStatusDrawer.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
+import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
 
 const store = useStore()
 
@@ -174,9 +132,6 @@ const listRef = ref(null)
 const callDialogRef = ref(null)
 const forwardDialogRef = ref(null)
 const detailDrawerVisible = ref(false)
-const showGroupInfo = () => {
-  detailDrawerVisible.value = true
-}
 const showReadDrawer = ref(false)
 const readDetailMessageId = ref(null)
 const replyingMessage = ref(null)
@@ -358,7 +313,7 @@ const processReply = (message) => {
 // 获取被引用的消息
 const getQuotedMessage = (msg) => {
   if (!msg.replyToMessageId) return null
-  return messages.value.find(m => (m.messageId || m.id) === msg.replyToMessageId)
+  return messages.value.find(m => m.messageId === msg.replyToMessageId)
 }
 
 // 处理转发
@@ -369,7 +324,7 @@ const processForward = (message) => {
 // 处理撤回
 const processRecall = async (message) => {
   try {
-    await store.dispatch('im/message/recallMessage', message.messageId || message.id)
+    await store.dispatch('im/message/recallMessage', message.messageId)
   } catch (error) {
     console.error('撤回消息失败:', error)
     ElMessage.error('撤回消息失败')
@@ -379,7 +334,7 @@ const processRecall = async (message) => {
 // 处理删除
 const processDelete = async (message) => {
   try {
-    await store.dispatch('im/message/deleteMessage', message.messageId || message.id)
+    await store.dispatch('im/message/deleteMessage', message.messageId)
   } catch (error) {
     console.error('删除消息失败:', error)
     ElMessage.error('删除消息失败')
@@ -388,7 +343,7 @@ const processDelete = async (message) => {
 
 // 处理收藏
 const processFavorite = async (message) => {
-  const messageId = message.messageId || message.id
+  const messageId = message.messageId
   const conversationId = currentSession.value?.id
 
   if (!messageId) {
@@ -414,7 +369,7 @@ const processFavorite = async (message) => {
 
 // 处理表情回应
 const processReaction = async ({ message, emoji }) => {
-  const messageId = message.messageId || message.id
+  const messageId = message.messageId
   if (!messageId) {
     console.error('消息ID不存在')
     return
@@ -437,7 +392,7 @@ const handleEdit = (message) => {
 // 保存编辑
 const handleEditSave = async () => {
   if (!editingMessage.value || !currentDraft.value.trim()) return
-  const messageId = editingMessage.value.messageId || editingMessage.value.id
+  const messageId = editingMessage.value.messageId
   try {
     await store.dispatch('im/message/editMessage', {
       messageId,
@@ -662,7 +617,7 @@ const scrollToMentionMe = () => {
     msg.content && msg.content.includes(`@${store.state.im?.currentUser?.name || store.state.im?.currentUser?.nickname || ''}`)
   )
   if (mentionMsg) {
-    const el = listRef.value.querySelector(`[data-message-id="${mentionMsg.messageId || mentionMsg.id}"]`)
+    const el = listRef.value.querySelector(`[data-message-id="${mentionMsg.messageId}"]`)
     if (el) {
       el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       ElMessage.success('已定位到艾特消息')
@@ -687,24 +642,21 @@ const cancelSelection = () => {
 }
 
 const isMessageSelected = (msg) => {
-  const id = msg.messageId || msg.id
-  return selectedMessages.value.has(id)
+  return selectedMessages.value.has(msg.messageId)
 }
 
 const handleMessageClick = (msg) => {
   if (!isSelectionMode.value) return
-  const id = msg.messageId || msg.id
-  if (selectedMessages.value.has(id)) {
-    selectedMessages.value.delete(id)
+  if (selectedMessages.value.has(msg.messageId)) {
+    selectedMessages.value.delete(msg.messageId)
   } else {
-    selectedMessages.value.add(id)
+    selectedMessages.value.add(msg.messageId)
   }
 }
 
 const selectAll = () => {
   messages.value.forEach(msg => {
-    const id = msg.messageId || msg.id
-    selectedMessages.value.add(id)
+    selectedMessages.value.add(msg.messageId)
   })
 }
 
@@ -713,7 +665,7 @@ const batchForward = () => {
     ElMessage.warning('请先选择消息')
     return
   }
-  const selectedMsgs = messages.value.filter(msg => selectedMessages.value.has(msg.messageId || msg.id))
+  const selectedMsgs = messages.value.filter(msg => selectedMessages.value.has(msg.messageId))
   forwardDialogRef.value?.openMultiple(selectedMsgs)
   cancelSelection()
 }
@@ -803,7 +755,7 @@ const scrollToMessage = (messageId) => {
     el.scrollIntoView({ behavior: 'smooth', block: 'center' })
   } else {
     // Fallback: find by index in messages array
-    const index = messages.value.findIndex(m => (m.messageId || m.id) === messageId)
+    const index = messages.value.findIndex(m => m.messageId === messageId)
     if (index !== -1) {
       const allItems = listRef.value.querySelectorAll('[data-message-id]')
       if (allItems[index]) {

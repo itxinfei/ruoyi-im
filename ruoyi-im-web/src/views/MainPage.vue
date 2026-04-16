@@ -151,7 +151,7 @@
 
     <!-- 弹窗 -->
     <EditProfileDialog v-model="showEditProfileDialog" />
-    <SystemSettingsDialog v-model="showSystemSettingsDialog" />
+    <SystemSettingsDialog v-model="showSystemSettingsDialog" @open-edit-profile="showEditProfileDialog = true" />
   </div>
 </template>
 
@@ -162,6 +162,7 @@
  */
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import ChatSessionList from '@/components/im/ChatSessionList.vue'
@@ -186,15 +187,19 @@ import WorkReportPanel from '@/views/WorkReportPanel.vue'
 import CallHistoryPanel from '@/components/Chat/CallHistoryPanel.vue'
 
 const store = useStore()
-const activeModule = ref('chat')
+const route = useRoute()
+const router = useRouter()
 const showEditProfileDialog = ref(false)
 const showSystemSettingsDialog = ref(false)
 
 // 修正：嵌套访问路径 im -> session (增加可选链防护)
 const currentSession = computed(() => store.state.im?.session?.currentSession)
 
+// 从 route query 获取当前模块，默认为 chat
+const activeModule = computed(() => route.query.module || 'chat')
+
 const processSwitchModule = (moduleId) => {
-  activeModule.value = moduleId
+  router.replace({ query: { ...route.query, module: moduleId } })
 }
 
 const openEditProfile = () => {
@@ -208,7 +213,7 @@ const openSystemSettings = () => {
 // 通话记录重新呼叫 - 切换到聊天页面发起呼叫
 const handleCallRecall = ({ targetName }) => {
   // 切换到聊天模块
-  activeModule.value = 'chat'
+  router.replace({ query: { ...route.query, module: 'chat' } })
   ElMessage.info(`将在聊天中发起与「${targetName}」的通话`)
 }
 
