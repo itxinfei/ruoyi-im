@@ -886,7 +886,6 @@ onBeforeUnmount(() => {
     border-radius: var(--dt-radius-full);
     background: rgba(255, 255, 255, 0.78);
     border: 1px solid var(--dt-border-lighter);
-    box-shadow: var(--dt-shadow-1);
     color: var(--dt-text-tertiary);
     font-size: var(--dt-font-size-sm);
     line-height: 1;
@@ -1526,7 +1525,6 @@ onBeforeUnmount(() => {
   border-radius: var(--dt-radius-2xl);
   border: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
-  box-shadow: var(--dt-shadow-2);
   z-index: 1999;
 }
 

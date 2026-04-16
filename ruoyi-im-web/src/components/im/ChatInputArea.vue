@@ -1498,12 +1498,10 @@ onBeforeUnmount(() => {
   background-color: var(--dt-brand-color);
   color: var(--dt-text-white);
   cursor: pointer;
-  box-shadow: var(--dt-shadow-brand);
 }
 
 .send-btn.is-active:hover {
   background-color: var(--dt-brand-hover);
-  box-shadow: var(--dt-shadow-brand-strong);
 }
 
 .send-btn.is-active:active {
