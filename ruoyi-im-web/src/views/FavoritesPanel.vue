@@ -101,14 +101,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Loading, Star, ChatDotRound, Picture, Document, Microphone, VideoCamera, Link, MoreFilled } from '@element-plus/icons-vue'
 import { getUserFavorites, removeMessageFavorite } from '@/api/im/message'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 
 const store = useStore()
-const router = useRouter()
 const emit = defineEmits(['switch-module'])
 
 const loading = ref(false)
@@ -146,7 +144,7 @@ const filteredFavorites = computed(() => {
   return result
 })
 
-const getTypeIcon = (type) => {
+const _getTypeIcon = (type) => {
   const icons = {
     'TEXT': 'ChatDotRound',
     'IMAGE': 'Picture',

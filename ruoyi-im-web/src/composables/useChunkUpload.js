@@ -398,7 +398,7 @@ export function useChunkUpload(options = {}) {
     currentFile.value = file
 
     // 合并配置
-    const config = {
+    const _config = {
       ...options,
       ...opts
     }

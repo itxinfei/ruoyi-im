@@ -314,7 +314,7 @@ import { ElMessage } from 'element-plus'
 import { Close, Star, Picture, Folder, Upload, Microphone, VideoCamera, Clock, User, Search, LocationInformation } from '@element-plus/icons-vue'
 import { getContacts } from '@/api/im/contact'
 import { getGroupMembers } from '@/api/im/group'
-import { uploadImage, uploadFile, initChunkUpload, uploadChunk, mergeChunks } from '@/api/im/file'
+import { uploadFile, initChunkUpload, uploadChunk, mergeChunks } from '@/api/im/file'
 import AtMemberPicker from './AtMemberPicker.vue'
 
 const props = defineProps({
@@ -338,7 +338,6 @@ const isDragover = ref(false)
 
 // 拖拽上传状态
 const dragUploadingFiles = ref([]) // { file, progress, status, fileType, result }
-const dragUploadAbortController = null // 取消上传的控制器
 
 // 拖拽进度计算属性
 const dragProgressPercentage = computed(() => {

@@ -533,7 +533,7 @@ const handleFileSelect = (e) => {
 }
 
 // 获取文件图标 Element Plus 组件名
-const getFileIcon = (fileType) => {
+const _getFileIcon = (fileType) => {
   const iconMap = {
     'image': 'Picture',
     'video': 'VideoCamera',

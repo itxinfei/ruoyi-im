@@ -470,7 +470,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Plus, Calendar, Clock, Stamp, Search, Document, ChatDotRound,
@@ -485,7 +485,6 @@ import {
   deleteWorkReport,
   submitWorkReport,
   getWorkReportDetail,
-  getMyReports,
   addWorkReportComment,
   toggleWorkReportLike,
   approveWorkReport

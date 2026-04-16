@@ -501,7 +501,7 @@ export default {
     },
 
     // 移除收藏
-    async removeFavorite({ commit, rootState }, { messageId, conversationId }) {
+    async removeFavorite({ commit, rootState }, { messageId, conversationId: _conversationId }) {
       const res = await removeMessageFavorite(messageId)
       if (res.code === 200) {
         const sessionId = rootState.session.currentSession?.id

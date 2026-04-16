@@ -363,7 +363,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useStore } from 'vuex'
 import {
   Search, Timer, Tickets, Management, Finished,
-  Money, FolderOpened, ChatLineRound, VideoPlay, Calendar,
+  FolderOpened, Calendar,
   DocumentCopy, Clock, Notebook, Files
 } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
@@ -561,11 +561,11 @@ const handleAppClick = async (app) => {
   ElMessage.success(`正在进入: ${app.label}`)
 }
 
-const handleTodoClick = (todo) => {
+const handleTodoClick = () => {
   emit('switch-module', 'todo')
 }
 
-const handleScheduleClick = (schedule) => {
+const handleScheduleClick = () => {
   emit('switch-module', 'calendar')
 }
 
@@ -581,7 +581,7 @@ const handleSubmitReport = async () => {
   }
   reportLoading.value = true
   try {
-    const [startDate, endDate] = reportForm.value.dateRange
+    const [, endDate] = reportForm.value.dateRange
     const formatDate = (d) => d instanceof Date ? d.toISOString().split('T')[0] : d
     const res = await createWorkReport({
       reportType: 'WEEKLY',

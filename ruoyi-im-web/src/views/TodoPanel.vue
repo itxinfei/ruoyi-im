@@ -148,9 +148,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { Loading, List, Clock, Check, Calendar, Bell, Edit, Delete, CircleCheck, MoreFilled, ArrowUp, WarnTriangleFilled } from '@element-plus/icons-vue'
+import { Loading, List, Clock, Check, Calendar, Bell, Edit, Delete, CircleCheck, MoreFilled, ArrowUp } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getMyTasks, updateTaskStatus, deleteTask, getTaskStatistics } from '@/api/im/task'
+import { getMyTasks, updateTaskStatus, deleteTask } from '@/api/im/task'
 import CreateTodoDialog from '@/components/CreateTodoDialog/index.vue'
 
 const loading = ref(false)

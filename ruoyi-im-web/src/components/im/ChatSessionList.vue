@@ -199,7 +199,7 @@
  */
 import { ref, computed, onMounted, reactive } from 'vue'
 import { useStore } from 'vuex'
-import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight, MoreFilled, FolderOpened, FolderAdd, Delete, Edit, Plus } from '@element-plus/icons-vue'
+import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight, FolderOpened, FolderAdd, Delete, Edit, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const store = useStore()

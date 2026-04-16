@@ -68,7 +68,7 @@
 import { ref } from 'vue'
 import {
   ChatDotRound, Search, User, Menu, FolderOpened, Calendar,
-  Tickets, Setting, Sunny, Moon, Star, Bell, Document, MoreFilled, Phone
+  Tickets, Setting, Sunny, Moon, Bell, Phone
 } from '@element-plus/icons-vue'
 import { useTheme } from '@/composables/useTheme'
 

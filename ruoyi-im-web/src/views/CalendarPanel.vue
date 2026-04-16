@@ -687,7 +687,6 @@ function formatEventTime(event) {
 
 function formatEventTimeFull(event) {
   const startDate = new Date(event.startTime)
-  const endDate = new Date(event.endTime)
   if (event.allDay) {
     return `${formatDate(startDate)} 全天`
   }

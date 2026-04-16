@@ -299,11 +299,11 @@
 <script setup>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { getDocuments, searchDocuments, toggleStar, updateDocument, deleteDocument, permanentlyDeleteDocument, restoreDocument, shareDocument } from '@/api/im/document'
+import { getDocuments, searchDocuments, updateDocument, deleteDocument, permanentlyDeleteDocument, restoreDocument, shareDocument } from '@/api/im/document'
 import { createFolder, getQuota, uploadFile, getFileList, getFolderList, renameFolder, deleteFolder, deleteFile, renameFile, toggleFileStar, toggleFolderStar } from '@/api/im/cloudDrive'
 import { formatFileSize, formatTime } from '@/utils/format'
 import DocumentEditorDialog from '@/components/Documents/DocumentEditorDialog.vue'
-import { Folder, UserFilled, Clock, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone, View, Edit, Share, StarFilled, EditPen, Refresh, ArrowLeft } from '@element-plus/icons-vue'
+import { Folder, Delete, Search, List, Grid, Plus, FolderOpened, Star, MoreFilled, Document, Picture, VideoCamera, Microphone, View, Edit, Share, StarFilled, EditPen, Refresh, ArrowLeft } from '@element-plus/icons-vue'
 
 const activeNav = ref('recent')
 const viewMode = ref('list')

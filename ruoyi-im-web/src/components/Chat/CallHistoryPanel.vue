@@ -135,7 +135,7 @@ const getStatusText = (status) => {
 }
 
 // 点击通话记录
-const handleCallClick = (record) => {
+const handleCallClick = (_record) => {
   // 可以打开详情或直接呼叫
 }
 

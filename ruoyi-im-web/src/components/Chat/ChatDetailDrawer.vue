@@ -36,12 +36,10 @@ const qrCodeDialogVisible = ref(false)
 const qrCodeUrl = ref('')
 const qrCodeLoading = ref(false)
 const announcementDialogVisible = ref(false)
-const announcementContent = ref('')
 const announcements = ref([])
 const showAllMembers = ref(false)  // 是否显示全部成员
 const currentUserId = computed(() => store.getters['user/currentUser']?.id)
 const isGroupOwner = computed(() => members.value.some(m => m.role === 'OWNER' && m.userId === currentUserId.value))
-const isGroupAdmin = computed(() => members.value.some(m => m.role === 'ADMIN' && m.userId === currentUserId.value))
 // 是否有更多成员可显示
 const hasMoreMembers = computed(() => {
   return allMembers.value.length > 12 && !showAllMembers.value

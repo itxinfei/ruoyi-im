@@ -206,7 +206,7 @@ const openSystemSettings = () => {
 }
 
 // 通话记录重新呼叫 - 切换到聊天页面发起呼叫
-const handleCallRecall = ({ targetId, targetName, callType }) => {
+const handleCallRecall = ({ targetName }) => {
   // 切换到聊天模块
   activeModule.value = 'chat'
   ElMessage.info(`将在聊天中发起与「${targetName}」的通话`)

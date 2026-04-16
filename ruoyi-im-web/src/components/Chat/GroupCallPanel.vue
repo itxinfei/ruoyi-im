@@ -190,7 +190,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onBeforeUnmount } from 'vue'
+import { ref, computed, watch, onBeforeUnmount } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Phone, Microphone, Mute, VideoCamera, VideoCameraFilled,

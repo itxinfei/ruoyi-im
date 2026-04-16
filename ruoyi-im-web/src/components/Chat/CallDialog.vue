@@ -193,7 +193,7 @@ let timeoutTimer = null
 
 const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
 
-const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection, manualReconnect } = useWebRTC({
+const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection } = useWebRTC({
   sendSignal: (action, data) => sendMessage({ type: 'call', data: { action, ...data } }),
   onConnectionStateChange: (state) => {
     if (state === 'reconnecting') {
