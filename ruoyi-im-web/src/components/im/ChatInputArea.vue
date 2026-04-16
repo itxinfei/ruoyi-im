@@ -1047,13 +1047,8 @@ onBeforeUnmount(() => {
 .drag-progress-icon {
   font-size: 32px;
   color: var(--dt-brand-color);
-  animation: pulse 1.5s ease-in-out infinite;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
 
 .drag-progress-text {
   font-size: var(--dt-font-size-base);

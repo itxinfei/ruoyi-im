@@ -914,8 +914,7 @@ onBeforeUnmount(() => {
   height: 36px;
   display: block;
   object-fit: cover;
-  border-radius: var(--dt-radius-xl);
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.08);
+  border-radius: var(--dt-radius-sm);
   background: var(--dt-bg-card);
 }
 
@@ -994,19 +993,15 @@ onBeforeUnmount(() => {
   max-width: 100%;
   min-height: 40px;
   padding: 10px 14px;
-  border-radius: var(--dt-radius-2xl);
+  border-radius: var(--dt-radius-lg);
   line-height: 1.6;
   font-size: 14px;
   word-break: break-word;
   white-space: pre-wrap;
-  transition: transform var(--dt-transition-fast), box-shadow var(--dt-transition-fast), background-color var(--dt-transition-fast);
+  transition: transform var(--dt-transition-fast), background-color var(--dt-transition-fast);
 
   &.is-pending {
     opacity: 0.72;
-  }
-
-  &.is-gesture-active {
-    box-shadow: var(--dt-shadow-2);
   }
 }
 
@@ -1015,7 +1010,6 @@ onBeforeUnmount(() => {
   background: var(--dt-bubble-left-bg);
   border: 1px solid rgba(23, 26, 29, 0.06);
   border-top-left-radius: 8px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
 }
 
 .is-me .message-bubble {
@@ -1504,7 +1498,6 @@ onBeforeUnmount(() => {
   color: var(--dt-text-secondary);
   background: rgba(255, 255, 255, 0.84);
   border: 1px solid rgba(23, 26, 29, 0.06);
-  box-shadow: var(--dt-shadow-1);
 }
 
 .recall-notice {

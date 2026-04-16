@@ -1004,7 +1004,6 @@ const scrollToMessage = (messageId) => {
   border-radius: var(--dt-radius-2xl);
   overflow: hidden;
   border: 1px solid rgba(23, 26, 29, 0.06);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
 }
 
 @media (max-width: 960px) {
