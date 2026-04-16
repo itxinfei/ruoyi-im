@@ -165,7 +165,7 @@ const logout = () => {
   width: var(--dt-avatar-size-md);
   height: var(--dt-avatar-size-md);
   border-radius: var(--dt-radius-md);
-  background: linear-gradient(135deg, var(--dt-brand-color) 0%, var(--dt-brand-light) 100%);
+  background: var(--dt-brand-color);
   color: var(--dt-text-white);
   display: flex;
   align-items: center;

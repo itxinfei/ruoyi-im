@@ -260,10 +260,7 @@ onMounted(() => {
 .bg-grid {
   position: absolute;
   inset: 0;
-  background-image:
-    linear-gradient(rgba(39, 126, 251, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(39, 126, 251, 0.03) 1px, transparent 1px);
-  background-size: 60px 60px;
+  background-color: var(--dt-bg-body);
 }
 
 .bg-orb {
@@ -731,9 +728,7 @@ h1 {
   }
 
   .bg-grid {
-    background-image:
-      linear-gradient(rgba(102, 126, 234, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(102, 126, 234, 0.05) 1px, transparent 1px);
+    background-color: var(--dt-bg-body-dark);
   }
 
   .login-container {
