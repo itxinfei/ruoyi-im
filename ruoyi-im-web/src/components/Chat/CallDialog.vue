@@ -508,7 +508,6 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
     height: 8px;
     border-radius: 50%;
     background: var(--dt-warning-color);
-    animation: pulse 1.5s ease-in-out infinite;
   }
 }
 
@@ -518,8 +517,4 @@ defineExpose({ open, end, handleWebRTCSignal, callId })
   justify-content: center;
 }
 
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.8); }
-}
 </style>
