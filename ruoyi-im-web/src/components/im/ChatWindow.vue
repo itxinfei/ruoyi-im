@@ -12,31 +12,16 @@
     />
 
     <!-- 1.5 多选模式顶部栏 -->
-    <div v-if="isSelectionMode" class="selection-header">
-      <div class="selection-info">
-        <span>已选择 {{ selectedMessages.size }} 条消息</span>
-      </div>
-      <div class="selection-actions">
-        <el-button size="small" @click="selectAll">
-          全选
-        </el-button>
-        <el-button size="small" @click="cancelSelection">
-          取消
-        </el-button>
-        <el-button type="primary" size="small" @click="batchForward">
-          转发
-        </el-button>
-        <el-button size="small" @click="batchMarkAsRead">
-          已读
-        </el-button>
-        <el-button size="small" @click="batchFavorite">
-          收藏
-        </el-button>
-        <el-button type="danger" size="small" @click="batchDelete">
-          删除
-        </el-button>
-      </div>
-    </div>
+    <SelectionHeader
+      v-if="isSelectionMode"
+      :selected-count="selectedMessages.size"
+      @select-all="selectAll"
+      @cancel="cancelSelection"
+      @forward="batchForward"
+      @mark-as-read="batchMarkAsRead"
+      @favorite="batchFavorite"
+      @delete="batchDelete"
+    />
 
     <!-- 2. 消息列表区 -->
     <div ref="listRef" class="message-list-viewport" @scroll="handleScroll">
@@ -121,6 +106,7 @@ import ReadStatusDrawer from '@/components/im/ReadStatusDrawer.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
+import SelectionHeader from './ChatWindow/SelectionHeader.vue'
 
 const store = useStore()
 
@@ -866,49 +852,6 @@ const scrollToMessage = (messageId) => {
   color: var(--dt-brand-color);
 }
 
-/* 多选模式顶部栏 - 钉钉风格 */
-.selection-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--dt-spacing-md) var(--dt-chat-gutter);
-  background-color: var(--dt-brand-color);
-  color: var(--dt-text-white);
-  flex-shrink: 0;
-  box-shadow: var(--dt-shadow-brand);
-}
-
-.selection-info {
-  font-size: var(--dt-font-size-base);
-  font-weight: var(--dt-font-weight-medium);
-}
-
-.selection-actions {
-  display: flex;
-  gap: var(--dt-spacing-sm);
-}
-
-.selection-actions :deep(.el-button) {
-  padding: var(--dt-spacing-sm) var(--dt-spacing-lg);
-  border-radius: var(--dt-radius-md);
-  font-size: var(--dt-font-size-sm);
-}
-
-.selection-actions :deep(.el-button--small) {
-  height: var(--dt-btn-height-sm);
-}
-
-.selection-actions :deep(.el-button:not(.el-button--primary):not(.el-button--danger)) {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: var(--dt-text-white);
-}
-
-.selection-actions :deep(.el-button:not(.el-button--primary):not(.el-button--danger)):hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
 /* 消息多选样式 */
 .message-item-wrapper {
   position: relative;
@@ -1000,16 +943,6 @@ const scrollToMessage = (messageId) => {
   :deep(.chat-input-wrapper) {
     margin: 0 10px 10px;
     border-radius: var(--dt-radius-2xl);
-  }
-
-  .selection-header {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
-  .selection-actions {
-    flex-wrap: wrap;
   }
 }
 </style>
