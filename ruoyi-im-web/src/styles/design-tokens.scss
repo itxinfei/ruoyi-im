@@ -166,6 +166,9 @@
   --dt-scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);  /* 滚动条滑块背景 */
   --dt-scrollbar-thumb-bg-hover: rgba(0, 0, 0, 0.35);  /* 滚动条滑块hover背景 */
 
+  // === Navigation Sidebar (侧边栏) ===
+  --dt-nav-sidebar-bg: #2B2D33;  /* 侧边栏背景色（深灰） */
+
   // === Transition ===
   --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   --dt-transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
