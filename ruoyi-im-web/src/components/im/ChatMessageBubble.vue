@@ -919,7 +919,7 @@ onBeforeUnmount(() => {
 
 .message-column {
   min-width: 0;
-  max-width: min(72%, 720px);
+  max-width: min(70%, 720px);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -989,11 +989,11 @@ onBeforeUnmount(() => {
 
 .message-bubble {
   position: relative;
-  max-width: 100%;
+  max-width: 70%;
   min-height: 40px;
-  padding: 10px 14px;
+  padding: 8px 12px;
   border-radius: var(--dt-radius-lg);
-  line-height: 1.6;
+  line-height: 1.5;
   font-size: 14px;
   word-break: break-word;
   white-space: pre-wrap;
@@ -1004,17 +1004,19 @@ onBeforeUnmount(() => {
   }
 }
 
+// 接收方气泡：左上角 4px（尖角），其余 8px
 .is-other .message-bubble {
   color: var(--dt-text-primary);
   background: var(--dt-bubble-left-bg);
-  border: 1px solid rgba(23, 26, 29, 0.06);
-  border-top-left-radius: 8px;
+  border: 1px solid rgba(23, 26, 29, 0.08);
+  border-radius: 4px 8px 8px 8px;
 }
 
+// 发送方气泡：右上角 4px（尖角），其余 8px
 .is-me .message-bubble {
   color: var(--dt-text-white);
   background: var(--dt-brand-color);
-  border-top-right-radius: 8px;
+  border-radius: 8px 4px 8px 8px;
 }
 
 .quoted-message-preview {

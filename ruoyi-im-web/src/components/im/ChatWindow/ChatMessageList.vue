@@ -111,7 +111,7 @@ const handleScroll = () => {
   overflow-y: auto;
   overflow-x: hidden;
   background-color: transparent;
-  padding: 14px var(--dt-chat-gutter) 20px;
+  padding: 12px var(--dt-chat-gutter);  /* 钉钉标准：消息列表 padding 上下 12px，左右 24px */
 }
 
 .message-list-content {

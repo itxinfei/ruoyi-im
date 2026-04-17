@@ -72,7 +72,7 @@ defineEmits([
 <style scoped>
 .chat-header {
   height: var(--dt-chat-header-height);
-  padding: 0 var(--dt-chat-gutter);
+  padding: 0 20px;  /* 钉钉标准：头部 padding 左右 20px */
   display: flex;
   align-items: center;
   justify-content: space-between;

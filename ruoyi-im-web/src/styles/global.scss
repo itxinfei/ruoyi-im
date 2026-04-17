@@ -85,7 +85,7 @@ textarea {
 
 ::-webkit-scrollbar-thumb {
   background: var(--dt-scrollbar-thumb-bg);
-  border-radius: var(--dt-radius-xs);
+  border-radius: 3px;  /* 钉钉标准：滚动条滑块圆角 3px */
 
   &:hover {
     background: var(--dt-scrollbar-thumb-bg-hover);
@@ -101,12 +101,12 @@ textarea {
 
   &::-webkit-scrollbar-track {
     background: transparent;
-    border-radius: var(--dt-radius-xs);
+    border-radius: 3px;
   }
 
   &::-webkit-scrollbar-thumb {
     background: var(--dt-scrollbar-thumb-bg);
-    border-radius: var(--dt-radius-xs);
+    border-radius: 3px;
     transition: background var(--dt-transition-fast);
 
     &:hover {

@@ -681,20 +681,20 @@ const handleGlobalClick = () => {
   color: var(--dt-text-white);
   font-size: var(--dt-font-size-xs);
   font-weight: var(--dt-font-weight-semibold);
-  line-height: 16px;
-  min-width: 16px;
-  height: 16px;
+  line-height: 18px;  /* 钉钉标准：18px */
+  min-width: 18px;    /* 钉钉标准：最小宽度 18px */
+  height: 18px;       /* 钉钉标准：18px */
   padding: 0 4px;
   text-align: center;
 }
 
 /* 钉钉规范：1-9 数字圆形，10+ 数字胶囊 */
 .unread-badge-circle {
-  border-radius: var(--dt-radius-full); /* 50% 当 width=height=16px 时为正圆 */
+  border-radius: 9px;  /* 钉钉标准：完全圆形 */
 }
 
 .unread-badge-capsule {
-  border-radius: var(--dt-radius-lg);
+  border-radius: 9px;  /* 钉钉标准：圆角为高度一半 */
 }
 
 .content-wrapper {
