@@ -26,8 +26,8 @@
 | 气泡最大宽度 | 70% | `var(--dt-bubble-max-width)` |
 | 气泡字号 | 14px | `var(--dt-font-size-base)` |
 | 气泡行高 | 1.5 | - |
-| 发送方气泡圆角 | 4px 8px 8px 8px | 右上小角 |
-| 接收方气泡圆角 | 8px 4px 8px 8px | 左上小角 |
+| 发送方气泡圆角 | 8px 4px 8px 8px | 右上小角 |
+| 接收方气泡圆角 | 4px 8px 8px 8px | 左上小角 |
 | 发送方气泡背景 | #277EFB | `var(--dt-bubble-right-bg)` |
 | 接收方气泡背景 | #ffffff | `var(--dt-bubble-left-bg)` |
 | 头像尺寸 | 36px | `var(--dt-avatar-size-md)` |
