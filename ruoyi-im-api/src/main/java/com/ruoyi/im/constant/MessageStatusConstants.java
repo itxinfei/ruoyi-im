@@ -14,6 +14,9 @@ public final class MessageStatusConstants {
 
     // ========== 消息发送状态 ==========
 
+    /** 消息状态：待发送 - 消息已创建，等待发送 */
+    public static final String STATUS_PENDING = "PENDING";
+
     /** 消息状态：发送中 */
     public static final String STATUS_SENDING = "SENDING";
 

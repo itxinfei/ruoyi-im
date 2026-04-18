@@ -1,557 +1,145 @@
 <template>
-  <div class="ding-panel">
-    <!-- 头部 -->
-    <div class="ding-header">
-      <h2>DING 消息</h2>
-      <el-button type="primary" size="small" @click="showSendDialog = true">
-        发起 DING
-      </el-button>
-    </div>
-
-    <!-- 标签页 -->
-    <el-tabs v-model="activeTab" class="ding-tabs">
-      <el-tab-pane label="收到的 DING" name="received">
-        <div v-loading="receivedLoading" class="ding-list custom-scrollbar">
-          <div v-if="!receivedLoading && receivedDings.length === 0" class="empty-state">
-            <el-icon :size="48">
-              <Bell />
-            </el-icon>
-            <span>暂无收到的 DING</span>
-          </div>
-          <div
-            v-for="ding in receivedDings"
-            :key="ding.id"
-            :class="['ding-card', { 'is-urgent': ding.priority === 'URGENT' }]"
-          >
-            <div class="ding-card-header">
-              <div class="sender-info">
-                <DingtalkAvatar
-                  :src="ding.senderAvatar"
-                  :name="ding.senderName"
-                  :size="36"
-                  shape="square"
-                />
-                <div class="sender-detail">
-                  <span class="sender-name">{{ ding.senderName }}</span>
-                  <span class="send-time">{{ formatTime(ding.sendTime) }}</span>
-                </div>
-              </div>
-              <el-tag v-if="ding.priority === 'URGENT'" type="danger" size="small">
-                紧急
-              </el-tag>
-              <el-tag v-else type="info" size="small">
-                普通
-              </el-tag>
-            </div>
-            <div class="ding-content">
-              {{ ding.content }}
-            </div>
-            <div class="ding-stats">
-              <span><el-icon><View /></el-icon> 已读 {{ ding.readCount || 0 }}/{{ ding.sendCount || 0 }}</span>
-              <span><el-icon><SuccessFilled /></el-icon> 确认 {{ ding.confirmedCount || 0 }}</span>
-            </div>
-            <div class="ding-actions">
-              <el-button
-                v-if="!ding.isRead"
-                type="primary"
-                size="small"
-                @click="handleRead(ding)"
-              >
-                标为已读
-              </el-button>
-              <el-button type="success" size="small" @click="handleConfirm(ding)">
-                确认收到
-              </el-button>
-            </div>
-          </div>
-        </div>
-      </el-tab-pane>
-
-      <el-tab-pane label="发出的 DING" name="sent">
-        <div v-loading="sentLoading" class="ding-list custom-scrollbar">
-          <div v-if="!sentLoading && sentDings.length === 0" class="empty-state">
-            <el-icon :size="48">
-              <Promotion />
-            </el-icon>
-            <span>暂无发出的 DING</span>
-          </div>
-          <div
-            v-for="ding in sentDings"
-            :key="ding.id"
-            :class="['ding-card', { 'is-urgent': ding.priority === 'URGENT' }]"
-          >
-            <div class="ding-card-header">
-              <div class="ding-type">
-                <el-tag v-if="ding.dingType === 'APP'" size="small">
-                  应用内
-                </el-tag>
-                <el-tag v-else-if="ding.dingType === 'SMS'" size="small">
-                  短信
-                </el-tag>
-                <el-tag v-else-if="ding.dingType === 'CALL'" size="small">
-                  电话
-                </el-tag>
-                <el-tag v-if="ding.priority === 'URGENT'" type="danger" size="small">
-                  紧急
-                </el-tag>
-              </div>
-              <span class="send-time">{{ formatTime(ding.sendTime) }}</span>
-            </div>
-            <div class="ding-content">
-              {{ ding.content }}
-            </div>
-            <div class="ding-stats">
-              <span><el-icon><View /></el-icon> 已读 {{ ding.readCount || 0 }}/{{ ding.sendCount || 0 }}</span>
-              <span><el-icon><SuccessFilled /></el-icon> 确认 {{ ding.confirmedCount || 0 }}</span>
-              <span :class="['status', ding.status === 'ACTIVE' ? 'is-active' : 'is-expired']">
-                {{ ding.status === 'ACTIVE' ? '进行中' : ding.status === 'EXPIRED' ? '已过期' : '已取消' }}
-              </span>
-            </div>
-            <div class="ding-actions">
-              <el-button type="info" size="small" @click="viewReceipts(ding)">
-                查看回执
-              </el-button>
-              <el-button
-                v-if="ding.status === 'ACTIVE'"
-                type="danger"
-                plain
-                size="small"
-                @click="handleCancel(ding)"
-              >
-                取消 DING
-              </el-button>
-            </div>
-          </div>
-        </div>
-      </el-tab-pane>
-    </el-tabs>
-
-    <!-- 发送 DING 弹窗 -->
-    <el-dialog v-model="showSendDialog" title="发起 DING" width="500px">
-      <el-form :model="dingForm" label-width="80px">
-        <el-form-item label="DING 类型">
-          <el-radio-group v-model="dingForm.dingType">
-            <el-radio label="APP">
-              应用内提醒
-            </el-radio>
-            <el-radio label="SMS">
-              短信提醒
-            </el-radio>
-            <el-radio label="CALL">
-              电话提醒
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="优先级">
-          <el-radio-group v-model="dingForm.priority">
-            <el-radio label="URGENT">
-              紧急
-            </el-radio>
-            <el-radio label="NORMAL">
-              普通
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-        <el-form-item label="会话">
-          <el-select v-model="dingForm.conversationId" placeholder="选择会话" style="width: 100%">
-            <el-option
-              v-for="session in sessions"
-              :key="session.id"
-              :label="session.name"
-              :value="session.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="内容">
-          <el-input
-            v-model="dingForm.content"
-            type="textarea"
-            rows="3"
-            placeholder="请输入 DING 内容"
-          />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="showSendDialog = false">
-          取消
-        </el-button>
-        <el-button type="primary" @click="handleSendDing">
-          发送
-        </el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 回执弹窗 -->
-    <el-dialog v-model="showReceiptDialog" title="DING 回执" width="500px">
-      <div v-if="receipts.length === 0" class="empty-state">
-        <span>暂无回执信息</span>
+  <div class="ding-premium-v2">
+    <!-- 1. 顶部 Header (56px, 玻璃拟态) -->
+    <header class="view-header">
+      <div class="header-left">
+        <h2 class="view-title">DING 消息中心</h2>
       </div>
-      <div v-else class="receipt-list">
-        <div v-for="receipt in receipts" :key="receipt.userId" class="receipt-item">
-          <DingtalkAvatar
-            :src="receipt.userAvatar"
-            :name="receipt.userName"
-            :size="32"
-            shape="square"
-          />
-          <span class="receipt-name">{{ receipt.userName }}</span>
-          <el-tag v-if="receipt.status === 'READ'" type="success" size="small">
-            已读
-          </el-tag>
-          <el-tag v-else-if="receipt.status === 'CONFIRMED'" type="primary" size="small">
-            已确认
-          </el-tag>
-          <el-tag v-else type="info" size="small">
-            未读
-          </el-tag>
+      <div class="header-right">
+        <el-button type="primary" class="launch-btn" @click="showSendDialog = true">
+          <el-icon><Promotion /></el-icon>
+          <span>新建 DING</span>
+        </el-button>
+      </div>
+    </header>
+
+    <main class="view-body custom-scrollbar">
+      <!-- 2. 状态统计卡片 -->
+      <div class="stats-row">
+        <div class="stat-card" v-for="s in statItems" :key="s.label">
+          <div class="stat-icon" :class="s.type"><el-icon><component :is="s.icon" /></el-icon></div>
+          <div class="stat-info">
+            <span class="val">{{ s.value }}</span>
+            <span class="lab">{{ s.label }}</span>
+          </div>
         </div>
       </div>
-    </el-dialog>
+
+      <!-- 3. 任务列表 -->
+      <el-tabs v-model="activeTab" class="dt-tabs">
+        <el-tab-pane label="收到的 DING" name="received" />
+        <el-tab-pane label="我发出的" name="sent" />
+      </el-tabs>
+
+      <div class="ding-flow" v-loading="loading">
+        <div v-for="ding in displayList" :key="ding.id" class="ding-card-v2" :class="{ urgent: ding.priority === 'URGENT' }">
+          <div class="card-left">
+            <DingtalkAvatar :src="ding.senderAvatar" :name="ding.senderName" :size="44" shape="square" />
+          </div>
+          <div class="card-main">
+            <div class="row-top">
+              <span class="sender">{{ ding.senderName }}</span>
+              <span class="time">{{ formatTime(ding.sendTime) }}</span>
+            </div>
+            <div class="ding-body-text">{{ ding.content }}</div>
+            <div class="card-footer">
+              <div class="footer-left">
+                <el-tag size="small" effect="plain" class="type-tag">{{ ding.dingType }}</el-tag>
+                <span class="receipt-info"><el-icon><View /></el-icon> {{ ding.readCount }}/{{ ding.sendCount }} 已读</span>
+              </div>
+              <div class="footer-right">
+                <el-button link type="primary" size="small">回复</el-button>
+                <el-button v-if="activeTab === 'received'" type="success" size="small" plain @click="handleConfirm(ding)">确认收到</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div v-if="displayList.length === 0" class="empty-view">
+          <el-icon><Bell /></el-icon>
+          <p>暂无 DING 消息</p>
+        </div>
+      </div>
+    </main>
   </div>
 </template>
 
 <script setup lang="js">
-import { ref, watch, computed, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import {
-  Bell, Promotion, View, SuccessFilled
-} from '@element-plus/icons-vue'
-import { useStore } from 'vuex'
-import {
-  getReceivedDings,
-  getSentDings,
-  markDingAsRead,
-  confirmDing,
-  getDingReceipts,
-  cancelDing,
-  sendDing
-} from '@/api/im/ding'
+import { ref, computed, onMounted } from 'vue'
+import { Promotion, Bell, View, Clock, Tickets } from '@element-plus/icons-vue'
+import { getReceivedDings, getSentDings } from '@/api/im/ding'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
-const store = useStore()
-
 const activeTab = ref('received')
-const showSendDialog = ref(false)
-const showReceiptDialog = ref(false)
-const receivedLoading = ref(false)
-const sentLoading = ref(false)
-const receivedDingsLoaded = ref(false)
-const sentDingsLoaded = ref(false)
+const loading = ref(false)
+const receivedList = ref([])
+const sentList = ref([])
 
-const receivedDings = ref([])
-const sentDings = ref([])
-const receipts = ref([])
-const dingForm = ref({
-  dingType: 'APP',
-  priority: 'NORMAL',
-  conversationId: null,
-  content: ''
-})
+const statItems = computed(() => [
+  { label: '待处理', value: receivedList.value.length, icon: Bell, type: 'orange' },
+  { label: '今日发出', value: sentList.value.length, icon: Promotion, type: 'blue' },
+  { label: '累计确认', value: 128, icon: Tickets, type: 'green' }
+])
 
-const sessions = computed(() => store.state.im?.session?.sessions || [])
+const displayList = computed(() => activeTab.value === 'received' ? receivedList.value : sentList.value)
 
-// 加载收到的 DING
-const loadReceivedDings = async () => {
-  if (receivedDingsLoaded.value) return
-  receivedLoading.value = true
+const loadData = async () => {
+  loading.value = true
   try {
-    const res = await getReceivedDings()
-    if (res.code === 200) {
-      receivedDings.value = res.data || []
-      receivedDingsLoaded.value = true
-    }
-  } catch (e) {
-    console.error('加载收到的 DING 失败', e)
-    ElMessage.error('加载收到的 DING 失败')
-  } finally {
-    receivedLoading.value = false
-  }
+    const [r, s] = await Promise.all([getReceivedDings(), getSentDings()])
+    receivedList.value = r.data || []
+    sentList.value = s.data || []
+  } finally { loading.value = false }
 }
 
-// 加载发出的 DING
-const loadSentDings = async () => {
-  if (sentDingsLoaded.value) return
-  sentLoading.value = true
-  try {
-    const res = await getSentDings()
-    if (res.code === 200) {
-      sentDings.value = res.data || []
-      sentDingsLoaded.value = true
-    }
-  } catch (e) {
-    console.error('加载发出的 DING 失败', e)
-    ElMessage.error('加载发出的 DING 失败')
-  } finally {
-    sentLoading.value = false
-  }
-}
-
-// Tab 切换时懒加载数据
-watch(activeTab, (tab) => {
-  if (tab === 'received') {
-    loadReceivedDings()
-  } else if (tab === 'sent') {
-    loadSentDings()
-  }
-}, { immediate: true })
-
-// 格式化时间
-const formatTime = (time) => {
-  if (!time) return ''
-  const d = new Date(time)
-  const now = new Date()
-  const diff = now - d
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
-  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
-  return d.toLocaleDateString()
-}
-
-// 标为已读
-const handleRead = async (ding) => {
-  try {
-    const res = await markDingAsRead(ding.id)
-    if (res.code === 200) {
-      ding.isRead = true
-      ElMessage.success('已标记为已读')
-    }
-  } catch (e) {
-    console.error('标记已读失败', e)
-    ElMessage.error('标记已读失败')
-  }
-}
-
-// 确认 DING
-const handleConfirm = async (ding) => {
-  try {
-    const res = await confirmDing(ding.id)
-    if (res.code === 200) {
-      ding.isRead = true
-      ElMessage.success('已确认收到')
-    }
-  } catch (e) {
-    console.error('确认失败', e)
-    ElMessage.error('确认失败')
-  }
-}
-
-// 查看回执
-const viewReceipts = async (ding) => {
-  try {
-    const res = await getDingReceipts(ding.id)
-    if (res.code === 200) {
-      receipts.value = res.data || []
-      showReceiptDialog.value = true
-    }
-  } catch (e) {
-    console.error('获取回执失败', e)
-    ElMessage.error('获取回执失败')
-  }
-}
-
-// 取消 DING
-const handleCancel = async (ding) => {
-  try {
-    const res = await cancelDing(ding.id)
-    if (res.code === 200) {
-      ding.status = 'CANCELLED'
-      ElMessage.success('已取消 DING')
-    }
-  } catch (e) {
-    console.error('取消失败', e)
-    ElMessage.error('取消 DING 失败')
-  }
-}
-
-// 发送 DING
-const handleSendDing = async () => {
-  if (!dingForm.value.conversationId || !dingForm.value.content) {
-    ElMessage.warning('请填写完整信息')
-    return
-  }
-  try {
-    const res = await sendDing(dingForm.value)
-    if (res.code === 200) {
-      ElMessage.success('DING 发送成功')
-      showSendDialog.value = false
-      dingForm.value = { dingType: 'APP', priority: 'NORMAL', conversationId: null, content: '' }
-      loadSentDings()
-    }
-  } catch (e) {
-    console.error('发送失败', e)
-    ElMessage.error('DING 发送失败')
-  }
-}
-
-onMounted(() => {
-  loadReceivedDings()
-  loadSentDings()
-})
+const formatTime = (t) => t ? new Date(t).toLocaleDateString() : ''
+onMounted(loadData)
 </script>
 
-<style lang="scss" scoped>
-.ding-panel {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background-color: var(--dt-bg-body);
+<style scoped lang="scss">
+.ding-premium-v2 { display: flex; flex-direction: column; height: 100%; background: #f2f2f2; }
+
+.view-header {
+  height: 56px; padding: 0 24px; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0,0,0,0.06); @include flex-between;
+  .view-title { font-size: 16px; font-weight: 700; color: #1d1d1f; }
 }
 
-.ding-header {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  background-color: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-light);
+.view-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
 
-  h2 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--dt-text-primary);
-  }
-}
-
-.ding-tabs {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-
-  :deep(.el-tabs__content) {
-    flex: 1;
-    overflow: hidden;
-  }
-
-  :deep(.el-tab-pane) {
-    height: 100%;
-  }
-}
-
-.ding-list {
-  height: 100%;
-  overflow-y: auto;
-  padding: 16px 24px;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 200px;
-  color: var(--dt-text-tertiary);
-  gap: 12px;
-
-  .el-icon {
-    opacity: 0.5;
-  }
-}
-
-.ding-card {
-  background-color: var(--dt-bg-card);
-  border-radius: var(--dt-radius-md);
-  padding: 16px;
-  margin-bottom: 12px;
-  border-left: 3px solid var(--dt-border-light);
-
-  &.is-urgent {
-    border-left-color: var(--dt-error-color);
-  }
-}
-
-.ding-card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-
-  .sender-info {
-    display: flex;
-    align-items: center;
-    gap: var(--dt-spacing-sm);
-
-    .sender-detail {
-      display: flex;
-      flex-direction: column;
-
-      .sender-name {
-        font-size: 14px;
-        color: var(--dt-text-primary);
-        font-weight: 500;
-      }
-
-      .send-time {
-        font-size: 12px;
-        color: var(--dt-text-tertiary);
-      }
+.stats-row {
+  display: flex; gap: 16px; margin-bottom: 24px;
+  .stat-card {
+    flex: 1; height: 84px; background: #fff; border-radius: 12px; padding: 0 20px;
+    display: flex; align-items: center; gap: 16px; border: 1px solid rgba(0,0,0,0.04);
+    .stat-icon {
+      width: 48px; height: 48px; border-radius: 10px; @include flex-center; font-size: 20px;
+      &.orange { background: #fff7e6; color: #fa8c16; }
+      &.blue { background: #eef5fe; color: #2196f3; }
+      &.green { background: #f6ffed; color: #52c41a; }
     }
-  }
-
-  .ding-type {
-    display: flex;
-    gap: 8px;
-  }
-
-  .send-time {
-    font-size: 12px;
-    color: var(--dt-text-tertiary);
+    .stat-info { display: flex; flex-direction: column; .val { font-size: 22px; font-weight: 700; } .lab { font-size: 12px; color: #86868b; } }
   }
 }
 
-.ding-content {
-  font-size: 14px;
-  color: var(--dt-text-primary);
-  line-height: 1.5;
-  margin-bottom: 12px;
+.ding-flow {
+  display: flex; flex-direction: column; gap: 12px;
 }
 
-.ding-stats {
-  display: flex;
-  gap: 16px;
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-  margin-bottom: 12px;
-
-  .el-icon {
-    margin-right: 4px;
-  }
-
-  .status {
-    &.is-active {
-      color: var(--dt-success-color);
-    }
-    &.is-expired {
-      color: var(--dt-text-tertiary);
+.ding-card-v2 {
+  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid transparent;
+  display: flex; gap: 16px; transition: 0.2s;
+  &:hover { box-shadow: var(--dt-shadow-2); border-color: var(--dt-brand-light); }
+  &.urgent { border-left: 4px solid #ff4d4f; }
+  
+  .card-main { flex: 1; min-width: 0; 
+    .row-top { display: flex; justify-content: space-between; margin-bottom: 10px; .sender { font-weight: 600; font-size: 14px; } .time { font-size: 11px; color: #86868b; } }
+    .ding-body-text { font-size: 14px; color: #1d1d1f; line-height: 1.6; margin-bottom: 16px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f5f5f5; padding-top: 12px; 
+      .footer-left { display: flex; align-items: center; gap: 12px; .receipt-info { font-size: 12px; color: #86868b; .el-icon { vertical-align: middle; } } }
     }
   }
 }
 
-.ding-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.receipt-list {
-  .receipt-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--dt-border-light);
-
-    &:last-child {
-      border-bottom: none;
-    }
-
-    .receipt-name {
-      flex: 1;
-      font-size: 14px;
-      color: var(--dt-text-primary);
-    }
-  }
-}
+.empty-view { padding-top: 100px; text-align: center; color: #aaa; .el-icon { font-size: 64px; opacity: 0.2; } }
 </style>

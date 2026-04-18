@@ -1,63 +1,69 @@
 <template>
-  <div class="calendar-v2">
-    <!-- 1. 左侧沉浸式侧栏 (240px) -->
-    <aside class="cal-sidebar">
-      <div class="sidebar-header">
-        <el-button type="primary" class="create-btn" @click="openCreateDialog">
+  <div class="cal-premium-v3">
+    <!-- 1. 左侧二级侧栏 (240px) -->
+    <aside class="cal-sidebar-v3">
+      <div class="sidebar-top">
+        <el-button type="primary" class="create-event-btn" @click="handleCreateEvent">
           <el-icon><Plus /></el-icon>
-          <span>新建日程</span>
+          <span>创建日程</span>
         </el-button>
       </div>
 
-      <!-- 迷你日历：深度复刻 -->
-      <div class="mini-cal-container">
-        <div class="mini-cal-header">
-          <span class="title">{{ miniCalendarTitle }}</span>
-          <div class="header-ops">
+      <!-- 迷你日历 (对齐钉钉 8.2 极简风格) -->
+      <div class="mini-datepicker-v3">
+        <div class="datepicker-header">
+          <span class="month-label">{{ miniCalMonth }}</span>
+          <div class="nav-btns">
             <el-icon @click="prevMonth"><ArrowLeft /></el-icon>
             <el-icon @click="nextMonth"><ArrowRight /></el-icon>
           </div>
         </div>
-        <div class="mini-cal-grid">
-          <div v-for="d in weekDays" :key="d" class="weekday-cell">{{ d }}</div>
+        <div class="datepicker-grid">
+          <span v-for="d in ['日','一','二','三','四','五','六']" :key="d" class="week-label">{{ d }}</span>
           <div 
-            v-for="day in miniCalendarDays" 
+            v-for="day in calendarDays" 
             :key="day.date" 
             class="day-cell"
-            :class="{ today: day.isToday, selected: day.date === selectedDateStr, other: day.otherMonth }"
+            :class="{ 
+              today: day.isToday, 
+              selected: day.date === selectedDateStr,
+              'other-month': day.isOtherMonth 
+            }"
             @click="selectDate(day)"
           >
-            {{ day.day }}
-            <div v-if="day.hasEvent" class="event-dot"></div>
+            {{ day.dayNum }}
+            <div v-if="day.hasEvent" class="event-indicator"></div>
           </div>
         </div>
       </div>
 
-      <!-- 视图分类 -->
-      <div class="cal-filters">
-        <h4 class="filter-title">我的日历</h4>
-        <div v-for="cat in categories" :key="cat.id" class="filter-item">
-          <el-checkbox v-model="cat.checked">
-            <span class="dot" :style="{ background: cat.color }"></span>
-            {{ cat.label }}
+      <div class="sidebar-divider"></div>
+
+      <!-- 日历订阅 -->
+      <div class="calendar-list">
+        <h4 class="sub-title">我的日历</h4>
+        <div v-for="c in categories" :key="c.id" class="cal-sub-item">
+          <el-checkbox v-model="c.active">
+            <span class="color-dot" :style="{ background: c.color }"></span>
+            <span class="label">{{ c.label }}</span>
           </el-checkbox>
         </div>
       </div>
     </aside>
 
-    <!-- 2. 右侧主视图区 -->
-    <main class="cal-main">
-      <header class="cal-toolbar">
-        <div class="toolbar-left">
+    <!-- 2. 主视图区 (对齐大厂：动态视图切换) -->
+    <main class="cal-main-content">
+      <header class="cal-view-header">
+        <div class="header-left">
           <el-button-group>
             <el-button size="small" @click="goToday">今天</el-button>
             <el-button size="small" :icon="ArrowLeft" @click="prevPeriod" />
             <el-button size="small" :icon="ArrowRight" @click="nextPeriod" />
           </el-button-group>
-          <h2 class="current-period-text">{{ periodTitle }}</h2>
+          <h2 class="view-title-text">{{ viewTitle }}</h2>
         </div>
-        <div class="toolbar-right">
-          <el-radio-group v-model="currentView" size="small">
+        <div class="header-right">
+          <el-radio-group v-model="viewMode" size="small">
             <el-radio-button value="day">日</el-radio-button>
             <el-radio-button value="week">周</el-radio-button>
             <el-radio-button value="month">月</el-radio-button>
@@ -65,15 +71,30 @@
         </div>
       </header>
 
-      <!-- 流延式内容区 -->
-      <div class="cal-content custom-scrollbar">
-        <!-- 此处根据 currentView 渲染不同子组件，演示月视图布局 -->
-        <div v-if="currentView === 'month'" class="month-grid">
-          <div v-for="d in weekDays" :key="d" class="month-header">{{ d }}</div>
-          <div v-for="day in monthDays" :key="day.date" class="month-day-cell" :class="{ other: day.otherMonth }">
-            <div class="cell-top"><span class="day-num" :class="{ today: day.isToday }">{{ day.day }}</span></div>
+      <!-- 时间网格主区 -->
+      <div class="view-body custom-scrollbar">
+        <!-- 以月视图为例：实现“灰底白卡”工业感 -->
+        <div v-if="viewMode === 'month'" class="month-view-grid">
+          <div v-for="d in ['周日','周一','周二','周三','周四','周五','周六']" :key="d" class="grid-header-cell">{{ d }}</div>
+          <div 
+            v-for="day in monthGridDays" 
+            :key="day.date" 
+            class="grid-day-cell"
+            :class="{ 'is-other': day.isOtherMonth }"
+          >
+            <div class="cell-top">
+              <span class="day-num" :class="{ isToday: day.isToday }">{{ day.dayNum }}</span>
+              <span v-if="day.lunar" class="lunar-text">{{ day.lunar }}</span>
+            </div>
             <div class="cell-events">
-              <div v-for="ev in day.events" :key="ev.id" class="ev-item" :style="{ background: ev.color }">{{ ev.title }}</div>
+              <div 
+                v-for="ev in day.events" 
+                :key="ev.id" 
+                class="event-pill"
+                :style="{ borderLeftColor: ev.color, background: ev.bgColor }"
+              >
+                {{ ev.title }}
+              </div>
             </div>
           </div>
         </div>
@@ -83,94 +104,92 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import { Plus, ArrowLeft, ArrowRight } from '@element-plus/icons-vue'
 
-const currentView = ref('month')
-const currentDate = ref(new Date())
-const selectedDate = ref(new Date())
-const weekDays = ['日', '一', '二', '三', '四', '五', '六']
+const viewMode = ref('month')
+const miniCalMonth = ref('2026年4月')
+const viewTitle = ref('2026年4月')
+const selectedDateStr = ref('2026-04-18')
 
 const categories = ref([
-  { id: 'work', label: '工作', color: 'var(--dt-event-work)', checked: true },
-  { id: 'meeting', label: '会议', color: 'var(--dt-event-meeting)', checked: true },
-  { id: 'personal', label: '个人', color: 'var(--dt-event-personal)', checked: true }
+  { id: 1, label: '工作', color: '#277efb', active: true },
+  { id: 2, label: '会议', color: '#22ab5c', active: true },
+  { id: 3, label: '个人', color: '#ff9800', active: true }
 ])
 
-const miniCalendarTitle = computed(() => `${currentDate.value.getFullYear()}年${currentDate.value.getMonth() + 1}月`)
-const periodTitle = computed(() => `${currentDate.value.getFullYear()}年${currentDate.value.getMonth() + 1}月`)
-const selectedDateStr = computed(() => selectedDate.value.toISOString().split('T')[0])
+// 模拟数据
+const monthGridDays = ref(Array.from({ length: 35 }, (_, i) => ({
+  date: `2026-04-${i+1}`,
+  dayNum: (i % 31) + 1,
+  isOtherMonth: i >= 30,
+  isToday: i === 17,
+  events: i === 17 ? [{ id: 1, title: 'IM界面纠偏评审', color: '#277efb', bgColor: '#eef5fe' }] : []
+})))
 
-// 迷你日历与主网格数据生成逻辑...
-const miniCalendarDays = ref([])
-const monthDays = ref([])
-
-const goToday = () => { currentDate.value = new Date(); selectedDate.value = new Date() }
-const prevMonth = () => { /* 翻页逻辑 */ }
-const nextMonth = () => { /* 翻页逻辑 */ }
-
-onMounted(() => {
-  // 初始化数据加载
-})
+const goToday = () => {}
+const handleCreateEvent = () => {}
 </script>
 
 <style scoped lang="scss">
-.calendar-v2 { display: flex; height: 100%; background: #fff; overflow: hidden; }
+.cal-premium-v3 { display: flex; height: 100%; background: #fff; overflow: hidden; }
 
-.cal-sidebar {
-  width: 240px; background: #f8fbff; border-right: 1px solid var(--dt-border-light);
+.cal-sidebar-v3 {
+  width: 240px; background: #f8fbff; border-right: 1px solid rgba(0,0,0,0.05);
   display: flex; flex-direction: column;
-  .sidebar-header { padding: 24px 20px; .create-btn { width: 100%; height: 36px; border-radius: 8px; font-weight: 600; } }
+  .sidebar-top { padding: 20px 16px; .create-event-btn { width: 100%; height: 36px; font-weight: 600; border-radius: 8px; } }
 }
 
-.mini-cal-container {
+/* 🏁 纠偏：迷你日历对齐钉钉 8.2 */
+.mini-datepicker-v3 {
   padding: 0 16px 20px;
-  .mini-cal-header {
+  .datepicker-header {
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-    padding: 0 4px; .title { font-size: 14px; font-weight: 600; }
-    .header-ops { display: flex; gap: 12px; color: var(--dt-text-tertiary); cursor: pointer; }
+    padding: 0 4px; .month-label { font-size: 14px; font-weight: 700; color: #1d1d1f; }
+    .nav-btns { display: flex; gap: 12px; color: #86868b; cursor: pointer; font-size: 14px; }
   }
-  .mini-cal-grid {
+  .datepicker-grid {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
-    .weekday-cell { font-size: 10px; color: var(--dt-text-quaternary); text-align: center; height: 24px; }
+    .week-label { font-size: 11px; color: #86868b; text-align: center; height: 24px; }
     .day-cell {
       aspect-ratio: 1; @include flex-center; font-size: 12px; border-radius: 50%; cursor: pointer;
-      position: relative; transition: 0.2s;
-      &:hover { background: var(--dt-bg-hover); }
+      position: relative; transition: 0.2s; color: #1d1d1f;
+      &:hover { background: #eef5fe; }
       &.today { background: var(--dt-brand-color); color: #fff; font-weight: 700; }
-      &.selected:not(.today) { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
-      &.other { color: var(--dt-text-quaternary); }
-      .event-dot { position: absolute; bottom: 4px; width: 3px; height: 3px; border-radius: 50%; background: var(--dt-brand-color); }
+      &.selected:not(.today) { background: #fff; border: 1px solid var(--dt-brand-color); color: var(--dt-brand-color); }
+      &.other-month { color: #ccc; }
+      .event-indicator { position: absolute; bottom: 4px; width: 4px; height: 4px; background: #22ab5c; border-radius: 50%; }
     }
   }
 }
 
-.cal-filters {
-  padding: 20px; .filter-title { font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 12px; }
-  .filter-item { margin-bottom: 8px; .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; } }
+.sidebar-divider { height: 1px; background: rgba(0,0,0,0.05); margin: 0 16px; }
+
+.cal-main-content { flex: 1; display: flex; flex-direction: column; background: #fff; }
+
+.cal-view-header {
+  height: 56px; padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.06);
+  @include flex-between;
+  .header-left { display: flex; align-items: center; gap: 20px; .view-title-text { font-size: 18px; font-weight: 700; } }
 }
 
-.cal-main { flex: 1; display: flex; flex-direction: column; background: #fff; }
+.view-body { flex: 1; overflow-y: auto; background: #f2f2f2; }
 
-.cal-toolbar {
-  height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
-  display: flex; align-items: center; justify-content: space-between;
-  .toolbar-left { display: flex; align-items: center; gap: 20px; }
-  .current-period-text { font-size: 18px; font-weight: 700; margin: 0; }
-}
-
-.cal-content { flex: 1; overflow: auto; background: #fdfdfe; }
-
-.month-grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); height: 100%;
-  .month-header { height: 40px; @include flex-center; font-size: 12px; color: var(--dt-text-tertiary); border-bottom: 1px solid var(--dt-border-lighter); }
-  .month-day-cell {
-    border-right: 1px solid var(--dt-border-lighter); border-bottom: 1px solid var(--dt-border-lighter);
-    min-height: 120px; padding: 8px; transition: 0.2s; &:hover { background: #f9fbff; }
-    &.other { background: #fcfcfd; .day-num { color: var(--dt-text-quaternary); } }
-    .day-num { width: 24px; height: 24px; @include flex-center; font-size: 13px; border-radius: 50%; &.today { background: var(--dt-brand-color); color: #fff; } }
-    .cell-events { margin-top: 8px; display: flex; flex-direction: column; gap: 2px;
-      .ev-item { font-size: 11px; color: #fff; padding: 2px 6px; border-radius: 4px; @include text-ellipsis; }
+/* 🏁 纠偏：日历主网格工业化对比 */
+.month-view-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr); height: 100%; min-height: 800px;
+  .grid-header-cell { height: 32px; background: #fff; border-bottom: 1px solid #eee; @include flex-center; font-size: 12px; color: #86868b; }
+  .grid-day-cell {
+    background: #fff; border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 8px;
+    display: flex; flex-direction: column; gap: 6px; transition: 0.1s;
+    &:hover { background: #fdfdfe; }
+    &.is-other { background: #f9f9f9; .day-num { color: #ccc; } }
+    .cell-top { display: flex; justify-content: space-between; align-items: center; 
+      .day-num { width: 24px; height: 24px; @include flex-center; font-size: 13px; border-radius: 50%; &.isToday { background: var(--dt-brand-color); color: #fff; } }
+      .lunar-text { font-size: 10px; color: #aaa; }
+    }
+    .cell-events { display: flex; flex-direction: column; gap: 2px;
+      .event-pill { font-size: 11px; padding: 2px 8px; border-left: 3px solid transparent; border-radius: 2px; cursor: pointer; @include text-ellipsis; }
     }
   }
 }

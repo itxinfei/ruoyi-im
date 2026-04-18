@@ -1,853 +1,174 @@
 <template>
-  <div class="login-page" :class="{ 'dark': isDark }">
-    <!-- 背景装饰 -->
-    <div class="bg-decoration">
-      <div class="bg-gradient" />
-      <div class="bg-grid" />
-      <div class="bg-orb bg-orb-1" />
-      <div class="bg-orb bg-orb-2" />
-      <div class="bg-orb bg-orb-3" />
+  <div class="dt-premium-login">
+    <!-- 1. 沉浸式动态背景 (对齐钉钉：深邃且冷静) -->
+    <div class="v5-bg-engine">
+      <div class="mesh-gradient"></div>
+      <div class="noise-overlay"></div>
     </div>
 
-    <!-- 登录容器 -->
-    <div class="login-container">
-      <!-- 左侧品牌展示 -->
-      <div class="brand-showcase">
-        <div class="brand-content">
-          <h2>高效协作，从 IM 开始</h2>
-          <p>安全、稳定的企业级即时通讯解决方案</p>
-          <div class="feature-list">
-            <div class="feature-item">
-              <el-icon><Message /></el-icon>
-              <span>即时消息</span>
-            </div>
-            <div class="feature-item">
-              <el-icon><Bell /></el-icon>
-              <span>实时通知</span>
-            </div>
-            <div class="feature-item">
-              <el-icon><FolderOpened /></el-icon>
-              <span>文件共享</span>
-            </div>
-          </div>
+    <!-- 2. 极简登录容器 -->
+    <main class="v5-login-card">
+      <div class="v5-card-header">
+        <div class="v5-logo-box">
+          <el-icon><Promotion /></el-icon>
         </div>
+        <h1 class="v5-title">RuoYi-IM</h1>
+        <p class="v5-subtitle">企业级数字化办公协同平台</p>
       </div>
 
-      <!-- 右侧登录表单 -->
-      <div class="login-card">
-        <!-- Logo 区域 -->
-        <div class="login-header">
-          <div class="logo-wrapper">
-            <div class="logo">
-              <el-icon><ChatDotRound /></el-icon>
-            </div>
-            <div class="logo-glow" />
+      <!-- 去 Web 化的表单：无边框感、专注输入 -->
+      <form class="v5-form" @submit.prevent="handleLogin">
+        <div class="v5-field" :class="{ active: usernameFocused }">
+          <label>用户名 / 手机号</label>
+          <div class="input-wrap">
+            <input 
+              v-model="loginForm.username" 
+              type="text" 
+              placeholder="请输入账号" 
+              @focus="usernameFocused = true"
+              @blur="usernameFocused = false"
+            />
           </div>
-          <h1>欢迎回来</h1>
-          <p class="subtitle">
-            登录您的账户继续协作
-          </p>
         </div>
 
-        <!-- 表单 -->
-        <form class="login-form" @submit.prevent="handleLogin">
-          <!-- 用户名输入 -->
-          <div class="field-group" :class="{ focused: usernameFocused, filled: loginForm.username }">
-            <label class="field-label">用户名</label>
-            <div class="field-input-wrapper">
-              <el-icon class="field-icon">
-                <User />
-              </el-icon>
-              <input
-                v-model="loginForm.username"
-                type="text"
-                placeholder="请输入用户名"
-                autocomplete="username"
-                @focus="usernameFocused = true"
-                @blur="usernameFocused = false"
-              >
-            </div>
+        <div class="v5-field" :class="{ active: passwordFocused }">
+          <label>登录密码</label>
+          <div class="input-wrap">
+            <input 
+              v-model="loginForm.password" 
+              :type="showPassword ? 'text' : 'password'" 
+              placeholder="请输入密码"
+              @focus="passwordFocused = true"
+              @blur="passwordFocused = false"
+            />
+            <el-icon class="eye-icon" @click="showPassword = !showPassword">
+              <View v-if="!showPassword" /><Hide v-else />
+            </el-icon>
           </div>
-
-          <!-- 密码输入 -->
-          <div class="field-group" :class="{ focused: passwordFocused, filled: loginForm.password }">
-            <label class="field-label">密码</label>
-            <div class="field-input-wrapper">
-              <el-icon class="field-icon">
-                <Lock />
-              </el-icon>
-              <input
-                v-model="loginForm.password"
-                :type="showPassword ? 'text' : 'password'"
-                placeholder="请输入密码"
-                autocomplete="current-password"
-                @focus="passwordFocused = true"
-                @blur="passwordFocused = false"
-              >
-              <button type="button" class="password-toggle" @click="showPassword = !showPassword">
-                <el-icon>
-                  <View v-if="!showPassword" />
-                  <Hide v-else />
-                </el-icon>
-              </button>
-            </div>
-          </div>
-
-          <!-- 选项行 -->
-          <div class="options-row">
-            <label class="checkbox-wrapper">
-              <input v-model="loginForm.rememberMe" type="checkbox">
-              <span class="checkbox-custom" />
-              <span class="checkbox-label">记住我</span>
-            </label>
-            <button type="button" class="link-btn" @click="handleForgotPassword">
-              忘记密码？
-            </button>
-          </div>
-
-          <!-- 登录按钮 -->
-          <button
-            type="submit"
-            class="btn-login"
-            :class="{ loading }"
-            :disabled="loading"
-          >
-            <span v-if="!loading" class="btn-text">
-              登录
-              <el-icon class="btn-arrow"><ArrowRight /></el-icon>
-            </span>
-            <span v-else class="btn-loading">
-              <span class="loading-dot" />
-              <span class="loading-dot" />
-              <span class="loading-dot" />
-            </span>
-          </button>
-        </form>
-
-        <!-- 底部信息 -->
-        <div class="login-footer">
-          <span>还没有账户？</span>
-          <button type="button" class="link-btn">
-            联系管理员
-          </button>
         </div>
-      </div>
-    </div>
 
-    <!-- 主题切换 -->
-    <button class="theme-toggle" :title="isDark ? '切换到亮色模式' : '切换到暗色模式'" @click="toggleTheme">
-      <el-icon>
-        <Sunny v-if="isDark" />
-        <Moon v-else />
-      </el-icon>
-    </button>
+        <div class="v5-options">
+          <el-checkbox v-model="loginForm.rememberMe">自动登录</el-checkbox>
+          <button type="button" class="forget-link">忘记密码</button>
+        </div>
 
-    <!-- 版权信息 -->
-    <div class="copyright">
-      © 2026 IM 企业通讯平台. All rights reserved.
+        <!-- 实体按压感登录按钮 -->
+        <button class="v5-login-btn" :class="{ loading }" :disabled="loading">
+          <span v-if="!loading">登录</span>
+          <el-icon v-else class="is-loading"><Loading /></el-icon>
+        </button>
+      </form>
+
+      <footer class="v5-footer">
+        <span class="v-ver">Version 8.2.0 Premium</span>
+        <div class="v-links">
+          <span>注册账号</span>
+          <span class="dot">·</span>
+          <span>隐私协议</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- 底部版权 (对齐钉钉：微缩极淡) -->
+    <div class="v5-copyright">
+      Powered by RuoYi Fullstack Architecture © 2026
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, reactive, onMounted } from 'vue'
+<script setup lang="js">
+import { ref, reactive } from 'vue'
+import { Promotion, View, Hide, Loading } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import {
-  ChatDotRound,
-  Sunny,
-  Moon,
-  User,
-  Lock,
-  View,
-  Hide,
-  ArrowRight,
-  Message,
-  Bell,
-  FolderOpened
-} from '@element-plus/icons-vue'
-import { useTheme } from '@/composables/useTheme'
 
 const store = useStore()
 const router = useRouter()
-const { isDark, toggleTheme } = useTheme()
-
 const loading = ref(false)
 const showPassword = ref(false)
 const usernameFocused = ref(false)
 const passwordFocused = ref(false)
 
-const loginForm = reactive({
-  username: '',
-  password: '',
-  rememberMe: false
-})
-
-const handleForgotPassword = () => {
-  ElMessage.info('请联系管理员重置密码')
-}
+const loginForm = reactive({ username: '', password: '', rememberMe: false })
 
 const handleLogin = async () => {
-  if (!loginForm.username || !loginForm.password) {
-    ElMessage.warning('请输入用户名和密码')
-    return
-  }
-
+  if (!loginForm.username || !loginForm.password) return
+  loading.value = true
   try {
-    loading.value = true
-
-    await store.dispatch('user/login', {
-      username: loginForm.username,
-      password: loginForm.password
-    })
-
-    if (loginForm.rememberMe) {
-      localStorage.setItem('remembered_username', loginForm.username)
-    } else {
-      localStorage.removeItem('remembered_username')
-    }
-
-    ElMessage.success('登录成功')
-    const redirectUrl = router.currentRoute.value.query.redirect || '/'
-    router.push(redirectUrl)
-  } catch (error) {
-    console.error('登录失败:', error)
-    const errorMsg = error.message || (error.response?.data?.msg) || '登录失败，请检查您的账户信息'
-    ElMessage.error(errorMsg)
-  } finally {
-    loading.value = false
-  }
+    await store.dispatch('user/login', loginForm)
+    router.push('/')
+  } catch (e) {
+    ElMessage.error(e.message || '登录失败')
+  } finally { loading.value = false }
 }
-
-onMounted(() => {
-  const rememberedUsername = localStorage.getItem('remembered_username')
-  if (rememberedUsername) {
-    loginForm.username = rememberedUsername
-    loginForm.rememberMe = true
-  }
-})
 </script>
 
 <style scoped lang="scss">
-.login-page {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--dt-bg-body);
-  padding: 24px;
-  position: relative;
-  overflow: hidden;
-  transition: background var(--dt-transition-base);
+.dt-premium-login {
+  width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: #fdfdfe; position: relative; overflow: hidden;
 }
 
-/* 背景装饰 */
-.bg-decoration {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.bg-gradient {
-  position: absolute;
-  inset: 0;
-  background: var(--dt-brand-color);
-  opacity: 0.06;
-}
-
-.bg-grid {
-  position: absolute;
-  inset: 0;
-  background-color: var(--dt-bg-body);
-}
-
-.bg-orb {
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0.3;
-
-  &.bg-orb-1 {
-    width: 400px;
-    height: 400px;
-    background: var(--dt-brand-color);
-    top: -100px;
-    right: -100px;
-    opacity: 0.2;
+// 1. 动态背景引擎
+.v5-bg-engine {
+  position: absolute; inset: 0; z-index: 1;
+  .mesh-gradient {
+    position: absolute; inset: 0;
+    background: radial-gradient(at 10% 20%, rgba(39, 126, 251, 0.05) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(114, 46, 209, 0.04) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, rgba(34, 171, 92, 0.03) 0px, transparent 50%);
   }
-
-  &.bg-orb-2 {
-    width: 300px;
-    height: 300px;
-    background: var(--dt-brand-color);
-    bottom: -50px;
-    left: -50px;
-    opacity: 0.15;
-  }
-
-  &.bg-orb-3 {
-    width: 200px;
-    height: 200px;
-    background: var(--dt-brand-color);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    opacity: 0.12;
-  }
+  .noise-overlay { position: absolute; inset: 0; opacity: 0.02; background: url('https://grainy-gradients.vercel.app/noise.svg'); filter: contrast(150%) brightness(100%); }
 }
 
-/* 登录容器 - 双栏布局 */
-.login-container {
-  display: flex;
+// 2. 极简卡片
+.v5-login-card {
+  width: 360px; z-index: 10; position: relative;
+  display: flex; flex-direction: column; align-items: center;
+}
+
+.v5-card-header {
+  text-align: center; margin-bottom: 40px;
+  .v5-logo-box { width: 56px; height: 56px; background: var(--dt-brand-gradient); border-radius: 14px; @include flex-center; color: #fff; font-size: 32px; margin: 0 auto 20px; box-shadow: 0 8px 24px rgba(39, 126, 251, 0.25); }
+  .v5-title { font-size: 24px; font-weight: 800; color: #1d1d1f; letter-spacing: -0.5px; }
+  .v5-subtitle { font-size: 13px; color: #86868b; margin-top: 8px; }
+}
+
+// 3. 去Web化的表单
+.v5-form {
   width: 100%;
-  max-width: 900px;
-  min-height: 560px;
-  background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-2xl);
-  box-shadow: var(--dt-shadow-2);
-  overflow: hidden;
-  position: relative;
-  z-index: 1;
-}
-
-/* 登录卡片 */
-.login-card {
-  flex: 1;
-  padding: 48px 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-/* 头部区域 */
-.login-header {
-  text-align: center;
-  margin-bottom: 36px;
-}
-
-.logo-wrapper {
-  position: relative;
-  width: 56px;
-  height: 56px;
-  margin: 0 auto 20px;
-}
-
-.logo {
-  width: 56px;
-  height: 56px;
-  background: var(--dt-brand-color);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 1;
-  box-shadow: var(--dt-shadow-brand);
-
-  .el-icon {
-    font-size: 28px;
-    color: var(--dt-text-white);
-  }
-}
-
-.logo-glow {
-  position: absolute;
-  inset: -4px;
-  background: var(--dt-brand-color);
-  border-radius: 18px;
-  opacity: 0.3;
-}
-
-h1 {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--dt-text-primary);
-  margin: 0 0 8px 0;
-  letter-spacing: -0.5px;
-}
-
-.subtitle {
-  font-size: 14px;
-  color: var(--dt-text-secondary);
-  margin: 0;
-}
-
-/* 表单 */
-.login-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.field-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-
-  .field-label {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--dt-text-primary);
-  }
-}
-
-.field-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-
-  .field-icon {
-    position: absolute;
-    left: 14px;
-    font-size: 18px;
-    color: var(--dt-text-tertiary);
-    transition: color var(--dt-transition-fast);
-  }
-
-  input {
-    width: 100%;
-    height: 48px;
-    padding: 0 44px;
-    font-size: 15px;
-    color: var(--dt-text-primary);
-    background: var(--dt-bg-input);
-    border: 2px solid transparent;
-    border-radius: var(--dt-radius-lg);
-    outline: none;
-    transition: background-color var(--dt-transition-fast);
-
-    &::placeholder {
-      color: var(--dt-text-tertiary);
+  .v5-field {
+    margin-bottom: 24px; border-bottom: 1.5px solid #e5e5e7; transition: 0.3s;
+    label { font-size: 11px; font-weight: 700; color: #aaa; text-transform: uppercase; margin-bottom: 4px; display: block; }
+    .input-wrap { display: flex; align-items: center; height: 36px;
+      input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; color: #1d1d1f; &::placeholder { color: #ccc; } }
+      .eye-icon { color: #ccc; cursor: pointer; &:hover { color: var(--dt-brand-color); } }
     }
-
-    &:hover {
-      background: var(--dt-bg-input-hover);
-    }
-  }
-
-  .password-toggle {
-    position: absolute;
-    right: 12px;
-    padding: 4px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--dt-text-tertiary);
-    transition: color 0.2s;
-
-    .el-icon {
-      font-size: 18px;
-    }
-
-    &:hover {
-      color: var(--dt-text-secondary);
-    }
+    &.active { border-bottom-color: var(--dt-brand-color); }
   }
 }
 
-.field-group.focused {
-  .field-icon {
-    color: var(--dt-brand-color);
-  }
-
-  input {
-    background: #fff;
-    border-color: var(--dt-brand-color);
-    box-shadow: var(--dt-shadow-brand);
-  }
+.v5-options {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+  :deep(.el-checkbox__label) { font-size: 12px; color: #86868b; }
+  .forget-link { background: none; border: none; font-size: 12px; color: var(--dt-brand-color); cursor: pointer; }
 }
 
-/* 选项行 */
-.options-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.v5-login-btn {
+  width: 100%; height: 44px; border: none; border-radius: 22px;
+  background: var(--dt-brand-color); color: #fff; font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(39, 126, 251, 0.3);
+  &:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(39, 126, 251, 0.4); }
+  &:active { transform: translateY(0); }
+  &.loading { opacity: 0.8; cursor: not-allowed; }
 }
 
-.checkbox-wrapper {
-  display: flex;
-  align-items: center;
-  gap: var(--dt-spacing-sm);
-  cursor: pointer;
-
-  input {
-    display: none;
-  }
-
-  .checkbox-custom {
-    width: 18px;
-    height: 18px;
-    border: 2px solid #d1d5db;
-    border-radius: var(--dt-radius-sm);
-    position: relative;
-    transition: background-color 0.2s, border-color 0.2s;
-
-    &::after {
-      content: '';
-      position: absolute;
-      left: 5px;
-      top: 2px;
-      width: 5px;
-      height: 9px;
-      border: solid #fff;
-      border-width: 0 2px 2px 0;
-      transform: rotate(45deg);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-  }
-
-  input:checked + .checkbox-custom {
-    background: var(--dt-brand-color);
-    border-color: var(--dt-brand-color);
-
-    &::after {
-      opacity: 1;
-    }
-  }
-
-  .checkbox-label {
-    font-size: 13px;
-    color: var(--dt-text-secondary);
-  }
+.v5-footer {
+  margin-top: 60px; text-align: center;
+  .v-ver { font-size: 10px; color: #d2d2d7; display: block; margin-bottom: 12px; }
+  .v-links { font-size: 12px; color: #86868b; display: flex; align-items: center; gap: 8px; justify-content: center; span:not(.dot) { cursor: pointer; &:hover { color: #1d1d1f; } } }
 }
 
-.link-btn {
-  font-size: 13px;
-  color: var(--dt-brand-color);
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 4px 0;
-  font-weight: 500;
-  transition: color 0.2s;
-
-  &:hover {
-    color: var(--dt-brand-active);
-  }
-}
-
-/* 登录按钮 */
-.btn-login {
-  width: 100%;
-  height: 50px;
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--dt-text-white);
-  background: linear-gradient(135deg, #277EFB 0%, #165DFF 100%);
-  border: none;
-  border-radius: var(--dt-radius-xl);
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background-color 0.25s, opacity 0.25s;
-  overflow: hidden;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #165DFF 0%, #277EFB 100%);
-    opacity: 0;
-    transition: opacity 0.25s;
-  }
-
-  &:hover {
-    &::before {
-      opacity: 1;
-    }
-  }
-
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  .btn-text {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    position: relative;
-    z-index: 1;
-
-    .btn-arrow {
-      font-size: 16px;
-      transition: transform 0.2s;
-    }
-  }
-
-  &:hover .btn-arrow {
-    opacity: 0.8;
-  }
-
-  .btn-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .loading-dot {
-    width: 8px;
-    height: 8px;
-    background: #fff;
-    border-radius: 50%;
-    opacity: 0.6;
-
-    &:nth-child(1) { opacity: 0.4; }
-    &:nth-child(2) { opacity: 0.9; }
-  }
-}
-
-/* 底部 */
-.login-footer {
-  margin-top: 32px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--dt-text-tertiary);
-}
-
-/* 品牌展示区 */
-.brand-showcase {
-  width: 380px;
-  background: var(--dt-brand-color);
-  padding: 48px 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-}
-
-.brand-content {
-  text-align: center;
-  color: var(--dt-text-white);
-  position: relative;
-  z-index: 1;
-
-  h2 {
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 12px 0;
-    letter-spacing: -0.3px;
-  }
-
-  p {
-    font-size: 14px;
-    opacity: 0.85;
-    margin: 0 0 40px 0;
-  }
-}
-
-.feature-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 20px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--dt-radius-xl);
-  transition: background-color 0.2s;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.15);
-  }
-
-  .el-icon {
-    font-size: 20px;
-  }
-
-  span {
-    font-size: 14px;
-    font-weight: 500;
-  }
-}
-
-/* 主题切换按钮 */
-.theme-toggle {
-  position: fixed;
-  top: 24px;
-  right: 24px;
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border: none;
-  border-radius: var(--dt-radius-xl);
-  cursor: pointer;
-  color: var(--dt-text-secondary);
-  transition: background-color 0.2s;
-  z-index: 10;
-
-  .el-icon {
-    font-size: 20px;
-  }
-
-  &:hover {
-    background: #f5f5f5;
-  }
-}
-
-/* 版权信息 */
-.copyright {
-  position: fixed;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 12px;
-  color: var(--dt-text-tertiary);
-  z-index: 10;
-}
-
-/* ============================================ */
-/* Dark Mode */
-/* ============================================ */
-.dark {
-  background: #0f0f1a;
-
-  .bg-gradient {
-    opacity: 0.05;
-  }
-
-  .bg-grid {
-    background-color: var(--dt-bg-body-dark);
-  }
-
-  .login-container {
-    background: #1a1a2e;
-    box-shadow: var(--dt-shadow-2);
-  }
-
-  .login-card {
-    background: #1a1a2e;
-  }
-
-  h1 {
-    color: var(--dt-text-quaternary);
-  }
-
-  .subtitle {
-    color: var(--dt-text-tertiary);
-  }
-
-  .field-label {
-    color: var(--dt-text-tertiary);
-  }
-
-  .field-input-wrapper {
-    input {
-      background: #262640;
-      color: var(--dt-text-quaternary);
-
-      &::placeholder {
-        color: var(--dt-text-secondary);
-      }
-
-      &:hover {
-        background: #2d2d4a;
-      }
-    }
-  }
-
-  .field-group.focused {
-    input {
-      background: #262640;
-      border-color: var(--dt-brand-color);
-    }
-  }
-
-  .checkbox-label {
-    color: var(--dt-text-tertiary);
-  }
-
-  .brand-showcase {
-    background: var(--dt-brand-color);
-  }
-
-  .theme-toggle {
-    background: #262640;
-    color: var(--dt-text-tertiary);
-
-    &:hover {
-      background: #2d2d4a;
-      color: var(--dt-text-quaternary);
-    }
-  }
-
-  .copyright {
-    color: var(--dt-text-secondary);
-  }
-}
-
-/* ============================================ */
-/* 响应式设计 */
-/* ============================================ */
-@media (max-width: 768px) {
-  .login-page {
-    padding: 16px;
-  }
-
-  .login-container {
-    flex-direction: column;
-    max-width: 400px;
-    min-height: auto;
-  }
-
-  .login-card {
-    padding: 36px 24px;
-  }
-
-  .brand-showcase {
-    width: 100%;
-    padding: 32px 24px;
-
-    h2 {
-      font-size: 20px;
-    }
-  }
-
-  .feature-list {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 12px;
-  }
-
-  .feature-item {
-    padding: 10px 16px;
-
-    span {
-      font-size: 13px;
-    }
-  }
-
-  .theme-toggle {
-    top: 16px;
-    right: 16px;
-    width: 40px;
-    height: 40px;
-  }
-
-  .copyright {
-    font-size: 11px;
-  }
-}
+.v5-copyright { position: absolute; bottom: 24px; font-size: 10px; color: #d2d2d7; }
 </style>

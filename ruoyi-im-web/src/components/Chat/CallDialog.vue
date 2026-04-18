@@ -12,167 +12,95 @@
       <!-- 1. 视频流容器 (沉浸式全屏) -->
       <div v-if="type === 'video'" class="video-canvas">
         <div class="remote-track">
-          <video
-            ref="remoteVideoRef"
-            autoplay
-            playsinline
-            class="video-element"
-          />
-          <!-- 未接通/对端关闭摄像头 占位 -->
+          <video ref="remoteVideoRef" autoplay playsinline class="video-element" />
           <div v-if="status !== 'talking' || remoteVideoOff" class="video-mask">
-            <DingtalkAvatar
-              :src="peerAvatar"
-              :name="peerName"
-              :size="120"
-              shape="circle"
-            />
-            <p class="mask-status">
-              {{ statusText }}
-            </p>
+            <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="120" shape="circle" />
+            <p class="mask-status">{{ statusText }}</p>
           </div>
         </div>
-
-        <!-- 本地预览 (小窗) -->
         <div v-show="!localVideoOff" class="local-track">
-          <video
-            ref="localVideoRef"
-            autoplay
-            playsinline
-            muted
-            class="video-element mirror"
-          />
+          <video ref="localVideoRef" autoplay playsinline muted class="video-element mirror" />
         </div>
       </div>
 
-      <!-- 2. 语音/呼叫信息区 -->
+      <!-- 2. 呼叫信息区 -->
       <div v-if="type === 'voice' || status !== 'talking'" class="calling-info">
-        <div class="avatar-ripple" :class="{ 'animating': status === 'calling' }">
-          <DingtalkAvatar
-            :src="peerAvatar"
-            :name="peerName"
-            :user-id="peerId"
-            :size="100"
-            shape="circle"
-            custom-class="main-avatar"
-          />
+        <div class="avatar-ripple-container">
+          <div class="ripple" v-if="status === 'calling' || status === 'incoming'"></div>
+          <div class="ripple delay-1" v-if="status === 'calling' || status === 'incoming'"></div>
+          <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="100" shape="circle" custom-class="main-avatar" />
         </div>
-        <h2 class="peer-name">
-          {{ peerName }}
-        </h2>
-        <p class="call-status-tag">
-          {{ statusText }}
-        </p>
-        <div v-if="status === 'talking'" class="call-timer">
-          {{ formattedDuration }}
-        </div>
+        <h2 class="peer-name">{{ peerName }}</h2>
+        <p class="call-status-tag">{{ statusText }}</p>
+        <div v-if="status === 'talking'" class="call-timer">{{ formattedDuration }}</div>
       </div>
 
-      <!-- 3. 控制控制台 (底栏) -->
+      <!-- 3. 控制控制台 -->
       <div class="call-console">
-        <!-- 呼入状态 -->
         <div v-if="status === 'incoming'" class="console-group">
           <button class="console-btn accept" @click="handleAccept">
-            <div class="icon-circle">
-              <el-icon><PhoneFilled /></el-icon>
-            </div>
+            <div class="icon-circle"><el-icon><PhoneFilled /></el-icon></div>
             <span>接听</span>
           </button>
           <button class="console-btn hangup" @click="handleReject">
-            <div class="icon-circle">
-              <el-icon><CloseBold /></el-icon>
-            </div>
+            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
             <span>拒绝</span>
           </button>
         </div>
 
-        <!-- 呼出状态 -->
         <div v-else-if="status === 'calling'" class="console-group">
           <button class="console-btn hangup" @click="handleCancel">
-            <div class="icon-circle">
-              <el-icon><CloseBold /></el-icon>
-            </div>
+            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
             <span>取消</span>
           </button>
         </div>
 
-        <!-- 通话中状态 -->
         <div v-else-if="status === 'talking'" class="console-group talking">
           <button class="console-btn" :class="{ active: isMuted }" @click="toggleMute">
-            <div class="icon-circle">
-              <el-icon><Microphone v-if="!isMuted" /><Mute v-else /></el-icon>
-            </div>
-            <span>{{ isMuted ? '取消静音' : '静音' }}</span>
+            <div class="icon-circle"><el-icon><Microphone v-if="!isMuted" /><Mute v-else /></el-icon></div>
+            <span>{{ isMuted ? '静音' : '已静音' }}</span>
           </button>
-
-          <button
-            v-if="type === 'video'"
-            class="console-btn"
-            :class="{ active: localVideoOff }"
-            @click="toggleVideo"
-          >
-            <div class="icon-circle">
-              <el-icon><VideoCamera v-if="!localVideoOff" /><VideoCameraFilled v-else /></el-icon>
-            </div>
+          <button v-if="type === 'video'" class="console-btn" :class="{ active: localVideoOff }" @click="toggleVideo">
+            <div class="icon-circle"><el-icon><VideoCamera v-if="!localVideoOff" /><VideoCameraFilled v-else /></el-icon></div>
             <span>摄像头</span>
           </button>
-
           <button class="console-btn hangup" @click="handleHangup">
-            <div class="icon-circle">
-              <el-icon><CloseBold /></el-icon>
-            </div>
+            <div class="icon-circle"><el-icon><CloseBold /></el-icon></div>
             <span>挂断</span>
           </button>
         </div>
 
-        <!-- 结束/超时/异常 -->
         <div v-else class="console-group">
-          <!-- 通话异常状态 -->
-          <div v-if="status === 'reconnecting'" class="reconnect-hint">
-            <span class="reconnect-dot" />
-            <span>网络不稳定，正在重连...</span>
-          </div>
-          <div v-else-if="status === 'reconnect_failed'" class="reconnect-actions">
-            <button class="console-btn" @click="handleReconnect">
-              <div class="icon-circle">
-                <el-icon><RefreshRight /></el-icon>
-              </div>
-              <span>重新拨打</span>
-            </button>
-          </div>
-          <div v-else>
-            <button class="console-btn" @click="close">
-              <div class="icon-circle gray">
-                <el-icon><Close /></el-icon>
-              </div>
-              <span>关闭</span>
-            </button>
-          </div>
+          <button class="console-btn" @click="close">
+            <div class="icon-circle gray"><el-icon><Close /></el-icon></div>
+            <span>关闭</span>
+          </button>
         </div>
       </div>
     </div>
 
-    <audio ref="remoteAudioRef" autoplay />
+    <!-- 音效资产 -->
+    <audio ref="ringtoneAudio" loop src="/assets/audio/ringtone.mp3"></audio>
+    <audio ref="dialtoneAudio" loop src="/assets/audio/dialtone.mp3"></audio>
+    <audio ref="remoteAudioRef" autoplay></audio>
   </el-dialog>
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted } from 'vue'
+import { ref, computed, onUnmounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
-import {
-  PhoneFilled, CloseBold, Microphone, VideoCamera,
-  VideoCameraFilled, Close, Mute, RefreshRight
-} from '@element-plus/icons-vue'
+import { PhoneFilled, CloseBold, Microphone, VideoCamera, VideoCameraFilled, Close, Mute, RefreshRight } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { acceptCall, rejectCall, endCall } from '@/api/im/videoCall'
 
 const props = defineProps({ session: Object })
-defineEmits(['accept', 'reject', 'cancel', 'hangup', 'closed'])
+const emit = defineEmits(['closed'])
 
 const { sendMessage } = useImWebSocket()
 const visible = ref(false)
-const status = ref('calling')
+const status = ref('calling') // calling, incoming, talking, hanging_up, timeout, reconnecting
 const type = ref('voice')
 const duration = ref(0)
 const callId = ref('')
@@ -187,6 +115,9 @@ const pendingOffer = ref(null)
 const localVideoRef = ref(null)
 const remoteVideoRef = ref(null)
 const remoteAudioRef = ref(null)
+const ringtoneAudio = ref(null)
+const dialtoneAudio = ref(null)
+
 let localStream = null
 let timer = null
 let timeoutTimer = null
@@ -196,28 +127,18 @@ const dialogWidth = computed(() => type.value === 'video' ? '800px' : '360px')
 const { createOffer, createAnswer, handleAnswer, handleCandidate, closePeerConnection } = useWebRTC({
   sendSignal: (action, data) => sendMessage({ type: 'call', data: { action, ...data } }),
   onConnectionStateChange: (state) => {
-    if (state === 'reconnecting') {
-      status.value = 'reconnecting'
-    } else if (state === 'reconnect_failed') {
-      status.value = 'reconnect_failed'
-      ElMessage.warning('通话连接中断，正在为您重新拨打...')
-    }
+    if (state === 'reconnecting') status.value = 'reconnecting'
+    if (state === 'connected') status.value = 'talking'
   },
-  onIceConnectionStateChange: () => {},
-  localVideo: localVideoRef, remoteVideo: remoteVideoRef, remoteAudio: remoteAudioRef
+  remoteVideo: remoteVideoRef, remoteAudio: remoteAudioRef
 })
 
 const statusText = computed(() => {
-  switch (status.value) {
-    case 'calling': return '正在呼叫对方...'
-    case 'incoming': return '邀请你进行通话'
-    case 'talking': return '正在通话'
-    case 'hanging_up': return '通话已结束'
-    case 'timeout': return '对方无应答'
-    case 'reconnecting': return '网络不稳定，正在重连...'
-    case 'reconnect_failed': return '通话中断'
-    default: return ''
+  const map = {
+    calling: '正在呼叫对方...', incoming: '邀请你进行通话', talking: '正在通话',
+    hanging_up: '通话已结束', timeout: '对方无应答', reconnecting: '网络不稳定，正在重连...'
   }
+  return map[status.value] || ''
 })
 
 const formattedDuration = computed(() => {
@@ -225,296 +146,125 @@ const formattedDuration = computed(() => {
   return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`
 })
 
+const playAudio = (t) => { if (t === 'ring') ringtoneAudio.value?.play().catch(() => {}); else dialtoneAudio.value?.play().catch(() => {}) }
+const stopAudio = () => { [ringtoneAudio, dialtoneAudio].forEach(a => { if (a.value) { a.value.pause(); a.value.currentTime = 0 } }) }
+
 const getMediaStream = async (isVideo) => {
   try {
     if (localStream) localStream.getTracks().forEach(t => t.stop())
     localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo })
     if (isVideo && localVideoRef.value) localVideoRef.value.srcObject = localStream
     return true
-  } catch { return false }
+  } catch (e) {
+    ElMessage.error('无法获取摄像头或麦克风权限，请检查系统设置')
+    return false
+  }
 }
-
-const toggleMute = () => { if (localStream) { isMuted.value = !isMuted.value; localStream.getAudioTracks()[0].enabled = !isMuted.value } }
-const toggleVideo = () => { if (localStream && type.value === 'video') { localVideoOff.value = !localVideoOff.value; localStream.getVideoTracks()[0].enabled = !localVideoOff.value } }
 
 const open = async (callType, options = {}) => {
   type.value = callType; status.value = options.status || 'calling'; callId.value = options.callId || `call-${Date.now()}`
-  peerId.value = options.peerId ?? props.session?.targetId; peerName.value = options.peerName || props.session?.name; peerAvatar.value = options.peerAvatar || props.session?.avatar
-  visible.value = true; duration.value = 0
-
-  // 保存 pending offer（如果有）
-  if (options.pendingOffer) {
-    pendingOffer.value = options.pendingOffer
-  }
-
+  peerId.value = options.peerId; peerName.value = options.peerName; peerAvatar.value = options.peerAvatar
+  pendingOffer.value = options.pendingOffer; visible.value = true; duration.value = 0
+  
+  if (status.value === 'incoming') playAudio('ring')
   if (status.value === 'calling') {
+    playAudio('dial')
     if (await getMediaStream(callType === 'video')) {
-      await createOffer(callId.value, peerId.value, localStream)
-      // 设置超时
-      startTimeout()
-    } else {
-      close()
-    }
+      createOffer(callId.value, peerId.value, localStream)
+      timeoutTimer = setTimeout(() => { if (status.value === 'calling') handleCancel() }, 45000)
+    } else close()
   }
-
-  if (status.value === 'talking') startTimer()
-}
-
-/**
- * 处理 WebRTC 信令
- */
-const handleWebRTCSignal = async (action, data) => {
-  if (!visible.value || data.callId !== callId.value) return
-
-  switch (action) {
-    case 'offer':
-      // 收到对方 offer（已通过 handleCallEvent 处理）
-      break
-
-    case 'answer':
-      // 收到对方应答
-      if (data.sdp) {
-        await handleAnswer(data.sdp)
-        // 清除超时
-        clearTimeout(timeoutTimer)
-      }
-      break
-
-    case 'candidate':
-      // 收到 ICE 候选者
-      if (data.candidate) {
-        await handleCandidate(data.candidate)
-      }
-      break
-  }
-}
-
-/**
- * 启动超时计时器
- */
-const startTimeout = () => {
-  timeoutTimer = setTimeout(() => {
-    status.value = 'timeout'
-    ElMessage.warning('对方无应答')
-    setTimeout(() => {
-      end()
-      sendMessage({ type: 'call', data: { action: 'hangup', callId: callId.value, peerId: peerId.value } })
-    }, 2000)
-  }, 60000) // 60秒超时
 }
 
 const handleAccept = async () => {
-  try {
-    // 先通过后端 API 接听通话
-    const res = await acceptCall(callId.value)
-    if (res.code !== 200) {
-      throw new Error(res.message || '接听通话失败')
+  stopAudio()
+  if (await getMediaStream(type.value === 'video')) {
+    await acceptCall(callId.value)
+    if (pendingOffer.value) {
+      await createAnswer(callId.value, peerId.value, pendingOffer.value, localStream)
+      status.value = 'talking'
+      startTimer()
     }
-
-    // 获取媒体流并建立 WebRTC 连接
-    if (await getMediaStream(type.value === 'video')) {
-      if (pendingOffer.value) {
-        await createAnswer(callId.value, peerId.value, pendingOffer.value, localStream)
-        status.value = 'talking'
-        startTimer()
-      }
-    } else {
-      handleReject()
-    }
-  } catch (error) {
-    console.error('接听通话失败:', error)
-    ElMessage.error(error.message || '接听通话失败')
-    handleReject()
-  }
+  } else handleReject()
 }
 
-const handleReject = async () => {
-  try {
-    // 通过后端 API 拒绝通话
-    await rejectCall(callId.value, '用户拒绝')
-  } catch (error) {
-    console.error('拒绝通话失败:', error)
-  } finally {
-    end()
-    sendMessage({ type: 'call', data: { action: 'reject', callId: callId.value, peerId: peerId.value } })
-  }
-}
+const handleReject = () => { stopAudio(); rejectCall(callId.value); end('reject') }
+const handleHangup = () => { endCall(callId.value); end('hangup') }
+const handleCancel = () => { endCall(callId.value); end('cancel') }
 
-const handleHangup = async () => {
-  try {
-    // 通过后端 API 结束通话
-    await endCall(callId.value)
-  } catch (error) {
-    console.error('结束通话失败:', error)
-  } finally {
-    end()
-    sendMessage({ type: 'call', data: { action: 'hangup', callId: callId.value, peerId: peerId.value } })
-  }
-}
-
-const handleCancel = async () => {
-  try {
-    // 通过后端 API 取消通话
-    await endCall(callId.value)
-  } catch (error) {
-    console.error('取消通话失败:', error)
-  } finally {
-    end()
-    sendMessage({ type: 'call', data: { action: 'cancel', callId: callId.value, peerId: peerId.value } })
-  }
-}
-
-const startTimer = () => { timer = setInterval(() => { duration.value++ }, 1000) }
-const end = () => {
-  clearInterval(timer)
+const startTimer = () => { clearInterval(timer); timer = setInterval(() => duration.value++, 1000) }
+const end = (reason) => {
+  stopAudio(); clearInterval(timer); clearTimeout(timeoutTimer)
   if (localStream) localStream.getTracks().forEach(t => t.stop())
   closePeerConnection()
-  // 异常状态下不自动关闭，等待用户操作
-  if (!['reconnecting', 'reconnect_failed'].includes(status.value)) {
-    status.value = 'hanging_up'
-    setTimeout(() => { visible.value = false }, 1500)
-  }
+  sendMessage({ type: 'call', data: { action: reason || 'hangup', callId: callId.value, peerId: peerId.value } })
+  status.value = 'hanging_up'
+  setTimeout(() => visible.value = false, 1200)
 }
 
-/**
- * 处理重新拨打
- * 当通话异常中断时，用户点击重新拨打按钮
- */
-const handleReconnect = async () => {
-  if (!peerId.value) return
+const toggleMute = () => { if (localStream) { isMuted.value = !isMuted.value; localStream.getAudioTracks()[0].enabled = !isMuted.value } }
+const toggleVideo = () => { if (localStream) { localVideoOff.value = !localVideoOff.value; localStream.getVideoTracks()[0].enabled = !localVideoOff.value } }
+const close = () => { visible.value = false; emit('closed') }
 
-  try {
-    // 先结束当前通话
-    await endCall(callId.value)
-  } catch (error) {
-    console.error('结束原通话失败:', error)
-  }
-
-  // 重置状态
-  status.value = 'calling'
-  duration.value = 0
-  callId.value = `call-${Date.now()}`
-
-  // 重新获取媒体流并发起呼叫
-  if (await getMediaStream(type.value === 'video')) {
-    await createOffer(callId.value, peerId.value, localStream)
-    startTimeout()
-  } else {
-    ElMessage.error('无法获取媒体设备，请检查摄像头和麦克风权限')
-    status.value = 'reconnect_failed'
-  }
-}
-
-const close = () => { visible.value = false }
-
-onUnmounted(() => {
-  clearInterval(timer)
-  clearTimeout(timeoutTimer)
-  if (localStream) localStream.getTracks().forEach(t => t.stop())
-})
-defineExpose({ open, end, handleWebRTCSignal, callId })
+onUnmounted(() => { stopAudio(); clearInterval(timer); if (localStream) localStream.getTracks().forEach(t => t.stop()) })
+defineExpose({ open, end, handleWebRTCSignal: (a, d) => { if (a === 'answer') { stopAudio(); handleAnswer(d.sdp); status.value = 'talking'; startTimer() } if (a === 'candidate') handleCandidate(d.candidate) }, callId })
 </script>
 
 <style scoped lang="scss">
-@mixin flex-center {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-@mixin button-reset {
-  background: none;
-  border: none;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  color: inherit;
-  font: inherit;
-}
-
 .call-dialog-immersive {
-  background: var(--dt-bg-card-dark) !important;
-  :deep(.el-dialog) { background: var(--dt-bg-card-dark); border-radius: var(--dt-radius-xl); overflow: hidden; box-shadow: var(--dt-shadow-modal); }
+  background: #1a1a1c !important;
+  :deep(.el-dialog) { background: #1a1a1c; border-radius: 20px; overflow: hidden; }
   :deep(.el-dialog__header) { display: none; }
-  :deep(.el-dialog__body) { padding: 0 !important; }
 }
 
 .call-stage {
-  position: relative; width: 100%; height: 520px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: var(--dt-spacing-2xl) 0; color: var(--dt-text-white);
+  position: relative; width: 100%; height: 540px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+  padding: 60px 0; color: #fff;
+}
+
+.avatar-ripple-container {
+  position: relative; width: 100px; height: 100px; margin: 0 auto 30px;
+  .ripple {
+    position: absolute; inset: 0; border: 2px solid var(--dt-brand-color); border-radius: 50%;
+    animation: ripple 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .delay-1 { animation-delay: 0.5s; }
+}
+
+@keyframes ripple {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(2.5); opacity: 0; }
 }
 
 .video-canvas {
-  position: absolute; inset: 0; background: var(--dt-bg-card-dark); z-index: 1;
-  .remote-track {
-    width: 100%; height: 100%; position: relative;
-    .video-element { width: 100%; height: 100%; object-fit: cover; }
-    .video-mask { position: absolute; inset: 0; @include flex-center; flex-direction: column; background: var(--dt-overlay-bg); }
-  }
+  position: absolute; inset: 0; background: #000; z-index: 1;
+  .remote-track, .video-element { width: 100%; height: 100%; object-fit: cover; }
   .local-track {
-    position: absolute; top: var(--dt-spacing-lg); right: var(--dt-spacing-lg); width: 140px; height: 180px;
-    border-radius: var(--dt-radius-md); overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: var(--dt-shadow-modal);
-    .video-element { width: 100%; height: 100%; object-fit: cover; &.mirror { transform: scaleX(-1); } }
+    position: absolute; top: 20px; right: 20px; width: 120px; height: 160px;
+    border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); z-index: 2;
   }
 }
 
-.calling-info {
-  position: relative; z-index: 2; text-align: center; margin-top: var(--dt-spacing-xl);
-  .avatar-ripple {
-    position: relative; margin-bottom: var(--dt-spacing-xl);
-    &.animating::after {
-      content: ''; position: absolute; inset: -15px; border-radius: var(--dt-radius-full); border: 2px solid var(--dt-brand-color);
-      opacity: 0;
-    }
-  }
-  .peer-name { font-size: var(--dt-font-size-2xl); font-weight: 600; margin: var(--dt-spacing-md) 0; }
-  .call-status-tag { font-size: var(--dt-font-size-base); color: var(--dt-text-white); opacity: 0.7; }
-  .call-timer { font-size: 20px; font-family: monospace; margin-top: var(--dt-spacing-md); color: var(--dt-brand-color); }
-}
+.calling-info { position: relative; z-index: 2; text-align: center; }
+.peer-name { font-size: 24px; margin-bottom: 8px; }
+.call-status-tag { color: rgba(255,255,255,0.6); font-size: 14px; }
+.call-timer { font-size: 20px; color: var(--dt-brand-color); margin-top: 12px; font-family: monospace; }
 
 .call-console {
-  position: relative; z-index: 2; width: 100%; padding: 0 var(--dt-spacing-2xl);
-  .console-group { display: flex; justify-content: center; gap: var(--dt-spacing-2xl);
-    &.talking { gap: 32px; }
-  }
+  position: relative; z-index: 2; width: 100%;
+  .console-group { display: flex; justify-content: center; gap: 40px; }
 }
 
 .console-btn {
-  @include button-reset; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: none; border: none; cursor: pointer; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px;
   .icon-circle {
-    width: 64px; height: 64px; border-radius: var(--dt-radius-full); @include flex-center; font-size: 28px;  /* 通话按钮图标28px，保持非标准值 */
-    background: rgba(255,255,255,0.1); transition: background-color var(--dt-transition-fast);
-    &:hover { background: rgba(255,255,255,0.2); }
+    width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-size: 28px; background: rgba(255,255,255,0.15); transition: all 0.3s;
+    &:hover { background: rgba(255,255,255,0.25); }
   }
-  span { font-size: var(--dt-font-size-sm); color: var(--dt-text-white); opacity: 0.8; }
-
-  &.accept .icon-circle { background: var(--dt-success-color); &:hover { background: var(--dt-brand-hover); } }
-  &.hangup .icon-circle { background: var(--dt-error-color); &:hover { background: var(--dt-error-color); } .el-icon { transform: rotate(135deg); } }
-  &.active .icon-circle { background: var(--dt-text-white); color: var(--dt-text-primary); }
-  .icon-circle.gray { background: var(--dt-text-tertiary-dark); }
+  &.accept .icon-circle { background: var(--dt-success-color); }
+  &.hangup .icon-circle { background: var(--dt-error-color); .el-icon { transform: rotate(135deg); } }
+  &.active .icon-circle { background: #fff; color: #1d1d1f; }
+  span { font-size: 12px; opacity: 0.8; }
 }
-
-// 重新连接提示
-.reconnect-hint {
-  display: flex;
-  align-items: center;
-  gap: var(--dt-spacing-sm);
-  color: var(--dt-text-white);
-  font-size: var(--dt-font-size-sm);
-  opacity: 0.8;
-
-  .reconnect-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--dt-warning-color);
-  }
-}
-
-// 重连操作区
-.reconnect-actions {
-  display: flex;
-  justify-content: center;
-}
-
 </style>

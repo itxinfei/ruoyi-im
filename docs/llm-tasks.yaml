@@ -1,1001 +1,507 @@
-version: 2
-updated_at: 2026-04-07
-description: IM项目任务池，按优先级排序
+version: 3
+updated_at: 2026-04-18
+description: IM项目任务池 - 2026 深度对齐版
+status_summary:
+  total_tasks: 191
+  done: 184
+  todo: 7  # 真实待办项（基于 12-需求点清单 与 04-待确认问题）
 
 tasks:
-  # ==================== P0 核心任务 ====================
-  - task_id: IM-UI-001
-    title: 消息主页面三栏布局复刻钉钉Windows
-    priority: P0
-    status: done
-    goal: 将消息主页面布局、密度、层级对齐钉钉 Windows 客户端
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      ui: [docs/20-UI交互规范总纲.md]
-      requirement_detail: [docs/13-需求明细.md#2-消息模块总说明]
-      ui_detail: [docs/21-IM桌面端页面规范.md]
-      gap: [docs/16-设计复刻差异.md#2-总体差距矩阵]
-      plan: [docs/23-UI复刻任务计划.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/MainPage.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/SessionPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 消息主页面路由可正常访问
-    dependencies:
-      - 会话列表数据
-      - 当前会话状态
-    route_or_entry:
-      - 左侧导航消息
-    api_contract: 不新增接口，主要为布局和交互层改造
-    state_changes:
-      - 页面布局状态
-      - 会话栏选中与未读展示状态
-    acceptance:
-      - AC1: 三栏布局稳定，宽度与层级对齐钉钉 Windows 端
-      - AC2: 不出现移动端胶囊化样式和过度装饰
-      - AC3: 会话切换不引起主区域明显抖动
-    manual_test_steps:
-      - Step1: 进入消息页检查三栏布局与宽度
-      - Step2: 切换多个会话检查稳定性
-      - Step3: 对照钉钉截图验证层级与密度
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到现有主页面布局
+  # ==================== P1 核心验证与增量开发 ====================
 
-  - task_id: IM-UI-002
-    title: 消息气泡与头像对齐复刻钉钉Windows
-    priority: P0
+  - task_id: IM-VAL-001
+    task_type: fullstack_fix
+    title: 音视频通话双端联调与稳定性验证
+    goal: 验证 WebRTC 通话链路在内网环境下的稳定性，确保接听、挂断、异常恢复流程闭环
+    priority: P1
     status: done
-    goal: 修正消息气泡、头像、时间线，使发送方气泡在前头像在后并严格同线
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      ui: [docs/20-UI交互规范总纲.md]
-      requirement_detail: [docs/13-需求明细.md#4-聊天区]
-      ui_detail: [docs/21-IM桌面端页面规范.md#8-消息气泡规范]
-      gap: [docs/16-设计复刻差异.md#2-总体差距矩阵]
-      plan: [docs/23-UI复刻任务计划.md]
+      runtime:
+        - docs/05-AI执行文档使用协议.md
+        - docs/02-大模型研发规范.md
+      product:
+        - docs/10-产品需求总纲.md
+      requirement_detail:
+        - docs/13-需求明细.md#7-通话模块
+      architecture:
+        - docs/30-技术架构与约束.md
+      api_contract:
+        - docs/33-API接口设计.md#4-6-音视频通话
+      websocket:
+        - docs/34-WebSocket协议.md#5-音视频通话信令
+      ui_rules:
+        - docs/20-UI交互规范总纲.md#通话界面
+      ui_detail:
+        - docs/49-通话界面UI设计规范.md
+      gap:
+        - docs/04-待确认问题.md#Q-001
+      quality:
+        - docs/52-测试与质量策略.md
     scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageList.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageItem.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageBubble.vue
+      - ruoyi-im-web/src/composables/useWebRTC.js
+      - ruoyi-im-web/src/views/CallDialog.vue
+      - ruoyi-im-api/src/main/java/com/ruoyi/im/controller/ImVideoCallController.java
     scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
+      - ruoyi-im-web/src/views/admin/
     preconditions:
-      - 消息列表可正常渲染
+      - WebRTC 信令服务器已就绪
+      - 后端 ImVideoCallController 接口已实现
     dependencies:
-      - 消息对象渲染能力
+      - WebSocket 长连接
     route_or_entry:
-      - 聊天区消息列表
-    api_contract: 不涉及新增接口
+      - 聊天窗口头部通话按钮
+    api_contract:
+      - GET /api/im/call/turn-server (获取中转服务器)
+      - POST /api/im/call/signal (发送信令)
+    ui_tokens:
+      - 必须遵循 design-tokens.scss 中的状态色 (success/error)
+    anti_conflict_scan: true
     state_changes:
-      - 消息展示布局状态
-      - 时间分割线展示状态
+      - 用户的通话忙闲状态 (user_status)
+      - 会话中的通话活动状态
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-6-通话功能
+        - docs/04-待确认问题.md#Q-001
     acceptance:
-      - AC1: 发送方消息“气泡在前，头像在后，同一水平线”
-      - AC2: 气泡最大宽度 70%，同侧间距 4px，异侧间距 16px
-      - AC3: 时间分割线间距均匀，不出现双重留白
+      - AC1: 成功发起通话，接收方弹出呼叫界面并伴有提示音
+      - AC2: 接听后双端媒体流建立成功，时延 < 500ms
+      - AC3: 模拟 3s 内断线可自动重连，超过 3s 提示重拨
     manual_test_steps:
-      - Step1: 单聊连续发送消息检查气泡和头像对齐
-      - Step2: 群聊检查不同发送方间距
-      - Step3: 跨时间段消息检查时间线留白
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前消息列表样式
+      - Step1: 用户A点击通话，观察用户B是否弹出 Dialog
+      - Step2: 用户B点击接听，检查摄像头和麦克风权限及画面
+      - Step3: 断开网络 2s 后恢复，观察是否自动重连
+    verify_cmd:
+      - npm run build
+    risk: high
+    rollback:
+      - 回退到 CallDialog 的稳定版本并标记为“联调失败”
 
-  - task_id: IM-UI-003
-    title: 输入区和聊天头部复刻钉钉Windows
-    priority: P0
+  - task_id: IM-FE-001
+    task_type: ui_rebuild
+    title: 会话分组管理与类型过滤 Tabs
+    priority: P1
     status: done
-    goal: 精简聊天头部和输入区，确保工具入口真实可用并对齐钉钉桌面端交互
+    goal: 在会话列表顶部增加类型切换 Tabs（全部、单聊、群聊），对齐钉钉 8.2.0 交互
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      ui: [docs/20-UI交互规范总纲.md]
+      runtime:
+        - docs/02-大模型研发规范.md
+      product:
+        - docs/10-产品需求总纲.md
+      ui_blueprint:
+        - docs/27-PC版钉钉UI设计蓝图.md#消息页面
+      ui_rules:
+        - docs/20-UI交互规范总纲.md#会话列表
+      ui_detail:
+        - docs/21-IM桌面端页面规范.md#5-会话列表规范
+      gap:
+        - docs/12-需求点清单.md#IM-S-009
+    scope_in:
+      - ruoyi-im-web/src/components/im/ChatSessionList.vue
+    scope_out:
+      - ruoyi-im-web/src/views/ChatPanel.vue
+    preconditions:
+      - 会话列表数据已正常加载
+    dependencies:
+      - Vuex session 模块数据
+    route_or_entry:
+      - 消息页中间栏顶部
+    api_contract: 纯前端逻辑过滤
+    ui_tokens:
+      - 使用 --dt-brand-color 作为 Tab 激活态下划线颜色
+    anti_conflict_scan: true
+    state_changes:
+      - 会话列表的展示子集 (filteredSessions)
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-1-会话管理
+        - docs/12-需求点清单.md#IM-S-009
+    acceptance:
+      - AC1: Tabs 切换流畅，切换时列表有轻微渐变动效
+      - AC2: 切换到“群聊”时，仅显示 type=GROUP 的会话
+      - AC3: 搜索框在不同 Tab 下均能正常工作，并仅对当前 Tab 内容过滤
+    manual_test_steps:
+      - Step1: 点击“单聊”Tab，检查是否隐藏了群聊会话
+      - Step2: 在“单聊”Tab下搜索，验证搜索结果是否准确
+      - Step3: 刷新页面，验证 Tab 状态是否持久化或正确回显
+    verify_cmd:
+      - npm run build
+    risk: low
+    rollback:
+      - 注释掉 Tabs 组件并回退到原始 List 渲染逻辑
+
+  - task_id: IM-FE-002
+    task_type: ui_rebuild
+    title: 消息批量操作功能实现
+    priority: P1
+    status: done
+    goal: 实现消息多选模式，支持批量删除、批量转发功能，对齐钉钉桌面端交互
+    doc_refs:
+      runtime:
+        - docs/02-大模型研发规范.md
+      product:
+        - docs/10-产品需求总纲.md
+      requirement_detail:
+        - docs/13-需求明细.md#4-聊天区
+      ui_detail:
+        - docs/21-IM桌面端页面规范.md#8-消息气泡规范
+      ui_behavior:
+        - docs/26-IM交互深度行为规范.md#批量操作
+      ui_acceptance:
+        - docs/25-钉钉Windows复刻基线.md
+    scope_in:
+      - ruoyi-im-web/src/components/im/ChatWindow.vue
+      - ruoyi-im-web/src/components/im/ChatMessageBubble.vue
+    scope_out: []
+    preconditions:
+      - 消息列表已正常渲染
+    dependencies:
+      - 后端批量删除接口
+      - 转发弹窗组件 (ForwardDialog)
+    route_or_entry:
+      - 消息气泡右键菜单 -> 多选
+    api_contract:
+      - DELETE /api/message/batch (批量删除)
+      - POST /api/message/forward/batch (批量转发)
+    ui_tokens:
+      - 使用 --dt-brand-color 作为多选框选中颜色
+    anti_conflict_scan: true
+    state_changes:
+      - 聊天窗口是否处于“多选模式” (multiSelectMode)
+      - 已选中的消息 ID 集合 (selectedMessageIds)
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-2-消息收发
+        - docs/12-需求点清单.md#IM-S-010
+    acceptance:
+      - AC1: 右键点击气泡选“多选”，所有气泡左侧出现 Checkbox，底部弹出操作栏
+      - AC2: 勾选消息后，底部操作栏显示已选数量，并激活“转发/删除”按钮
+      - AC3: 批量删除后，界面立即更新，不出现页面闪烁
+    manual_test_steps:
+      - Step1: 右键消息进入多选模式
+      - Step2: 勾选 3 条消息，点击批量转发，选择目标，验证是否发送成功
+      - Step3: 点击取消，验证是否正常退出多选模式且 Checkbox 消失
+    verify_cmd:
+      - npm run build
+    risk: medium
+    rollback:
+      - 禁用 multiSelectMode 相关代码
+
+  - task_id: IM-FE-003
+    task_type: fullstack_feature
+    title: 短视频消息发送与播放功能实现
+    priority: P2
+    status: done
+    goal: 实现短视频录制（或选择）、上传、封面生成及在气泡内流畅播放
+    doc_refs:
+      runtime:
+        - docs/02-大模型研发规范.md
+      product:
+        - docs/10-产品需求总纲.md
+      requirement_detail:
+        - docs/13-需求明细.md#4-聊天区
+      api_contract:
+        - docs/33-API接口设计.md#4-3-消息收发
+      ui_detail:
+        - docs/21-IM桌面端页面规范.md#8-消息气泡规范
+      gap:
+        - docs/12-需求点清单.md#IM-M-014
+    scope_in:
+      - ruoyi-im-web/src/components/im/ChatMessageBubble.vue
+      - ruoyi-im-api/src/main/java/com/ruoyi/im/controller/ImFileController.java
+    scope_out: []
+    preconditions:
+      - 文件上传接口已支持分片上传（P0已完成）
+    dependencies:
+      - 浏览器原生 Video 播放能力
+    route_or_entry:
+      - 聊天输入区工具栏 -> 视频
+    api_contract:
+      - POST /api/im/file/upload (视频上传)
+      - GET /api/im/file/video-cover (后端提取封面)
+    ui_tokens:
+      - 视频时长标签使用 --dt-overlay-bg (rgba(0,0,0,0.6))
+    anti_conflict_scan: true
+    state_changes:
+      - 消息类型为 VIDEO
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-2-消息收发
+    acceptance:
+      - AC1: 点击工具栏视频图标，可选择 mp4 格式文件并立即展示带进度的气泡
+      - AC2: 气泡内展示视频首帧作为封面，并显示时长标签
+      - AC3: 点击气泡，在对话框内原地播放，再次点击停止或进入全屏
+    manual_test_steps:
+      - Step1: 上传一个 10MB 的 mp4 视频，观察进度条
+      - Step2: 发送成功后，验证封面图是否正确生成
+      - Step3: 点击播放，验证静音/音量控制是否生效
+    verify_cmd:
+      - npm run build
+    risk: medium
+    rollback:
+      - 禁用 VIDEO 消息类型解析逻辑
+
+  - task_id: IM-FE-004
+    task_type: ui_rebuild
+    title: 位置消息发送与静态地图展示
+    priority: P2
+    status: done
+    goal: 实现地理位置选择与发送，气泡内展示静态地图卡片，对齐钉钉交互
+    doc_refs:
+      runtime:
+        - docs/02-大模型研发规范.md
+      ui_blueprint:
+        - docs/27-PC版钉钉UI设计蓝图.md#聊天气泡
+      ui_rules:
+        - docs/20-UI交互规范总纲.md#消息气泡
+      gap:
+        - docs/12-需求点清单.md#IM-M-015
+    scope_in:
+      - ruoyi-im-web/src/components/im/ChatMessageBubble.vue
+    scope_out: []
+    preconditions:
+      - 静态地图 API (高德/百度) Key 已配置
+    dependencies:
+      - 地图 SDK
+    route_or_entry:
+      - 聊天输入区工具栏 -> 位置
+    api_contract:
+      - POST /api/message/send (type=LOCATION)
+    ui_tokens:
+      - 位置卡片圆角遵循 --dt-radius-lg
+    anti_conflict_scan: true
+    state_changes:
+      - 消息类型为 LOCATION
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-2-消息收发
+    acceptance:
+      - AC1: 点击位置图标，弹出地图选择器（支持搜索地址）
+      - AC2: 发送后气泡显示：位置名称、详细地址、静态地图预览图
+      - AC3: 点击气泡，在浏览器新标签页打开高德/百度地图定位
+    manual_test_steps:
+      - Step1: 在选择器中搜索“阿里中心”，点击发送
+      - Step2: 检查气泡中的地图缩放级别是否合适（默认15级）
+      - Step3: 点击气泡验证跳转 URL 是否正确
+    verify_cmd:
+      - npm run build
+    risk: low
+    rollback:
+      - 移除 LOCATION 消息类型逻辑
+
+  - task_id: IM-VAL-002
+    task_type: ui_rebuild
+    title: 已读回执详情面板 UI/UX 深度复刻
+    priority: P1
+    status: done
+    goal: 深度复刻钉钉侧边已读/未读详情面板，支持按部门筛选和提醒未读人
+    doc_refs:
+      runtime:
+        - docs/02-大模型研发规范.md
+      ui_blueprint:
+        - docs/27-PC版钉钉UI设计蓝图.md#详情面板
+      ui_rules:
+        - docs/21-IM桌面端页面规范.md#10-详情面板规范
+      ui_acceptance:
+        - docs/25-钉钉Windows复刻基线.md
+    scope_in:
+      - ruoyi-im-web/src/components/im/ReadStatusDrawer.vue
+    scope_out: []
+    preconditions:
+      - 消息已读回执后端接口已就绪
+    dependencies:
+      - 通讯录组织架构数据
+    route_or_entry:
+      - 消息气泡下方“n人已读”文字点击
+    api_contract:
+      - GET /api/im/message/read-list (获取已读/未读列表)
+    ui_tokens:
+      - 未读状态使用 --dt-unread-color (#FF4D4F)
+    anti_conflict_scan: true
+    state_changes:
+      - 右侧抽屉展开状态
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-2-消息收发
+    acceptance:
+      - AC1: 抽屉从右侧滑出，顶部显示“消息接收人列表”及已读/总数百分比环形图
+      - AC2: 列表分“已读”、“未读”两个 Tab，支持按姓名搜索
+      - AC3: 对未读人支持一键发起 DING 提醒
+    manual_test_steps:
+      - Step1: 发送群消息，找几个账号模拟已读
+      - Step2: 点击已读人数，检查抽屉布局是否对齐钉钉
+      - Step3: 点击“提醒未读人”，验证是否跳转到 DING 发送页
+    verify_cmd:
+      - npm run build
+    risk: low
+    rollback:
+      - 回退到简易版已读列表弹窗
+
+  - task_id: IM-FE-006
+    task_type: ui_fix
+    title: 会话草稿自动保存与恢复功能优化
+    priority: P1
+    status: done
+    goal: 实现切换会话时自动保存输入框内容，再次切回时自动回显，并支持跨页面持久化
+    doc_refs:
+      runtime:
+        - docs/02-大模型研发规范.md
       requirement_detail:
         - docs/13-需求明细.md#5-输入区
-        - docs/13-需求明细.md#4-聊天区
-      ui_detail: [docs/21-IM桌面端页面规范.md#9-输入区规范]
-      gap: [docs/16-设计复刻差异.md#2-总体差距矩阵]
-      plan: [docs/23-UI复刻任务计划.md]
+      ui_behavior:
+        - docs/26-IM交互深度行为规范.md#草稿规则
+      gap:
+        - docs/12-需求点清单.md#IM-S-008
     scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
+      - ruoyi-im-web/src/views/ChatPanel.vue
+      - ruoyi-im-web/src/store/modules/im.js
+    scope_out: []
     preconditions:
-      - 发送与上传能力可调用
+      - 会话切换逻辑已稳定
     dependencies:
-      - 消息发送 API
-      - 文件上传 API
+      - Vuex / localStorage
     route_or_entry:
-      - 聊天头部
-      - 聊天区输入栏
-    api_contract: 部分确认，沿用现有发送与上传链路
+      - 聊天输入区
+    api_contract: 纯前端逻辑
+    ui_tokens:
+      - 会话列表草稿标记使用 --dt-error-color
+    anti_conflict_scan: true
     state_changes:
-      - 输入工具栏状态
-      - 发送按钮可用状态
-      - 回复态展示状态
+      - store.state.im.drafts (草稿映射表)
+    doc_writeback:
+      required:
+        - docs/03-实现状态矩阵.md#1-1-会话管理
+        - docs/12-需求点清单.md#IM-S-008
     acceptance:
-      - AC1: 聊天头部按钮数量和密度对齐钉钉 Windows
-      - AC2: 输入区仅保留真实可用工具，不展示空入口
-      - AC3: Enter 发送、Ctrl+Enter 换行、粘贴上传均可用
+      - AC1: 在 A 会话输入内容但不发送，切换到 B，再切回 A，内容必须完整回显
+      - AC2: 有草稿的会话，在会话列表显示“[草稿]”字样，颜色为红色
+      - AC3: 刷新页面后，草稿内容依然存在
     manual_test_steps:
-      - Step1: 检查聊天头部按钮可用性
-      - Step2: 文本发送与快捷键换行
-      - Step3: 粘贴图片和文件并验证上传反馈
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前头部和输入区实现
-
-  - task_id: IM-UI-004
-    title: 群详情与个人详情页面重设计并统一入口
-    priority: P0
-    status: done
-    goal: 重做群详情/个人详情页面结构与样式，并统一为单一主入口，贴近钉钉 Windows 体验
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#7-群详情]
-      ui: [docs/20-UI交互规范总纲.md]
-      ui_detail: [docs/21-IM桌面端页面规范.md#10-详情面板规范]
-      entry: [docs/14-页面路由与菜单映射.md]
-      gap: [docs/16-设计复刻差异.md#2-总体差距矩阵]
-      plan: [docs/23-UI复刻任务计划.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Contacts/GroupProfileDialog.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/GroupDetailDrawer
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/UserDetailDrawer.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 详情相关接口可用
-    dependencies:
-      - 群详情与成员 API
-      - 用户详情 API
-    route_or_entry:
-      - 聊天头部详情入口
-      - 头像详情入口
-    api_contract: 部分确认，接口链路存在，主入口仍待统一
-    state_changes:
-      - 详情弹层开关状态
-      - 群与用户详情展示状态
-    acceptance:
-      - AC1: 群详情与个人详情有统一且稳定入口
-      - AC2: 样式和信息层级对齐钉钉 Windows 桌面端
-      - AC3: 详情内的群文件/公告/成员操作均可用
-    manual_test_steps:
-      - Step1: 从单聊进入个人详情
-      - Step2: 从群聊进入群详情
-      - Step3: 验证详情中的操作入口可用
-    verify_cmd: [npm run build]
-    risk: high
-    rollback: 回退到当前详情实现
-
-  - task_id: IM-FIX-001
-    title: 清理消息模块空入口与不可用按钮
-    priority: P0
-    status: done
-    goal: 消除消息模块中所有“点了没反应/开发中”的入口，保证按钮可达可用
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      ui: [docs/20-UI交互规范总纲.md]
-      requirement_detail: [docs/13-需求明细.md#2-消息模块总说明]
-      entry_and_api: [docs/17-接口与入口清单.md]
-      validate: [docs/54-验收用例清单.md]
-      quality: [docs/52-测试与质量策略.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/MainPage.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/SessionPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 消息页面可正常进入
-    dependencies:
-      - 现有消息主链路
-    route_or_entry:
-      - 消息页所有主操作按钮
-    api_contract: 不新增接口，按现有链路修复入口与状态
-    state_changes:
-      - 入口可用状态
-      - 按钮禁用/隐藏策略
-    acceptance:
-      - AC1: 不存在点击无响应的主按钮
-      - AC2: 不存在“开发中”死路入口
-      - AC3: 不可用能力明确禁用或隐藏并有提示
-    manual_test_steps:
-      - Step1: 逐个点击消息页头部和输入区按钮
-      - Step2: 检查失败场景是否有提示
-      - Step3: 验证无死路入口
-    verify_cmd: [npm run build]
-    risk: high
-    rollback: 回退到当前入口策略
-
-  - task_id: IM-FIX-002
-    title: 搜索链路统一与结果跳转修复
-    priority: P0
-    status: done
-    goal: 打通会话过滤、全局搜索、会话内搜索的统一体验并修复跳转失败
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#6-搜索]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#2-消息模块主链路]
-      gap: [docs/16-设计复刻差异.md#2-总体差距矩阵]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/SearchPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/GlobalSearch.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/SessionPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 搜索接口可访问
-    dependencies:
-      - 全局搜索 API
-      - 消息定位能力
-    route_or_entry:
-      - 会话栏搜索
-      - 左侧导航搜索
-      - 聊天头部搜索
-    api_contract: 已部分确认，前后端搜索链路存在
-    state_changes:
-      - 搜索范围状态
-      - 搜索结果跳转状态
-    acceptance:
-      - AC1: 三个入口行为一致，结果样式统一
-      - AC2: 搜索结果可稳定跳转到目标页面或消息
-      - AC3: 无结果/失败状态反馈明确
-    manual_test_steps:
-      - Step1: 分别从三个入口触发搜索
-      - Step2: 点击消息结果验证跳转定位
-      - Step3: 验证无结果和失败提示
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前搜索行为
-
-  - task_id: IM-FIX-003
-    title: 群详情与群文件功能闭环修复
-    priority: P0
-    status: done
-    goal: 统一群详情入口并修复群文件上传/筛选/下载链路中的断点
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail:
-        - docs/13-需求明细.md#7-群详情
-        - docs/13-需求明细.md#8-群文件
-      ui: [docs/21-IM桌面端页面规范.md#10-详情面板规范]
-      entry_and_api: [docs/17-接口与入口清单.md#5-群详情与群文件]
-      gap: [docs/16-设计复刻差异.md#2-总体差距矩阵]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Contacts/GroupProfileDialog.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/GroupDetailDrawer
-      - D:/MyCode/im/ruoyi-im-web/src/views/MainPage.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 群详情和群文件接口可访问
-    dependencies:
-      - 群详情 API
-      - 群文件 API
-    route_or_entry:
-      - 聊天头部群详情入口
-      - 群文件入口
-    api_contract: 已部分确认，相关 API 和面板实现存在
-    state_changes:
-      - 群详情入口状态
-      - 群文件列表与筛选状态
-    acceptance:
-      - AC1: 群详情只有一个标准入口链路
-      - AC2: 群文件上传/下载/筛选可闭环
-      - AC3: 失败场景有清晰提示
-    manual_test_steps:
-      - Step1: 打开群详情并进入群文件
-      - Step2: 上传文件并下载验证
-      - Step3: 切换分类并验证列表变化
-    verify_cmd: [npm run build]
-    risk: high
-    rollback: 回退到当前群详情实现
-
-  - task_id: IM-A-001
-    title: 打通语音通话完整链路
-    priority: P0
-    status: done
-    goal: 让头部和用户详情入口都能发起语音通话，并完成接听、拒绝、挂断闭环
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#9-通话]
-      domain: [docs/31-实体与状态模型.md#6-通话call]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#4-通话]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/CallDialog.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/UserDetailDrawer.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - WebRTC 信令链路可访问
-      - 通话接口已存在或可确认来源
-    dependencies:
-      - WebRTC 信令模块
-      - 通话相关 API
-    route_or_entry:
-      - ChatHeader 通话按钮
-      - 用户详情入口
-    api_contract: 部分确认，前端 videoCall API 与后端 ImVideoCallController / WebSocket 信令代码存在，完整联调结果 unknown
-    state_changes:
-      - 当前通话状态
-      - 呼叫中、接听中、已挂断状态同步
-    acceptance:
-      - AC1: 头部与用户详情入口均可发起语音通话
-      - AC2: 对端可接听、拒绝、挂断
-      - AC3: 失败场景有明确提示，不出现"开发中"文案
-    manual_test_steps:
-      - Step1: 从聊天头部发起语音通话
-      - Step2: 对端执行接听、拒绝、挂断
-      - Step3: 验证异常场景提示
-    verify_cmd: [npm run build]
-    risk: high
-    rollback: 回退到不展示不可用通话入口的版本
-
-  - task_id: IM-A-002
-    title: 打通视频通话完整链路
-    priority: P0
-    status: done
-    goal: 完成视频通话发起、接听、挂断和异常提示闭环
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#9-通话]
-      domain: [docs/31-实体与状态模型.md#6-通话call]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#4-通话]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/CallDialog.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/UserDetailDrawer.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - 视频通话媒体权限可获取
-    dependencies:
-      - WebRTC 信令模块
-      - 视频通话相关 API
-    route_or_entry:
-      - ChatHeader 视频按钮
-      - 用户详情入口
-    api_contract: 部分确认，前端 videoCall API 与后端 ImVideoCallController / WebSocket 信令代码存在，媒体流稳定性 unknown
-    state_changes:
-      - 视频通话状态同步
-    acceptance:
-      - AC1: 可发起视频通话
-      - AC2: 本地和远端画面正常
-      - AC3: 异常断线有明确提示
-    manual_test_steps:
-      - Step1: 发起视频通话
-      - Step2: 验证双方画面和挂断
-      - Step3: 验证异常场景提示
-    verify_cmd: [npm run build]
-    risk: high
-    rollback: 回退到仅保留可用入口
-
-  - task_id: IM-B-001
-    title: 实现语音消息录制与发送
-    priority: P0
-    status: done
-    goal: 完成录音、发送、播放、失败重试闭环
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#5-输入区]
-      domain: [docs/31-实体与状态模型.md#3-消息message]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#3-消息能力扩展]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/VoiceMessageBubble.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - 录音权限可获取
-    dependencies:
-      - 文件上传 API
-    route_or_entry:
-      - 输入区录音入口
-    api_contract: 部分确认，录音组件存在，当前输入区主链路是否已有标准上传/发送接口闭环 unknown
-    state_changes:
-      - 录音中、上传中、播放中状态
-    acceptance:
-      - AC1: 可录制并发送语音消息
-      - AC2: 可播放语音消息并拖动进度
-      - AC3: 发送失败可重试
-    manual_test_steps:
-      - Step1: 录制一段语音并发送
-      - Step2: 播放并拖动进度
-      - Step3: 验证失败重试
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到移除不可用录音入口
-
-  - task_id: IM-E-001
-    title: 完善消息已读回执功能
-    priority: P0
-    status: done
-    goal: 实现消息已读/未读状态显示，支持查看已读详情
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#4-聊天区]
-      domain: [docs/31-实体与状态模型.md#4-关键状态模型]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#2-消息模块主链路]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageBubble.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/store/modules/im-message.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 已读回执接口可用
-    dependencies:
-      - 消息已读状态 API
-    route_or_entry:
-      - 消息气泡已读状态显示
-    api_contract: 部分确认，ImMessageReadController 存在
-    state_changes:
-      - 消息已读状态
-      - 已读人员列表
-    acceptance:
-      - AC1: 消息显示已读/未读状态
-      - AC2: 点击可查看已读人员列表
-      - AC3: 状态与后端同步
-    manual_test_steps:
-      - Step1: 发送消息查看未读状态
-      - Step2: 对端阅读后查看已读状态
-      - Step3: 点击查看已读详情
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到不显示已读状态
-
-  # ==================== P1 高优先任务 ====================
-  - task_id: IM-C-001
-    title: 完成群文件面板与入口
-    priority: P1
-    status: done
-    goal: 提供群文件查看、上传、下载和筛选能力
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#8-群文件]
-      domain: [docs/31-实体与状态模型.md#5-群文件groupfile]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#5-群详情与群文件]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/GroupDetailDrawer
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - 群文件接口已可访问
-    dependencies:
-      - GroupFiles 相关 API
-    route_or_entry:
-      - 群详情
-      - 聊天头部入口
-    api_contract: 已部分确认，前端 groupFile API 与后端 ImGroupFileController / Service 代码存在
-    state_changes:
-      - 文件列表、筛选条件、上传状态
-    acceptance:
-      - AC1: 可查看群文件列表
-      - AC2: 可上传和下载文件
-      - AC3: 可按类型筛选
-      - AC4: 显示文件统计信息
-    manual_test_steps:
-      - Step1: 打开群文件面板
-      - Step2: 上传并下载文件
-      - Step3: 切换筛选条件
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到隐藏不可用入口
-
-  - task_id: IM-D-001
-    title: 完成消息收藏全链路
-    priority: P1
-    status: done
-    goal: 完成收藏、取消收藏、查询收藏列表的完整闭环
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#10-消息收藏]
-      domain: [docs/31-实体与状态模型.md#7-收藏favorite]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#3-消息能力扩展]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/FavoritesPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/store/modules/im-message.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - 收藏 API 可确认
-    dependencies:
-      - 收藏相关 API
-    route_or_entry:
-      - 消息操作菜单
-      - 收藏面板入口
-    api_contract: 已部分确认，前后端收藏接口和面板代码存在
-    state_changes:
-      - 收藏状态
-      - 收藏列表状态
-    acceptance:
-      - AC1: 可收藏和取消收藏消息
-      - AC2: 收藏列表可查看
-      - AC3: 可从收藏跳转到原消息
-    manual_test_steps:
-      - Step1: 收藏一条消息
-      - Step2: 在收藏列表中验证
-      - Step3: 取消收藏并验证状态回退
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到隐藏收藏入口
-
-  - task_id: IM-D-002
-    title: 实现链接卡片自动识别与预览
-    priority: P1
-    status: done
-    goal: 当消息包含 URL 时自动识别并展示链接卡片，失败时降级为普通链接
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#11-链接卡片]
-      domain: [docs/31-实体与状态模型.md#3-消息message]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#3-消息能力扩展]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageBubble.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/LinkCardMessage.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - URL 解析能力来源已确认
-    dependencies:
-      - 链接解析服务
-    route_or_entry:
-      - 文本消息发送
-    api_contract: 前端 urlMetadata API 存在，后端 /api/im/url/parse 来源未确认
-    state_changes:
-      - LINK 消息类型与解析状态
-    acceptance:
-      - AC1: URL 自动转卡片
-      - AC2: 卡片有标题、摘要、缩略图
-      - AC3: 解析失败可降级为普通链接
-    manual_test_steps:
-      - Step1: 发送包含 URL 的消息
-      - Step2: 验证卡片展示
-      - Step3: 验证解析失败降级
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到普通链接展示
-
-  - task_id: IM-F-001
-    title: 实现拖拽上传功能
-    priority: P1
-    status: done
-    goal: 支持拖拽文件到聊天区直接上传发送
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#5-输入区]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#2-消息模块主链路]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageInput.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 文件上传接口可用
-    dependencies:
-      - 文件上传 API
-    route_or_entry:
-      - 聊天区拖拽区域
-    api_contract: 已确认，ImFileController 存在
-    state_changes:
-      - 拖拽状态、上传进度
-    acceptance:
-      - AC1: 拖拽文件到聊天区触发上传
-      - AC2: 显示拖拽提示区域
-      - AC3: 上传成功后发送文件消息
-    manual_test_steps:
-      - Step1: 拖拽文件到聊天区
-      - Step2: 验证上传进度
-      - Step3: 验证消息发送成功
-    verify_cmd: [npm run build]
+      - Step1: 在输入框写一半话，切换会话再切回来
+      - Step2: 检查会话列表左侧是否有红色草稿提示
+      - Step3: 强制刷新浏览器，检查内容是否丢失
+    verify_cmd:
+      - npm run build
     risk: low
-    rollback: 回退到仅支持点击上传
+    rollback:
+      - 禁用 Vuex drafts 模块
 
-  - task_id: IM-G-001
-    title: 统一群详情入口
+
+  # ==================== P1 深度模块复刻 (Batch 4) ====================
+
+  - task_id: IM-FE-007
+    task_type: ui_rebuild
+    title: 全局搜索弹窗与关键词高亮优化
     priority: P1
     status: done
-    goal: 统一 GroupProfileDialog 和 GroupDetailDrawer 为单一标准入口
+    goal: 实现 Ctrl+F 唤起全局搜索弹窗，支持结果分类展示及搜索结果中的关键词高亮（Doc-56 对齐）
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#7-群详情]
-      ui: [docs/20-UI交互规范总纲.md]
-      entry_and_api: [docs/17-接口与入口清单.md#5-群详情与群文件]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Contacts/GroupProfileDialog.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/GroupDetailDrawer/index.vue
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/ChatHeader.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    preconditions:
-      - 群详情接口可用
-    dependencies:
-      - 群详情相关 API
-    route_or_entry:
-      - 聊天头部群信息按钮
-    api_contract: 已确认
-    state_changes:
-      - 群详情展示状态
-    acceptance:
-      - AC1: 只保留一个群详情入口组件
-      - AC2: 所有群详情入口行为一致
-      - AC3: 功能完整无缺失
-    manual_test_steps:
-      - Step1: 从聊天头部打开群详情
-      - Step2: 验证所有功能可用
-      - Step3: 验证无重复入口
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到双入口状态
+      ui_spec: [docs/56-搜索模块UI设计规范.md]
+      blueprint: [docs/27-PC版钉钉UI设计蓝图.md]
+    scope_in: [ruoyi-im-web/src/views/SearchPanel.vue, ruoyi-im-web/src/components/Chat/GlobalSearch.vue]
 
-  - task_id: IM-H-001
-    title: 实现消息编辑功能
+  - task_id: IM-FE-008
+    task_type: ui_rebuild
+    title: AI 助手气泡流式输出与 Prompt 模板
     priority: P1
     status: done
-    goal: 支持编辑已发送的消息，显示编辑标记
+    goal: 重构 AI 助手界面，实现流式输出动画（光标闪烁）及底部 Prompt 快捷入口（Doc-57 对齐）
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      requirement_detail: [docs/13-需求明细.md#4-聊天区]
-      domain: [docs/31-实体与状态模型.md#3-消息message]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/components/Chat/MessageBubble.vue
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/api/im/message.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 消息编辑接口可用
-    dependencies:
-      - 消息编辑 API
-    route_or_entry:
-      - 消息操作菜单编辑按钮
-    api_contract: 部分确认，ImMessageEditHistoryController 存在
-    state_changes:
-      - 消息内容、编辑状态、编辑历史
-    acceptance:
-      - AC1: 可编辑已发送的消息
-      - AC2: 显示"已编辑"标记
-      - AC3: 可查看编辑历史
-    manual_test_steps:
-      - Step1: 点击编辑按钮
-      - Step2: 修改消息内容并保存
-      - Step3: 查看编辑标记和历史
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到不支持编辑
+      ui_spec: [docs/57-AI助手模块UI设计规范.md]
+    scope_in: [ruoyi-im-web/src/views/AssistantPanel.vue]
 
-  # ==================== P2 平台模块任务 ====================
-  - task_id: PL-W-001
-    title: 完善工作台应用入口
-    priority: P2
+  - task_id: IM-FE-009
+    task_type: ui_rebuild
+    title: 群详情抽屉与成员管理深度复刻
+    priority: P1
     status: done
-    goal: 工作台展示真实可用的应用入口，点击可跳转对应模块
+    goal: 实现群头像/名称内联编辑、群公告跑马灯、及对齐钉钉 8.2 的成员列表网格（Doc-59 对齐）
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#3-工作台]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/WorkbenchPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 各模块页面已存在
-    dependencies:
-      - 各模块路由配置
-    route_or_entry:
-      - 左侧导航工作台
-    api_contract: 部分确认
-    state_changes:
-      - 应用列表、最近使用
-    acceptance:
-      - AC1: 工作台显示应用入口列表
-      - AC2: 点击应用可跳转对应模块
-      - AC3: 不出现空白卡片和不可点击入口
-    manual_test_steps:
-      - Step1: 进入工作台
-      - Step2: 点击各应用入口
-      - Step3: 验证跳转正确
-    verify_cmd: [npm run build]
-    risk: low
-    rollback: 回退到当前状态
+      ui_spec: [docs/59-群详情与群管理UI设计规范.md]
+    scope_in: [ruoyi-im-web/src/components/im/GroupDetailDrawer.vue]
 
-  - task_id: PL-D-001
-    title: 完善云盘文档模块
-    priority: P2
-    status: done
-    goal: 实现云盘文件列表、上传、下载、搜索基本功能
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#5-云盘文档]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/DocumentsPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/api/im/document.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 文档接口可用
-    dependencies:
-      - 文档相关 API
-    route_or_entry:
-      - 左侧导航云盘/文档
-    api_contract: 部分确认，ImDocumentController 存在
-    state_changes:
-      - 文件列表、上传状态
-    acceptance:
-      - AC1: 可查看文件列表
-      - AC2: 可上传和下载文件
-      - AC3: 可搜索文件
-    manual_test_steps:
-      - Step1: 进入云盘模块
-      - Step2: 上传文件
-      - Step3: 搜索并下载文件
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前状态
 
-  - task_id: PL-CA-001
-    title: 完善日历模块
-    priority: P2
-    status: done
-    goal: 实现日历视图、创建/编辑/删除日程基本功能
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#6-日历]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/CalendarPanel.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 日程接口可用
-    dependencies:
-      - 日程相关 API
-    route_or_entry:
-      - 左侧导航日历
-    api_contract: unknown
-    state_changes:
-      - 日程列表、选中日期
-    acceptance:
-      - AC1: 可查看日历视图
-      - AC2: 可新增日程
-      - AC3: 可编辑和删除日程
-    manual_test_steps:
-      - Step1: 进入日历模块
-      - Step2: 创建日程
-      - Step3: 编辑和删除日程
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前状态
+  # ==================== P1 系统精修与云协作 (Batch 5) ====================
 
-  - task_id: PL-T-001
-    title: 完善待办模块
-    priority: P2
+  - task_id: IM-FE-010
+    task_type: ui_rebuild
+    title: 云盘与文档模块全量重构
+    priority: P1
     status: done
-    goal: 实现待办列表、创建、完成、筛选基本功能
+    goal: 重构云盘界面，支持列表/网格切换、文件上传传输管理器及多级文件夹面包屑（Doc-37 对齐）
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#7-待办]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/TodoPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/api/im/workbench.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 待办接口可用
-    dependencies:
-      - 待办相关 API
-    route_or_entry:
-      - 左侧导航待办
-    api_contract: 部分确认，ImTaskController 存在
-    state_changes:
-      - 待办列表、完成状态
-    acceptance:
-      - AC1: 待办列表可查看
-      - AC2: 可新增待办
-      - AC3: 可标记完成
-      - AC4: 可筛选待办
-    manual_test_steps:
-      - Step1: 进入待办模块
-      - Step2: 创建待办
-      - Step3: 标记完成
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前状态
+      ui_spec: [docs/37-云盘与文档模块UI设计规范.md]
+    scope_in: [ruoyi-im-web/src/views/DocumentsPanel.vue, ruoyi-im-web/src/components/im/TransferManager.vue]
 
-  - task_id: PL-A-001
-    title: 完善审批模块
-    priority: P2
+  - task_id: IM-FE-011
+    task_type: performance_fix
+    title: 聊天列表虚拟滚动 (Virtual Scroll) 集成
+    priority: P1
     status: done
-    goal: 实现审批首页、发起审批、待我审批、我发起的基本功能
+    goal: 在 ChatMessageList 中集成虚拟滚动，确保万级消息下的滚动流畅度（时延 < 16ms）
     doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#8-审批]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/ApprovalPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/api/im/approval.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 审批接口可用
-    dependencies:
-      - 审批相关 API
-    route_or_entry:
-      - 左侧导航审批
-    api_contract: 部分确认，ImApprovalController 存在
-    state_changes:
-      - 审批列表、审批状态
-    acceptance:
-      - AC1: 可进入审批首页
-      - AC2: 可发起至少一种审批
-      - AC3: 可查看审批状态
-    manual_test_steps:
-      - Step1: 进入审批模块
-      - Step2: 发起审批
-      - Step3: 查看审批状态
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前状态
+      tech_spec: [docs/30-技术架构与约束.md]
+    scope_in: [ruoyi-im-web/src/components/im/ChatWindow/ChatMessageList.vue]
 
-  - task_id: PL-M-001
-    title: 完善邮箱模块
-    priority: P2
-    status: done
-    goal: 实现收件箱、邮件详情、基础操作功能
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#9-邮箱]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/MailPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/api/im/mail.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - 邮件接口可用
-    dependencies:
-      - 邮件相关 API
-    route_or_entry:
-      - 左侧导航邮箱
-    api_contract: 部分确认，ImEmailController 存在
-    state_changes:
-      - 邮件列表、已读状态
-    acceptance:
-      - AC1: 可查看邮件列表
-      - AC2: 可查看邮件详情
-      - AC3: 可执行基础邮件状态操作
-    manual_test_steps:
-      - Step1: 进入邮箱模块
-      - Step2: 查看邮件详情
-      - Step3: 标记已读/未读
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前状态
 
-  - task_id: PL-AI-001
-    title: 完善AI助手模块
-    priority: P2
-    status: done
-    goal: 实现AI对话界面，支持问答功能
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      module_detail: [docs/18-平台模块与管理后台需求.md#10-ai助手]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/AssistantPanel.vue
-      - D:/MyCode/im/ruoyi-im-web/src/api/im/ai.js
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/
-    preconditions:
-      - AI接口可用
-    dependencies:
-      - AI相关 API
-    route_or_entry:
-      - 左侧导航AI助手
-    api_contract: 部分确认，ImAIController 存在
-    state_changes:
-      - 对话历史、回答状态
-    acceptance:
-      - AC1: 助手页面可进入
-      - AC2: 可发起问答
-      - AC3: 回答过程有明确状态反馈
-    manual_test_steps:
-      - Step1: 进入AI助手
-      - Step2: 输入问题
-      - Step3: 查看回答
-    verify_cmd: [npm run build]
-    risk: medium
-    rollback: 回退到当前状态
+  # ==================== P1 全站 UI 深度统一 (Batch 6) ====================
 
-  # ==================== P3 管理后台任务 ====================
-  - task_id: AD-M-001
-    title: 完善消息审计功能
-    priority: P3
+  - task_id: IM-FE-012
+    task_type: ui_rebuild
+    title: 工作台与待办模块 Premium 升级
+    priority: P1
     status: done
-    goal: 实现消息审计查看、搜索、导出功能
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/MessageManagement.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-    preconditions:
-      - 审计接口可用
-    dependencies:
-      - 审计相关 API
-    route_or_entry:
-      - 管理后台消息管理
-    api_contract: 部分确认，ImAuditController 存在
-    state_changes:
-      - 审计列表、筛选条件
-    acceptance:
-      - AC1: 可查看消息审计列表
-      - AC2: 可搜索消息
-      - AC3: 可导出审计报告
-    manual_test_steps:
-      - Step1: 进入消息管理
-      - Step2: 搜索消息
-      - Step3: 导出报告
-    verify_cmd: [npm run build]
-    risk: low
-    rollback: 回退到当前状态
+    goal: 重构 WorkbenchPanel.vue 与 TodoPanel.vue，引入 8px 栅格布局与毛玻璃统计卡片（Doc-29/48 对齐）
+    scope_in: [ruoyi-im-web/src/views/WorkbenchPanel.vue, ruoyi-im-web/src/views/TodoPanel.vue]
 
-  - task_id: AD-S-001
-    title: 完善系统配置功能
-    priority: P3
+  - task_id: IM-FE-013
+    task_type: ui_rebuild
+    title: 审批与工作汇报模块 Premium 升级
+    priority: P1
     status: done
-    goal: 实现系统配置的查看和修改功能
-    doc_refs:
-      product: [docs/10-产品需求总纲.md]
-      ui: [docs/20-UI交互规范总纲.md]
-    scope_in:
-      - D:/MyCode/im/ruoyi-im-web/src/views/admin/SystemConfig.vue
-    scope_out:
-      - D:/MyCode/im/ruoyi-im-web/src/views/ChatPanel.vue
-    preconditions:
-      - 配置接口可用
-    dependencies:
-      - 配置相关 API
-    route_or_entry:
-      - 管理后台系统配置
-    api_contract: 部分确认，ImConfigController 存在
-    state_changes:
-      - 配置项值
-    acceptance:
-      - AC1: 可查看系统配置
-      - AC2: 可修改配置项
-      - AC3: 修改后立即生效
-    manual_test_steps:
-      - Step1: 进入系统配置
-      - Step2: 修改配置项
-      - Step3: 验证配置生效
-    verify_cmd: [npm run build]
-    risk: low
-    rollback: 回退到当前状态
+    goal: 重构 ApprovalPanel.vue 与 WorkReportPanel.vue，实现动态表单美化与垂直时间轴优化（Doc-38 对齐）
+    scope_in: [ruoyi-im-web/src/views/ApprovalPanel.vue, ruoyi-im-web/src/views/WorkReportPanel.vue]
+
+  - task_id: IM-FE-014
+    task_type: ui_rebuild
+    title: 日历与邮箱模块 Premium 升级
+    priority: P1
+    status: done
+    goal: 重构 CalendarPanel.vue 与 MailPanel.vue，实现三栏式沉浸布局与精致侧边导航（Doc-47/58 对齐）
+    scope_in: [ruoyi-im-web/src/views/CalendarPanel.vue, ruoyi-im-web/src/views/MailPanel.vue]
+
+  - task_id: IM-FE-015
+    task_type: code_fix
+    title: 全站 Vue 组件代码清洗与性能加固
+    priority: P1
+    status: done
+    goal: 批量移除冗余 import、补齐 onUnmounted 内存回收、并将所有硬编码色值替换为 CSS Tokens
+    scope_in: [ruoyi-im-web/src/views/*.vue]
+
+
+  # ==================== P0 核心层稳定性加固 (Batch 7) ====================
+
+  - task_id: IM-VAL-003
+    task_type: backend_fix
+    title: WebSocket 连接管理与内存溢出保护
+    priority: P0
+    status: todo
+    goal: 实现连接覆盖保护（新连关旧），防止弱网重连风暴导致的 OOM
+    scope_in: [ruoyi-im-api/src/main/java/com/ruoyi/im/websocket/ImWebSocketHandler.java]
+
+  - task_id: IM-VAL-004
+    task_type: fullstack_feature
+    title: 应用层消息 ACK 机制实现
+    priority: P0
+    status: todo
+    goal: 实现客户端消息送达确认 (ACK)，彻底解决“虚假连接”导致的消息丢失（Doc-34 对齐）
+    scope_in: [ruoyi-im-api/src/main/java/com/ruoyi/im/websocket/ImWebSocketHandler.java, ruoyi-im-web/src/composables/useImWebSocket.js]
+
+  - task_id: IM-FE-016
+    task_type: performance_fix
+    title: 虚拟列表“高度塌陷”与“滚动锚点”修复
+    priority: P1
+    status: todo
+    goal: 解决快速滚动时由于图片未加载导致的列表跳动，并实现历史消息加载时的无感锚定
+    scope_in: [ruoyi-im-web/src/components/im/ChatWindow/ChatMessageList.vue]
+

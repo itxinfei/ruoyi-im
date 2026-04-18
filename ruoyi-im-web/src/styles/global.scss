@@ -73,10 +73,10 @@ textarea {
   outline: none;
 }
 
-// Scrollbar Styling
+// 1. 全局滚动条：钉钉标准 (非活跃态隐藏，活跃态 4px 极简)
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -84,35 +84,37 @@ textarea {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--dt-scrollbar-thumb-bg);
-  border-radius: 3px;  /* 钉钉标准：滚动条滑块圆角 3px */
-
-  &:hover {
-    background: var(--dt-scrollbar-thumb-bg-hover);
-  }
+  background: transparent; // 默认完全隐藏
+  border-radius: 2px;
+  transition: background 0.3s;
 }
 
-// Custom Scrollbar Class - 精致滚动条
-.custom-scrollbar {
-  &::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
+// 只有在 Hover 容器时才显示滚动条
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08); // 极浅灰
+}
 
-  &::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
-  }
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15) !important; // 稍微加深
+}
 
-  &::-webkit-scrollbar-thumb {
-    background: var(--dt-scrollbar-thumb-bg);
-    border-radius: 3px;
-    transition: background var(--dt-transition-fast);
+/* 钉钉 Premium 阴影系统：替代虚构的 box-shadow */
+:root {
+  --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dt-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --dt-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --dt-shadow-brand: 0 4px 12px rgba(39, 126, 251, 0.2);
+}
 
-    &:hover {
-      background: var(--dt-scrollbar-thumb-bg-hover);
-    }
-  }
+/* 文字渲染加固 */
+body {
+  font-family: "Microsoft YaHei", "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color: var(--dt-text-primary);
+  background-color: var(--dt-bg-body);
+  overflow: hidden;
 }
 
 // Focus styles for accessibility

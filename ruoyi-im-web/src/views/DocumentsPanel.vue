@@ -121,136 +121,71 @@
         </div>
       </header>
 
-      <div class="docs-content">
-        <!-- 空状态 -->
-        <div v-if="!loading && files.length === 0" class="empty-state">
-          <el-icon class="empty-icon">
-            <FolderOpened />
-          </el-icon>
-          <p class="empty-text">
-            {{ searchQuery ? '没有找到匹配的文档' : '暂无文档' }}
-          </p>
+      <div class="docs-content" :class="{ 'is-grid': viewMode === 'grid' }">
+        <!-- 加载与空状态 -->
+        <div v-if="loading" class="loading-view"><el-icon class="is-loading"><Loading /></el-icon><p>正在获取文件...</p></div>
+        <div v-else-if="files.length === 0" class="empty-view">
+          <div class="empty-box">
+            <el-icon class="empty-icon"><FolderOpened /></el-icon>
+            <p>{{ searchQuery ? '未找到相关文件' : '文件夹空空如也' }}</p>
+            <el-button v-if="!searchQuery" type="primary" size="small" @click="handleNewCommand('upload')">立即上传</el-button>
+          </div>
         </div>
 
-        <!-- 加载状态 -->
-        <div v-if="loading" class="loading-state">
-          <el-icon class="is-loading">
-            <loading />
-          </el-icon>
-          <p>加载中...</p>
+        <!-- 列表视图 (对齐钉钉 8.2) -->
+        <div v-else-if="viewMode === 'list'" class="list-view">
+          <div class="list-header">
+            <div class="col-name">名称</div>
+            <div class="col-owner">所有者</div>
+            <div class="col-time">修改时间</div>
+            <div class="col-actions"></div>
+          </div>
+          <div class="list-body">
+            <div v-for="file in files" :key="file.id" class="list-row" @click="handleFileClick(file)" @dblclick="handleDoubleClick(file)">
+              <div class="col-name">
+                <div class="file-icon-wrapper" :class="file.iconClass">
+                  <el-icon><component :is="getFileIconEl(file.icon)" /></el-icon>
+                </div>
+                <div class="file-info-main">
+                  <span class="file-name">{{ file.name }}</span>
+                  <span class="file-size">{{ file.meta }}</span>
+                </div>
+              </div>
+              <div class="col-owner">{{ file.owner }}</div>
+              <div class="col-time">{{ file.modifiedTime }}</div>
+              <div class="col-actions">
+                <el-dropdown trigger="click" @command="(cmd) => handleDropdownCommand(cmd, file)">
+                  <el-icon class="more-btn" @click.stop><MoreFilled /></el-icon>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="view" :icon="View">查看</el-dropdown-item>
+                      <el-dropdown-item command="rename" :icon="EditPen">重命名</el-dropdown-item>
+                      <el-dropdown-item command="delete" :icon="Delete" divided>删除</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- 文件列表 -->
-        <div v-else class="files-table-wrapper">
-          <table class="files-table">
-            <thead>
-              <tr>
-                <th class="name-col">
-                  名称
-                </th>
-                <th>所有者</th>
-                <th>修改时间</th>
-                <th class="actions-col" />
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="file in files"
-                :key="file.id"
-                class="file-row"
-                @click="handleFileClick(file)"
-                @dblclick="handleDoubleClick(file)"
-              >
-                <td class="name-col">
-                  <div class="file-info">
-                    <div class="file-icon" :class="file.iconClass">
-                      <el-icon>{{ getFileIconEl(file.icon) }}</el-icon>
-                    </div>
-                    <div class="file-text">
-                      <div class="file-name">
-                        {{ file.name }}
-                        <span v-if="file.isStarred" class="star-icon">
-                          <el-icon><Star /></el-icon>
-                        </span>
-                      </div>
-                      <div class="file-meta">
-                        {{ file.meta }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td><span class="owner-name">{{ file.owner }}</span></td>
-                <td><span class="file-time">{{ file.modifiedTime }}</span></td>
-                <td class="actions-col">
-                  <el-dropdown trigger="click" @command="(cmd) => handleDropdownCommand(cmd, file)">
-                    <button class="action-btn" @click.stop>
-                      <el-icon><MoreFilled /></el-icon>
-                    </button>
-                    <template #dropdown>
-                      <el-dropdown-menu>
-                        <el-dropdown-item command="view" :icon="View">
-                          查看
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="file.documentType === 'TEXT' && activeNav !== 'trash'"
-                          command="edit"
-                          :icon="Edit"
-                        >
-                          编辑
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="activeNav !== 'trash' && !file.cloudFileId"
-                          command="share"
-                          :icon="Share"
-                        >
-                          分享
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="activeNav !== 'trash' && file.documentType !== 'FOLDER' && !file.cloudFileId"
-                          :command="file.isStarred ? 'unstar' : 'star'"
-                          :icon="file.isStarred ? StarFilled : Star"
-                        >
-                          {{ file.isStarred ? '取消收藏' : '收藏' }}
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="activeNav !== 'trash'"
-                          command="rename"
-                          :icon="EditPen"
-                        >
-                          重命名
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="activeNav !== 'trash'"
-                          command="delete"
-                          :icon="Delete"
-                          divided
-                        >
-                          删除
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="activeNav === 'trash'"
-                          command="restore"
-                          :icon="Refresh"
-                        >
-                          恢复
-                        </el-dropdown-item>
-                        <el-dropdown-item
-                          v-if="activeNav === 'trash'"
-                          command="permanent"
-                          :icon="Delete"
-                          divided
-                        >
-                          永久删除
-                        </el-dropdown-item>
-                      </el-dropdown-menu>
-                    </template>
-                  </el-dropdown>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- 网格视图 (对齐钉钉 8.2) -->
+        <div v-else class="grid-view">
+          <div v-for="file in files" :key="file.id" class="grid-item" @click="handleFileClick(file)" @dblclick="handleDoubleClick(file)">
+            <div class="grid-thumb" :class="file.iconClass">
+              <el-icon v-if="file.documentType !== 'IMAGE'"><component :is="getFileIconEl(file.icon)" /></el-icon>
+              <el-image v-else :src="file.url" fit="cover" lazy />
+            </div>
+            <div class="grid-info">
+              <span class="grid-name">{{ file.name }}</span>
+              <span class="grid-sub">{{ file.meta }}</span>
+            </div>
+          </div>
         </div>
       </div>
+
+      <!-- 传输管理中心 (对齐钉钉右下角浮窗) -->
+      <TransferManager ref="transferManagerRef" />
     </main>
     <!-- 文档编辑器弹窗 -->
     <DocumentEditorDialog
@@ -831,86 +766,110 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.documents-panel { display: flex; height: 100%; flex: 1; background: var(--dt-bg-body); }
-.docs-sidebar { width: var(--dt-contact-panel-width, 220px); background: var(--dt-bg-card); border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-header { padding: var(--dt-spacing-lg) var(--dt-spacing-md); border-bottom: 1px solid var(--dt-border-lighter);
-  .sidebar-title { font-size: var(--dt-font-size-base); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); margin: 0; }
+.documents-panel {
+  display: flex; height: 100%; background: #fff;
 }
-.sidebar-content { flex: 1; padding: var(--dt-spacing-md) 0; overflow-y: auto;
-  .nav-item { display: flex; flex-direction: row; align-items: center; gap: var(--dt-spacing-sm); padding: var(--dt-spacing-sm) var(--dt-spacing-md); height: 44px; box-sizing: border-box; margin: 2px var(--dt-spacing-xs); border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-primary); transition: background-color var(--dt-transition-base); position: relative;
-    &:hover { background: var(--dt-bg-session-hover); }
-    &.active {
-      background: var(--dt-brand-bg);
-      color: var(--dt-brand-color);
-      font-weight: var(--dt-font-weight-semibold);
-      &::before { content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; background: var(--dt-brand-color); border-radius: 0 2px 2px 0; }
-    }
-    .nav-icon { font-size: var(--dt-icon-size-lg); flex-shrink: 0; }
-    .nav-label { font-size: var(--dt-font-size-base); flex: 1; }
-  }
-  .nav-divider { height: 1px; background: var(--dt-border-light); margin: var(--dt-spacing-md) var(--dt-spacing-md); }
-  .nav-section-label { padding: var(--dt-spacing-sm) var(--dt-spacing-lg); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); text-transform: uppercase; font-weight: var(--dt-font-weight-medium); }
+
+// 1. 侧边栏
+.docs-sidebar {
+  width: 240px; background: #f8fbff; border-right: 1px solid var(--dt-border-light);
+  display: flex; flex-direction: column;
 }
-.sidebar-footer { padding: var(--dt-spacing-lg); border-top: 1px solid var(--dt-border-light);
-  .storage-info { background: var(--dt-bg-body); padding: var(--dt-spacing-md); border-radius: var(--dt-radius-md);
-    .storage-header { display: flex; justify-content: space-between; font-size: var(--dt-font-size-xs); margin-bottom: var(--dt-spacing-sm); color: var(--dt-text-tertiary); }
-    .storage-bar { height: var(--dt-spacing-xs); background: var(--dt-border-color); border-radius: var(--dt-radius-full); overflow: hidden; .storage-fill { height: 100%; background: var(--dt-brand-color); } }
-    .storage-text { font-size: var(--dt-font-size-xs); color: var(--dt-text-quaternary); margin-top: var(--dt-spacing-sm); text-align: right; }
+
+.sidebar-header {
+  height: 56px; padding: 0 20px; display: flex; align-items: center;
+  .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); }
+}
+
+.sidebar-content {
+  flex: 1; padding: 12px 8px;
+  .nav-item {
+    height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
+    border-radius: 8px; cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
+    &:hover { background: #eff4fc; }
+    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
+  }
+  .nav-divider { height: 1px; background: rgba(0,0,0,0.04); margin: 12px; }
+  .nav-section-label { font-size: 11px; color: var(--dt-text-quaternary); padding: 8px 12px; }
+}
+
+// 2. 主区头部
+.docs-header {
+  height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.header-left {
+  display: flex; align-items: center; gap: 16px;
+  .header-divider { width: 1px; height: 16px; background: var(--dt-border-light); }
+}
+
+.search-box {
+  width: 240px; height: 32px; background: var(--dt-bg-hover); border-radius: 16px;
+  display: flex; align-items: center; padding: 0 12px;
+  input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; }
+  .search-icon { color: var(--dt-text-tertiary); margin-right: 8px; }
+}
+
+.new-btn {
+  height: 32px; padding: 0 16px; background: var(--dt-brand-color); color: #fff;
+  border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px;
+  &:hover { background: var(--dt-brand-hover); }
+}
+
+// 3. 内容区
+.docs-content {
+  flex: 1; overflow-y: auto; padding: 12px 24px;
+}
+
+// 列表视图
+.list-view {
+  .list-header {
+    height: 40px; display: flex; align-items: center; border-bottom: 1px solid var(--dt-border-light);
+    color: var(--dt-text-tertiary); font-size: 12px; padding: 0 12px;
+    div { flex: 1; } .col-name { flex: 2; } .col-actions { width: 40px; flex: none; }
+  }
+  .list-row {
+    height: 52px; display: flex; align-items: center; padding: 0 12px; border-radius: 8px;
+    cursor: pointer; transition: 0.2s;
+    &:hover { background: var(--dt-bg-hover); .more-btn { opacity: 1; } }
+    div { flex: 1; font-size: 13px; color: var(--dt-text-secondary); }
+    .col-name { flex: 2; display: flex; align-items: center; gap: 12px;
+      .file-name { color: var(--dt-text-primary); font-weight: 500; display: block; }
+      .file-size { font-size: 11px; color: var(--dt-text-quaternary); }
+    }
+    .more-btn { opacity: 0; color: var(--dt-text-tertiary); cursor: pointer; }
   }
 }
-.docs-main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.docs-header { height: var(--dt-header-height, 56px); padding: 0 var(--dt-spacing-xl); border-bottom: 1px solid var(--dt-border-light); display: flex; align-items: center; justify-content: space-between;
-  .header-left { display: flex; align-items: center; gap: var(--dt-spacing-md);
-    .back-btn { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: none; background: var(--dt-bg-body); border-radius: var(--dt-radius-sm); cursor: pointer; color: var(--dt-text-secondary); &:hover { background: var(--dt-bg-session-hover); color: var(--dt-text-primary); } }
-    .breadcrumb-nav { display: flex; align-items: center; gap: 4px; font-size: var(--dt-font-size-sm);
-      .breadcrumb-sep { color: var(--dt-text-quaternary); }
-      .breadcrumb-item { color: var(--dt-text-secondary); cursor: pointer; padding: 2px 4px; border-radius: var(--dt-radius-xs); &:hover { color: var(--dt-brand-color); background: var(--dt-brand-lighter); }
-        &.active { color: var(--dt-text-primary); font-weight: var(--dt-font-weight-medium); cursor: default; &:hover { background: transparent; color: var(--dt-text-primary); } }
-      }
+
+// 网格视图
+.grid-view {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; padding: 12px 0;
+  .grid-item {
+    padding: 12px; border-radius: 12px; border: 1px solid transparent; transition: 0.2s;
+    text-align: center; cursor: pointer;
+    &:hover { background: #fdfdfe; border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
+    .grid-thumb {
+      height: 100px; background: #f8f9fb; border-radius: 8px; @include flex-center; margin-bottom: 10px;
+      font-size: 40px; overflow: hidden;
+      &.icon-doc { color: #2196f3; } &.icon-pdf { color: #f56c6c; } &.icon-sheet { color: #67c23a; }
     }
-    .header-divider { width: 1px; height: var(--dt-spacing-lg); background: var(--dt-border-light); }
-    .search-box { position: relative; .search-icon { position: absolute; left: var(--dt-spacing-sm); top: 50%; transform: translateY(-50%); font-size: var(--dt-icon-size-md); color: var(--dt-text-tertiary); }
-      .search-input { width: var(--dt-search-width-md, 200px); height: var(--dt-btn-height-sm); background: var(--dt-bg-body); border: none; border-radius: var(--dt-radius-sm); padding: 0 var(--dt-spacing-2xl); font-size: var(--dt-font-size-sm); outline: none; &:focus { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); } }
-    }
-  }
-  .header-right { display: flex; align-items: center; gap: var(--dt-spacing-md);
-    .view-toggle { display: flex; background: var(--dt-bg-body); padding: var(--dt-spacing-xs); border-radius: var(--dt-radius-sm);
-      .toggle-btn { padding: var(--dt-spacing-xs); border: none; background: transparent; cursor: pointer; color: var(--dt-text-tertiary); &.active { background: var(--dt-bg-card); color: var(--dt-brand-color); border-radius: var(--dt-radius-xs); box-shadow: var(--dt-shadow-1); } }
-    }
-    .new-btn { padding: var(--dt-spacing-xs) var(--dt-spacing-md); background: var(--dt-brand-color); color: var(--dt-text-primary); border: none; border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); cursor: pointer; }
+    .grid-name { font-size: 13px; color: var(--dt-text-primary); @include text-ellipsis; display: block; }
+    .grid-sub { font-size: 11px; color: var(--dt-text-quaternary); }
   }
 }
-.docs-content { flex: 1; padding: var(--dt-spacing-lg); overflow-y: auto; }
-.empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 200px); color: var(--dt-text-tertiary);
-  .empty-icon { font-size: 64px; margin-bottom: var(--dt-spacing-lg); opacity: 0.5; color: var(--dt-border-color); }
-  .empty-text { margin: 0; font-size: var(--dt-font-size-sm); }
+
+// 文件图标基础
+.file-icon-wrapper {
+  width: 32px; height: 32px; border-radius: 6px; @include flex-center; font-size: 16px;
+  &.icon-folder { background: #fff8e1; color: #ff9800; }
+  &.icon-doc { background: #eef5fe; color: #2196f3; }
+  &.icon-image { background: #f3e5f5; color: #9c27b0; }
 }
-.loading-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: var(--dt-empty-state-height, 200px); color: var(--dt-text-tertiary);
-  .is-loading { font-size: var(--dt-icon-size-2xl); margin-bottom: var(--dt-spacing-lg); }
-  p { margin: 0; font-size: var(--dt-font-size-sm); }
-}
-.files-table { width: 100%; border-collapse: collapse;
-  th { text-align: left; padding: var(--dt-spacing-sm) var(--dt-spacing-md); font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); border-bottom: 1px solid var(--dt-border-light); font-weight: var(--dt-font-weight-normal); }
-  td { padding: var(--dt-spacing-sm) var(--dt-spacing-md); border-bottom: 1px solid var(--dt-border-light); vertical-align: middle; }
-  .file-row { cursor: pointer; transition: background var(--dt-transition-fast), box-shadow var(--dt-transition-fast); border-radius: var(--dt-radius-md);
-    &:hover { background: var(--dt-bg-session-hover); box-shadow: var(--dt-shadow-1); .action-btn { opacity: 1; } }
-  }
-  .file-info { display: flex; align-items: center; gap: var(--dt-spacing-sm);
-    .file-icon { width: var(--dt-avatar-size-md); height: var(--dt-avatar-size-md); border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; font-size: var(--dt-icon-size-lg);
-      .el-icon { font-size: var(--dt-icon-size-lg); }
-      &.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
-      &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
-      &.icon-sheet { background: var(--dt-success-bg); color: var(--dt-success-color); }
-      &.icon-image { background: var(--dt-brand-lighter); color: var(--dt-brand-color); }
-      &.icon-video { background: var(--dt-error-bg); color: var(--dt-error-color); }
-      &.icon-voice { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
-    }
-    .file-name { font-size: var(--dt-font-size-sm); font-weight: var(--dt-font-weight-medium); color: var(--dt-text-primary); display: flex; align-items: center; gap: var(--dt-spacing-xs);
-      .star-icon { color: var(--dt-warning-color); font-size: var(--dt-font-size-sm); }
-    }
-    .file-meta { font-size: var(--dt-font-size-xs); color: var(--dt-text-tertiary); margin-top: var(--dt-spacing-xs); }
-  }
-  .owner-name, .file-time { font-size: var(--dt-font-size-sm); color: var(--dt-text-secondary); }
-  .actions-col { text-align: right; .action-btn { opacity: 0; background: transparent; border: none; color: var(--dt-text-tertiary); cursor: pointer; transition: color var(--dt-transition-fast); &:hover { color: var(--dt-brand-color); } } }
+
+.empty-view {
+  height: 80%; @include flex-center; color: var(--dt-text-tertiary);
+  .empty-box { text-align: center; .empty-icon { font-size: 64px; opacity: 0.2; margin-bottom: 16px; } }
 }
 </style>

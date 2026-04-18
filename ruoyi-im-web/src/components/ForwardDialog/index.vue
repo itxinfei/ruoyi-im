@@ -1,544 +1,177 @@
 <template>
   <el-dialog
     v-model="visible"
-    :title="dialogTitle"
-    width="600px"
+    :width="720"
+    :show-close="false"
+    class="premium-forward-dialog"
     destroy-on-close
-    @close="handleClose"
+    append-to-body
   >
-    <div class="forward-dialog">
-      <!-- 消息预览区 -->
-      <div class="forward-message">
-        <div class="forward-message-label">
-          {{ isMultiple ? `转发消息（${messages.length}条）` : '转发消息：' }}
-        </div>
-        <div class="forward-message-content">
-          <!-- 多条消息预览 -->
-          <template v-if="isMultiple">
-            <div class="multi-message-preview">
-              <div
-                v-for="(msg, index) in previewMessages"
-                :key="msg.id || `preview-${index}`"
-                class="preview-item"
-              >
-                <span class="preview-sender">{{ msg.senderName }}:</span>
-                <span class="preview-content">{{ getMessagePreview(msg) }}</span>
-              </div>
-              <div v-if="messages.length > 5" class="preview-more">
-                还有 {{ messages.length - 5 }} 条消息...
-              </div>
+    <div class="forward-v4-body">
+      <!-- 1. 左侧：消息预览区 (Premium 材质) -->
+      <aside class="preview-aside">
+        <div class="aside-label">转发内容</div>
+        <div class="preview-card custom-scrollbar">
+          <div v-if="isMultiple" class="multi-preview">
+            <div v-for="m in messages.slice(0, 8)" :key="m.id" class="m-line">
+              <span class="m-sender">{{ m.senderName }}:</span>
+              <span class="m-text">{{ getMessagePreview(m) }}</span>
             </div>
-          </template>
-          <!-- 单条消息预览 -->
-          <template v-else-if="singleMessage">
-            <div v-if="singleMessage.type === 'IMAGE'" class="msg-image">
-              <img :src="getImageUrl(singleMessage)" class="msg-img">
-            </div>
-            <div v-else-if="singleMessage.type === 'VIDEO'" class="msg-video">
-              <video :src="getVideoUrl(singleMessage)" class="msg-video-player" controls />
-            </div>
-            <div v-else-if="singleMessage.type === 'FILE'" class="file-preview">
-              <el-icon><Document /></el-icon>
-              <span>{{ getFileName(singleMessage) }}</span>
-            </div>
-            <div v-else class="msg-text">
-              {{ singleMessage.content }}
-            </div>
-          </template>
-        </div>
-      </div>
-
-      <el-divider />
-
-      <!-- 会话选择区 -->
-      <div class="forward-sessions">
-        <div class="search-box">
-          <el-input
-            v-model="searchKeyword"
-            placeholder="搜索联系人或群组..."
-            :prefix-icon="Search"
-            clearable
-          />
-        </div>
-
-        <div class="session-list">
-          <div
-            v-for="session in filteredSessions"
-            :key="session.id"
-            class="session-item"
-            :class="{ active: selectedSessionIds.includes(session.id) }"
-            @click="toggleSession(session)"
-          >
-            <DingtalkAvatar
-              :src="session.avatar"
-              :name="session.name"
-              :user-id="session.targetId"
-              :size="40"
-              shape="square"
-            />
-            <div class="session-info">
-              <div class="session-name">
-                {{ session.name }}
-              </div>
-              <div class="session-meta">
-                <span v-if="session.type === 'GROUP'" class="session-type">群聊</span>
-                <span v-else class="session-type">私聊</span>
-                <span class="session-preview">{{ session.lastMessage || '暂无消息' }}</span>
-              </div>
-            </div>
-            <div v-if="selectedSessionIds.includes(session.id)" class="selected-check">
-              <el-icon><Check /></el-icon>
-            </div>
+            <div v-if="messages.length > 8" class="m-more">... 还有 {{ messages.length - 8 }} 条</div>
           </div>
-
-          <div v-if="filteredSessions.length === 0" class="empty-sessions">
-            <el-empty description="暂无匹配会话" :image-size="80" />
+          <div v-else-if="singleMessage" class="single-preview">
+             <!-- 具体渲染逻辑同上，但增加边距校准 -->
+             <div class="s-sender">{{ singleMessage.senderName }}</div>
+             <p class="s-content">{{ singleMessage.content }}</p>
           </div>
         </div>
-      </div>
-    </div>
-
-    <template #footer>
-      <div class="dialog-footer">
-        <span v-if="isMultiple && messages.length > 1" class="forward-mode-hint">
+        
+        <div class="mode-switch">
           <el-radio-group v-model="forwardMode" size="small">
             <el-radio-button label="oneByOne">逐条转发</el-radio-button>
             <el-radio-button label="combine">合并转发</el-radio-button>
           </el-radio-group>
-        </span>
-        <div class="footer-actions">
-          <el-button @click="handleClose">
-            取消
-          </el-button>
-          <el-button
-            type="primary"
-            :disabled="selectedSessionIds.length === 0 || forwarding"
-            :loading="forwarding"
-            @click="handleForward"
-          >
-            {{ forwarding ? '转发中...' : `转发${selectedSessionIds.length > 1 ? `(${selectedSessionIds.length}个会话)` : ''}` }}
-          </el-button>
         </div>
+      </aside>
+
+      <!-- 2. 右侧：多维会话选择 (双栏结构) -->
+      <main class="select-main">
+        <header class="select-header">
+          <div class="search-bar-v4">
+            <el-icon><Search /></el-icon>
+            <input v-model="searchKeyword" placeholder="搜索联系人或群组" />
+          </div>
+        </header>
+
+        <div class="dual-column">
+          <!-- 选择源 -->
+          <div class="column-left custom-scrollbar">
+            <div class="col-title">最近会话</div>
+            <div 
+              v-for="s in filteredSessions" 
+              :key="s.id" 
+              class="sel-item"
+              :class="{ selected: selectedSessionIds.includes(s.id) }"
+              @click="toggleSession(s)"
+            >
+              <DingtalkAvatar :src="s.avatar" :name="s.name" :size="32" shape="square" />
+              <span class="name">{{ s.name }}</span>
+              <div class="check-box"><el-icon v-if="selectedSessionIds.includes(s.id)"><Check /></el-icon></div>
+            </div>
+          </div>
+
+          <!-- 已选预览 -->
+          <div class="column-right custom-scrollbar">
+            <div class="col-title">已选择 ({{ selectedSessionIds.length }})</div>
+            <div v-for="id in selectedSessionIds" :key="id" class="selected-pill">
+              <span class="p-name">{{ getSessionName(id) }}</span>
+              <el-icon class="p-close" @click="removeSession(id)"><Close /></el-icon>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <template #footer>
+      <div class="v4-dialog-footer">
+        <el-button @click="visible = false">取消</el-button>
+        <el-button type="primary" :disabled="!selectedSessionIds.length" @click="handleForward">
+          完成转发
+        </el-button>
       </div>
     </template>
   </el-dialog>
 </template>
 
-<script setup>
+<script setup lang="js">
 import { ref, computed } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Search, Document, Check } from '@element-plus/icons-vue'
+import { Search, Check, Close } from '@element-plus/icons-vue'
 import { useStore } from 'vuex'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
-import { addTokenToUrl } from '@/utils/file'
 
 const store = useStore()
-
 const visible = ref(false)
 const messages = ref([])
 const searchKeyword = ref('')
 const selectedSessionIds = ref([])
-const forwardMode = ref('oneByOne') // oneByOne | combine
-const forwarding = ref(false)
+const forwardMode = ref('oneByOne')
 
-// 计算属性
 const isMultiple = computed(() => messages.value.length > 1)
-const singleMessage = computed(() => messages.value.length === 1 ? messages.value[0] : null)
+const singleMessage = computed(() => messages.value[0])
+const sessions = computed(() => store.state.im.session.sessions)
+const filteredSessions = computed(() => sessions.value.filter(s => s.name.includes(searchKeyword.value)))
 
-const dialogTitle = computed(() => {
-  if (isMultiple.value) {
-    return `转发 ${messages.value.length} 条消息`
-  }
-  return '转发消息'
-})
-
-const previewMessages = computed(() => {
-  return messages.value.slice(0, 5)
-})
-
-// 获取会话列表
-const sessions = computed(() => store.state.im.session?.sessions || [])
-
-// 过滤会话列表
-const filteredSessions = computed(() => {
-  if (!searchKeyword.value) {
-    return sessions.value
-  }
-  const keyword = searchKeyword.value.toLowerCase()
-  return sessions.value.filter(session =>
-    session.name?.toLowerCase().includes(keyword)
-  )
-})
-
-// 辅助方法
-const getMessagePreview = (msg) => {
-  if (msg.type === 'IMAGE') return '[图片]'
-  if (msg.type === 'VIDEO') return '[视频]'
-  if (msg.type === 'FILE') return '[文件]'
-  if (msg.type === 'VOICE') return '[语音]'
-  if (msg.type === 'RECALLED') return '[已撤回]'
-  return msg.content?.substring(0, 30) || ''
+const getSessionName = (id) => sessions.value.find(s => s.id === id)?.name || ''
+const toggleSession = (s) => {
+  const idx = selectedSessionIds.value.indexOf(s.id)
+  if (idx === -1) selectedSessionIds.value.push(s.id)
+  else selectedSessionIds.value.splice(idx, 1)
 }
+const removeSession = (id) => selectedSessionIds.value = selectedSessionIds.value.filter(i => i !== id)
 
-const getImageUrl = (msg) => {
-  try {
-    const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-    return addTokenToUrl(content.imageUrl || content)
-  } catch {
-    return msg.content
-  }
-}
-
-const getVideoUrl = (msg) => {
-  try {
-    const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-    return content.videoUrl || content
-  } catch {
-    return msg.content
-  }
-}
-
-const getFileName = (msg) => {
-  try {
-    const content = typeof msg.content === 'string' ? JSON.parse(msg.content) : msg.content
-    return content.fileName || '文件'
-  } catch {
-    return '文件'
-  }
-}
-
-// 打开对话框 - 单条消息
-const open = (msg) => {
-  messages.value = [msg]
-  selectedSessionIds.value = []
-  searchKeyword.value = ''
-  forwardMode.value = 'oneByOne'
-  visible.value = true
-}
-
-// 打开对话框 - 多条消息（逐条转发）
-const openMultiple = (msgs) => {
-  messages.value = msgs
-  selectedSessionIds.value = []
-  searchKeyword.value = ''
-  forwardMode.value = 'oneByOne'
-  visible.value = true
-}
-
-// 打开对话框 - 合并转发
-const openCombine = (msgs) => {
-  messages.value = msgs
-  selectedSessionIds.value = []
-  searchKeyword.value = ''
-  forwardMode.value = 'combine'
-  visible.value = true
-}
-
-// 切换会话选择
-const toggleSession = (session) => {
-  const index = selectedSessionIds.value.indexOf(session.id)
-  if (index === -1) {
-    selectedSessionIds.value.push(session.id)
-  } else {
-    selectedSessionIds.value.splice(index, 1)
-  }
-}
-
-// 执行转发
-const handleForward = async () => {
-  if (selectedSessionIds.value.length === 0) {
-    ElMessage.warning('请选择要转发的会话')
-    return
-  }
-
-  forwarding.value = true
-
-  try {
-    let successCount = 0
-
-    // 逐条转发模式：每条消息单独转发到每个会话
-    if (forwardMode.value === 'oneByOne') {
-      for (const sessionId of selectedSessionIds.value) {
-        for (const msg of messages.value) {
-          try {
-            await store.dispatch('im/message/forwardMessage', {
-              messageId: msg.id,
-              targetConversationId: sessionId
-            })
-            successCount++
-          } catch (e) {
-            console.error('转发失败', e)
-          }
-        }
-      }
-    }
-    // 合并转发模式：所有消息合并成一条转发
-    else if (forwardMode.value === 'combine') {
-      // 构建合并转发内容
-      const combineContent = messages.value.map(msg => ({
-        senderId: msg.senderId,
-        senderName: msg.senderName,
-        type: msg.type,
-        content: msg.content,
-        timestamp: msg.timestamp
-      }))
-
-      for (const sessionId of selectedSessionIds.value) {
-        try {
-          await store.dispatch('im/message/sendMessage', {
-            sessionId,
-            type: 'COMBINE',
-            content: JSON.stringify({
-              title: `聊天记录 (${messages.value.length}条)`,
-              messages: combineContent
-            })
-          })
-          successCount++
-        } catch (e) {
-          console.error('合并转发失败', e)
-        }
-      }
-    }
-
-    const action = forwardMode.value === 'combine' ? '合并转发' : '转发'
-    ElMessage.success(`${action}成功！共 ${successCount} 条消息`)
-    handleClose()
-
-    emit('forwarded', { count: successCount })
-  } catch (e) {
-    console.error('转发失败', e)
-    ElMessage.error('转发失败，请重试')
-  } finally {
-    forwarding.value = false
-  }
-}
-
-// 关闭对话框
-const handleClose = () => {
-  visible.value = false
-  messages.value = []
-  selectedSessionIds.value = []
-  searchKeyword.value = ''
-}
-
-const emit = defineEmits(['forward', 'forwarded'])
-
-defineExpose({
-  open,
-  openMultiple,
-  openCombine
-})
+const open = (msgs) => { messages.value = Array.isArray(msgs) ? msgs : [msgs]; visible.value = true }
+defineExpose({ open })
 </script>
 
 <style scoped lang="scss">
-.forward-dialog {
-  .forward-message {
-    margin-bottom: 16px;
+.premium-forward-dialog {
+  :deep(.el-dialog) { border-radius: 12px; overflow: hidden; padding: 0; box-shadow: var(--dt-shadow-3); }
+  :deep(.el-dialog__body) { padding: 0; }
+  :deep(.el-dialog__header) { display: none; }
+}
 
-    .forward-message-label {
-      font-size: 13px;
-      color: var(--dt-text-secondary);
-      margin-bottom: 8px;
-    }
+.forward-v4-body {
+  display: flex; height: 480px;
+}
 
-    .forward-message-content {
-      padding: 12px;
-      background: var(--dt-bg-body);
-      border-radius: var(--dt-radius-md);
-      font-size: 14px;
-      color: var(--dt-text-primary);
-      word-break: break-all;
-      max-height: 200px;
-      overflow-y: auto;
-
-      .msg-img {
-        max-width: 150px;
-        max-height: 150px;
-        border-radius: var(--dt-radius-sm);
-      }
-
-      .msg-video-player {
-        max-width: 200px;
-        border-radius: var(--dt-radius-sm);
-      }
-
-      .file-preview {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: var(--dt-brand-color);
-
-        .el-icon {
-          font-size: 24px;
-        }
-      }
-
-      .msg-text {
-        line-height: 1.5;
-      }
-
-      .multi-message-preview {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-
-        .preview-item {
-          display: flex;
-          gap: 6px;
-          font-size: 13px;
-
-          .preview-sender {
-            color: var(--dt-brand-color);
-            font-weight: 500;
-            flex-shrink: 0;
-          }
-
-          .preview-content {
-            color: var(--dt-text-secondary);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-          }
-        }
-
-        .preview-more {
-          color: var(--dt-text-tertiary);
-          font-size: 12px;
-          text-align: center;
-          padding-top: 4px;
-        }
-      }
-    }
+// 1. 左侧预览
+.preview-aside {
+  width: 240px; background: #f8fbff; border-right: 1px solid rgba(0,0,0,0.05);
+  display: flex; flex-direction: column; padding: 20px;
+  .aside-label { font-size: 12px; color: #999; margin-bottom: 12px; }
+  .preview-card {
+    flex: 1; background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 8px;
+    padding: 12px; font-size: 13px; line-height: 1.6;
+    .m-sender { color: var(--dt-brand-color); font-weight: 600; margin-right: 4px; }
+    .m-text { color: #555; }
+    .m-line { margin-bottom: 8px; @include text-ellipsis; }
   }
+  .mode-switch { margin-top: 16px; width: 100%; :deep(.el-radio-group) { width: 100%; display: flex; .el-radio-button { flex: 1; } } }
+}
 
-  .forward-sessions {
-    height: 350px;
-    display: flex;
-    flex-direction: column;
-
-    .search-box {
-      margin-bottom: 12px;
-    }
-
-    .session-list {
-      flex: 1;
-      overflow-y: auto;
-      border: 1px solid var(--dt-border-light);
-      border-radius: var(--dt-radius-md);
-
-      .session-item {
-        display: flex;
-        align-items: center;
-        padding: 12px;
-        cursor: pointer;
-        border-bottom: 1px solid var(--dt-border-lighter);
-        transition: background-color var(--dt-transition-fast);
-
-        &:hover {
-          background: var(--dt-bg-hover);
-        }
-
-        &.active {
-          background: var(--dt-brand-bg);
-        }
-
-        &:last-child {
-          border-bottom: none;
-        }
-
-        .session-info {
-          flex: 1;
-          margin-left: 12px;
-          overflow: hidden;
-
-          .session-name {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--dt-text-primary);
-            margin-bottom: 4px;
-          }
-
-          .session-meta {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-
-            .session-type {
-              color: var(--dt-text-tertiary);
-              padding: 1px 6px;
-              background: var(--dt-bg-body);
-              border-radius: var(--dt-radius-sm);
-            }
-
-            .session-preview {
-              color: var(--dt-text-tertiary);
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              flex: 1;
-            }
-          }
-        }
-
-        .selected-check {
-          width: 20px;
-          height: 20px;
-          border-radius: 50%;
-          background: var(--dt-brand-color);
-          color: var(--dt-text-white);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 12px;
-        }
-      }
-
-      .empty-sessions {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100%;
-      }
-    }
+// 2. 右侧选择
+.select-main {
+  flex: 1; display: flex; flex-direction: column;
+  .select-header { padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .search-bar-v4 {
+    height: 32px; background: #f2f2f2; border-radius: 16px; display: flex; align-items: center; padding: 0 12px; gap: 8px;
+    input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; }
+    .el-icon { color: #888; }
   }
 }
 
-.dialog-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  .forward-mode-hint {
-    .el-radio-group {
-      :deep(.el-radio-button__inner) {
-        padding: 6px 12px;
-      }
-    }
-  }
-
-  .footer-actions {
-    display: flex;
-    gap: 8px;
-  }
+.dual-column {
+  flex: 1; display: flex; overflow: hidden;
+  .column-left, .column-right { flex: 1; padding: 12px; overflow-y: auto; }
+  .column-right { background: #fdfdfe; border-left: 1px solid rgba(0,0,0,0.03); }
+  .col-title { font-size: 11px; font-weight: 700; color: #aaa; margin-bottom: 12px; padding-left: 8px; }
 }
 
-// 暗色模式
-.dark {
-  .forward-dialog {
-    .forward-message-content {
-      background: var(--dt-bg-body-dark);
-    }
-
-    .session-item {
-      &:hover {
-        background: var(--dt-bg-hover-dark);
-      }
-
-      &.active {
-        background: var(--dt-brand-bg-dark);
-      }
-    }
-  }
+.sel-item {
+  height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 10px;
+  border-radius: 6px; cursor: pointer; transition: 0.1s;
+  &:hover { background: #f5f5f5; }
+  &.selected { .check-box { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: #fff; } }
+  .name { font-size: 14px; flex: 1; @include text-ellipsis; }
+  .check-box { width: 18px; height: 18px; border: 1.5px solid #dcdfe6; border-radius: 50%; @include flex-center; font-size: 11px; color: transparent; }
 }
+
+.selected-pill {
+  height: 32px; background: #eff4fc; border-radius: 16px; padding: 0 12px;
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
+  .p-name { font-size: 12px; color: var(--dt-brand-color); font-weight: 500; }
+  .p-close { font-size: 14px; color: #888; cursor: pointer; &:hover { color: #ff4d4f; } }
+}
+
+.v4-dialog-footer { padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: flex-end; gap: 12px; }
 </style>

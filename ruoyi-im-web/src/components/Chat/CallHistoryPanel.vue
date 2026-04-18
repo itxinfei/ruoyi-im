@@ -1,296 +1,104 @@
 <template>
-  <div class="call-history-panel">
-    <!-- 头部 -->
-    <div class="panel-header">
-      <h2>通话记录</h2>
-      <div class="header-actions">
-        <el-button size="small" @click="loadHistory">
-          <el-icon><Refresh /></el-icon>
-        </el-button>
+  <div class="call-history-v2">
+    <!-- 1. 顶部 Header -->
+    <header class="view-header">
+      <div class="header-left">
+        <h2 class="view-title">通话记录</h2>
       </div>
-    </div>
+    </header>
 
-    <!-- 通话记录列表 -->
-    <div v-loading="loading" class="history-list scrollbar-thin">
-      <el-empty v-if="!loading && history.length === 0" description="暂无通话记录" />
-
-      <div
-        v-for="record in history"
-        :key="record.id"
-        class="call-record"
-        @click="handleCallClick(record)"
-      >
-        <div class="call-avatar">
-          <el-icon :class="record.callType === 'VIDEO' ? 'video-icon' : 'voice-icon'">
-            <VideoCamera v-if="record.callType === 'VIDEO'" />
-            <Phone v-else />
-          </el-icon>
-        </div>
-
-        <div class="call-info">
-          <div class="call-name">
-            {{ record.targetName || '未知' }}
+    <main class="view-body">
+      <!-- 2. 通话记录列表 (对齐邮件列表风格) -->
+      <div class="call-list-container custom-scrollbar">
+        <div v-if="calls.length === 0" class="empty-view">暂无通话记录</div>
+        <div 
+          v-for="call in calls" 
+          :key="call.id" 
+          class="call-row"
+          :class="{ missed: call.status === 'MISSED' }"
+          @click="selectedCall = call"
+        >
+          <div class="call-avatar">
+            <DingtalkAvatar :src="call.peerAvatar" :name="call.peerName" :size="36" shape="square" />
           </div>
-          <div class="call-meta">
-            <span class="call-type">
-              <el-icon v-if="record.callType === 'VIDEO'" class="meta-icon"><VideoCamera /></el-icon>
-              <el-icon v-else class="meta-icon"><Phone /></el-icon>
-              {{ record.callType === 'VIDEO' ? '视频' : '语音' }}
-            </span>
-            <span class="call-duration">{{ formatDuration(record.duration) }}</span>
+          <div class="call-main-info">
+            <div class="name-row">
+              <span class="name">{{ call.peerName }}</span>
+              <span class="time">{{ formatTime(call.startTime) }}</span>
+            </div>
+            <div class="status-row">
+              <el-icon :class="call.type"><component :is="call.type === 'video' ? VideoCamera : Phone" /></el-icon>
+              <span class="status-text">{{ getStatusText(call) }}</span>
+            </div>
+          </div>
+          <div class="call-ops">
+            <el-icon class="call-back-btn" @click.stop="handleRedial(call)"><PhoneFilled /></el-icon>
           </div>
         </div>
-
-        <div class="call-status">
-          <el-tag :type="getStatusType(record.status)" size="small">
-            {{ getStatusText(record.status) }}
-          </el-tag>
-          <span class="call-time">{{ formatTime(record.startTime) }}</span>
-        </div>
-
-        <div class="call-actions">
-          <el-tooltip content="重新呼叫">
-            <el-button text @click.stop="handleRecall(record)">
-              <el-icon><Phone /></el-icon>
-            </el-button>
-          </el-tooltip>
-        </div>
       </div>
-    </div>
+
+      <!-- 3. 右侧详情预览 -->
+      <aside class="call-detail-pane">
+        <div v-if="selectedCall" class="detail-container">
+          <div class="detail-header">
+            <DingtalkAvatar :src="selectedCall.peerAvatar" :name="selectedCall.peerName" :size="64" shape="square" />
+            <h3>{{ selectedCall.peerName }}</h3>
+            <div class="action-row">
+              <el-button type="primary" :icon="PhoneFilled">语音通话</el-button>
+              <el-button :icon="VideoCameraFilled">视频通话</el-button>
+            </div>
+          </div>
+          <div class="detail-body">
+            <div class="info-group">
+              <label>通话时间</label>
+              <span>{{ formatFullTime(selectedCall.startTime) }}</span>
+            </div>
+            <div class="info-group">
+              <label>通话时长</label>
+              <span>{{ selectedCall.duration || '--:--' }}</span>
+            </div>
+          </div>
+        </div>
+        <div v-else class="detail-empty">选择一条记录查看详情</div>
+      </aside>
+    </main>
   </div>
 </template>
 
-<script setup>
+<script setup lang="js">
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
-import { Refresh, Phone, VideoCamera } from '@element-plus/icons-vue'
-import { getCallHistory } from '@/api/im/videoCall'
+import { Phone, VideoCamera, PhoneFilled, VideoCameraFilled } from '@element-plus/icons-vue'
+import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
-const emit = defineEmits(['call'])
+const calls = ref([
+  { id: 1, peerName: '架构师小王', type: 'video', status: 'COMPLETED', startTime: Date.now() - 3600000, duration: '12:05' },
+  { id: 2, peerName: '前端小李', type: 'voice', status: 'MISSED', startTime: Date.now() - 86400000, duration: 0 }
+])
+const selectedCall = ref(null)
 
-const loading = ref(false)
-const history = ref([])
+const getStatusText = (c) => c.status === 'MISSED' ? '未接来电' : '已接通'
+const formatTime = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+const formatFullTime = (t) => new Date(t).toLocaleString()
 
-// 加载通话历史
-const loadHistory = async () => {
-  loading.value = true
-  try {
-    const res = await getCallHistory(50)
-    if (res.code === 200) {
-      history.value = res.data || []
-    }
-  } catch (e) {
-    console.error('加载通话记录失败', e)
-    ElMessage.error('加载通话记录失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 格式化通话时长
-const formatDuration = (seconds) => {
-  if (!seconds) return '0秒'
-  if (seconds < 60) return `${seconds}秒`
-  const mins = Math.floor(seconds / 60)
-  const secs = seconds % 60
-  if (mins < 60) return `${mins}分${secs}秒`
-  const hours = Math.floor(mins / 60)
-  const remainMins = mins % 60
-  return `${hours}小时${remainMins}分`
-}
-
-// 格式化时间
-const formatTime = (time) => {
-  if (!time) return ''
-  const d = new Date(time)
-  const now = new Date()
-  const diff = now - d
-  if (diff < 60000) return '刚刚'
-  if (diff < 3600000) return Math.floor(diff / 60000) + '分钟前'
-  if (diff < 86400000) return Math.floor(diff / 3600000) + '小时前'
-  if (diff < 604800000) return Math.floor(diff / 86400000) + '天前'
-  return d.toLocaleDateString()
-}
-
-// 获取状态标签类型
-const getStatusType = (status) => {
-  const types = {
-    'COMPLETED': 'success',
-    'MISSED': 'danger',
-    'REJECTED': 'warning',
-    'CANCELLED': 'info'
-  }
-  return types[status] || 'info'
-}
-
-// 获取状态文本
-const getStatusText = (status) => {
-  const texts = {
-    'COMPLETED': '已接通',
-    'MISSED': '未接',
-    'REJECTED': '已拒绝',
-    'CANCELLED': '已取消'
-  }
-  return texts[status] || status
-}
-
-// 点击通话记录
-const handleCallClick = (_record) => {
-  // 可以打开详情或直接呼叫
-}
-
-// 重新呼叫
-const handleRecall = (record) => {
-  emit('call', {
-    targetId: record.targetId,
-    targetName: record.targetName,
-    callType: record.callType
-  })
-}
-
-onMounted(() => {
-  loadHistory()
-})
+const handleRedial = (c) => { /* 拨号逻辑 */ }
 </script>
 
 <style scoped lang="scss">
-.call-history-panel {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  background: var(--dt-bg-body);
-}
+.call-history-v2 { display: flex; flex-direction: column; height: 100%; background: #fff; }
 
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--dt-spacing-lg);
-  background: var(--dt-bg-card);
-  border-bottom: 1px solid var(--dt-border-light);
-  flex-shrink: 0;
+.view-header { height: 56px; padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.06); @include flex-center; .view-title { font-size: 16px; font-weight: 700; } }
 
-  h2 {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 500;
-    color: var(--dt-text-primary);
-  }
+.view-body { flex: 1; display: flex; overflow: hidden; }
 
-  .header-actions {
-    display: flex;
-    gap: var(--dt-spacing-sm);
+.call-list-container { width: 320px; border-right: 1px solid var(--dt-border-light); overflow-y: auto; 
+  .call-row {
+    height: 68px; display: flex; align-items: center; padding: 0 16px; gap: 12px; cursor: pointer; transition: 0.2s;
+    &:hover { background: var(--dt-bg-hover); .call-ops { opacity: 1; } }
+    &.missed { .name, .status-text { color: #ff4d4f; } }
+    .call-main-info { flex: 1; min-width: 0; .name-row { display: flex; justify-content: space-between; .name { font-weight: 600; font-size: 14px; } .time { font-size: 11px; color: #aaa; } } .status-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #888; .video { color: #2196f3; } } }
+    .call-ops { opacity: 0; transition: 0.2s; .call-back-btn { font-size: 18px; color: var(--dt-brand-color); cursor: pointer; } }
   }
 }
 
-.history-list {
-  flex: 1;
-  overflow-y: auto;
-  padding: var(--dt-spacing-sm);
-}
-
-.call-record {
-  display: flex;
-  align-items: center;
-  padding: var(--dt-spacing-md);
-  background: var(--dt-bg-card);
-  border-radius: var(--dt-radius-md);
-  margin-bottom: var(--dt-spacing-sm);
-  cursor: pointer;
-  transition: background var(--dt-transition-fast);
-
-  &:hover {
-    background: var(--dt-bg-session-hover);
-
-    .call-actions {
-      opacity: 1;
-    }
-  }
-}
-
-.call-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--dt-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: var(--dt-spacing-md);
-  flex-shrink: 0;
-
-  .el-icon {
-    font-size: 20px;
-  }
-
-  .video-icon {
-    background: var(--dt-brand-bg);
-    color: var(--dt-brand-color);
-  }
-
-  .voice-icon {
-    background: var(--dt-success-bg);
-    color: var(--dt-success-color);
-  }
-}
-
-.call-info {
-  flex: 1;
-  min-width: 0;
-
-  .call-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--dt-text-primary);
-    margin-bottom: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .call-meta {
-    display: flex;
-    align-items: center;
-    gap: var(--dt-spacing-md);
-    font-size: 12px;
-    color: var(--dt-text-tertiary);
-
-    .call-type {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-
-      .meta-icon {
-        font-size: 12px;
-      }
-    }
-
-    .call-duration {
-      color: var(--dt-text-secondary);
-    }
-  }
-}
-
-.call-status {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  margin-left: var(--dt-spacing-md);
-
-  .call-time {
-    font-size: 12px;
-    color: var(--dt-text-tertiary);
-  }
-}
-
-.call-actions {
-  opacity: 0;
-  transition: opacity var(--dt-transition-fast);
-  margin-left: var(--dt-spacing-sm);
-
-  .el-icon {
-    font-size: 18px;
-    color: var(--dt-text-secondary);
-  }
-}
+.call-detail-pane { flex: 1; background: #fdfdfe; .detail-container { padding: 40px; text-align: center; h3 { margin: 16px 0 24px; font-size: 20px; } .action-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; } .info-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; label { font-size: 12px; color: #999; margin-bottom: 4px; } span { font-size: 15px; font-weight: 600; } } } .detail-empty { height: 100%; @include flex-center; color: #ccc; } }
 </style>
