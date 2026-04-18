@@ -296,6 +296,10 @@ public class ImWebSocketEndpoint {
                     // 处理消息已读
                     handleReadReceipt(userId, payload);
                     break;
+                case "delivered":
+                    // 处理消息送达确认 (对方收到消息后发送的 ACK)
+                    handleDeliveryAck(userId, payload);
+                    break;
                 case "call":
                     // 处理实时通话信令 (WebRTC)
                     handleCallSignal(userId, payload);
@@ -763,6 +767,37 @@ public class ImWebSocketEndpoint {
 
         } catch (Exception e) {
             log.error("处理消息已读异常", e);
+        }
+    }
+
+    /**
+     * 处理消息送达确认 (对方收到消息后发送的 ACK)
+     * 验证接收者身份并更新消息状态为 DELIVERED
+     *
+     * @param userId  接收者用户ID
+     * @param payload 送达确认数据 (包含 messageId)
+     */
+    private void handleDeliveryAck(Long userId, Object payload) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            Map<String, Object> ackData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
+            });
+
+            Object messageIdObj = ackData.get("messageId");
+            if (messageIdObj == null) {
+                log.warn("消息送达确认缺少messageId字段: userId={}", userId);
+                return;
+            }
+            Long messageId = Long.valueOf(messageIdObj.toString());
+
+            // 调用 Service 层确认消息送达
+            if (staticImMessageService != null) {
+                staticImMessageService.confirmMessageDelivery(messageId, userId);
+                log.info("消息送达确认: messageId={}, receiverId={}", messageId, userId);
+            }
+
+        } catch (Exception e) {
+            log.error("处理消息送达确认异常", e);
         }
     }
 
