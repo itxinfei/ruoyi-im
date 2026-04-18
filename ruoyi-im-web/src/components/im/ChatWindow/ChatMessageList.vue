@@ -5,18 +5,16 @@
         v-for="(msg, index) in messages"
         :key="msg.clientMsgId || msg.messageId"
         :data-message-id="msg.messageId"
-        :class="['message-item-wrapper', { 'is-selected': isMessageSelected(msg) }]"
-        @click="handleMessageClick(msg)"
+        class="message-item-wrapper"
       >
-        <div v-if="isSelectionMode" class="message-checkbox">
-          <el-checkbox :model-value="isMessageSelected(msg)" />
-        </div>
         <ChatMessageBubble
           :message="msg"
           :is-me="msg.isSelf"
           :is-grouped="checkIsGrouped(msg, index)"
           :show-time="checkShowTime(msg, index)"
           :quoted-message="msg.quotedMessage || getQuotedMessage(msg)"
+          :is-selection-mode="isSelectionMode"
+          :is-selected="isMessageSelected(msg)"
           @reply="$emit('reply', msg)"
           @forward="$emit('forward', msg)"
           @recall="$emit('recall', msg)"
@@ -25,6 +23,8 @@
           @reaction="(emoji) => $emit('reaction', { message: msg, emoji })"
           @read-detail="$emit('read-detail', msg.messageId)"
           @edit="$emit('edit', msg)"
+          @select-message="$emit('select-message', $event)"
+          @toggle-selection="$emit('toggle-selection')"
         />
       </div>
     </div>
@@ -45,7 +45,7 @@ const props = defineProps({
     default: false
   },
   selectedMessages: {
-    type: Set,
+    type: Object, // Set 集合
     default: () => new Set()
   }
 })
@@ -59,7 +59,9 @@ const emit = defineEmits([
   'reaction',
   'read-detail',
   'edit',
-  'scroll-top'
+  'scroll-top',
+  'select-message',
+  'toggle-selection'
 ])
 
 const listRef = ref(null)
@@ -92,12 +94,7 @@ const getQuotedMessage = (msg) => {
 }
 
 const isMessageSelected = (msg) => {
-  return props.selectedMessages.has(msg.messageId)
-}
-
-const handleMessageClick = (msg) => {
-  if (!props.isSelectionMode) return
-  emit('select-message', msg)
+  return props.selectedMessages?.has?.(msg.messageId) || false
 }
 
 const handleScroll = () => {
@@ -111,7 +108,7 @@ const handleScroll = () => {
   overflow-y: auto;
   overflow-x: hidden;
   background-color: transparent;
-  padding: 12px var(--dt-chat-gutter);  /* 钉钉标准：消息列表 padding 上下 12px，左右 24px */
+  padding: 12px var(--dt-chat-gutter);
 }
 
 .message-list-content {
@@ -119,30 +116,11 @@ const handleScroll = () => {
   margin: 0 auto;
 }
 
-/* 消息多选样式 */
 .message-item-wrapper {
   position: relative;
-  cursor: pointer;
-  padding: 4px var(--dt-spacing-md);
-  margin: 2px 0;
-  border-radius: var(--dt-radius-xl);
-  transition: background-color var(--dt-transition-fast), transform var(--dt-transition-fast);
-}
-
-.message-item-wrapper:hover {
-  background-color: rgba(255, 255, 255, 0.42);
-}
-
-.message-item-wrapper.is-selected {
-  background-color: rgba(39, 126, 251, 0.08);
-}
-
-.message-checkbox {
-  position: absolute;
-  left: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 5;
+  width: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 @media (max-width: 960px) {
@@ -155,11 +133,6 @@ const handleScroll = () => {
 @media (max-width: 640px) {
   .message-list-viewport {
     padding: 10px 10px 12px;
-  }
-
-  .message-item-wrapper {
-    padding-left: 4px;
-    padding-right: 4px;
   }
 }
 </style>

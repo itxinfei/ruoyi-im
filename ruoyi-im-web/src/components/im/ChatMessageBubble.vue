@@ -11,6 +11,13 @@
     </div>
 
     <div class="message-row">
+      <!-- 多选模式下的 Checkbox -->
+      <div v-if="isSelectionMode" class="selection-checkbox-wrapper" @click.stop="toggleSelect">
+        <div class="selection-checkbox" :class="{ 'is-checked': isSelected }">
+          <el-icon v-if="isSelected"><Check /></el-icon>
+        </div>
+      </div>
+
       <div v-if="!isGrouped" class="avatar-shell">
         <img :src="avatarSrc" class="avatar" alt="avatar">
       </div>
@@ -129,14 +136,27 @@
                   />
                 </div>
 
-                <div v-else-if="messageType === 'VIDEO'" class="video-content" @click="openVideoPlayer">
-                  <video :src="mediaUrl" class="content-video" />
+                <div v-else-if="messageType === 'VIDEO'" class="video-content" @click="handleVideoClick">
+                  <!-- 视频预览：优先使用 poster 属性 -->
+                  <video 
+                    ref="videoPreviewRef"
+                    :src="mediaUrl" 
+                    :poster="videoPoster"
+                    class="content-video"
+                    preload="metadata"
+                    @loadedmetadata="onVideoMetadataLoaded"
+                  />
                   <div class="video-overlay">
-                    <el-icon class="play-icon">
-                      <VideoPlay />
-                    </el-icon>
+                    <div class="play-icon-wrapper">
+                      <el-icon class="play-icon">
+                        <VideoPlay />
+                      </el-icon>
+                    </div>
                   </div>
-                  <span v-if="videoDuration" class="video-duration">{{ formatVideoDuration(videoDuration) }}</span>
+                  <div v-if="videoDuration" class="video-duration-tag">
+                    <el-icon><VideoPlay /></el-icon>
+                    <span>{{ formatVideoDuration(videoDuration) }}</span>
+                  </div>
                 </div>
 
                 <div v-else-if="messageType === 'FILE'" class="file-content" @click="handleFileClick">
@@ -171,18 +191,17 @@
                   </div>
                 </div>
 
-                <div v-else-if="messageType === 'CARD' && cardInfo" class="card-content" @click="handleCardClick">
-                  <img :src="cardInfo.userAvatar" class="card-avatar" alt="card">
-                  <div class="card-info">
-                    <div class="card-name">
-                      {{ cardInfo.userName }}
-                    </div>
-                    <div class="card-dept">
-                      {{ cardInfo.department || '点击查看详情' }}
+                <div v-else-if="messageType === 'CARD' && cardInfo" class="card-bubble-item" @click="handleCardClick">
+                  <div class="card-body">
+                    <img :src="cardInfo.userAvatar || '/avatars/default.png'" class="card-img" alt="card">
+                    <div class="card-meta">
+                      <div class="card-title">{{ cardInfo.userName }}</div>
+                      <div class="card-subtitle">{{ cardInfo.department || '点击查看详情' }}</div>
                     </div>
                   </div>
-                  <div class="card-tag">
-                    {{ cardInfo.cardType === 'group' ? '群聊名片' : '个人名片' }}
+                  <div class="card-footer">
+                    <span class="card-type-text">{{ cardInfo.cardType === 'group' ? '群组名片' : '个人名片' }}</span>
+                    <el-icon><ArrowRight /></el-icon>
                   </div>
                 </div>
 
@@ -282,17 +301,23 @@
     <teleport to="body">
       <div v-if="menuVisible" class="message-menu-mask" @click="closeContextMenu" />
       <div v-if="menuVisible" class="message-context-menu" :style="contextMenuStyle">
-        <button
-          v-for="action in menuActions"
-          :key="action.key"
-          class="menu-item"
-          type="button"
-          @click.stop="runMenuAction(action.key)"
-        >
-          <el-icon><component :is="action.icon" /></el-icon>
-          <span>{{ action.label }}</span>
-        </button>
+        <!-- ... 菜单项 ... -->
       </div>
+
+      <!-- 全屏视频播放器 -->
+      <transition name="fade">
+        <div v-if="showVideoPlayer" class="video-player-overlay" @click="closeVideoPlayer">
+          <div class="video-player-container" @click.stop>
+            <video 
+              :src="mediaUrl" 
+              controls 
+              autoplay 
+              class="full-video"
+            />
+            <el-icon class="video-close" @click="closeVideoPlayer"><Close /></el-icon>
+          </div>
+        </div>
+      </transition>
     </teleport>
   </div>
 </template>
@@ -302,6 +327,7 @@ import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   ChatLineRound,
+  Check,
   Delete,
   Document,
   DocumentCopy,
@@ -327,19 +353,39 @@ const props = defineProps({
   isMe: { type: Boolean, default: false },
   isGrouped: { type: Boolean, default: false },
   showTime: { type: Boolean, default: false },
-  quotedMessage: { type: Object, default: null }
+  quotedMessage: { type: Object, default: null },
+  isSelectionMode: { type: Boolean, default: false },
+  isSelected: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['reply', 'forward', 'recall', 'delete', 'favorite', 'read-detail', 'edit', 'reaction'])
+const emit = defineEmits([
+  'reply', 'forward', 'recall', 'delete', 'favorite', 'read-detail', 'edit', 'reaction',
+  'select-message', 'toggle-selection'
+])
 
 const isHovered = ref(false)
-const imageLoading = ref(true)
-const downloadProgress = ref(0)
-const swipeOffset = ref(0)
-const menuVisible = ref(false)
-const menuPosition = ref({ x: 0, y: 0 })
-const gestureState = ref(null)
-const quickReactions = ['👍', '❤️', '😂', '😮', '😢', '👏']
+const showVideoPlayer = ref(false)
+const videoPreviewRef = ref(null)
+
+const videoPoster = computed(() => {
+  return parsedPayload.value.posterUrl || parsedPayload.value.thumbnail || ''
+})
+
+const handleVideoClick = () => {
+  if (props.isSelectionMode) {
+    toggleSelect()
+    return
+  }
+  showVideoPlayer.value = true
+}
+
+const closeVideoPlayer = () => {
+  showVideoPlayer.value = false
+}
+
+const onVideoMetadataLoaded = (e) => {
+  // 如果没有时长且元数据已加载，可以动态获取（作为兜底）
+}
 
 // URL metadata for inline link cards
 const urlMetadata = ref(null)
@@ -570,6 +616,8 @@ const menuActions = computed(() => {
   if (props.isMe && props.message.isRead !== undefined) {
     actions.push({ key: 'read-detail', label: '查看已读', icon: Star })
   }
+  // 加入多选菜单项
+  actions.push({ key: 'selection', label: '多选', icon: Check })
   return actions
 })
 
@@ -594,6 +642,9 @@ const runMenuAction = (key) => {
 
 const runAction = (key) => {
   switch (key) {
+    case 'selection':
+      emit('toggle-selection')
+      break
     case 'reply':
       emit('reply', props.message)
       break
@@ -627,8 +678,18 @@ const emitDelete = () => {
 }
 
 const handleTrackClick = () => {
+  if (props.isSelectionMode) {
+    toggleSelect()
+    return
+  }
   if (isSwipeOpen.value) {
     resetSwipe()
+  }
+}
+
+const toggleSelect = () => {
+  if (props.isSelectionMode) {
+    emit('select-message', props.message)
   }
 }
 
@@ -865,30 +926,46 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped lang="scss">
+// 消息进场动画：轻微上滑 + 缩放，增加灵动感
+@keyframes message-appear {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 .message-item {
   display: flex;
   flex-direction: column;
   gap: 8px;
   margin-bottom: 16px;
+  animation: message-appear 0.25s cubic-bezier(0.4, 0, 0.2, 1); // 全局消息入场动效
 
   &.is-grouped {
     margin-top: -6px;
+    animation: none; // 连续消息不重复触发动画
   }
 }
 
 .time-divider {
   display: flex;
   justify-content: center;
-  margin: 4px 0 2px;
+  margin: 8px 0 4px;
 
   span {
     padding: 4px 12px;
     border-radius: var(--dt-radius-full);
-    background: rgba(255, 255, 255, 0.78);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(4px);
     border: 1px solid var(--dt-border-lighter);
     color: var(--dt-text-tertiary);
-    font-size: var(--dt-font-size-sm);
+    font-size: var(--dt-font-size-xs);
     line-height: 1;
+    letter-spacing: 0.2px;
   }
 }
 
@@ -896,6 +973,42 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: flex-start;
   gap: 12px;
+}
+
+// 多选 Checkbox 样式
+.selection-checkbox-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 40px; // 与头像/气泡高度对齐
+  margin-right: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.selection-checkbox {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dt-bg-card);
+  transition: all var(--dt-transition-fast);
+  color: transparent;
+
+  &.is-checked {
+    background-color: var(--dt-brand-color);
+    border-color: var(--dt-brand-color);
+    color: var(--dt-text-white);
+  }
+
+  .el-icon {
+    font-size: 12px;
+    font-weight: bold;
+  }
 }
 
 .is-me .message-row {
@@ -913,8 +1026,14 @@ onBeforeUnmount(() => {
   height: 36px;
   display: block;
   object-fit: cover;
-  border-radius: var(--dt-radius-sm);
+  border-radius: var(--dt-radius-md); // 钉钉风格：稍微圆润的直角
   background: var(--dt-bg-card);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: transform var(--dt-transition-fast);
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .message-column {
@@ -932,7 +1051,7 @@ onBeforeUnmount(() => {
 .sender-line {
   margin: 0 2px 6px;
   color: var(--dt-text-secondary);
-  font-size: var(--dt-font-size-sm);
+  font-size: var(--dt-font-size-xs);
   line-height: 1.2;
 }
 
@@ -940,6 +1059,7 @@ onBeforeUnmount(() => {
   position: relative;
   width: 100%;
   overflow: hidden;
+  border-radius: var(--dt-radius-xl); // 增加外层切圆角，防止滑动溢出
 }
 
 .swipe-delete {
@@ -969,6 +1089,7 @@ onBeforeUnmount(() => {
 
   span {
     font-size: var(--dt-font-size-sm);
+    font-weight: 500;
   }
 }
 
@@ -977,7 +1098,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  transition: transform 180ms ease;
+  transition: transform 0.2s cubic-bezier(0.18, 0.89, 0.32, 1.28); // 增加回弹效果
   touch-action: pan-y;
 }
 
@@ -989,51 +1110,77 @@ onBeforeUnmount(() => {
 
 .message-bubble {
   position: relative;
-  max-width: 70%;
+  max-width: fit-content;
   min-height: 40px;
-  padding: 8px 12px;
+  padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
   border-radius: var(--dt-radius-lg);
   line-height: 1.5;
   font-size: 14px;
   word-break: break-word;
   white-space: pre-wrap;
-  transition: transform var(--dt-transition-fast), background-color var(--dt-transition-fast);
+  transition: transform var(--dt-transition-fast), background-color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
+  cursor: pointer;
+
+  // 物理触感反馈：模拟按压感
+  &:active {
+    transform: scale(0.985);
+  }
 
   &.is-pending {
     opacity: 0.72;
+    filter: grayscale(0.2);
+  }
+
+  &.is-gesture-active {
+    transform: scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.06);
   }
 }
 
-// 接收方气泡：左上角 4px（尖角），其余 8px
+// 接收方气泡：玻璃拟态风格
 .is-other .message-bubble {
   color: var(--dt-text-primary);
-  background: var(--dt-bubble-left-bg);
-  border: 1px solid rgba(23, 26, 29, 0.08);
-  border-radius: 4px 8px 8px 8px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px); // 高级通透感
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-bubble-radius-received);
+  box-shadow: var(--dt-shadow-1);
+
+  &:hover {
+    background: #ffffff;
+    box-shadow: var(--dt-shadow-2);
+  }
 }
 
-// 发送方气泡：右上角 4px（尖角），其余 8px
+// 发送方气泡：品牌渐变 + 内发光
 .is-me .message-bubble {
   color: var(--dt-text-white);
-  background: var(--dt-brand-color);
-  border-radius: 8px 4px 8px 8px;
+  background: var(--dt-brand-gradient);
+  border-radius: var(--dt-bubble-radius-sent);
+  box-shadow: 0 2px 6px rgba(39, 126, 251, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.12); // 内发光增强质感
+
+  &:hover {
+    filter: brightness(1.05);
+    box-shadow: 0 4px 12px rgba(39, 126, 251, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  }
 }
 
 .quoted-message-preview {
   max-width: 100%;
   padding: 8px 12px;
   border-left: 3px solid var(--dt-brand-color);
-  border-radius: var(--dt-radius-xl);
-  background: rgba(39, 126, 251, 0.08);
+  border-radius: var(--dt-radius-md);
+  background: rgba(39, 126, 251, 0.05);
   color: var(--dt-text-secondary);
   font-size: 12px;
   line-height: 1.4;
+  margin-bottom: 4px;
 }
 
 .quoted-author {
   margin-right: 6px;
   color: var(--dt-text-primary);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .quoted-content {
@@ -1042,17 +1189,25 @@ onBeforeUnmount(() => {
 
 .text-content {
   color: inherit;
+  font-family: var(--dt-font-family);
+  letter-spacing: 0.1px;
 }
 
 .text-link {
   color: inherit;
   font-weight: 600;
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
   text-decoration-color: rgba(255, 255, 255, 0.4);
 
   .is-other & {
     color: var(--dt-brand-color);
-    text-decoration-color: rgba(39, 126, 251, 0.26);
+    text-decoration-color: rgba(39, 126, 251, 0.2);
+    
+    &:hover {
+      text-decoration-color: var(--dt-brand-color);
+    }
   }
 }
 
@@ -1060,13 +1215,19 @@ onBeforeUnmount(() => {
   min-width: 120px;
   max-width: min(320px, 100%);
   max-height: 400px;
-  border-radius: var(--dt-radius-2xl);
+  border-radius: var(--dt-radius-lg);
   display: block;
   object-fit: cover;
+  transition: transform var(--dt-transition-base);
+
+  &:hover {
+    transform: scale(1.01);
+  }
 }
 
 .image-content {
   position: relative;
+  line-height: 0; // 消除图片下方间隙
 }
 
 .image-placeholder {
@@ -1075,7 +1236,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-2xl);
+  border-radius: var(--dt-radius-lg);
   color: var(--dt-text-tertiary);
   background: var(--dt-bg-placeholder);
 }
@@ -1086,21 +1247,34 @@ onBeforeUnmount(() => {
 .file-content,
 .card-content {
   overflow: hidden;
-  border-radius: var(--dt-radius-2xl);
+  border-radius: var(--dt-radius-lg);
 }
 
 .video-content {
   position: relative;
-  min-width: 220px;
+  min-width: 200px;
   max-width: 320px;
+  border-radius: var(--dt-radius-lg);
+  overflow: hidden;
   cursor: pointer;
+  background: #000;
+  line-height: 0;
+
+  &:hover {
+    .play-icon-wrapper {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 1);
+    }
+    .video-overlay {
+      background: rgba(0, 0, 0, 0.2);
+    }
+  }
 }
 
 .content-video {
   width: 100%;
-  display: block;
   max-height: 240px;
-  background: rgba(23, 26, 29, 0.12);
+  object-fit: cover;
 }
 
 .video-overlay {
@@ -1109,36 +1283,94 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.16);
-  opacity: 0;
-  transition: opacity var(--dt-transition-fast);
+  background: rgba(0, 0, 0, 0.1);
+  transition: background var(--dt-transition-fast);
 }
 
-.video-content:hover .video-overlay {
-  opacity: 1;
-}
-
-.play-icon {
-  width: 38px;
-  height: 38px;
+.play-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--dt-radius-full);
-  background: rgba(255, 255, 255, 0.88);
-  color: var(--dt-text-primary);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all var(--dt-transition-fast);
+
+  .play-icon {
+    font-size: 24px;
+    color: var(--dt-brand-color);
+  }
 }
 
-.video-duration {
+.video-duration-tag {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
-  padding: 3px 7px;
+  right: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
   border-radius: var(--dt-radius-full);
-  color: var(--dt-text-white);
-  background: var(--dt-overlay-bg);
-  font-size: 12px;
+  color: #fff;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .el-icon { font-size: 10px; }
 }
+
+// 全屏播放器样式
+.video-player-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-player-container {
+  position: relative;
+  width: 90%;
+  height: 85%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.full-video {
+  max-width: 100%;
+  max-height: 100%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  border-radius: var(--dt-radius-lg);
+}
+
+.video-close {
+  position: absolute;
+  top: -40px;
+  right: -40px;
+  font-size: 32px;
+  color: #fff;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+
+  &:hover { opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .video-close {
+    top: 10px;
+    right: 10px;
+  }
+}
+
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 
 .file-content {
   position: relative;
@@ -1149,27 +1381,38 @@ onBeforeUnmount(() => {
   max-width: 320px;
   padding: 12px 14px;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.08);
+  transition: background-color var(--dt-transition-fast);
 }
 
 .is-other .file-content,
 .is-other .link-card,
 .is-other .card-content,
 .is-other .location-content {
-  background: #f8fafc;
-  border: 1px solid rgba(23, 26, 29, 0.06);
+  background: #fdfdfe;
+  border: 1px solid var(--dt-border-light);
+  
+  &:hover {
+    background: #f8fbff;
+    border-color: var(--dt-brand-light);
+  }
 }
 
 .is-me .file-content,
 .is-me .link-card,
 .is-me .card-content,
 .is-me .location-content {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
+  }
 }
 
 .file-icon {
-  font-size: 34px;
+  font-size: 38px;
   flex-shrink: 0;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.05));
 }
 
 .file-info {
@@ -1177,15 +1420,13 @@ onBeforeUnmount(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 .file-name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  @include text-ellipsis;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .is-me .file-name,
@@ -1201,8 +1442,9 @@ onBeforeUnmount(() => {
 }
 
 .file-size {
-  font-size: 12px;
-  color: var(--dt-text-secondary);
+  font-size: 11px;
+  color: var(--dt-text-tertiary);
+  .is-me & { opacity: 0.8; }
 }
 
 .file-download-progress {
@@ -1210,18 +1452,20 @@ onBeforeUnmount(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 3px;
-  background: rgba(23, 26, 29, 0.08);
+  height: 2px;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .file-download-fill {
   height: 100%;
   background: var(--dt-brand-color);
+  .is-me & { background: var(--dt-text-white); }
 }
 
 .link-card {
   width: min(280px, 100%);
   cursor: pointer;
+  box-shadow: var(--dt-shadow-1);
 
   &.is-inline {
     width: auto;
@@ -1231,7 +1475,7 @@ onBeforeUnmount(() => {
 .link-image {
   width: 100%;
   height: 120px;
-  background: var(--dt-border-lighter);
+  background: var(--dt-bg-placeholder);
 
   img {
     width: 100%;
@@ -1241,11 +1485,11 @@ onBeforeUnmount(() => {
 }
 
 .link-content {
-  padding: 12px 14px;
+  padding: 10px 12px;
 }
 
 .link-desc {
-  font-size: var(--dt-font-size-sm);
+  font-size: 12px;
   color: var(--dt-text-secondary);
   margin-top: 4px;
   overflow: hidden;
@@ -1259,7 +1503,7 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 80px;
+  min-height: 60px;
   color: var(--dt-text-tertiary);
 }
 
@@ -1271,57 +1515,98 @@ onBeforeUnmount(() => {
   color: var(--dt-text-primary);
 }
 
-.link-desc,
-.card-dept,
-.location-address {
-  margin-top: 4px;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--dt-text-secondary);
-}
-
 .link-url {
-  margin-top: 8px;
-  font-size: 12px;
+  margin-top: 6px;
+  font-size: 11px;
   color: var(--dt-text-tertiary);
+  opacity: 0.8;
 }
 
-.card-content {
+.card-bubble-item {
+  width: 240px;
+  background: #ffffff;
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--dt-transition-fast);
+  box-shadow: var(--dt-shadow-1);
+
+  &:hover {
+    box-shadow: var(--dt-shadow-2);
+    border-color: var(--dt-brand-light);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.card-body {
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 220px;
-  max-width: 280px;
   padding: 12px 14px;
-  cursor: pointer;
 }
 
-.card-avatar {
+.card-img {
   width: 44px;
   height: 44px;
-  border-radius: var(--dt-radius-xl);
+  border-radius: var(--dt-radius-md);
   object-fit: cover;
-  flex-shrink: 0;
+  border: 1px solid var(--dt-border-lighter);
 }
 
-.card-info {
-  min-width: 0;
+.card-meta {
   flex: 1;
+  min-width: 0;
 }
 
-.card-tag {
-  flex-shrink: 0;
-  padding: 4px 8px;
-  border-radius: var(--dt-radius-full);
-  font-size: 11px;
-  color: var(--dt-brand-color);
-  background: rgba(39, 126, 251, 0.12);
+.card-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dt-text-primary);
+  @include text-ellipsis;
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
+  margin-top: 2px;
+  @include text-ellipsis;
+}
+
+.card-footer {
+  height: 28px;
+  padding: 0 12px;
+  background: #fdfdfe;
+  border-top: 1px solid var(--dt-border-lighter);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  .card-type-text {
+    font-size: 10px;
+    color: var(--dt-text-quaternary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  
+  .el-icon {
+    font-size: 12px;
+    color: var(--dt-text-quaternary);
+  }
+}
+
+.is-me .card-bubble-item {
+  // 发送方的名片也要保持白色背景，钉钉逻辑
+  color: var(--dt-text-primary);
 }
 
 .location-map {
   position: relative;
   width: 100%;
-  height: 132px;
+  height: 120px;
   background: var(--dt-bg-body);
 }
 
@@ -1335,284 +1620,215 @@ onBeforeUnmount(() => {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 38px;
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 32px;
+  height: 32px;
+  @include flex-center;
   border-radius: var(--dt-radius-full);
   background: var(--dt-brand-color);
   transform: translate(-50%, -50%);
+  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
 }
 
 .location-icon {
-  font-size: 20px;
+  font-size: 18px;
   color: var(--dt-text-white);
 }
 
 .location-info {
-  padding: 12px 14px;
-}
-
-.fallback-content {
-  min-width: 120px;
+  padding: 10px 12px;
 }
 
 .meta-line {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   min-height: 16px;
   padding: 0 4px;
   color: var(--dt-text-tertiary);
   font-size: 11px;
+  margin-top: 2px;
 }
 
 .is-me .meta-line {
   justify-content: flex-end;
 }
 
-.is-other .meta-line {
-  justify-content: flex-start;
+.meta-time {
+  opacity: 0.8;
 }
 
-.meta-time,
-.meta-tag,
-.meta-status,
-.read-status {
-  line-height: 1;
+.meta-tag {
+  background: var(--dt-bg-placeholder);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 10px;
 }
 
 .meta-status {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 
   &.is-failed {
     color: var(--dt-error-color);
   }
 }
 
-.status-icon {
-  font-size: 12px;
-}
-
 .read-status {
-  border: none;
-  background: transparent;
-  padding: 0;
-  cursor: pointer;
+  @include button-reset;
   color: var(--dt-text-tertiary);
+  transition: color var(--dt-transition-fast);
 
   &.is-unread {
     color: var(--dt-brand-color);
     font-weight: 600;
   }
+
+  &:hover {
+    color: var(--dt-brand-hover);
+  }
 }
 
 .action-bar {
   position: absolute;
-  top: -44px;
+  top: -42px;
   display: none;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: 4px;
+  padding: 4px 6px;
   border-radius: var(--dt-radius-lg);
-  background: var(--dt-bg-card);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
   border: 1px solid var(--dt-border-light);
-  box-shadow: var(--dt-shadow-2);
-  z-index: 3;
+  box-shadow: var(--dt-shadow-3);
+  z-index: 10;
 }
 
-.is-me .action-bar {
-  right: 0;
-}
-
-.is-other .action-bar {
-  left: 0;
-}
-
-.action-item,
-.emoji-action,
-.reaction-chip,
-.menu-item {
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  font: inherit;
-}
+.is-me .action-bar { right: 0; }
+.is-other .action-bar { left: 0; }
 
 .action-item {
   width: 28px;
   height: 28px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--dt-radius-lg);
+  @include flex-center;
+  border-radius: var(--dt-radius-md);
   color: var(--dt-text-secondary);
-  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
+  transition: all var(--dt-transition-fast);
 
   &:hover {
     color: var(--dt-brand-color);
-    background: rgba(39, 126, 251, 0.08);
+    background: var(--dt-brand-bg);
   }
 }
 
 .reaction-strip {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
   padding-left: 4px;
-  border-left: 1px solid var(--dt-border-light);
+  margin-left: 4px;
+  border-left: 1px solid var(--dt-border-lighter);
 }
 
 .emoji-action {
   width: 26px;
   height: 26px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--dt-radius-lg);
+  @include flex-center;
+  border-radius: var(--dt-radius-md);
   font-size: 14px;
-  transition: background-color var(--dt-transition-fast), transform var(--dt-transition-fast);
+  transition: all var(--dt-transition-fast);
 
   &:hover {
-    transform: translateY(-1px);
-    background: rgba(39, 126, 251, 0.08);
+    transform: scale(1.2) translateY(-2px);
+    background: var(--dt-brand-bg);
   }
 }
 
 .reaction-groups {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 4px;
   margin-top: 6px;
-  padding: 0 2px;
 }
 
 .reaction-chip {
+  @include button-reset;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 4px 8px;
+  padding: 3px 8px;
   border-radius: var(--dt-radius-full);
   color: var(--dt-text-secondary);
-  background: rgba(255, 255, 255, 0.84);
-  border: 1px solid rgba(23, 26, 29, 0.06);
+  background: #ffffff;
+  border: 1px solid var(--dt-border-lighter);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  transition: all var(--dt-transition-fast);
+
+  &:hover {
+    background: var(--dt-brand-bg);
+    border-color: var(--dt-brand-light);
+  }
+
+  span:last-child {
+    font-size: 11px;
+    font-weight: 600;
+  }
 }
 
 .recall-notice {
-  margin-top: 4px;
+  margin-top: 6px;
+  padding: 4px 12px;
   color: var(--dt-text-tertiary);
   font-size: 12px;
+  text-align: center;
+  width: 100%;
 }
 
 .re-edit-link {
   margin-left: 6px;
   color: var(--dt-brand-color);
+  font-weight: 500;
   cursor: pointer;
-}
-
-.message-menu-mask {
-  position: fixed;
-  inset: 0;
-  z-index: 1998;
-  background: transparent;
+  &:hover { text-decoration: underline; }
 }
 
 .message-context-menu {
   position: fixed;
-  min-width: 164px;
-  padding: 6px;
-  border-radius: var(--dt-radius-2xl);
+  min-width: 160px;
+  padding: 4px;
+  border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
-  background: var(--dt-bg-card);
-  z-index: 1999;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(16px);
+  box-shadow: var(--dt-shadow-4);
+  z-index: 2000;
 }
 
 .menu-item {
+  @include button-reset;
   width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 10px 12px;
-  border-radius: var(--dt-radius-lg);
+  padding: 8px 12px;
+  border-radius: var(--dt-radius-md);
   color: var(--dt-text-primary);
-  text-align: left;
-  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
+  font-size: 13px;
+  transition: all var(--dt-transition-fast);
 
   &:hover {
     color: var(--dt-brand-color);
-    background: rgba(39, 126, 251, 0.08);
+    background: var(--dt-brand-bg);
   }
+
+  .el-icon { font-size: 16px; opacity: 0.7; }
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .swipe-shell:hover .action-bar {
-    display: inline-flex;
-  }
-}
-
-@media (max-width: 1280px) {
-  .message-column {
-    max-width: min(78%, 640px);
-  }
-}
-
-@media (max-width: 768px) {
-  .message-row {
-    gap: 10px;
-  }
-
-  .message-column {
-    max-width: calc(100% - 46px);
-  }
-
-  .message-bubble {
-    padding: 10px 12px;
-    border-radius: var(--dt-radius-2xl);
-  }
-
-  .content-img,
-  .video-content {
-    max-width: min(260px, 100%);
-  }
-
-  .file-content,
-  .card-content,
-  .link-card {
-    min-width: 0;
-    width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
-  .avatar-shell,
-  .avatar-placeholder {
-    width: 32px;
-    flex-basis: 32px;
-  }
-
-  .avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: var(--dt-radius-md);
-  }
-
-  .message-row {
-    gap: 8px;
-  }
-
-  .message-column {
-    max-width: calc(100% - 40px);
-  }
-
-  .time-divider span {
-    font-size: 11px;
-  }
-
-  .action-bar {
-    display: none !important;
+// 触摸优化：移动端/平板禁用 hover 动画
+@media (hover: none) {
+  .message-bubble:active {
+    transform: scale(0.96);
+    background-color: var(--dt-bg-hover);
   }
 }
 </style>

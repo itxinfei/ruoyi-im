@@ -197,7 +197,7 @@
  * 修复：数据初始化加载、色彩对齐、图标修正
  * 功能增强：会话分组管理（用户创建分组）
  */
-import { ref, computed, onMounted, reactive } from 'vue'
+import { ref, computed, onMounted, reactive, watch } from 'vue'
 import { useStore } from 'vuex'
 import { Search, BellFilled, ChatLineRound, ArrowDown, ArrowRight, FolderOpened, FolderAdd, Delete, Edit, Plus } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
@@ -207,7 +207,13 @@ const store = useStore()
 // 内部状态
 const isSearchFocused = ref(false)
 const searchKeyword = ref('')
-const filterType = ref('all')
+// 优化：从 localStorage 恢复过滤状态，默认为 'all'
+const filterType = ref(localStorage.getItem('dt_session_filter') || 'all')
+
+// 监听过滤类型变化并持久化
+watch(filterType, (newVal) => {
+  localStorage.setItem('dt_session_filter', newVal)
+})
 
 // 分类折叠状态
 const collapsedGroups = reactive({
@@ -266,23 +272,28 @@ const filteredSessions = computed(() => {
   return list
 })
 
-// 分组会话列表（钉钉分类设计：置顶 > 单聊 > 群聊 + 用户分组）
+// 分组会话列表（钉钉分类设计：全部模式下按组显示；特定模式下平铺显示）
 const groupedSessions = computed(() => {
   const list = filteredSessions.value
 
+  // 场景 1：如果不是 "全部"，则执行平铺显示（对齐钉钉特定 Tab 逻辑）
+  if (filterType.value !== 'all') {
+    const unreadCount = list.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
+    return [{
+      type: 'FLAT',
+      label: filterType.value === 'PRIVATE' ? '单聊会话' : '群聊会话',
+      sessions: list,
+      unreadCount
+    }]
+  }
+
+  // 场景 2：如果是 "全部"，按 钉钉标准组 排序
   const typeGroups = sessionGroups.map(group => {
     let groupSessions
-
-    if (filterType.value !== 'all') {
-      // 单一类型过滤时，只显示该类型的非置顶会话
-      groupSessions = list.filter(s => !s.isPinned && s.type === filterType.value)
+    if (group.type === 'PINNED') {
+      groupSessions = list.filter(s => s.isPinned)
     } else {
-      // 全部类型时，按分组显示
-      if (group.type === 'PINNED') {
-        groupSessions = list.filter(s => s.isPinned)
-      } else {
-        groupSessions = list.filter(s => !s.isPinned && s.type === group.type)
-      }
+      groupSessions = list.filter(s => !s.isPinned && s.type === group.type)
     }
 
     const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
@@ -295,10 +306,9 @@ const groupedSessions = computed(() => {
     }
   })
 
-  // 用户创建的分组（只在全部筛选时显示）
-  if (filterType.value === 'all' && userSessionGroups.value.length > 0) {
+  // 用户创建的分组（只在 "全部" 模式下追加）
+  if (userSessionGroups.value.length > 0) {
     const userGroups = userSessionGroups.value.map(g => {
-      // 该分组下的会话（排除已置顶的，置顶会话在置顶分组中显示）
       const groupSessions = list.filter(s => !s.isPinned && s.groupId === g.id)
       const unreadCount = groupSessions.reduce((sum, s) => sum + (s.unreadCount || 0), 0)
       return {
@@ -479,10 +489,11 @@ const handleGlobalClick = () => {
 .session-tabs {
   display: flex;
   gap: 4px;
-  margin-top: 10px;
+  margin-top: 12px;
   background: var(--dt-bg-hover);
   border-radius: var(--dt-radius-lg);
-  padding: 4px;
+  padding: 3px;
+  position: relative;
 }
 
 .session-tab {
@@ -490,24 +501,25 @@ const handleGlobalClick = () => {
   height: 28px;
   border: none;
   background: transparent;
-  border-radius: var(--dt-radius-md);
-  font-size: var(--dt-font-size-sm);  /* 13px对齐到标准12px */
+  border-radius: 6px;
+  font-size: var(--dt-font-size-xs);
   font-weight: 500;
   color: var(--dt-text-secondary);
   cursor: pointer;
-  transition: color var(--dt-transition-fast), background-color var(--dt-transition-fast);
-}
+  transition: all var(--dt-transition-base);
+  z-index: 1;
 
-.session-tab:hover {
-  color: var(--dt-text-primary);
-  background: var(--dt-bg-card);
-}
+  &:hover {
+    color: var(--dt-text-primary);
+  }
 
-.session-tab.active {
-  background-color: var(--dt-bg-card);
-  color: var(--dt-brand-color);
-  font-weight: 600;
-  box-shadow: var(--dt-shadow-1);
+  &.active {
+    background-color: var(--dt-bg-card);
+    color: var(--dt-brand-color);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transform: translateY(-0.5px);
+  }
 }
 
 .session-actions {
@@ -690,11 +702,11 @@ const handleGlobalClick = () => {
 
 /* 钉钉规范：1-9 数字圆形，10+ 数字胶囊 */
 .unread-badge-circle {
-  border-radius: 9px;  /* 钉钉标准：完全圆形 */
+  border-radius: var(--dt-radius-full);  /* 钉钉标准：完全圆形 */
 }
 
 .unread-badge-capsule {
-  border-radius: 9px;  /* 钉钉标准：圆角为高度一半 */
+  border-radius: var(--dt-radius-full);  /* 钉钉标准：圆角为高度一半 */
 }
 
 .content-wrapper {

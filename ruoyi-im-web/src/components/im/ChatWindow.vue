@@ -11,14 +11,13 @@
       @header-command="handleHeaderCommand"
     />
 
-    <!-- 1.5 多选模式顶部栏 -->
-    <SelectionHeader
+    <!-- 1.5 多选模式底部操作栏 (对齐钉钉，遮盖输入区) -->
+    <SelectionActionBar
       v-if="isSelectionMode"
       :selected-count="selectedMessages.size"
       @select-all="selectAll"
       @cancel="cancelSelection"
       @forward="batchForward"
-      @mark-as-read="batchMarkAsRead"
       @favorite="batchFavorite"
       @delete="batchDelete"
     />
@@ -39,6 +38,7 @@
       @edit="handleEdit"
       @scroll-top="handleListScroll"
       @select-message="handleMessageClick"
+      @toggle-selection="toggleSelectionMode"
     />
 
     <!-- 3. 输入区 -->
@@ -91,7 +91,7 @@ import ReadStatusDrawer from '@/components/im/ReadStatusDrawer.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
-import SelectionHeader from './ChatWindow/SelectionHeader.vue'
+import SelectionActionBar from './ChatWindow/SelectionActionBar.vue'
 import ChatMessageList from './ChatWindow/ChatMessageList.vue'
 
 const store = useStore()
@@ -730,7 +730,7 @@ const scrollToMessage = (messageId) => {
   margin: 0 var(--dt-chat-gutter) var(--dt-chat-gutter);
   border-radius: var(--dt-radius-2xl);
   overflow: hidden;
-  border: 1px solid rgba(23, 26, 29, 0.06);
+  border: 1px solid var(--dt-border-light);
 }
 
 @media (max-width: 960px) {
