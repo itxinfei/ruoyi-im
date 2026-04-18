@@ -1,6 +1,7 @@
 package com.ruoyi.im.websocket;
 
 import com.alibaba.fastjson.JSON;
+import com.ruoyi.im.service.ImMessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -8,6 +9,7 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -26,9 +28,12 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
     // 内存 Session 映射 (集群环境建议替换为 Redis 订阅)
     private static final Map<Long, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
-    
+
     // 异步发送线程池 (防止慢连接阻塞业务)
     private static final ExecutorService SEND_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+
+    @Resource
+    private ImMessageService imMessageService;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -67,7 +72,15 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             // 3. 处理应用层 ACK (Doc-34 §5.2)
             if ("MESSAGE".equals(frame.getType()) && "ACK".equals(frame.getAction())) {
                 log.debug("Received MESSAGE_ACK from userId: {}, requestId: {}", userId, frame.getRequestId());
-                // 此处应调用 Service 层: messageService.confirmDelivery(frame.getRequestId())
+                // 确认消息送达：requestId 为消息 ID
+                if (frame.getRequestId() != null && !frame.getRequestId().isEmpty()) {
+                    try {
+                        Long messageId = Long.parseLong(frame.getRequestId());
+                        imMessageService.confirmMessageDelivery(messageId, userId);
+                    } catch (NumberFormatException e) {
+                        log.warn("Invalid message ID in ACK: {}", frame.getRequestId());
+                    }
+                }
                 return;
             }
 

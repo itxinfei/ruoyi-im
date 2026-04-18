@@ -199,6 +199,12 @@ public final class SystemConstants {
     /** 消息状态：发送中 */
     public static final String MESSAGE_STATUS_SENDING = "SENDING";
 
+    /** 消息状态：已送达 */
+    public static final String MESSAGE_STATUS_DELIVERED = "DELIVERED";
+
+    /** 消息状态：已读 */
+    public static final String MESSAGE_STATUS_READ = "READ";
+
     // ========== 视频会议状态 ==========
 
     /** 视频会议状态：进行中 */

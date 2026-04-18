@@ -52,21 +52,21 @@ const { list, containerRef, wrapperProps } = useVirtualList(
 
 <style scoped lang="scss">
 .v6-message-viewport {
-  flex: 1; overflow-y: auto; padding: 20px 0;
-  background-color: #f2f2f2; // 锁定钉钉工业灰
+  flex: 1; overflow-y: auto; padding: 20px 0 0;
+  background-color: #ffffff; // Slack 纯白背景
 }
 
 .v6-message-content {
-  width: 100%; max-width: 900px; margin: 0 auto;
+  width: 100%; max-width: 1000px; margin: 0 auto;
 }
 
 .v6-message-row-wrapper {
-  padding: 0 24px;
-  margin-bottom: 20px; // 不同簇之间的间距
+  padding: 0;
+  margin-bottom: 12px; // 不同用户消息间的自然段落间距
   
   &.is-cluster {
-    margin-top: -12px; // 压缩同一簇内的间距至 4px-8px
-    margin-bottom: 8px;
+    margin-top: -8px; // 同一用户连续发言的紧凑间距
+    margin-bottom: 4px;
   }
 }
 </style>

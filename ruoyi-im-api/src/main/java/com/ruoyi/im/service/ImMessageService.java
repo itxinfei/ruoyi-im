@@ -152,4 +152,13 @@ public interface ImMessageService {
      * @param userId         当前用户ID
      */
     void clearConversationMessages(Long conversationId, Long userId);
+
+    /**
+     * 确认消息送达 (WebSocket ACK 处理)
+     * 当对方收到消息后，调用此方法更新消息状态为 DELIVERED
+     *
+     * @param messageId 消息ID
+     * @param userId   当前用户ID (接收方)
+     */
+    void confirmMessageDelivery(Long messageId, Long userId);
 }

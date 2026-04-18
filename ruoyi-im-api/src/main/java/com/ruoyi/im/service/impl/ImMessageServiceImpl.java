@@ -220,7 +220,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setClientMsgId(clientMsgId);
         message.setSendStatus(SystemConstants.MESSAGE_STATUS_SENDING);
         message.setSendRetryCount(0);
-        message.setDeliveredTime(LocalDateTime.now());
+        // deliveredTime 不在这里设置，收到对方 ACK 后再更新
 
         // 生成递增 Seq (Doc-34 §2.1)
         String seqKey = "im:seq:" + conversationId;
@@ -1110,6 +1110,33 @@ public class ImMessageServiceImpl implements ImMessageService {
         } catch (Exception e) {
             log.error("确保用户会话记录失败: userId={}, convId={}", userId, conversationId, e);
             throw new BusinessException(500, "同步会话状态失败");
+        }
+    }
+
+    @Override
+    public void confirmMessageDelivery(Long messageId, Long userId) {
+        if (messageId == null) {
+            return;
+        }
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            log.warn("确认消息送达失败: 消息不存在, messageId={}", messageId);
+            return;
+        }
+        // 验证接收者是否为当前用户
+        if (!userId.equals(message.getReceiverId())) {
+            log.warn("确认消息送达失败: 接收者不匹配, messageId={}, expected={}, actual={}",
+                    messageId, message.getReceiverId(), userId);
+            return;
+        }
+        // 只有 SENDING 状态才能更新为 DELIVERED
+        if (SystemConstants.MESSAGE_STATUS_SENDING.equals(message.getSendStatus())) {
+            ImMessage update = new ImMessage();
+            update.setId(messageId);
+            update.setSendStatus(SystemConstants.MESSAGE_STATUS_DELIVERED);
+            update.setDeliveredTime(LocalDateTime.now());
+            imMessageMapper.updateImMessage(update);
+            log.debug("消息已送达确认: messageId={}, receiverId={}", messageId, userId);
         }
     }
 }
