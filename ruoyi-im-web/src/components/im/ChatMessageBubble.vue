@@ -959,8 +959,7 @@ onBeforeUnmount(() => {
   span {
     padding: 4px 12px;
     border-radius: var(--dt-radius-full);
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(4px);
+    background: var(--dt-bg-card);
     border: 1px solid var(--dt-border-lighter);
     color: var(--dt-text-tertiary);
     font-size: var(--dt-font-size-xs);
@@ -1137,17 +1136,16 @@ onBeforeUnmount(() => {
   }
 }
 
-// 接收方气泡：玻璃拟态风格
+// 接收方气泡：简洁风格
 .is-other .message-bubble {
   color: var(--dt-text-primary);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(12px); // 高级通透感
+  background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-bubble-radius-received);
   box-shadow: var(--dt-shadow-1);
 
   &:hover {
-    background: #ffffff;
+    background: var(--dt-bg-card);
     box-shadow: var(--dt-shadow-2);
   }
 }
@@ -1309,8 +1307,7 @@ onBeforeUnmount(() => {
   right: 8px;
   bottom: 8px;
   padding: 2px 8px;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.7);
   border-radius: var(--dt-radius-full);
   color: #fff;
   font-size: 11px;
@@ -1697,8 +1694,7 @@ onBeforeUnmount(() => {
   gap: 4px;
   padding: 4px 6px;
   border-radius: var(--dt-radius-lg);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
+  background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   box-shadow: var(--dt-shadow-3);
   z-index: 10;
@@ -1798,8 +1794,7 @@ onBeforeUnmount(() => {
   padding: 4px;
   border-radius: var(--dt-radius-xl);
   border: 1px solid var(--dt-border-light);
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(16px);
+  background: var(--dt-bg-card);
   box-shadow: var(--dt-shadow-4);
   z-index: 2000;
 }
