@@ -1,319 +1,256 @@
 <template>
-  <aside class="side-nav">
-    <!-- 顶部 Logo 区 -->
-    <div class="nav-logo-wrapper">
-      <div class="nav-logo">
-        <span class="logo-text">IM</span>
+  <aside class="dingtalk-l1-nav">
+    <!-- 1. 顶部 Logo -->
+    <div class="nav-header">
+      <div class="logo-box">
+        <el-icon><Promotion /></el-icon>
       </div>
     </div>
 
-    <!-- 顶部功能区 -->
-    <div class="nav-top">
-      <div
-        v-for="item in topNavs"
-        :key="item.id"
-        :class="['nav-item', { active: activeModule === item.id }]"
+    <!-- 2. 主导航区 (带指示器) -->
+    <div class="nav-body custom-scrollbar">
+      <div 
+        v-for="item in topNavs" 
+        :key="item.id" 
+        class="nav-item-wrapper"
+        :class="{ active: activeModule === item.id }"
         @click="switchModule(item.id)"
       >
-        <el-icon :size="20">
-          <component :is="item.icon" />
-        </el-icon>
-        <span class="nav-label">{{ item.name }}</span>
-        <div v-if="item.badge > 0" class="nav-badge">
-          {{ item.badge > 99 ? '99+' : item.badge }}
+        <!-- 左侧 3px 指示条 -->
+        <div class="active-indicator"></div>
+        
+        <div class="nav-item">
+          <el-icon class="nav-icon">
+            <component :is="activeModule === item.id ? item.activeIcon : item.icon" />
+          </el-icon>
+          <span class="nav-label">{{ item.name }}</span>
+          <div v-if="item.badge > 0" class="nav-badge">{{ item.badge > 99 ? '9' : item.badge }}</div>
         </div>
       </div>
     </div>
 
-    <!-- 分割线 -->
-    <div class="nav-divider" />
+    <!-- 3. 底部操作区 -->
+    <div class="nav-footer">
+      <!-- 搜索 -->
+      <div class="footer-item" @click="switchModule('search')">
+        <el-icon><Search /></el-icon>
+      </div>
+      
+      <!-- 更多菜单 -->
+      <el-dropdown trigger="click" placement="right-end" @command="handleMore">
+        <div class="footer-item">
+          <el-icon><MoreFilled /></el-icon>
+        </div>
+        <template #dropdown>
+          <el-dropdown-menu class="dt-more-dropdown">
+            <el-dropdown-item command="settings" :icon="Setting">系统设置</el-dropdown-item>
+            <el-dropdown-item command="theme" :icon="Sunny">切换主题</el-dropdown-item>
+            <el-dropdown-item command="about" :icon="InfoFilled" divided>关于 IM</el-dropdown-item>
+          </el-dropdown-menu>
+        </template>
+      </el-dropdown>
 
-    <!-- 底部功能区 -->
-    <div class="nav-bottom">
-      <div class="nav-item" @click="switchModule('search')">
-        <el-icon :size="20">
-          <Search />
-        </el-icon>
-        <span class="nav-label">搜索</span>
-      </div>
-      <div class="nav-item" @click="openSystemSettings">
-        <el-icon :size="20">
-          <Setting />
-        </el-icon>
-        <span class="nav-label">设置</span>
-      </div>
-      <div class="nav-item" @click="handleToggleTheme">
-        <el-icon :size="20">
-          <Sunny v-if="isDark" /><Moon v-else />
-        </el-icon>
-        <span class="nav-label">{{ isDark ? '亮色' : '暗黑' }}</span>
-      </div>
-    </div>
-
-    <!-- 用户头像 -->
-    <div class="user-avatar-wrapper" @click="openEditProfile">
-      <div class="avatar-ring" />
-      <img :src="userAvatar" class="user-avatar" alt="me">
-      <div class="online-status-dot">
-        <span class="status-pulse" />
+      <!-- 个人头像 -->
+      <div class="profile-entry" @click="openEditProfile">
+        <img :src="userAvatar" class="avatar-img" alt="me">
+        <div class="status-dot online"></div>
       </div>
     </div>
   </aside>
 </template>
 
 <script setup lang="js">
-/**
- * ImSideNavNew (设置恢复版)
- */
-import { ref } from 'vue'
+import { ref, markRaw } from 'vue'
 import {
-  ChatDotRound, Search, User, Menu, FolderOpened, Calendar,
-  Tickets, Setting, Sunny, Moon, Bell, Phone
+  ChatDotRound, User, Bell, Menu, Tickets, Calendar,
+  FolderOpened, Phone, Search, MoreFilled, Setting,
+  Sunny, InfoFilled, Promotion, ChatLineRound,
+  UserFilled, BellFilled, Grid, List, CircleCheck,
+  PhoneFilled
 } from '@element-plus/icons-vue'
-import { useTheme } from '@/composables/useTheme'
 
 defineProps({
   activeModule: { type: String, default: 'chat' }
 })
 
 const emit = defineEmits(['switch-module', 'open-edit-profile', 'open-system-settings'])
-const { isDark, toggleTheme } = useTheme()
 
-// 状态
 const userAvatar = ref('/avatars/me.svg')
 
-// 导航项配置
 const topNavs = [
-  { id: 'chat', name: '消息', icon: ChatDotRound, badge: 5 },
-  { id: 'contacts', name: '通讯录', icon: User, badge: 0 },
-  { id: 'ding', name: 'DING', icon: Bell, badge: 0 },
-  { id: 'workbench', name: '工作台', icon: Menu, badge: 0 },
-  { id: 'todo', name: '待办', icon: Tickets, badge: 2 },
-  { id: 'calendar', name: '日历', icon: Calendar, badge: 0 },
-  { id: 'documents', name: '云盘', icon: FolderOpened, badge: 0 },
-  { id: 'call', name: '通话', icon: Phone, badge: 0 }
+  { id: 'chat', name: '消息', icon: markRaw(ChatLineRound), activeIcon: markRaw(ChatDotRound), badge: 5 },
+  { id: 'contacts', name: '通讯录', icon: markRaw(User), activeIcon: markRaw(UserFilled), badge: 0 },
+  { id: 'ding', name: 'DING', icon: markRaw(Bell), activeIcon: markRaw(BellFilled), badge: 0 },
+  { id: 'workbench', name: '工作台', icon: markRaw(Menu), activeIcon: markRaw(Grid), badge: 0 },
+  { id: 'todo', name: '待办', icon: markRaw(Tickets), activeIcon: markRaw(List), badge: 2 },
+  { id: 'calendar', name: '日历', icon: markRaw(Calendar), activeIcon: markRaw(CircleCheck), badge: 0 },
+  { id: 'documents', name: '云盘', icon: markRaw(FolderOpened), activeIcon: markRaw(CircleCheck), badge: 0 },
+  { id: 'call', name: '通话', icon: markRaw(Phone), activeIcon: markRaw(PhoneFilled), badge: 0 }
 ]
 
-const switchModule = (moduleId) => {
-  emit('switch-module', moduleId)
-}
-
-const openEditProfile = () => {
-  emit('open-edit-profile')
-}
-
-const openSystemSettings = () => {
-  emit('open-system-settings')
-}
-
-const handleToggleTheme = () => {
-  toggleTheme()
+const switchModule = (id) => emit('switch-module', id)
+const openEditProfile = () => emit('open-edit-profile')
+const handleMore = (cmd) => {
+  if (cmd === 'settings') emit('open-system-settings')
 }
 </script>
 
-<style scoped>
-/* 导航栏容器 */
-.side-nav {
-  width: 64px;
+<style scoped lang="scss">
+.dingtalk-l1-nav {
+  width: 68px; // 钉钉标准宽度
   height: 100%;
-  background: var(--dt-nav-sidebar-bg, var(--dt-brand-color));
+  background: #1e1e1e; // 钉钉深色 L1 背景
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4px 0;
+  padding: 12px 0;
   flex-shrink: 0;
-  z-index: 100;
+  z-index: 2000;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Logo区域 */
-.nav-logo-wrapper {
-  margin-bottom: 4px;
-  padding-top: 0;
+.nav-header {
+  margin-bottom: 20px;
+  .logo-box {
+    width: 36px;
+    height: 36px;
+    background: var(--dt-brand-gradient);
+    border-radius: 8px;
+    @include flex-center;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    &:hover { filter: brightness(1.1); }
+  }
 }
 
-.nav-logo {
-  width: var(--dt-logo-size);
-  height: var(--dt-logo-size);
-  border-radius: var(--dt-radius-lg);
-  background: var(--dt-nav-logo-bg, var(--dt-brand-gradient));
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: opacity var(--dt-transition-base);
-}
-
-.nav-logo:hover {
-  opacity: 0.9;
-}
-
-.logo-text {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--dt-text-white);
-  letter-spacing: 1px;
-}
-
-/* 顶部导航区 */
-.nav-top {
+.nav-body {
   flex: 1;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 0;
-  width: 100%;
+  gap: 4px;
 }
 
-/* 导航项 - 紧凑矩形按钮 */
-.nav-item {
+.nav-item-wrapper {
   position: relative;
   width: 100%;
-  height: 48px;
+  height: 56px; // 对齐钉钉纵向间距
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
   cursor: pointer;
-  border-radius: var(--dt-radius-lg);
-  color: var(--dt-nav-sidebar-text);
-  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
-  margin: 0;
-}
+  transition: all 0.2s;
 
-.nav-item:hover {
-  background-color: var(--dt-nav-sidebar-hover);
-  color: var(--dt-nav-sidebar-text-hover);
-}
+  .active-indicator {
+    position: absolute;
+    left: 0;
+    width: 3px;
+    height: 18px;
+    background: var(--dt-brand-color);
+    border-radius: 0 2px 2px 0;
+    opacity: 0;
+    transform: scaleY(0.5);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
 
-.nav-item.active {
-  background-color: var(--dt-nav-sidebar-active);
-  color: var(--dt-nav-sidebar-text-active);
-}
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.65);
+    transition: all 0.2s;
+    
+    .nav-icon { font-size: 22px; }
+    .nav-label { font-size: 10px; font-weight: 500; transform: scale(0.9); }
+  }
 
-.nav-item .el-icon {
-  font-size: 20px;
-}
+  &:hover {
+    .nav-item { color: #fff; }
+    background: rgba(255, 255, 255, 0.05);
+  }
 
-.nav-label {
-  font-size: 12px;
-  font-weight: 500;
-  text-align: center;
-  line-height: 1.2;
-  white-space: nowrap;
+  &.active {
+    .active-indicator { opacity: 1; transform: scaleY(1); }
+    .nav-item { color: var(--dt-brand-color); font-weight: 600; }
+    background: rgba(255, 255, 255, 0.08);
+  }
 }
 
 .nav-badge {
   position: absolute;
-  top: 4px;
-  right: 8px;
-  background-color: var(--dt-error-color);
-  color: var(--dt-text-white);
+  top: 8px;
+  right: 14px;
+  background: var(--dt-error-color);
+  color: #fff;
   font-size: 10px;
-  min-width: 16px;
-  height: 16px;
+  min-width: 14px;
+  height: 14px;
+  border-radius: 7px;
+  @include flex-center;
   padding: 0 4px;
-  border-radius: var(--dt-radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
+  border: 1.5px solid #1e1e1e;
+  transform: scale(0.8);
 }
 
-/* 分割线 */
-.nav-divider {
-  width: 48px;
-  height: 1px;
-  background: var(--dt-border-light);
-  margin: 4px auto;
-  flex-shrink: 0;
-}
-
-/* 底部工具栏 */
-.nav-bottom {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  padding: 0;
-  width: 100%;
-}
-
-.nav-bottom .nav-item {
+.nav-footer {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0;
-  padding: 1px 0;
-  cursor: pointer;
-  border-radius: 0;
-  color: var(--dt-nav-sidebar-text);
-  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
+  gap: 16px;
+  padding-bottom: 8px;
+
+  .footer-item {
+    width: 40px;
+    height: 40px;
+    @include flex-center;
+    color: rgba(255, 255, 255, 0.65);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    transition: all 0.2s;
+    &:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+  }
 }
 
-.nav-bottom .nav-item:hover {
-  color: var(--dt-nav-sidebar-text-hover);
-  background: var(--dt-nav-sidebar-hover);
-}
-
-.nav-bottom .nav-item:active {
-  background: var(--dt-nav-sidebar-active);
-}
-
-/* 用户头像 - 钉钉风格 */
-.user-avatar-wrapper {
+.profile-entry {
   position: relative;
-  width: 44px;
-  height: 44px;
-  margin-top: 8px;
+  width: 36px;
+  height: 36px;
   cursor: pointer;
-  flex-shrink: 0;
+  
+  .avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+    background: #444;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .status-dot {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1e1e1e;
+    &.online { background: #22ab5c; }
+  }
+
+  &:hover .avatar-img { filter: brightness(1.1); }
 }
 
-.avatar-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: var(--dt-radius-lg);
-  background: var(--dt-avatar-ring-bg-dark);
-  border: 2px solid var(--dt-avatar-ring-border-dark);
-  transition: background-color var(--dt-transition-base), border-color var(--dt-transition-base), box-shadow var(--dt-transition-base);
-}
-
-.user-avatar-wrapper:hover .avatar-ring {
-  background: var(--dt-avatar-ring-bg-dark-hover);
-  border-color: var(--dt-avatar-ring-border-dark-hover);
-  box-shadow: 0 0 12px var(--dt-avatar-ring-shadow-dark-hover);
-}
-
-.user-avatar {
-  width: var(--dt-avatar-size-md);
-  height: var(--dt-avatar-size-md);
-  border-radius: var(--dt-radius-sm);
-  border: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  display: block;
-  object-fit: cover;
-}
-
-.user-avatar-wrapper:hover .user-avatar {
-  opacity: 0.9;
-}
-
-.online-status-dot {
-  position: absolute;
-  bottom: -2px;
-  right: -2px;
-  width: 11px;
-  height: 11px;
-  background-color: var(--dt-success-color);
-  border: 2px solid var(--dt-brand-color);
-  border-radius: 50%;
-  z-index: 2;
+// 更多菜单自定义样式
+:deep(.dt-more-dropdown) {
+  background: #2d2d2d;
+  border: 1px solid rgba(255,255,255,0.1);
+  .el-dropdown-menu__item {
+    color: rgba(255,255,255,0.8);
+    &:hover { background: rgba(255,255,255,0.05); color: var(--dt-brand-color); }
+  }
 }
 </style>
