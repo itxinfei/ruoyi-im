@@ -26,8 +26,10 @@ import { formatMessagePreview, formatMessagePreviewFromObject } from '@/utils/me
  * @enum {string}
  */
 export const MESSAGE_SEND_STATUS = {
-  SENDING: 'sending',   // 发送中 - 消息已创建但尚未确认发送成功
-  SENT: 'sent',         // 发送成功 - 消息已成功发送到服务器
+  PENDING: 'pending',   // 待发送 - 消息已创建，等待发送
+  SENDING: 'sending',   // 发送中 - 消息正在发送到服务器
+  SENT: 'sent',         // 已送达 - 消息已成功发送到服务器并推送到对方设备
+  DELIVERED: 'delivered', // 已接收 - 消息已推送到对方设备（仅用于确认）
   FAILED: 'failed'      // 发送失败 - 消息发送失败，可能需要重试
 }
 
@@ -56,8 +58,10 @@ export const MESSAGE_SPECIAL_STATUS = {
  * @type {Object.<string, string[]>}
  */
 const VALID_STATUS_TRANSITIONS = {
+  [MESSAGE_SEND_STATUS.PENDING]: [MESSAGE_SEND_STATUS.SENDING, MESSAGE_SEND_STATUS.FAILED],
   [MESSAGE_SEND_STATUS.SENDING]: [MESSAGE_SEND_STATUS.SENT, MESSAGE_SEND_STATUS.FAILED],
-  [MESSAGE_SEND_STATUS.SENT]: [MESSAGE_READ_STATUS.READ, MESSAGE_SPECIAL_STATUS.RECALLED],
+  [MESSAGE_SEND_STATUS.SENT]: [MESSAGE_SEND_STATUS.DELIVERED, MESSAGE_READ_STATUS.READ, MESSAGE_SPECIAL_STATUS.RECALLED],
+  [MESSAGE_SEND_STATUS.DELIVERED]: [MESSAGE_READ_STATUS.READ, MESSAGE_SPECIAL_STATUS.RECALLED],
   [MESSAGE_READ_STATUS.UNREAD]: [MESSAGE_READ_STATUS.READ],
   [MESSAGE_READ_STATUS.READ]: [MESSAGE_SPECIAL_STATUS.RECALLED]
 }
