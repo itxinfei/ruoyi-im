@@ -111,6 +111,25 @@ const removeSession = (id) => selectedSessionIds.value = selectedSessionIds.valu
 
 const open = (msgs) => { messages.value = Array.isArray(msgs) ? msgs : [msgs]; visible.value = true }
 defineExpose({ open })
+
+// 转发消息
+const handleForward = async () => {
+  if (!selectedSessionIds.value.length || !messages.value.length) return
+
+  try {
+    for (const sessionId of selectedSessionIds.value) {
+      for (const msg of messages.value) {
+        await store.dispatch('im/message/forwardMessage', {
+          messageId: msg.messageId || msg.id,
+          targetConversationId: sessionId
+        })
+      }
+    }
+    visible.value = false
+  } catch (error) {
+    console.error('转发失败:', error)
+  }
+}
 </script>
 
 <style scoped lang="scss">
