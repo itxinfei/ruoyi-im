@@ -64,7 +64,7 @@
 import { markRaw } from 'vue'
 import {
   ChatDotRound, User, Bell, Menu, Tickets, Calendar,
-  FolderOpened, Phone, Search, MoreFilled, Setting,
+  FolderOpened, FolderChecked, Phone, Search, MoreFilled, Setting,
   InfoFilled, Promotion, ChatLineRound,
   UserFilled, BellFilled, Grid, List,
   PhoneFilled, Connection
