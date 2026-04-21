@@ -62,6 +62,20 @@
           </div>
           <el-button size="small" plain>发消息</el-button>
         </div>
+
+        <!-- 位置 -->
+        <div v-else-if="messageType === 'LOCATION'" class="location-card" @click="handleLocationClick">
+          <div class="location-map">
+            <img v-if="locationInfo.staticMapUrl" :src="locationInfo.staticMapUrl" class="map-img" />
+            <div v-else class="map-placeholder">
+              <el-icon><Location /></el-icon>
+            </div>
+          </div>
+          <div class="location-info">
+            <div class="l-title">{{ locationInfo.title || '位置' }}</div>
+            <div class="l-address">{{ locationInfo.address || '' }}</div>
+          </div>
+        </div>
       </div>
 
       <!-- 底部：表态区 (Reactions) -->
@@ -87,8 +101,8 @@
 
 <script setup lang="js">
 import { ref, computed } from 'vue'
-import { 
-  Check, Document, CaretRight, CircleCheck, ChatDotSquare, Share, MoreFilled 
+import {
+  Check, Document, CaretRight, CircleCheck, ChatDotSquare, Share, MoreFilled, Location
 } from '@element-plus/icons-vue'
 
 const props = defineProps({
@@ -112,6 +126,16 @@ const avatarSrc = computed(() => props.message.senderAvatar || '/avatars/default
 const senderLabel = computed(() => props.message.senderName || '成员')
 
 const cardInfo = computed(() => props.message.payload || {})
+const locationInfo = computed(() => {
+  const payload = props.message.payload || {}
+  return {
+    title: payload.title || '位置',
+    address: payload.address || '',
+    latitude: payload.latitude,
+    longitude: payload.longitude,
+    staticMapUrl: payload.staticMapUrl || ''
+  }
+})
 const resolvedFileName = computed(() => props.message.fileName || '未知文件')
 const resolvedFileSize = computed(() => props.message.fileSize || 0)
 const formatReadableFileSize = (s) => (s / 1024 / 1024).toFixed(1) + ' MB'
@@ -119,6 +143,16 @@ const fileTypeColor = computed(() => '#277efb') // 可根据扩展名动态变�
 
 // 模拟 Reactions 数据
 const reactions = ref([])
+
+// 位置点击处理（可扩展为打开地图）
+const handleLocationClick = () => {
+  const { latitude, longitude } = locationInfo.value
+  if (latitude && longitude) {
+    // 尝试打开系统地图应用
+    const mapUrl = `https://maps.google.com/?q=${latitude},${longitude}`
+    window.open(mapUrl, '_blank')
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -234,6 +268,25 @@ const reactions = ref([])
   background: #fff; border: 1px solid #e3e5e8; border-radius: 8px; max-width: 280px;
   .c-avatar { width: 40px; height: 40px; border-radius: 6px; }
   .c-info { flex: 1; min-width: 0; .c-name { font-size: 14px; font-weight: 600; color: #1d1d1f; } .c-desc { font-size: 12px; color: #86868b; } }
+}
+
+/* 位置消息卡片 */
+.location-card {
+  display: flex; flex-direction: column; gap: 0; margin-top: 6px;
+  background: #fff; border: 1px solid #e3e5e8; border-radius: 8px; max-width: 280px; overflow: hidden;
+  cursor: pointer;
+  transition: 0.2s;
+  &:hover { border-color: #bac2cd; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  .location-map {
+    width: 100%; height: 120px; background: #f0f4f8;
+    .map-img { width: 100%; height: 100%; object-fit: cover; }
+    .map-placeholder { width: 100%; height: 100%; @include flex-center; font-size: 32px; color: #86868b; }
+  }
+  .location-info {
+    padding: 10px 12px;
+    .l-title { font-size: 14px; font-weight: 600; color: #1d1d1f; }
+    .l-address { font-size: 12px; color: #86868b; margin-top: 2px; @include text-ellipsis; }
+  }
 }
 
 /* 3. 悬浮操作栏 (Slack/飞书绝对定位右上角) */

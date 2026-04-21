@@ -15,10 +15,12 @@
       <!-- 消息列表区 -->
       <div class="message-area-scroller custom-scrollbar" ref="messageListRef">
         <ChatMessageList
+          ref="chatMessageListRef"
           :messages="messages"
           :is-selection-mode="isSelectionMode"
           :selected-messages="selectedMessages"
           @select-message="handleMessageClick"
+          @load-more="handleLoadMore"
         />
       </div>
 
@@ -33,7 +35,14 @@
         v-if="isSelectionMode"
         :selected-count="selectedMessages.size"
         @cancel="isSelectionMode = false"
+        @delete="handleBatchDelete"
+        @forward="handleOpenForwardDialog"
+        @favorite="handleBatchFavorite"
+        @select-all="handleSelectAll"
       />
+
+      <!-- 转发对话框 -->
+      <ForwardDialog ref="forwardDialogRef" />
     </div>
 
     <!-- 2. 侧边详情区 (去虚构：Push 布局而非覆盖) -->
@@ -48,24 +57,129 @@
 <script setup lang="js">
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
 import ChatMessageList from './ChatWindow/ChatMessageList.vue'
 import ChatInputArea from './ChatInputArea.vue'
 import SelectionActionBar from './ChatWindow/SelectionActionBar.vue'
 import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue'
+import ForwardDialog from '@/components/ForwardDialog/index.vue'
 
 const store = useStore()
 const isDetailOpen = ref(false)
 const isSelectionMode = ref(false)
 const selectedMessages = ref(new Set())
 const currentDraft = ref('')
+const messageListRef = ref(null)
+const chatMessageListRef = ref(null)
+const isLoadingHistory = ref(false)
+const forwardDialogRef = ref(null)
 
 const currentSession = computed(() => store.state.im.session.currentSession)
 const messages = computed(() => store.state.im.message.messages)
 
-// 模拟发送
+// 发送消息
 const processSendMessage = (payload) => {
   store.dispatch('im/message/sendMessage', { ...payload, sessionId: currentSession.value.id })
+}
+
+// 加载更多历史消息
+const handleLoadMore = async () => {
+  if (isLoadingHistory.value || !currentSession.value) return
+
+  const messages_data = messages.value
+  if (!messages_data || messages_data.length === 0) return
+
+  isLoadingHistory.value = true
+
+  try {
+    // 获取最早一条消息的 ID 作为分页起点
+    const oldestMessage = messages_data[0]
+    const lastMessageId = oldestMessage?.messageId || oldestMessage?.id
+
+    await store.dispatch('im/message/loadMessages', {
+      sessionId: currentSession.value.id,
+      lastMessageId: lastMessageId,
+      pageSize: 20,
+      isLoadMore: true
+    })
+  } catch (error) {
+    console.error('加载历史消息失败:', error)
+  } finally {
+    isLoadingHistory.value = false
+  }
+}
+
+// 处理消息点击（多选模式）
+const handleMessageClick = (message) => {
+  if (isSelectionMode.value) {
+    // 多选模式：切换选中状态
+    if (selectedMessages.value.has(message.messageId)) {
+      selectedMessages.value.delete(message.messageId)
+    } else {
+      selectedMessages.value.add(message.messageId)
+    }
+  }
+}
+
+// 切换多选模式
+const toggleSelectionMode = () => {
+  isSelectionMode.value = !isSelectionMode.value
+  if (!isSelectionMode.value) {
+    selectedMessages.value.clear()
+  }
+}
+
+// 批量删除消息
+const handleBatchDelete = async () => {
+  const messageIds = Array.from(selectedMessages.value)
+  if (messageIds.length === 0) return
+
+  try {
+    await store.dispatch('im/message/batchDeleteMessagesAction', messageIds)
+    ElMessage.success(`已删除 ${messageIds.length} 条消息`)
+    isSelectionMode.value = false
+    selectedMessages.value.clear()
+  } catch (error) {
+    console.error('批量删除失败:', error)
+    ElMessage.error('删除失败，请重试')
+  }
+}
+
+// 批量收藏消息
+const handleBatchFavorite = async () => {
+  const messageIds = Array.from(selectedMessages.value)
+  if (messageIds.length === 0) return
+
+  try {
+    for (const messageId of messageIds) {
+      await store.dispatch('im/message/addFavorite', {
+        messageId,
+        conversationId: currentSession.value.id
+      })
+    }
+    ElMessage.success(`已收藏 ${messageIds.length} 条消息`)
+    isSelectionMode.value = false
+    selectedMessages.value.clear()
+  } catch (error) {
+    console.error('批量收藏失败:', error)
+    ElMessage.error('收藏失败，请重试')
+  }
+}
+
+// 全选消息
+const handleSelectAll = () => {
+  messages.value.forEach(msg => {
+    selectedMessages.value.add(msg.messageId)
+  })
+}
+
+// 打开转发对话框
+const handleOpenForwardDialog = () => {
+  const selectedMsgs = messages.value.filter(msg => selectedMessages.value.has(msg.messageId))
+  if (forwardDialogRef.value) {
+    forwardDialogRef.value.open(selectedMsgs)
+  }
 }
 </script>
 

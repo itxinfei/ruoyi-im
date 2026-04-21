@@ -1,10 +1,10 @@
 version: 3
-updated_at: 2026-04-18
+updated_at: 2026-04-21
 description: IM项目任务池 - 2026 深度对齐版
 status_summary:
   total_tasks: 191
-  done: 184
-  todo: 7  # 真实待办项（基于 12-需求点清单 与 04-待确认问题）
+  done: 187
+  todo: 4  # 真实待办项（基于 12-需求点清单 与 04-待确认问题）
 
 tasks:
   # ==================== P1 核心验证与增量开发 ====================
@@ -485,23 +485,29 @@ tasks:
     task_type: backend_fix
     title: WebSocket 连接管理与内存溢出保护
     priority: P0
-    status: todo
+    status: done
+    done_at: 2026-04-21
     goal: 实现连接覆盖保护（新连关旧），防止弱网重连风暴导致的 OOM
     scope_in: [ruoyi-im-api/src/main/java/com/ruoyi/im/websocket/ImWebSocketHandler.java]
+    note: 后端 ImWebSocketEndpoint.java 和 ImWebSocketHandler.java 均已实现连接覆盖保护
 
   - task_id: IM-VAL-004
     task_type: fullstack_feature
     title: 应用层消息 ACK 机制实现
     priority: P0
-    status: todo
-    goal: 实现客户端消息送达确认 (ACK)，彻底解决“虚假连接”导致的消息丢失（Doc-34 对齐）
-    scope_in: [ruoyi-im-api/src/main/java/com/ruoyi/im/websocket/ImWebSocketHandler.java, ruoyi-im-web/src/composables/useImWebSocket.js]
+    status: done
+    done_at: 2026-04-21
+    goal: 实现客户端消息送达确认 (ACK)，彻底解决”虚假连接”导致的消息丢失（Doc-34 对齐）
+    scope_in: [ruoyi-im-api/src/main/java/com/ruoyi/im/websocket/ImWebSocketHandler.java, ruoyi-im-web/src/utils/websocket/imWebSocket.js]
+    note: 后端 handleDeliveryAck 已实现，前端 imWebSocket.js 添加 sendDeliveryAck 方法
 
   - task_id: IM-FE-016
     task_type: performance_fix
-    title: 虚拟列表“高度塌陷”与“滚动锚点”修复
+    title: 虚拟列表”高度塌陷”与”滚动锚点”修复
     priority: P1
-    status: todo
+    status: done
+    done_at: 2026-04-21
     goal: 解决快速滚动时由于图片未加载导致的列表跳动，并实现历史消息加载时的无感锚定
-    scope_in: [ruoyi-im-web/src/components/im/ChatWindow/ChatMessageList.vue]
+    scope_in: [ruoyi-im-web/src/components/im/ChatWindow/ChatMessageList.vue, ruoyi-im-web/src/components/im/ChatWindow.vue]
+    note: 移除虚拟滚动（固定 itemHeight 问题），改用普通列表+滚动锚定机制
 

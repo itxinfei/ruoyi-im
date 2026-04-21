@@ -23,7 +23,8 @@ export const MESSAGE_TYPE = {
   TYPING: 'typing',       // 正在输入
   ONLINE: 'online',       // 用户上线
   OFFLINE: 'offline',     // 用户下线
-  CALL: 'call'            // 音视频通话
+  CALL: 'call',           // 音视频通话
+  DELIVERED: 'delivered'  // 消息送达确认
 }
 
 class ImWebSocket {
@@ -110,6 +111,11 @@ class ImWebSocket {
         case MESSAGE_TYPE.MESSAGE:
           // 聊天消息
           this.emit('message', payload)
+          // 发送消息送达确认 ACK (Doc-34 §5.2)
+          // payload 中包含 id (服务端消息ID)
+          if (payload && payload.id) {
+            this.sendDeliveryAck(payload.id)
+          }
           break
         case MESSAGE_TYPE.READ:
           // 已读回执
@@ -175,6 +181,21 @@ class ImWebSocket {
         token: this.token
       }
     })
+  }
+
+  /**
+   * 发送消息送达确认 ACK
+   * 用于告知服务器客户端已收到消息
+   * @param {number} messageId - 服务端消息ID
+   */
+  sendDeliveryAck(messageId) {
+    this.send({
+      type: MESSAGE_TYPE.DELIVERED,
+      data: {
+        messageId: messageId
+      }
+    })
+    debug('ImWebSocket', '发送送达确认 ACK, messageId:', messageId)
   }
 
   /**
