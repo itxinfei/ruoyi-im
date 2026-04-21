@@ -148,9 +148,32 @@ const reactions = ref([])
 const handleLocationClick = () => {
   const { latitude, longitude } = locationInfo.value
   if (latitude && longitude) {
-    // 尝试打开系统地图应用
     const mapUrl = `https://maps.google.com/?q=${latitude},${longitude}`
     window.open(mapUrl, '_blank')
+  }
+}
+
+// 名片点击处理
+const handleCardClick = () => {
+  const { userId } = cardInfo.value
+  if (userId) {
+    // 打开用户资料对话框
+  }
+}
+
+// 文件消息点击处理
+const handleFileClick = () => {
+  const fileUrl = mediaUrl.value
+  if (fileUrl) {
+    window.open(fileUrl, '_blank')
+  }
+}
+
+// 视频消息点击处理
+const handleVideoClick = () => {
+  const videoUrl = mediaUrl.value
+  if (videoUrl) {
+    window.open(videoUrl, '_blank')
   }
 }
 </script>
