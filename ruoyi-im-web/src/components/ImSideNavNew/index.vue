@@ -62,12 +62,12 @@
 
 <script setup lang="js">
 import { markRaw } from 'vue'
-import { 
-  ChatDotRound, User, Bell, Menu, Tickets, Calendar, 
-  FolderOpened, Phone, Search, MoreFilled, Setting, 
-  InfoFilled, Promotion, ChatLineRound, 
-  UserFilled, BellFilled, Grid, List, CalendarChecked, 
-  FolderChecked, PhoneFilled, Connection 
+import {
+  ChatDotRound, User, Bell, Menu, Tickets, Calendar,
+  FolderOpened, Phone, Search, MoreFilled, Setting,
+  InfoFilled, Promotion, ChatLineRound,
+  UserFilled, BellFilled, Grid, List,
+  PhoneFilled, Connection
 } from '@element-plus/icons-vue'
 
 defineProps({ activeModule: String })
