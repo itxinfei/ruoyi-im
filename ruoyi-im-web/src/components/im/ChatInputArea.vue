@@ -24,19 +24,19 @@
       <!-- 2. 底部工具栏与发送区 -->
       <div class="toolbar-zone">
         <div class="tools-left">
-          <button class="tool-btn" title="添加附件"><el-icon><Plus /></el-icon></button>
+          <button class="tool-btn" title="添加附件" @click="handleAttach"><el-icon><Plus /></el-icon></button>
           <div class="sep"></div>
-          <button class="tool-btn" title="表情"><el-icon><CircleCheck /></el-icon></button>
-          <button class="tool-btn" title="提及"><el-icon><User /></el-icon></button>
-          <button class="tool-btn" title="文字加粗"><b style="font-family: serif;">B</b></button>
-          <button class="tool-btn" title="斜体"><i style="font-family: serif;">I</i></button>
-          <button class="tool-btn" title="链接"><el-icon><Link /></el-icon></button>
-          <button class="tool-btn" title="代码块"><el-icon><Document /></el-icon></button>
+          <button class="tool-btn" title="表情" @click="handleEmoji"><el-icon><CircleCheck /></el-icon></button>
+          <button class="tool-btn" title="提及" @click="handleMention"><el-icon><User /></el-icon></button>
+          <button class="tool-btn" title="文字加粗" @click="handleBold"><b style="font-family: serif;">B</b></button>
+          <button class="tool-btn" title="斜体" @click="handleItalic"><i style="font-family: serif;">I</i></button>
+          <button class="tool-btn" title="链接" @click="handleLink"><el-icon><Link /></el-icon></button>
+          <button class="tool-btn" title="代码块" @click="handleCode"><el-icon><Document /></el-icon></button>
         </div>
 
         <div class="tools-right">
-          <button 
-            class="slack-send-btn" 
+          <button
+            class="slack-send-btn"
             :class="{ 'can-send': canSend }"
             @click="executeSendMessage"
           >
@@ -64,8 +64,25 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Plus, CircleCheck, User, Link, Document, Promotion, UploadFilled } from '@element-plus/icons-vue'
+
+const emit = defineEmits([
+  'send',
+  'update:modelValue',
+  'attach',
+  'attach-click',
+  'emoji-click',
+  'mention-click',
+  'link-click'
+])
+
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  }
+})
 
 const editorRef = ref(null)
 const isFocused = ref(false)
@@ -74,14 +91,29 @@ const isDragover = ref(false)
 
 const canSend = computed(() => hasContent.value)
 
+// 监听外部 modelValue 变化，同步到编辑器
+watch(() => props.modelValue, (newVal) => {
+  if (editorRef.value && editorRef.value.innerText !== newVal) {
+    editorRef.value.innerText = newVal || ''
+    hasContent.value = !!newVal?.trim()
+  }
+})
+
 const handleInput = () => {
-  hasContent.value = !!editorRef.value?.innerText.trim()
+  const text = editorRef.value?.innerText.trim() || ''
+  hasContent.value = !!text
+  emit('update:modelValue', text)
 }
 
 const executeSendMessage = () => {
   if (!canSend.value) return
-  editorRef.value.innerHTML = ''
-  hasContent.value = false
+  const content = editorRef.value?.innerText.trim()
+  if (content) {
+    emit('send', content)
+    editorRef.value.innerHTML = ''
+    hasContent.value = false
+    emit('update:modelValue', '')
+  }
 }
 
 const handleDragOver = () => { isDragover.value = true }
@@ -90,7 +122,33 @@ const handleDrop = (e) => {
   isDragover.value = false
   const files = e.dataTransfer?.files
   if (files?.length) {
-    // 文件上传逻辑将通过 emit 通知父组件
+    emit('attach', files)
+  }
+}
+
+// 工具栏功能
+const handleAttach = () => { emit('attach-click') }
+const handleEmoji = () => { emit('emoji-click') }
+const handleMention = () => { emit('mention-click') }
+const handleBold = () => {
+  document.execCommand('bold', false, null)
+  editorRef.value?.focus()
+}
+const handleItalic = () => {
+  document.execCommand('italic', false, null)
+  editorRef.value?.focus()
+}
+const handleLink = () => { emit('link-click') }
+const handleCode = () => {
+  const selection = window.getSelection()
+  if (selection?.rangeCount) {
+    const text = selection.toString()
+    if (text) {
+      document.execCommand('insertHTML', false, `<code>${text}</code>`)
+    } else {
+      document.execCommand('insertHTML', false, '<code>代码</code>')
+    }
+    editorRef.value?.focus()
   }
 }
 

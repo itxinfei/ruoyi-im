@@ -28,6 +28,10 @@
       <ChatInputArea
         v-model="currentDraft"
         @send="processSendMessage"
+        @attach-click="handleOpenFilePicker"
+        @emoji-click="handleOpenEmoji"
+        @mention-click="handleOpenMention"
+        @link-click="handleInsertLink"
       />
 
       <!-- 多选操作条 (悬浮覆盖) -->
@@ -79,8 +83,51 @@ const currentSession = computed(() => store.state.im.session.currentSession)
 const messages = computed(() => store.state.im.message.messages)
 
 // 发送消息
-const processSendMessage = (payload) => {
-  store.dispatch('im/message/sendMessage', { ...payload, sessionId: currentSession.value.id })
+const processSendMessage = (content) => {
+  if (!currentSession.value?.id) return
+  store.dispatch('im/message/sendMessage', {
+    content,
+    sessionId: currentSession.value.id
+  })
+}
+
+// 工具栏功能处理
+const handleOpenFilePicker = () => {
+  // 触发文件选择
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.multiple = true
+  input.onchange = (e) => {
+    const files = e.target.files
+    if (files?.length) {
+      handleUploadFiles(files)
+    }
+  }
+  input.click()
+}
+
+const handleUploadFiles = (files) => {
+  Array.from(files).forEach(file => {
+    store.dispatch('im/message/sendFile', {
+      file,
+      sessionId: currentSession.value.id
+    })
+  })
+}
+
+const handleOpenEmoji = () => {
+  // TODO: 打开表情选择器
+  ElMessage.info('表情选择器开发中')
+}
+
+const handleOpenMention = () => {
+  // TODO: 打开 @提及 选择器
+  ElMessage.info('提及功能开发中')
+}
+
+const handleInsertLink = () => {
+  // TODO: 插入链接
+  ElMessage.info('链接功能开发中')
 }
 
 // 加载更多历史消息
