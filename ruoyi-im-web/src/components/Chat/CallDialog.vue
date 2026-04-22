@@ -212,59 +212,54 @@ defineExpose({ open, end, handleWebRTCSignal: (a, d) => { if (a === 'answer') { 
 
 <style scoped lang="scss">
 .call-dialog-immersive {
-  background: #1a1a1c !important;
-  :deep(.el-dialog) { background: #1a1a1c; border-radius: 20px; overflow: hidden; }
+  background: var(--dt-bg-card) !important;
+  :deep(.el-dialog) { background: var(--dt-bg-card); border-radius: var(--dt-radius-xl); overflow: hidden; }
   :deep(.el-dialog__header) { display: none; }
 }
 
 .call-stage {
   position: relative; width: 100%; height: 540px; display: flex; flex-direction: column; align-items: center; justify-content: space-between;
-  padding: 60px 0; color: #fff;
+  padding: 60px 0; color: var(--dt-text-white);
 }
 
 .avatar-ripple-container {
   position: relative; width: 100px; height: 100px; margin: 0 auto 30px;
   .ripple {
     position: absolute; inset: 0; border: 2px solid var(--dt-brand-color); border-radius: 50%;
-    animation: ripple 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+    opacity: 0.5;
   }
-  .delay-1 { animation-delay: 0.5s; }
-}
-
-@keyframes ripple {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(2.5); opacity: 0; }
+  .delay-1 { opacity: 0.3; }
 }
 
 .video-canvas {
-  position: absolute; inset: 0; background: #000; z-index: 1;
+  position: absolute; inset: 0; background: var(--dt-text-primary); z-index: 1;
   .remote-track, .video-element { width: 100%; height: 100%; object-fit: cover; }
   .local-track {
     position: absolute; top: 20px; right: 20px; width: 120px; height: 160px;
-    border-radius: 12px; overflow: hidden; border: 2px solid rgba(255,255,255,0.3); z-index: 2;
+    border-radius: 12px; overflow: hidden; border: 2px solid var(--dt-border-light); z-index: 2;
   }
 }
 
 .calling-info { position: relative; z-index: 2; text-align: center; }
 .peer-name { font-size: 24px; margin-bottom: 8px; }
 .call-status-tag { color: rgba(255,255,255,0.6); font-size: 14px; }
-.call-timer { font-size: 20px; color: var(--dt-brand-color); margin-top: 12px; font-family: monospace; }
+.call-timer { font-size: 18px; color: var(--dt-brand-color); margin-top: 12px; font-family: monospace; }
 
 .call-console {
   position: relative; z-index: 2; width: 100%;
-  .console-group { display: flex; justify-content: center; gap: 40px; }
+  .console-group { display: flex; justify-content: center; gap: 32px; }
 }
 
 .console-btn {
-  background: none; border: none; cursor: pointer; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 10px;
+  background: none; border: none; cursor: pointer; color: var(--dt-text-white); display: flex; flex-direction: column; align-items: center; gap: 10px;
   .icon-circle {
     width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-size: 28px; background: rgba(255,255,255,0.15); transition: all 0.3s;
+    font-size: 28px; background: rgba(255,255,255,0.15); transition: background var(--dt-transition-fast);
     &:hover { background: rgba(255,255,255,0.25); }
   }
   &.accept .icon-circle { background: var(--dt-success-color); }
-  &.hangup .icon-circle { background: var(--dt-error-color); .el-icon { transform: rotate(135deg); } }
-  &.active .icon-circle { background: #fff; color: #1d1d1f; }
+  &.hangup .icon-circle { background: var(--dt-error-color); }
+  &.active .icon-circle { background: var(--dt-text-white); color: var(--dt-text-primary); }
   span { font-size: 12px; opacity: 0.8; }
 }
 </style>

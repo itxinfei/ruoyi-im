@@ -79,21 +79,21 @@ onUnmounted(() => window.removeEventListener('keydown', handleGlobalKeydown))
 
 <style scoped lang="scss">
 .dt-main-layout {
-  display: flex; width: 100vw; height: 100vh; overflow: hidden; background: #fff;
+  display: flex; width: 100vw; height: 100vh; overflow: hidden; background: var(--dt-bg-body);
 }
 
 .dt-main-view {
   flex: 1; min-width: 0; height: 100%; position: relative;
 }
 
-/* 视图切换动效：模仿钉钉的轻微位移 + 渐变 */
+/* 视图切换动效：opacity-only */
 .view-slide-enter-active, .view-slide-leave-active {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: opacity 0.2s ease;
 }
 .view-slide-enter-from {
-  opacity: 0; transform: translateX(8px);
+  opacity: 0;
 }
 .view-slide-leave-to {
-  opacity: 0; transform: translateX(-8px);
+  opacity: 0;
 }
 </style>

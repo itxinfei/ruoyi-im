@@ -103,54 +103,54 @@ const handleApprovalAction = () => loadData()
 </script>
 
 <style scoped lang="scss">
-.approval-v2 { display: flex; flex-direction: column; height: 100%; background: #fff; }
+.approval-v2 { display: flex; flex-direction: column; height: 100%; background: var(--dt-bg-card); }
 
 .view-header {
   height: 64px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
   .header-left { display: flex; align-items: center; gap: 40px; }
-  .view-title { font-size: 18px; font-weight: 700; margin: 0; }
+  .view-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--dt-text-primary); }
 }
 
 .header-tab-bar {
   display: flex; gap: 32px; height: 100%;
   .header-tab-item {
     height: 64px; line-height: 64px; font-size: 14px; color: var(--dt-text-secondary);
-    cursor: pointer; position: relative; transition: 0.2s;
+    cursor: pointer; position: relative; transition: var(--dt-transition-fast);
     &:hover { color: var(--dt-brand-color); }
     &.active {
       color: var(--dt-brand-color); font-weight: 600;
-      &::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--dt-brand-color); border-radius: 3px 3px 0 0; }
+      &::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--dt-brand-color); border-radius: var(--dt-radius-sm) var(--dt-radius-sm) 0 0; }
     }
-    .tab-badge { margin-left: 4px; font-size: 11px; background: var(--dt-error-color); color: #fff; padding: 1px 6px; border-radius: 10px; vertical-align: middle; }
+    .tab-badge { margin-left: 4px; font-size: 11px; background: var(--dt-error-color); color: var(--dt-text-white); padding: 1px 6px; border-radius: 10px; vertical-align: middle; }
   }
 }
 
-.approval-body { flex: 1; overflow-y: auto; padding: 24px; background: #fdfdfe; }
+.approval-body { flex: 1; overflow-y: auto; padding: 24px; background: var(--dt-bg-body); }
 
 .approval-list {
   max-width: 900px; margin: 0 auto;
 }
 
 .approval-card {
-  background: #fff; border: 1px solid var(--dt-border-light); border-radius: 12px;
-  padding: 16px 20px; margin-bottom: 16px; cursor: pointer; transition: 0.2s;
-  &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); .app-icon { transform: scale(1.05); } }
-  
+  background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg);
+  padding: 16px 20px; margin-bottom: 16px; cursor: pointer; transition: var(--dt-transition-fast);
+  &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
+
   .card-main { display: flex; align-items: center; gap: 16px; }
   .app-icon {
-    width: 44px; height: 44px; border-radius: 10px; color: #fff; @include flex-center;
-    font-size: 18px; font-weight: 700; transition: 0.2s;
+    width: 44px; height: 44px; border-radius: 10px; color: var(--dt-text-white); @include flex-center;
+    font-size: 18px; font-weight: 700; transition: var(--dt-transition-fast);
   }
-  .app-info { flex: 1; .app-title { font-size: 15px; font-weight: 600; margin: 0; } .app-meta { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; } }
-  
+  .app-info { flex: 1; .app-title { font-size: 15px; font-weight: 600; margin: 0; color: var(--dt-text-primary); } .app-meta { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; } }
+
   .app-status {
     padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
-    &.pending { background: #fff7e6; color: #fa8c16; }
-    &.approved { background: #f6ffed; color: #52c41a; }
-    &.rejected { background: #fff1f0; color: #f5222d; }
+    &.pending { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+    &.approved { background: var(--dt-success-bg); color: var(--dt-success-color); }
+    &.rejected { background: var(--dt-error-bg); color: var(--dt-error-color); }
   }
-  
+
   .card-footer { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--dt-border-light); font-size: 12px; color: var(--dt-text-secondary); }
 }
 

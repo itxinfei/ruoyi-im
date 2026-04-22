@@ -108,16 +108,14 @@ defineExpose({ addTask, tasks })
 <style scoped lang="scss">
 .transfer-manager {
   position: fixed; right: 24px; bottom: 24px; width: 360px;
-  background: #ffffff; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  border: 1px solid var(--dt-border-light); z-index: 2000; overflow: hidden;
+  background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light); z-index: 2000; overflow: hidden;
 }
 
 .manager-header {
   height: 48px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between;
   background: var(--dt-brand-bg); cursor: pointer;
   .header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--dt-brand-color); font-weight: 600; }
-  .header-right { display: flex; align-items: center; gap: 12px; color: var(--dt-text-tertiary); 
-    .is-expanded { transform: rotate(180deg); }
+  .header-right { display: flex; align-items: center; gap: 12px; color: var(--dt-text-tertiary);
     .close-icon:hover { color: var(--dt-error-color); }
   }
 }
@@ -133,10 +131,10 @@ defineExpose({ addTask, tasks })
 }
 
 .file-thumb {
-  width: 36px; height: 36px; border-radius: 6px; @include flex-center; font-size: 18px;
-  &.icon-doc { background: #eef5fe; color: #2196f3; }
-  &.icon-pdf { background: #fef0f0; color: #f56c6c; }
-  &.icon-sheet { background: #f0f9eb; color: #67c23a; }
+  width: 36px; height: 36px; border-radius: var(--dt-radius-md); @include flex-center; font-size: 18px;
+  &.icon-doc { background: var(--dt-bg-session-hover); color: var(--dt-brand-color); }
+  &.icon-pdf { background: var(--dt-bg-session-hover); color: var(--dt-error-color); }
+  &.icon-sheet { background: var(--dt-bg-session-hover); color: var(--dt-success-color); }
 }
 
 .transfer-info {
@@ -149,13 +147,13 @@ defineExpose({ addTask, tasks })
 }
 
 .transfer-ops {
-  display: flex; gap: 8px; color: var(--dt-text-tertiary); opacity: 0; transition: 0.2s;
+  display: flex; gap: 8px; color: var(--dt-text-tertiary); opacity: 0; transition: var(--dt-transition-fast);
   .el-icon { cursor: pointer; &:hover { color: var(--dt-brand-color); } }
   .del-icon:hover { color: var(--dt-error-color); }
 }
 
 .empty-list { text-align: center; padding: 40px 0; color: var(--dt-text-quaternary); font-size: 13px; }
 
-.slide-up-enter-active, .slide-up-leave-active { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-.slide-up-enter-from, .slide-up-leave-to { transform: translateY(100px); opacity: 0; }
+.slide-up-enter-active, .slide-up-leave-active { transition: opacity var(--dt-transition-base); }
+.slide-up-enter-from, .slide-up-leave-to { opacity: 0; }
 </style>

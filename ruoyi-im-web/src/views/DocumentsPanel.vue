@@ -767,12 +767,12 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .documents-panel {
-  display: flex; height: 100%; background: #fff;
+  display: flex; height: 100%; background: var(--dt-bg-card);
 }
 
 // 1. 侧边栏
 .docs-sidebar {
-  width: 240px; background: #f8fbff; border-right: 1px solid var(--dt-border-light);
+  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
 }
 
@@ -785,11 +785,11 @@ onMounted(() => {
   flex: 1; padding: 12px 8px;
   .nav-item {
     height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
-    border-radius: 8px; cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
-    &:hover { background: #eff4fc; }
+    border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
+    &:hover { background: var(--dt-bg-hover); }
     &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
   }
-  .nav-divider { height: 1px; background: rgba(0,0,0,0.04); margin: 12px; }
+  .nav-divider { height: 1px; background: var(--dt-border-light); margin: 12px; }
   .nav-section-label { font-size: 11px; color: var(--dt-text-quaternary); padding: 8px 12px; }
 }
 
@@ -812,7 +812,7 @@ onMounted(() => {
 }
 
 .new-btn {
-  height: 32px; padding: 0 16px; background: var(--dt-brand-color); color: #fff;
+  height: 32px; padding: 0 16px; background: var(--dt-brand-color); color: var(--dt-text-white);
   border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
   &:hover { background: var(--dt-brand-hover); }
@@ -832,7 +832,7 @@ onMounted(() => {
   }
   .list-row {
     height: 52px; display: flex; align-items: center; padding: 0 12px; border-radius: 8px;
-    cursor: pointer; transition: 0.2s;
+    cursor: pointer; transition: var(--dt-transition-fast);
     &:hover { background: var(--dt-bg-hover); .more-btn { opacity: 1; } }
     div { flex: 1; font-size: 13px; color: var(--dt-text-secondary); }
     .col-name { flex: 2; display: flex; align-items: center; gap: 12px;
@@ -847,13 +847,13 @@ onMounted(() => {
 .grid-view {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; padding: 12px 0;
   .grid-item {
-    padding: 12px; border-radius: 12px; border: 1px solid transparent; transition: 0.2s;
+    padding: 12px; border-radius: var(--dt-radius-lg); border: 1px solid transparent; transition: var(--dt-transition-fast);
     text-align: center; cursor: pointer;
-    &:hover { background: #fdfdfe; border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
+    &:hover { background: var(--dt-bg-hover); border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
     .grid-thumb {
-      height: 100px; background: #f8f9fb; border-radius: 8px; @include flex-center; margin-bottom: 10px;
+      height: 100px; background: var(--dt-bg-input); border-radius: var(--dt-radius-lg); @include flex-center; margin-bottom: 10px;
       font-size: 40px; overflow: hidden;
-      &.icon-doc { color: #2196f3; } &.icon-pdf { color: #f56c6c; } &.icon-sheet { color: #67c23a; }
+      &.icon-doc { color: var(--dt-brand-color); } &.icon-pdf { color: var(--dt-error-color); } &.icon-sheet { color: var(--dt-success-color); }
     }
     .grid-name { font-size: 13px; color: var(--dt-text-primary); @include text-ellipsis; display: block; }
     .grid-sub { font-size: 11px; color: var(--dt-text-quaternary); }
@@ -862,9 +862,9 @@ onMounted(() => {
 
 // 文件图标基础
 .file-icon-wrapper {
-  width: 32px; height: 32px; border-radius: 6px; @include flex-center; font-size: 16px;
-  &.icon-folder { background: #fff8e1; color: #ff9800; }
-  &.icon-doc { background: #eef5fe; color: #2196f3; }
+  width: 32px; height: 32px; border-radius: var(--dt-radius-md); @include flex-center; font-size: 16px;
+  &.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+  &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
   &.icon-image { background: #f3e5f5; color: #9c27b0; }
 }
 

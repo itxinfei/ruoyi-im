@@ -186,7 +186,7 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .search-panel-v2 {
-  height: 100%; display: flex; flex-direction: column; background: #fff;
+  height: 100%; display: flex; flex-direction: column; background: var(--dt-bg-card);
 }
 
 .search-top-bar {
@@ -195,8 +195,8 @@ onMounted(() => {
 
 .search-input-box {
   flex: 1; height: 36px; background: var(--dt-bg-hover); border-radius: 18px; display: flex; align-items: center; padding: 0 16px;
-  transition: all 0.2s;
-  &.is-active { background: #fff; box-shadow: 0 0 0 2px var(--dt-brand-lighter); border: 1px solid var(--dt-brand-color); }
+  transition: var(--dt-transition-fast);
+  &.is-active { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); border: 1px solid var(--dt-brand-color); }
   
   .prefix-icon { color: var(--dt-text-tertiary); margin-right: 10px; }
   input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; }
@@ -206,10 +206,10 @@ onMounted(() => {
 .search-main { flex: 1; display: flex; overflow: hidden; }
 
 .search-nav {
-  width: 160px; background: #fdfdfe; border-right: 1px solid var(--dt-border-light); padding: 12px 8px;
+  width: 160px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light); padding: 12px 8px;
   .nav-item {
-    height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-radius: 8px;
-    cursor: pointer; color: var(--dt-text-secondary); font-size: 14px; transition: all 0.2s;
+    height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-radius: var(--dt-radius-lg);
+    cursor: pointer; color: var(--dt-text-secondary); font-size: 14px; transition: var(--dt-transition-fast);
     &:hover { background: var(--dt-bg-hover); }
     &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
     .el-icon { font-size: 16px; }
@@ -222,7 +222,7 @@ onMounted(() => {
 .history-tags {
   display: flex; flex-wrap: wrap; gap: 8px;
   .h-tag {
-    padding: 4px 12px; background: var(--dt-bg-hover); border-radius: 4px; font-size: 13px;
+    padding: 4px 12px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); font-size: 13px;
     cursor: pointer; display: flex; align-items: center; gap: 6px;
     &:hover { background: var(--dt-border-light); }
   }
@@ -234,13 +234,13 @@ onMounted(() => {
 }
 
 .result-item {
-  display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; cursor: pointer;
+  display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--dt-radius-lg); cursor: pointer;
   &:hover { background: var(--dt-bg-hover); }
   .item-info { flex: 1; min-width: 0; }
   .item-title { font-size: 14px; color: var(--dt-text-primary); font-weight: 500; }
   .item-sub { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; @include text-ellipsis; }
   .item-time { font-size: 11px; color: var(--dt-text-quaternary); }
-  .file-thumb { width: 32px; height: 32px; background: var(--dt-bg-hover); border-radius: 4px; @include flex-center; color: var(--dt-brand-color); }
+  .file-thumb { width: 32px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); @include flex-center; color: var(--dt-brand-color); }
 }
 
 .no-results {

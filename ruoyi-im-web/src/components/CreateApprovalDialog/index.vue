@@ -327,13 +327,13 @@ const resetForm = () => {
 .template-name {
   font-size: 15px;
   font-weight: 500;
-  color: var(--dt-text-main);
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .template-desc {
   font-size: 12px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
 }
 
 .dialog-footer {

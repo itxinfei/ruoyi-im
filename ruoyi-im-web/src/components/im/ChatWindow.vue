@@ -181,6 +181,16 @@ const handleOpenForwardDialog = () => {
     forwardDialogRef.value.open(selectedMsgs)
   }
 }
+
+// 发起语音通话
+const handleVoiceCall = () => {
+  ElMessage.info('语音通话功能开发中')
+}
+
+// 发起视频通话
+const handleVideoCall = () => {
+  ElMessage.info('视频通话功能开发中')
+}
 </script>
 
 <style scoped lang="scss">
@@ -189,7 +199,7 @@ const handleOpenForwardDialog = () => {
   display: flex;
   height: 100%;
   overflow: hidden;
-  background-color: #ffffff; // Slack 纯白背景
+  background-color: var(--dt-bg-card);
 }
 
 .chat-container {
@@ -210,8 +220,8 @@ const handleOpenForwardDialog = () => {
 /* 右侧侧边栏 (钉钉 Push 布局) */
 .chat-right-sidebar {
   width: 320px;
-  background-color: #ffffff;
-  border-left: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: var(--dt-bg-card);
+  border-left: 1px solid var(--dt-border-light);
   height: 100%;
   flex-shrink: 0;
   z-index: 50;

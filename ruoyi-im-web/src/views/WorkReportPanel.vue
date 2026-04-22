@@ -95,7 +95,7 @@ onMounted(loadData)
 </script>
 
 <style scoped lang="scss">
-.report-v2 { display: flex; flex-direction: column; height: 100%; background: #fdfdfe; }
+.report-v2 { display: flex; flex-direction: column; height: 100%; background: var(--dt-bg-body); }
 
 .report-header {
   height: 64px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
@@ -106,15 +106,15 @@ onMounted(loadData)
 .report-stats {
   display: flex; gap: 16px; padding: 20px 24px;
   .stat-box {
-    flex: 1; height: 80px; background: #fff; border: 1px solid var(--dt-border-light);
-    border-radius: 12px; display: flex; align-items: center; padding: 0 20px; gap: 16px;
-    transition: 0.2s; &:hover { box-shadow: var(--dt-shadow-1); border-color: var(--dt-brand-light); }
-    
+    flex: 1; height: 80px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light);
+    border-radius: var(--dt-radius-lg); display: flex; align-items: center; padding: 0 20px; gap: 16px;
+    transition: var(--dt-transition-fast); &:hover { box-shadow: var(--dt-shadow-1); border-color: var(--dt-brand-light); }
+
     .stat-icon {
       width: 44px; height: 44px; border-radius: 10px; @include flex-center; font-size: 20px;
-      &.blue { background: #eef5fe; color: #2196f3; }
-      &.green { background: #f0f9eb; color: #67c23a; }
-      &.orange { background: #fff7e6; color: #fa8c16; }
+      &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+      &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
+      &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
     }
     .stat-content {
       .stat-val { font-size: 20px; font-weight: 700; display: block; line-height: 1.2; }
@@ -127,22 +127,22 @@ onMounted(loadData)
 
 .report-flow-item {
   display: flex; gap: 20px; margin-bottom: 24px; cursor: pointer;
-  
+
   .flow-date {
     width: 60px; text-align: right; flex-shrink: 0;
     .day { font-size: 28px; font-weight: 800; color: var(--dt-text-primary); display: block; line-height: 1; }
     .month { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; display: block; }
   }
-  
+
   .flow-card {
-    flex: 1; background: #fff; border: 1px solid var(--dt-border-light); border-radius: 12px;
-    padding: 16px 20px; transition: 0.2s;
+    flex: 1; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg);
+    padding: 16px 20px; transition: var(--dt-transition-fast);
     &:hover { border-color: var(--dt-brand-color); box-shadow: var(--dt-shadow-2); }
-    
+
     .card-header {
       display: flex; justify-content: space-between; margin-bottom: 12px;
-      .type-tag { font-size: 11px; font-weight: 600; color: var(--dt-brand-color); background: var(--dt-brand-bg); padding: 2px 8px; border-radius: 4px; }
-      .status-tag { font-size: 11px; &.APPROVED { color: #52c41a; } }
+      .type-tag { font-size: 11px; font-weight: 600; color: var(--dt-brand-color); background: var(--dt-brand-bg); padding: 2px 8px; border-radius: var(--dt-radius-sm); }
+      .status-tag { font-size: 11px; &.APPROVED { color: var(--dt-success-color); } }
     }
     .card-body-text { font-size: 14px; color: var(--dt-text-primary); line-height: 1.6; @include text-ellipsis-multiline(2); margin-bottom: 16px; }
     .card-footer {

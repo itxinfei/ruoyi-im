@@ -12,7 +12,7 @@
           <DingtalkAvatar
             :src="email.senderAvatar"
             :name="email.sender"
-            :size="48"
+            :size="44"
             shape="circle"
           />
           <div class="sender-detail">
@@ -151,13 +151,13 @@ const formatFileSize = (bytes) => {
 
 <style scoped>
 .mail-detail {
-  padding: var(--dt-spacing-md) 0;
+  padding: var(--dt-spacing-lg) 0;
 }
 
 .mail-header {
   padding-bottom: 16px;
   border-bottom: 1px solid var(--dt-border-light);
-  margin-bottom: 20px;
+  margin-bottom: var(--dt-spacing-lg);
 }
 
 .sender-info {
@@ -172,8 +172,8 @@ const formatFileSize = (bytes) => {
 }
 
 .sender-name {
-  font-size: 16px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-lg);
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
@@ -238,7 +238,7 @@ const formatFileSize = (bytes) => {
 }
 
 .attachment-item:hover {
-  background: var(--dt-border-light);
+  background: var(--dt-bg-session-hover);
 }
 
 .file-icon {
@@ -275,6 +275,6 @@ const formatFileSize = (bytes) => {
 
 :deep(.dark) .attachment-item,
 :deep(.dark) .mail-body {
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--dt-bg-hover-dark);
 }
 </style>

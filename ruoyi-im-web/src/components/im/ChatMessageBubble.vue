@@ -46,7 +46,7 @@
 
         <!-- 文件 (Slack风格卡片) -->
         <div v-else-if="messageType === 'FILE'" class="file-card" @click="handleFileClick">
-          <div class="file-icon" :style="{ background: '#f0f4f8', color: fileTypeColor }"><el-icon><Document /></el-icon></div>
+          &.online { background: var(--dt-success-color); }
           <div class="file-info">
             <div class="f-name">{{ resolvedFileName }}</div>
             <div class="f-meta">{{ formatReadableFileSize(resolvedFileSize) }} · <span>点击下载</span></div>
@@ -139,7 +139,7 @@ const locationInfo = computed(() => {
 const resolvedFileName = computed(() => props.message.fileName || '未知文件')
 const resolvedFileSize = computed(() => props.message.fileSize || 0)
 const formatReadableFileSize = (s) => (s / 1024 / 1024).toFixed(1) + ' MB'
-const fileTypeColor = computed(() => '#277efb') // 可根据扩展名动态变化
+const fileTypeColor = computed(() => 'var(--dt-brand-color)')
 
 // 模拟 Reactions 数据
 const reactions = ref([])
@@ -183,19 +183,19 @@ const handleVideoClick = () => {
 .slack-message-row {
   display: flex;
   align-items: flex-start;
-  padding: 6px 20px;
+  padding: var(--dt-spacing-sm) var(--dt-spacing-xl);
   position: relative;
   transition: background-color 0.15s;
   width: 100%;
-  
+
   &:hover {
-    background-color: #f8f9fa; // 极淡的灰底色，标志着视线聚焦
-    
+    background-color: var(--dt-bg-session-hover);
+
     .time-hover { opacity: 1; }
   }
 
   &.is-selected {
-    background-color: #f0f5ff;
+    background-color: var(--dt-bg-session-active);
   }
 }
 
@@ -207,7 +207,7 @@ const handleVideoClick = () => {
 
 /* 1. 头像与复选区 (严格对齐轴线) */
 .slack-checkbox-zone, .slack-avatar-zone {
-  width: 44px; // 容纳 36px 头像 + 8px 间距
+  width: 44px;
   flex-shrink: 0;
   display: flex;
   justify-content: flex-start;
@@ -217,19 +217,19 @@ const handleVideoClick = () => {
 .slack-checkbox-zone {
   cursor: pointer;
   .checkbox {
-    width: 18px; height: 18px; border: 1.5px solid #dcdfe6; border-radius: 4px;
-    @include flex-center; color: transparent; transition: 0.2s;
-    &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: #fff; }
+    width: 18px; height: 18px; border: 1.5px solid var(--dt-border-color); border-radius: var(--dt-radius-sm);
+    @include flex-center; color: transparent; transition: var(--dt-transition-fast);
+    &.checked { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); }
   }
 }
 
 .avatar {
-  width: 36px; height: 36px; border-radius: 4px; object-fit: cover; cursor: pointer;
-  border: 1px solid rgba(0,0,0,0.05); // 防止纯白头像融入背景
+  width: var(--dt-avatar-size-md); height: var(--dt-avatar-size-md); border-radius: var(--dt-radius-sm); object-fit: cover; cursor: pointer;
+  border: 1px solid var(--dt-border-light);
 }
 
 .time-hover {
-  font-size: 10px; color: #aaa; opacity: 0; transition: opacity 0.2s;
+  font-size: 10px; color: var(--dt-text-tertiary); opacity: 0; transition: opacity 0.2s;
   width: 36px; text-align: center; line-height: 20px; user-select: none;
 }
 
@@ -242,15 +242,15 @@ const handleVideoClick = () => {
 }
 
 .slack-meta-row {
-  display: flex; align-items: baseline; gap: 8px; margin-bottom: 2px; line-height: 1.2;
-  .sender-name { font-size: 15px; font-weight: 700; color: #1d1d1f; }
-  .timestamp { font-size: 12px; color: #86868b; font-weight: 400; }
+  display: flex; align-items: baseline; gap: var(--dt-spacing-sm); margin-bottom: 2px; line-height: 1.2;
+  .sender-name { font-size: var(--dt-font-size-md); font-weight: 700; color: var(--dt-text-primary); }
+  .timestamp { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); font-weight: 400; }
 }
 
 .slack-body {
-  font-size: 15px;
+  font-size: var(--dt-font-size-md);
   line-height: 1.6;
-  color: #333; // 极度舒适的阅读黑
+  color: var(--dt-text-primary);
   word-break: break-word;
   white-space: pre-wrap;
 }
@@ -262,70 +262,71 @@ const handleVideoClick = () => {
 
 /* 多媒体块 */
 .media-content {
-  margin-top: 6px; border-radius: 8px; overflow: hidden; max-width: 360px;
-  border: 1px solid rgba(0,0,0,0.06); background: #f8f9fa;
+  margin-top: var(--dt-spacing-sm); border-radius: var(--dt-radius-lg); overflow: hidden; max-width: 360px;
+  border: 1px solid var(--dt-border-light); background: var(--dt-bg-input);
   .media-img { display: block; width: 100%; }
 }
 
 .media-content.video {
   position: relative; cursor: pointer;
   .media-video { width: 100%; display: block; }
-  .play-overlay { position: absolute; inset: 0; @include flex-center; background: rgba(0,0,0,0.2); transition: 0.2s;
-    .el-icon { font-size: 40px; color: #fff; opacity: 0.9; }
-    &:hover { background: rgba(0,0,0,0.3); .el-icon { transform: scale(1.1); } }
+  .play-overlay { position: absolute; inset: 0; @include flex-center; background: var(--dt-overlay-bg); transition: var(--dt-transition-fast);
+    .el-icon { font-size: 40px; color: var(--dt-text-white); opacity: 0.9; }
+    &:hover { background: rgba(0,0,0,0.55); }
   }
 }
 
 /* 极简文件卡片 */
 .file-card {
-  display: flex; align-items: center; gap: 12px; padding: 10px 14px; margin-top: 6px;
-  background: #fff; border: 1px solid #e3e5e8; border-radius: 8px; max-width: 320px; cursor: pointer;
-  transition: 0.2s; &:hover { border-color: #bac2cd; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
-  .file-icon { width: 36px; height: 36px; border-radius: 6px; @include flex-center; font-size: 20px; }
-  .file-info { flex: 1; min-width: 0; .f-name { font-size: 14px; font-weight: 600; @include text-ellipsis; color: #1d1d1f; } .f-meta { font-size: 12px; color: #86868b; margin-top: 2px; span { color: var(--dt-brand-color); } } }
+  display: flex; align-items: center; gap: var(--dt-spacing-md); padding: 10px 14px; margin-top: var(--dt-spacing-sm);
+  background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg); max-width: 320px; cursor: pointer;
+  transition: var(--dt-transition-fast);
+  &:hover { border-color: var(--dt-border-color); box-shadow: var(--dt-shadow-1); }
+  .file-icon { width: 36px; height: 36px; border-radius: var(--dt-radius-md); @include flex-center; font-size: 20px; }
+  .file-info { flex: 1; min-width: 0; .f-name { font-size: var(--dt-font-size-base); font-weight: 600; @include text-ellipsis; color: var(--dt-text-primary); } .f-meta { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); margin-top: 2px; span { color: var(--dt-brand-color); } } }
 }
 
 /* 联系人名片 */
 .contact-card {
-  display: flex; align-items: center; gap: 12px; padding: 12px; margin-top: 6px;
-  background: #fff; border: 1px solid #e3e5e8; border-radius: 8px; max-width: 280px;
-  .c-avatar { width: 40px; height: 40px; border-radius: 6px; }
-  .c-info { flex: 1; min-width: 0; .c-name { font-size: 14px; font-weight: 600; color: #1d1d1f; } .c-desc { font-size: 12px; color: #86868b; } }
+  display: flex; align-items: center; gap: var(--dt-spacing-md); padding: var(--dt-spacing-md); margin-top: var(--dt-spacing-sm);
+  background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg); max-width: 280px;
+  .c-avatar { width: 40px; height: 40px; border-radius: var(--dt-radius-md); }
+  .c-info { flex: 1; min-width: 0; .c-name { font-size: var(--dt-font-size-base); font-weight: 600; color: var(--dt-text-primary); } .c-desc { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); } }
 }
 
 /* 位置消息卡片 */
 .location-card {
-  display: flex; flex-direction: column; gap: 0; margin-top: 6px;
-  background: #fff; border: 1px solid #e3e5e8; border-radius: 8px; max-width: 280px; overflow: hidden;
+  display: flex; flex-direction: column; gap: 0; margin-top: var(--dt-spacing-sm);
+  background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg); max-width: 280px; overflow: hidden;
   cursor: pointer;
-  transition: 0.2s;
-  &:hover { border-color: #bac2cd; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+  transition: var(--dt-transition-fast);
+  &:hover { border-color: var(--dt-border-color); box-shadow: var(--dt-shadow-1); }
   .location-map {
-    width: 100%; height: 120px; background: #f0f4f8;
+    width: 100%; height: 120px; background: var(--dt-bg-placeholder);
     .map-img { width: 100%; height: 100%; object-fit: cover; }
-    .map-placeholder { width: 100%; height: 100%; @include flex-center; font-size: 32px; color: #86868b; }
+    .map-placeholder { width: 100%; height: 100%; @include flex-center; font-size: 32px; color: var(--dt-text-tertiary); }
   }
   .location-info {
-    padding: 10px 12px;
-    .l-title { font-size: 14px; font-weight: 600; color: #1d1d1f; }
-    .l-address { font-size: 12px; color: #86868b; margin-top: 2px; @include text-ellipsis; }
+    padding: 10px var(--dt-spacing-md);
+    .l-title { font-size: var(--dt-font-size-base); font-weight: 600; color: var(--dt-text-primary); }
+    .l-address { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); margin-top: 2px; @include text-ellipsis; }
   }
 }
 
 /* 3. 悬浮操作栏 (Slack/飞书绝对定位右上角) */
 .slack-actions-bar {
-  position: absolute; top: -16px; right: 20px;
+  position: absolute; top: -16px; right: var(--dt-spacing-xl);
   display: flex; align-items: center; padding: 2px;
-  background: #fff; border: 1px solid #e3e5e8; border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 10;
+  background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-md);
+  box-shadow: var(--dt-shadow-action-bar); z-index: 10;
 
   .s-btn {
     width: 28px; height: 28px; @include flex-center; border: none; background: transparent;
-    color: #5f6368; border-radius: 4px; cursor: pointer; font-size: 16px; transition: 0.1s;
-    &:hover { background: #f0f4f8; color: #1d1d1f; }
+    color: var(--dt-text-secondary); border-radius: var(--dt-radius-sm); cursor: pointer; font-size: 16px; transition: var(--dt-transition-fast);
+    &:hover { background: var(--dt-bg-hover); color: var(--dt-text-primary); }
   }
 }
 
-.fade-fast-enter-active, .fade-fast-leave-active { transition: opacity 0.1s, transform 0.1s; }
-.fade-fast-enter-from, .fade-fast-leave-to { opacity: 0; transform: translateY(4px); }
+.fade-fast-enter-active, .fade-fast-leave-active { transition: opacity 0.1s; }
+.fade-fast-enter-from, .fade-fast-leave-to { opacity: 0; }
 </style>

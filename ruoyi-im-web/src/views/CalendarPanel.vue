@@ -113,9 +113,9 @@ const viewTitle = ref('2026年4月')
 const selectedDateStr = ref('2026-04-18')
 
 const categories = ref([
-  { id: 1, label: '工作', color: '#277efb', active: true },
-  { id: 2, label: '会议', color: '#22ab5c', active: true },
-  { id: 3, label: '个人', color: '#ff9800', active: true }
+  { id: 1, label: '工作', color: 'var(--dt-brand-color)', active: true },
+  { id: 2, label: '会议', color: 'var(--dt-success-color)', active: true },
+  { id: 3, label: '个人', color: 'var(--dt-warning-color)', active: true }
 ])
 
 // 模拟数据
@@ -124,7 +124,7 @@ const monthGridDays = ref(Array.from({ length: 35 }, (_, i) => ({
   dayNum: (i % 31) + 1,
   isOtherMonth: i >= 30,
   isToday: i === 17,
-  events: i === 17 ? [{ id: 1, title: 'IM界面纠偏评审', color: '#277efb', bgColor: '#eef5fe' }] : []
+  events: i === 17 ? [{ id: 1, title: 'IM界面纠偏评审', color: 'var(--dt-brand-color)', bgColor: 'var(--dt-brand-bg)' }] : []
 })))
 
 const goToday = () => {}
@@ -132,12 +132,12 @@ const handleCreateEvent = () => {}
 </script>
 
 <style scoped lang="scss">
-.cal-premium-v3 { display: flex; height: 100%; background: #fff; overflow: hidden; }
+.cal-premium-v3 { display: flex; height: 100%; background: var(--dt-bg-card); overflow: hidden; }
 
 .cal-sidebar-v3 {
-  width: 240px; background: #f8fbff; border-right: 1px solid rgba(0,0,0,0.05);
+  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .sidebar-top { padding: 20px 16px; .create-event-btn { width: 100%; height: 36px; font-weight: 600; border-radius: 8px; } }
+  .sidebar-top { padding: 20px 16px; .create-event-btn { width: 100%; height: 36px; font-weight: 600; border-radius: var(--dt-radius-lg); } }
 }
 
 /* 🏁 纠偏：迷你日历对齐钉钉 8.2 */
@@ -145,51 +145,51 @@ const handleCreateEvent = () => {}
   padding: 0 16px 20px;
   .datepicker-header {
     display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
-    padding: 0 4px; .month-label { font-size: 14px; font-weight: 700; color: #1d1d1f; }
-    .nav-btns { display: flex; gap: 12px; color: #86868b; cursor: pointer; font-size: 14px; }
+    padding: 0 4px; .month-label { font-size: 14px; font-weight: 700; color: var(--dt-text-primary); }
+    .nav-btns { display: flex; gap: 12px; color: var(--dt-text-tertiary); cursor: pointer; font-size: 14px; }
   }
   .datepicker-grid {
     display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
-    .week-label { font-size: 11px; color: #86868b; text-align: center; height: 24px; }
+    .week-label { font-size: 11px; color: var(--dt-text-tertiary); text-align: center; height: 24px; }
     .day-cell {
       aspect-ratio: 1; @include flex-center; font-size: 12px; border-radius: 50%; cursor: pointer;
-      position: relative; transition: 0.2s; color: #1d1d1f;
-      &:hover { background: #eef5fe; }
-      &.today { background: var(--dt-brand-color); color: #fff; font-weight: 700; }
-      &.selected:not(.today) { background: #fff; border: 1px solid var(--dt-brand-color); color: var(--dt-brand-color); }
-      &.other-month { color: #ccc; }
-      .event-indicator { position: absolute; bottom: 4px; width: 4px; height: 4px; background: #22ab5c; border-radius: 50%; }
+      position: relative; transition: var(--dt-transition-fast); color: var(--dt-text-primary);
+      &:hover { background: var(--dt-brand-bg); }
+      &.today { background: var(--dt-brand-color); color: var(--dt-text-white); font-weight: 700; }
+      &.selected:not(.today) { background: var(--dt-bg-card); border: 1px solid var(--dt-brand-color); color: var(--dt-brand-color); }
+      &.other-month { color: var(--dt-text-quaternary); }
+      .event-indicator { position: absolute; bottom: 4px; width: 4px; height: 4px; background: var(--dt-success-color); border-radius: 50%; }
     }
   }
 }
 
-.sidebar-divider { height: 1px; background: rgba(0,0,0,0.05); margin: 0 16px; }
+.sidebar-divider { height: 1px; background: var(--dt-border-light); margin: 0 16px; }
 
-.cal-main-content { flex: 1; display: flex; flex-direction: column; background: #fff; }
+.cal-main-content { flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); }
 
 .cal-view-header {
-  height: 56px; padding: 0 24px; border-bottom: 1px solid rgba(0,0,0,0.06);
+  height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   @include flex-between;
   .header-left { display: flex; align-items: center; gap: 20px; .view-title-text { font-size: 18px; font-weight: 700; } }
 }
 
-.view-body { flex: 1; overflow-y: auto; background: #f2f2f2; }
+.view-body { flex: 1; overflow-y: auto; background: var(--dt-bg-body); }
 
 /* 🏁 纠偏：日历主网格工业化对比 */
 .month-view-grid {
   display: grid; grid-template-columns: repeat(7, 1fr); height: 100%; min-height: 800px;
-  .grid-header-cell { height: 32px; background: #fff; border-bottom: 1px solid #eee; @include flex-center; font-size: 12px; color: #86868b; }
+  .grid-header-cell { height: 32px; background: var(--dt-bg-card); border-bottom: 1px solid var(--dt-border-light); @include flex-center; font-size: 12px; color: var(--dt-text-tertiary); }
   .grid-day-cell {
-    background: #fff; border-right: 1px solid #eee; border-bottom: 1px solid #eee; padding: 8px;
-    display: flex; flex-direction: column; gap: 6px; transition: 0.1s;
-    &:hover { background: #fdfdfe; }
-    &.is-other { background: #f9f9f9; .day-num { color: #ccc; } }
-    .cell-top { display: flex; justify-content: space-between; align-items: center; 
-      .day-num { width: 24px; height: 24px; @include flex-center; font-size: 13px; border-radius: 50%; &.isToday { background: var(--dt-brand-color); color: #fff; } }
-      .lunar-text { font-size: 10px; color: #aaa; }
+    background: var(--dt-bg-card); border-right: 1px solid var(--dt-border-light); border-bottom: 1px solid var(--dt-border-light); padding: 8px;
+    display: flex; flex-direction: column; gap: 6px; transition: var(--dt-transition-fast);
+    &:hover { background: var(--dt-bg-hover); }
+    &.is-other { background: var(--dt-bg-body); .day-num { color: var(--dt-text-quaternary); } }
+    .cell-top { display: flex; justify-content: space-between; align-items: center;
+      .day-num { width: 24px; height: 24px; @include flex-center; font-size: 13px; border-radius: 50%; &.isToday { background: var(--dt-brand-color); color: var(--dt-text-white); } }
+      .lunar-text { font-size: 10px; color: var(--dt-text-quaternary); }
     }
     .cell-events { display: flex; flex-direction: column; gap: 2px;
-      .event-pill { font-size: 11px; padding: 2px 8px; border-left: 3px solid transparent; border-radius: 2px; cursor: pointer; @include text-ellipsis; }
+      .event-pill { font-size: 11px; padding: 2px 8px; border-left: 3px solid transparent; border-radius: var(--dt-radius-sm); cursor: pointer; @include text-ellipsis; }
     }
   }
 }

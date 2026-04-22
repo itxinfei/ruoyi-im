@@ -97,9 +97,9 @@ const subDepartments = ref([])
 const deptMembers = ref([])
 
 const navItems = [
-  { id: 'new', label: '新的联系人', icon: UserFilled, color: '#ff9800' },
-  { id: 'groups', label: '我的群组', icon: Menu, color: '#277efb' },
-  { id: 'friends', label: '我的好友', icon: StarFilled, color: '#22ab5c' },
+  { id: 'new', label: '新的联系人', icon: UserFilled, color: 'var(--dt-warning-color)' },
+  { id: 'groups', label: '我的群组', icon: Menu, color: 'var(--dt-brand-color)' },
+  { id: 'friends', label: '我的好友', icon: StarFilled, color: 'var(--dt-success-color)' },
   { id: 'external', label: '外部联系人', icon: Link, color: '#722ed1' },
   { id: 'frequent', label: '常用联系人', icon: Clock, color: '#13c2c2' }
 ]
@@ -112,18 +112,18 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 <style scoped lang="scss">
 .contacts-panel-v3 {
-  display: flex; height: 100%; background: #fff; overflow: hidden;
+  display: flex; height: 100%; background: var(--dt-bg-card); overflow: hidden;
 }
 
 // 1. 中栏 (280px)
 .contacts-sidebar {
-  width: 280px; background: #fff; border-right: 1px solid var(--dt-border-light);
+  width: 280px; background: var(--dt-bg-card); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column; flex-shrink: 0;
-  
+
   .sidebar-header {
-    height: 56px; padding: 0 12px; @include flex-center; border-bottom: 1px solid rgba(0,0,0,0.05);
+    height: 56px; padding: 0 12px; @include flex-center; border-bottom: 1px solid var(--dt-border-light);
     .search-box {
-      width: 100%; height: 32px; background: var(--dt-bg-hover); border-radius: 6px;
+      width: 100%; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-md);
       display: flex; align-items: center; padding: 0 10px; gap: 8px;
       input { border: none; background: transparent; outline: none; font-size: 13px; flex: 1; }
       .el-icon { color: var(--dt-text-tertiary); font-size: 16px; }
@@ -135,7 +135,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 .nav-item {
   height: 44px; display: flex; align-items: center; padding: 0 12px; gap: 12px;
-  border-radius: 8px; cursor: pointer; transition: 0.1s; margin-bottom: 2px;
+  border-radius: 8px; cursor: pointer; transition: var(--dt-transition-fast); margin-bottom: 2px;
   &:hover { background: var(--dt-bg-hover); }
   &.active { background: var(--dt-brand-bg); .label { color: var(--dt-brand-color); font-weight: 600; } }
   
@@ -150,11 +150,11 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 // 2. 右侧主区 (核心：工业灰背景)
 .contacts-main {
-  flex: 1; display: flex; flex-direction: column; background: #f2f2f2; min-width: 0;
+  flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-body); min-width: 0;
 }
 
 .main-header {
-  height: 56px; padding: 0 24px; background: #fff; border-bottom: 1px solid var(--dt-border-light);
+  height: 56px; padding: 0 24px; background: var(--dt-bg-card); border-bottom: 1px solid var(--dt-border-light);
   @include flex-between;
   .breadcrumb-bar {
     display: flex; align-items: center; font-size: 14px; color: var(--dt-text-secondary);
@@ -171,11 +171,11 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; margin-bottom: 32px;
 }
 .dept-card {
-  background: #fff; padding: 16px 20px; border-radius: 12px; border: 1px solid var(--dt-border-light);
-  display: flex; align-items: center; gap: 16px; cursor: pointer; transition: 0.2s;
+  background: var(--dt-bg-card); padding: 16px 20px; border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
+  display: flex; align-items: center; gap: 16px; cursor: pointer; transition: var(--dt-transition-fast);
   &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); .arrow-icon { opacity: 1; } }
-  
-  .folder-icon-box { width: 44px; height: 44px; background: #eef5fe; color: var(--dt-brand-color); border-radius: 10px; @include flex-center; font-size: 20px; }
+
+  .folder-icon-box { width: 44px; height: 44px; background: var(--dt-brand-bg); color: var(--dt-brand-color); border-radius: var(--dt-radius-lg); @include flex-center; font-size: 20px; }
   .folder-info { flex: 1; .name { font-size: 15px; font-weight: 600; color: var(--dt-text-primary); } .count { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; } }
   .arrow-icon { font-size: 14px; color: var(--dt-text-quaternary); opacity: 0; }
 }
@@ -188,11 +188,11 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 // 纯白成员卡片
 .member-card-v3 {
-  background: #fff; padding: 14px 16px; border-radius: 10px; border: 1px solid var(--dt-border-light);
-  display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s;
+  background: var(--dt-bg-card); padding: 14px 16px; border-radius: var(--dt-radius-lg); border: 1px solid var(--dt-border-light);
+  display: flex; align-items: center; gap: 12px; cursor: pointer; transition: var(--dt-transition-fast);
   &:hover { border-color: var(--dt-brand-color); .chat-btn { opacity: 1; } }
-  
+
   .member-info { flex: 1; min-width: 0; .m-name { font-size: 14px; font-weight: 600; color: var(--dt-text-primary); } .m-post { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; } }
-  .chat-btn { width: 32px; height: 32px; background: var(--dt-brand-bg); color: var(--dt-brand-color); border: none; border-radius: 50%; opacity: 0; transition: 0.2s; cursor: pointer; @include flex-center; &:hover { background: var(--dt-brand-color); color: #fff; } }
+  .chat-btn { width: 32px; height: 32px; background: var(--dt-brand-bg); color: var(--dt-brand-color); border: none; border-radius: 50%; opacity: 0; transition: var(--dt-transition-fast); cursor: pointer; @include flex-center; &:hover { background: var(--dt-brand-color); color: var(--dt-text-white); } }
 }
 </style>

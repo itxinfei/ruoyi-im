@@ -155,7 +155,7 @@ onMounted(() => {
 .view-title {
   font-size: 18px;
   font-weight: 600;
-  color: var(--dt-text-main);
+  color: var(--dt-text-primary);
   margin: 0;
 }
 
@@ -171,7 +171,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: 200px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
   gap: 12px;
 }
 
@@ -239,13 +239,13 @@ onMounted(() => {
 .request-name {
   font-size: 15px;
   font-weight: 500;
-  color: var(--dt-text-main);
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .request-message {
   font-size: 13px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -259,7 +259,7 @@ onMounted(() => {
 
 .status-text {
   font-size: 13px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
 }
 
 /* 暗色模式 */
@@ -271,11 +271,11 @@ onMounted(() => {
 
 :deep(.dark) .view-title,
 :deep(.dark) .request-name {
-  color: var(--dt-text-main-dark);
+  color: var(--dt-text-primary-dark);
 }
 
 :deep(.dark) .request-message,
 :deep(.dark) .status-text {
-  color: var(--dt-text-desc-dark);
+  color: var(--dt-text-secondary-dark);
 }
 </style>

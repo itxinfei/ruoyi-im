@@ -168,6 +168,9 @@
 
   // === Navigation Sidebar (侧边栏) ===
   --dt-nav-sidebar-bg: #2B2D33;  /* 侧边栏背景色（深灰） */
+  --dt-nav-hover: rgba(255,255,255,0.05);  /* 侧边栏hover背景 */
+  --dt-nav-active: rgba(255,255,255,0.08);  /* 侧边栏激活背景 */
+  --dt-border-subtle: rgba(255,255,255,0.05);  /* 暗色边框 */
 
   // === Transition ===
   --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);

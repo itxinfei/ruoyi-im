@@ -62,20 +62,14 @@ defineEmits([
   justify-content: space-between;
   height: 64px;
   padding: 0 24px;
-  background-color: #ffffff;
+  background-color: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.04);
   position: absolute;
   bottom: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  animation: slide-up 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes slide-up {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
+  transition: opacity 0.2s;
 }
 
 .selection-info {
@@ -85,7 +79,7 @@ defineEmits([
   
   .count-tag {
     background: var(--dt-brand-color);
-    color: #fff;
+    color: var(--dt-text-white);
     padding: 2px 8px;
     border-radius: 4px;
     font-size: 14px;
@@ -111,7 +105,7 @@ defineEmits([
   height: 32px;
   padding: 0 12px;
   border: 1px solid var(--dt-border-light);
-  background: #fff;
+  background: var(--dt-bg-card);
   border-radius: var(--dt-radius-md);
   font-size: 13px;
   color: var(--dt-text-primary);
@@ -127,7 +121,7 @@ defineEmits([
   &.is-danger:hover {
     border-color: var(--dt-error-color);
     color: var(--dt-error-color);
-    background: #fff1f0;
+    background: var(--dt-error-bg);
   }
   
   &.is-close {

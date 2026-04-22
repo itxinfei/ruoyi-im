@@ -107,29 +107,28 @@ const handleConfirm = (item) => {
 
 <style scoped lang="scss">
 .dt-spotlight-overlay {
-  position: fixed; inset: 0; background: rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px); z-index: 5000;
+  position: fixed; inset: 0; background: var(--dt-bg-mask);
+  z-index: 5000;
   display: flex; justify-content: center; padding-top: 15vh;
 }
 
 .spotlight-container {
-  width: 640px; background: #fff; border-radius: 14px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  width: 640px; background: var(--dt-bg-card); border-radius: var(--dt-radius-xl);
   display: flex; flex-direction: column; overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.08);
+  border: 1px solid var(--dt-border-light);
 }
 
 .spotlight-header {
-  height: 60px; display: flex; align-items: center; padding: 0 20px;
-  border-bottom: 1px solid rgba(0,0,0,0.05); gap: 14px;
-  
+  height: 56px; display: flex; align-items: center; padding: 0 20px;
+  border-bottom: 1px solid var(--dt-border-light); gap: 14px;
+
   .search-icon { font-size: 20px; color: var(--dt-brand-color); }
   .spotlight-input {
     flex: 1; border: none; background: transparent; outline: none;
-    font-size: 18px; color: #1d1d1f;
-    &::placeholder { color: #ccc; }
+    font-size: var(--dt-font-size-lg); color: var(--dt-text-primary);
+    &::placeholder { color: var(--dt-text-quaternary); }
   }
-  .shortcut-tip { font-size: 10px; color: #aaa; background: #f5f5f5; padding: 2px 6px; border-radius: 4px; }
+  .shortcut-tip { font-size: 10px; color: var(--dt-text-tertiary); background: var(--dt-bg-hover); padding: 2px 6px; border-radius: var(--dt-radius-sm); }
 }
 
 .spotlight-body {
@@ -138,39 +137,41 @@ const handleConfirm = (item) => {
 
 .res-group {
   margin-bottom: 16px;
-  .group-title { font-size: 11px; font-weight: 700; color: #999; padding: 0 12px 8px; text-transform: uppercase; }
+  .group-title { font-size: 11px; font-weight: 700; color: var(--dt-text-tertiary); padding: 0 12px 8px; }
 }
 
 .res-item {
   height: 52px; display: flex; align-items: center; justify-content: space-between;
-  padding: 0 12px; border-radius: 8px; cursor: pointer; transition: 0.1s;
-  
+  padding: 0 12px; border-radius: var(--dt-radius-md); cursor: pointer; transition: var(--dt-transition-fast);
+
   &.active { background: var(--dt-brand-bg); }
-  
+
   .item-left {
     display: flex; align-items: center; gap: 12px;
     .icon-avatar {
-      width: 32px; height: 32px; border-radius: 6px; overflow: hidden; @include flex-center;
+      width: 32px; height: 32px; border-radius: var(--dt-radius-md); overflow: hidden; @include flex-center;
       img { width: 100%; height: 100%; }
-      &.user { border-radius: 4px; }
-      &.file { background: #fef0f0; color: #f56c6c; }
+      &.user { border-radius: var(--dt-radius-sm); }
+      &.file { background: var(--dt-bg-session-hover); color: var(--dt-error-color); }
     }
     .item-meta {
-      .name { font-size: 14px; color: #1d1d1f; :deep(mark) { background: transparent; color: var(--dt-brand-color); font-weight: 700; } }
-      .sub { font-size: 11px; color: #86868b; margin-top: 1px; }
+      .name { font-size: 14px; color: var(--dt-text-primary); :deep(mark) { background: transparent; color: var(--dt-brand-color); font-weight: 700; } }
+      .sub { font-size: 11px; color: var(--dt-text-tertiary); margin-top: 1px; }
     }
   }
-  
+
   .item-enter { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--dt-brand-color); font-weight: 600; }
 }
 
 .spotlight-footer {
-  padding: 16px 20px; background: #f9f9f9; border-top: 1px solid rgba(0,0,0,0.03);
-  .footer-hint { font-size: 11px; color: #999; margin-bottom: 8px; }
-  .suggest-row { display: flex; gap: 8px; .s-tag { font-size: 11px; color: #666; background: #fff; border: 1px solid #eee; padding: 2px 8px; border-radius: 4px; } }
+  padding: 16px 20px; background: var(--dt-bg-body); border-top: 1px solid var(--dt-border-light);
+  .footer-hint { font-size: 11px; color: var(--dt-text-tertiary); margin-bottom: 8px; }
+  .suggest-row { display: flex; gap: 8px; .s-tag { font-size: 11px; color: var(--dt-text-secondary); background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); padding: 2px 8px; border-radius: var(--dt-radius-sm); } }
 }
 
-// 动画
-.spotlight-fade-enter-active { transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); }
-.spotlight-fade-enter-from { opacity: 0; transform: translateY(-20px) scale(0.98); }
+// transition
+.spotlight-fade-enter-active { transition: opacity 0.15s; }
+.spotlight-fade-enter-from { opacity: 0; }
+.spotlight-fade-leave-active { transition: opacity 0.1s; }
+.spotlight-fade-leave-to { opacity: 0; }
 </style>

@@ -273,7 +273,7 @@ const getBarHeight = (index) => {
     }
 
     .waveform-bar {
-      background: rgba(255, 255, 255, 0.8);  /* 钉钉规范：白色波形 rgba(255,255,255,0.8) */
+      background: var(--dt-text-white);  /* 钉钉规范：白色波形 */
     }
 
     .duration {
@@ -296,7 +296,7 @@ const getBarHeight = (index) => {
   }
 
   &.is-own .waveform-bar {
-    background: rgba(255, 255, 255, 0.8);  /* 钉钉规范：白色波形 rgba(255,255,255,0.8) */
+    background: var(--dt-text-white);  /* 钉钉规范：白色波形 */
   }
 }
 </style>

@@ -142,11 +142,11 @@ const readPercentage = computed(() => {
 })
 
 const customColors = [
-  { color: '#f56c6c', percentage: 20 },
-  { color: '#e6a23c', percentage: 40 },
-  { color: '#5cb87a', percentage: 60 },
-  { color: '#1989fa', percentage: 80 },
-  { color: '#277EFB', percentage: 100 },
+  { color: 'var(--dt-error-color)', percentage: 20 },
+  { color: 'var(--dt-warning-color)', percentage: 40 },
+  { color: 'var(--dt-success-color)', percentage: 60 },
+  { color: 'var(--dt-brand-color)', percentage: 80 },
+  { color: 'var(--dt-brand-color)', percentage: 100 },
 ]
 
 // 过滤后的用户列表
@@ -236,7 +236,7 @@ const formatTime = (ts) => {
   align-items: center;
   padding: 24px 20px;
   gap: 24px;
-  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
+  background: var(--dt-bg-body);
 }
 
 .chart-wrapper {
@@ -333,7 +333,7 @@ const formatTime = (ts) => {
 .action-footer {
   padding: 16px 20px;
   border-top: 1px solid var(--dt-border-light);
-  background: #fff;
+  background: var(--dt-bg-card);
 }
 
 .ding-btn {

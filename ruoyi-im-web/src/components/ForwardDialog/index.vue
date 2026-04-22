@@ -145,14 +145,14 @@ const handleForward = async () => {
 
 // 1. 左侧预览
 .preview-aside {
-  width: 240px; background: #f8fbff; border-right: 1px solid rgba(0,0,0,0.05);
+  width: 240px; background: var(--dt-bg-input); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column; padding: 20px;
-  .aside-label { font-size: 12px; color: #999; margin-bottom: 12px; }
+  .aside-label { font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 12px; }
   .preview-card {
-    flex: 1; background: #fff; border: 1px solid rgba(0,0,0,0.06); border-radius: 8px;
+    flex: 1; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg);
     padding: 12px; font-size: 13px; line-height: 1.6;
     .m-sender { color: var(--dt-brand-color); font-weight: 600; margin-right: 4px; }
-    .m-text { color: #555; }
+    .m-text { color: var(--dt-text-secondary); }
     .m-line { margin-bottom: 8px; @include text-ellipsis; }
   }
   .mode-switch { margin-top: 16px; width: 100%; :deep(.el-radio-group) { width: 100%; display: flex; .el-radio-button { flex: 1; } } }
@@ -161,36 +161,36 @@ const handleForward = async () => {
 // 2. 右侧选择
 .select-main {
   flex: 1; display: flex; flex-direction: column;
-  .select-header { padding: 16px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); }
+  .select-header { padding: 16px 20px; border-bottom: 1px solid var(--dt-border-light); }
   .search-bar-v4 {
-    height: 32px; background: #f2f2f2; border-radius: 16px; display: flex; align-items: center; padding: 0 12px; gap: 8px;
-    input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; }
-    .el-icon { color: #888; }
+    height: 32px; background: var(--dt-bg-input); border-radius: 16px; display: flex; align-items: center; padding: 0 12px; gap: 8px;
+    input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; color: var(--dt-text-primary); }
+    .el-icon { color: var(--dt-text-tertiary); }
   }
 }
 
 .dual-column {
   flex: 1; display: flex; overflow: hidden;
   .column-left, .column-right { flex: 1; padding: 12px; overflow-y: auto; }
-  .column-right { background: #fdfdfe; border-left: 1px solid rgba(0,0,0,0.03); }
-  .col-title { font-size: 11px; font-weight: 700; color: #aaa; margin-bottom: 12px; padding-left: 8px; }
+  .column-right { background: var(--dt-bg-input); border-left: 1px solid var(--dt-border-light); }
+  .col-title { font-size: 11px; font-weight: 700; color: var(--dt-text-tertiary); margin-bottom: 12px; padding-left: 8px; }
 }
 
 .sel-item {
   height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 10px;
-  border-radius: 6px; cursor: pointer; transition: 0.1s;
-  &:hover { background: #f5f5f5; }
-  &.selected { .check-box { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: #fff; } }
-  .name { font-size: 14px; flex: 1; @include text-ellipsis; }
-  .check-box { width: 18px; height: 18px; border: 1.5px solid #dcdfe6; border-radius: 50%; @include flex-center; font-size: 11px; color: transparent; }
+  border-radius: var(--dt-radius-md); cursor: pointer; transition: var(--dt-transition-fast);
+  &:hover { background: var(--dt-bg-hover); }
+  &.selected { .check-box { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); } }
+  .name { font-size: 14px; flex: 1; @include text-ellipsis; color: var(--dt-text-primary); }
+  .check-box { width: 18px; height: 18px; border: 1.5px solid var(--dt-border-color); border-radius: 50%; @include flex-center; font-size: 11px; color: transparent; }
 }
 
 .selected-pill {
-  height: 32px; background: #eff4fc; border-radius: 16px; padding: 0 12px;
+  height: 32px; background: var(--dt-brand-bg); border-radius: 16px; padding: 0 12px;
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
   .p-name { font-size: 12px; color: var(--dt-brand-color); font-weight: 500; }
-  .p-close { font-size: 14px; color: #888; cursor: pointer; &:hover { color: #ff4d4f; } }
+  .p-close { font-size: 14px; color: var(--dt-text-tertiary); cursor: pointer; &:hover { color: var(--dt-error-color); } }
 }
 
-.v4-dialog-footer { padding: 12px 20px; border-top: 1px solid rgba(0,0,0,0.05); display: flex; justify-content: flex-end; gap: 12px; }
+.v4-dialog-footer { padding: 12px 20px; border-top: 1px solid var(--dt-border-light); display: flex; justify-content: flex-end; gap: 12px; }
 </style>

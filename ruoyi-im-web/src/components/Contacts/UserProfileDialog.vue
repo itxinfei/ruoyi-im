@@ -121,7 +121,7 @@ watch(visible, (v) => emit('update:modelValue', v))
 
 <style scoped lang="scss">
 .premium-profile-modal {
-  :deep(.el-dialog) { border-radius: 16px; overflow: hidden; padding: 0; box-shadow: var(--dt-shadow-3); background: #fff; }
+  :deep(.el-dialog) { border-radius: var(--dt-radius-xl); overflow: hidden; padding: 0; box-shadow: var(--dt-shadow-3); background: var(--dt-bg-card); }
   :deep(.el-dialog__header) { display: none; }
   :deep(.el-dialog__body) { padding: 0; }
 }
@@ -131,29 +131,29 @@ watch(visible, (v) => emit('update:modelValue', v))
 // 1. Banner
 .v4-header-banner {
   height: 140px; position: relative;
-  .banner-bg { height: 100%; background: linear-gradient(135deg, #277efb 0%, #4facfe 100%); opacity: 0.9; }
-  .close-btn { position: absolute; top: 16px; right: 16px; color: #fff; cursor: pointer; font-size: 20px; z-index: 10; &:hover { opacity: 0.8; } }
-  
+  .banner-bg { height: 100%; background: var(--dt-brand-color); }
+  .close-btn { position: absolute; top: 16px; right: 16px; color: var(--dt-text-white); cursor: pointer; font-size: 20px; z-index: 10; transition: opacity var(--dt-transition-fast); &:hover { opacity: 0.8; } }
+
   .avatar-stack {
-    position: absolute; left: 24px; bottom: -30px; z-index: 5;
-    .v4-main-avatar { border: 4px solid #fff; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .status-indicator { position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; border: 2.5px solid #fff; border-radius: 50%; &.online { background: #22ab5c; } }
+    position: absolute; left: 24px; bottom: -32px; z-index: 5;
+    .v4-main-avatar { border: 4px solid var(--dt-bg-card); border-radius: var(--dt-radius-lg); box-shadow: var(--dt-shadow-2); }
+    .status-indicator { position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; border: 2px solid var(--dt-bg-card); border-radius: 50%; &.online { background: var(--dt-success-color); } }
   }
 }
 
 // 2. Body
 .v4-info-body {
   flex: 1; padding: 40px 24px 20px; overflow-y: auto;
-  
-  .primary-info { margin-bottom: 24px; 
-    .u-name { font-size: 22px; font-weight: 700; color: #1d1d1f; margin-bottom: 4px; }
-    .u-org { font-size: 13px; color: #86868b; .sep { margin: 0 6px; } }
+
+  .primary-info { margin-bottom: 24px;
+    .u-name { font-size: var(--dt-font-size-2xl); font-weight: 600; color: var(--dt-text-primary); margin-bottom: 4px; }
+    .u-org { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); .sep { margin: 0 6px; } }
   }
-  
+
   .info-sections {
-    .section-block { margin-bottom: 18px; 
-      label { display: block; font-size: 11px; color: #aaa; margin-bottom: 4px; text-transform: uppercase; font-weight: 600; }
-      .val { font-size: 14px; color: #1d1d1f; &.signature { line-height: 1.5; color: #5f6368; } }
+    .section-block { margin-bottom: 18px;
+      label { display: block; font-size: 11px; color: var(--dt-text-tertiary); margin-bottom: 4px; font-weight: 600; }
+      .val { font-size: 14px; color: var(--dt-text-primary); &.signature { line-height: 1.5; color: var(--dt-text-tertiary); } }
     }
   }
 }
@@ -161,22 +161,22 @@ watch(visible, (v) => emit('update:modelValue', v))
 // 3. Footer Actions (Pills)
 .v4-action-footer {
   padding: 0 24px 32px; display: flex; justify-content: center;
-  
+
   .action-pills {
-    height: 44px; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 22px;
-    padding: 4px; display: flex; align-items: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    
+    height: 44px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: 22px;
+    padding: 4px; display: flex; align-items: center; box-shadow: var(--dt-shadow-2);
+
     .pill-btn {
       height: 36px; border: none; background: transparent; cursor: pointer; border-radius: 18px;
       display: flex; align-items: center; gap: 8px; padding: 0 16px;
-      transition: all 0.2s; color: #1d1d1f; font-weight: 600;
-      
-      &:hover { background: #f5f5f7; }
-      &.chat { background: var(--dt-brand-color); color: #fff; &:hover { background: var(--dt-brand-hover); } }
-      &.icon-only { width: 36px; padding: 0; @include flex-center; font-size: 18px; color: #555; }
+      transition: background var(--dt-transition-fast); color: var(--dt-text-primary); font-weight: 600;
+
+      &:hover { background: var(--dt-bg-hover); }
+      &.chat { background: var(--dt-brand-color); color: var(--dt-text-white); &:hover { background: var(--dt-brand-hover); } }
+      &.icon-only { width: 36px; padding: 0; @include flex-center; font-size: 18px; color: var(--dt-text-secondary); }
     }
-    
-    .pill-divider { width: 1px; height: 16px; background: rgba(0,0,0,0.08); margin: 0 4px; }
+
+    .pill-divider { width: 1px; height: 16px; background: var(--dt-border-light); margin: 0 4px; }
   }
 }
 </style>

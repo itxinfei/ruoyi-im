@@ -97,12 +97,12 @@ onMounted(loadData)
 </script>
 
 <style scoped lang="scss">
-.ding-premium-v2 { display: flex; flex-direction: column; height: 100%; background: #f2f2f2; }
+.ding-premium-v2 { display: flex; flex-direction: column; height: 100%; background: var(--dt-bg-body); }
 
 .view-header {
-  height: 56px; padding: 0 24px; background: rgba(255,255,255,0.9); backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(0,0,0,0.06); @include flex-between;
-  .view-title { font-size: 16px; font-weight: 700; color: #1d1d1f; }
+  height: 56px; padding: 0 24px; background: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light); @include flex-between;
+  .view-title { font-size: 16px; font-weight: 700; color: var(--dt-text-primary); }
 }
 
 .view-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
@@ -110,15 +110,15 @@ onMounted(loadData)
 .stats-row {
   display: flex; gap: 16px; margin-bottom: 24px;
   .stat-card {
-    flex: 1; height: 84px; background: #fff; border-radius: 12px; padding: 0 20px;
-    display: flex; align-items: center; gap: 16px; border: 1px solid rgba(0,0,0,0.04);
+    flex: 1; height: 84px; background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: 0 20px;
+    display: flex; align-items: center; gap: 16px; border: 1px solid var(--dt-border-light);
     .stat-icon {
-      width: 48px; height: 48px; border-radius: 10px; @include flex-center; font-size: 20px;
-      &.orange { background: #fff7e6; color: #fa8c16; }
-      &.blue { background: #eef5fe; color: #2196f3; }
-      &.green { background: #f6ffed; color: #52c41a; }
+      width: 48px; height: 48px; border-radius: var(--dt-radius-lg); @include flex-center; font-size: 20px;
+      &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
+      &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
+      &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
     }
-    .stat-info { display: flex; flex-direction: column; .val { font-size: 22px; font-weight: 700; } .lab { font-size: 12px; color: #86868b; } }
+    .stat-info { display: flex; flex-direction: column; .val { font-size: 22px; font-weight: 700; color: var(--dt-text-primary); } .lab { font-size: 12px; color: var(--dt-text-tertiary); } }
   }
 }
 
@@ -127,19 +127,19 @@ onMounted(loadData)
 }
 
 .ding-card-v2 {
-  background: #fff; border-radius: 12px; padding: 20px; border: 1px solid transparent;
-  display: flex; gap: 16px; transition: 0.2s;
-  &:hover { box-shadow: var(--dt-shadow-2); border-color: var(--dt-brand-light); }
-  &.urgent { border-left: 4px solid #ff4d4f; }
-  
-  .card-main { flex: 1; min-width: 0; 
-    .row-top { display: flex; justify-content: space-between; margin-bottom: 10px; .sender { font-weight: 600; font-size: 14px; } .time { font-size: 11px; color: #86868b; } }
-    .ding-body-text { font-size: 14px; color: #1d1d1f; line-height: 1.6; margin-bottom: 16px; }
-    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f5f5f5; padding-top: 12px; 
-      .footer-left { display: flex; align-items: center; gap: 12px; .receipt-info { font-size: 12px; color: #86868b; .el-icon { vertical-align: middle; } } }
+  background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: 20px; border: 1px solid var(--dt-border-light);
+  display: flex; gap: 16px; transition: var(--dt-transition-fast);
+  &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
+  &.urgent { border-left: 4px solid var(--dt-error-color); }
+
+  .card-main { flex: 1; min-width: 0;
+    .row-top { display: flex; justify-content: space-between; margin-bottom: 10px; .sender { font-weight: 600; font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 11px; color: var(--dt-text-tertiary); } }
+    .ding-body-text { font-size: 14px; color: var(--dt-text-primary); line-height: 1.6; margin-bottom: 16px; }
+    .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--dt-border-light); padding-top: 12px;
+      .footer-left { display: flex; align-items: center; gap: 12px; .receipt-info { font-size: 12px; color: var(--dt-text-tertiary); .el-icon { vertical-align: middle; } } }
     }
   }
 }
 
-.empty-view { padding-top: 100px; text-align: center; color: #aaa; .el-icon { font-size: 64px; opacity: 0.2; } }
+.empty-view { padding-top: 100px; text-align: center; color: var(--dt-text-quaternary); .el-icon { font-size: 64px; opacity: 0.3; } }
 </style>

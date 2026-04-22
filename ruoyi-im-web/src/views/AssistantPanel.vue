@@ -150,10 +150,10 @@ const currentChatTitle = computed(() => {
 
 // 快捷指令
 const quickActions = [
-  { id: 1, label: '✍️ 润色周报', prompt: '请帮我润色以下周报内容，使其更专业：' },
-  { id: 2, label: '🌐 中英翻译', prompt: '请将以下内容翻译成英文：' },
-  { id: 3, label: '📊 数据总结', prompt: '请帮我总结以下数据的核心指标：' },
-  { id: 4, label: '📝 起草通知', prompt: '请帮我起草一份关于' }
+  { id: 1, label: '润色周报', prompt: '请帮我润色以下周报内容，使其更专业：' },
+  { id: 2, label: '中英翻译', prompt: '请将以下内容翻译成英文：' },
+  { id: 3, label: '数据总结', prompt: '请帮我总结以下数据的核心指标：' },
+  { id: 4, label: '起草通知', prompt: '请帮我起草一份关于' }
 ]
 
 // --- 逻辑实现 ---
@@ -261,35 +261,35 @@ onMounted(() => {
 
 // 1. 历史侧栏
 .ai-history-sidebar {
-  width: 240px; background: #f8fbff; border-right: 1px solid var(--dt-border-light);
+  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
   .sidebar-header { padding: 16px; }
   .new-chat-btn {
-    width: 100%; height: 40px; border-radius: 8px; border: 1.5px dashed var(--dt-brand-color);
-    color: var(--dt-brand-color); background: #fff;
+    width: 100%; height: 40px; border-radius: var(--dt-radius-lg); border: 1.5px dashed var(--dt-brand-color);
+    color: var(--dt-brand-color); background: var(--dt-bg-card);
     &:hover { background: var(--dt-brand-bg); }
   }
   .history-list {
     flex: 1; overflow-y: auto; padding: 0 8px;
     .history-item {
       height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 12px;
-      border-radius: 8px; cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
-      &:hover { background: #eff4fc; .del-icon { opacity: 1; } }
+      border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
+      &:hover { background: var(--dt-bg-hover); .del-icon { opacity: 1; } }
       &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
       .chat-title { flex: 1; @include text-ellipsis; font-size: 13px; }
-      .del-icon { opacity: 0; font-size: 14px; transition: 0.2s; &:hover { color: var(--dt-error-color); } }
+      .del-icon { opacity: 0; font-size: 14px; transition: var(--dt-transition-fast); &:hover { color: var(--dt-error-color); } }
     }
   }
 }
 
 // 2. 对话容器
 .ai-chat-container {
-  flex: 1; display: flex; flex-direction: column; background: #fff; position: relative;
+  flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); position: relative;
   .chat-header {
     height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
     display: flex; align-items: center; justify-content: space-between;
     .title-info { display: flex; align-items: center; gap: 8px; }
-    .ai-badge { background: var(--dt-brand-color); color: #fff; font-size: 10px; padding: 1px 4px; border-radius: 4px; }
+    .ai-badge { background: var(--dt-brand-color); color: var(--dt-text-white); font-size: 10px; padding: 1px 4px; border-radius: var(--dt-radius-sm); }
     .chat-title { font-size: 15px; font-weight: 600; }
     .model-selector { font-size: 13px; color: var(--dt-text-tertiary); cursor: pointer; }
   }
@@ -320,37 +320,35 @@ onMounted(() => {
 }
 
 .msg-avatar {
-  width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: var(--dt-radius-lg); flex-shrink: 0;
   @include flex-center; font-size: 18px;
-  .msg-row.assistant & { background: var(--dt-brand-color); color: #fff; }
-  .msg-row.user & { background: #e2e8f0; color: #475569; font-size: 14px; font-weight: 600; }
+  .msg-row.assistant & { background: var(--dt-brand-color); color: var(--dt-text-white); }
+  .msg-row.user & { background: var(--dt-bg-hover); color: var(--dt-text-secondary); font-size: 14px; font-weight: 600; }
 }
 
 .msg-bubble {
-  max-width: calc(100% - 100px); padding: 12px 16px; border-radius: 12px; line-height: 1.6; font-size: 14px;
-  &.assistant { 
-    background: #f2f4f7; border: 1px solid #e5e9ef; color: var(--dt-text-primary);
+  max-width: calc(100% - 100px); padding: 12px 16px; border-radius: var(--dt-radius-lg); line-height: 1.6; font-size: 14px;
+  &.assistant {
+    background: var(--dt-bg-input); border: 1px solid var(--dt-border-light); color: var(--dt-text-primary);
     border-top-left-radius: 2px;
   }
-  &.user { 
-    background: var(--dt-brand-color); color: #fff; border-top-right-radius: 2px;
+  &.user {
+    background: var(--dt-brand-color); color: var(--dt-text-white); border-top-right-radius: 2px;
   }
 }
 
 .typing-cursor {
   display: inline-block; width: 2px; height: 16px; background: var(--dt-brand-color);
-  margin-left: 4px; animation: blink 0.8s infinite; vertical-align: middle;
+  margin-left: 4px; opacity: 0.6; vertical-align: middle;
 }
 
-@keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-
 .msg-footer {
-  margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(0,0,0,0.04);
+  margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--dt-border-light);
   .msg-actions {
     display: flex; gap: 12px;
-    button { 
+    button {
       background: none; border: none; cursor: pointer; color: var(--dt-text-quaternary);
-      font-size: 16px; transition: 0.2s; &:hover { color: var(--dt-brand-color); }
+      font-size: 16px; transition: var(--dt-transition-fast); &:hover { color: var(--dt-brand-color); }
     }
   }
 }
@@ -362,17 +360,17 @@ onMounted(() => {
     display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px;
     &::-webkit-scrollbar { height: 0; }
     .p-chip {
-      white-space: nowrap; padding: 6px 12px; background: #fff; border: 1px solid var(--dt-border-light);
+      white-space: nowrap; padding: 6px 12px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light);
       border-radius: 16px; font-size: 12px; color: var(--dt-text-secondary); cursor: pointer;
-      transition: all 0.2s; &:hover { border-color: var(--dt-brand-color); color: var(--dt-brand-color); background: var(--dt-brand-bg); }
+      transition: var(--dt-transition-fast); &:hover { border-color: var(--dt-brand-color); color: var(--dt-brand-color); background: var(--dt-brand-bg); }
     }
   }
 }
 
 .input-box-v2 {
-  background: #f9fafb; border: 1.5px solid var(--dt-border-light); border-radius: 12px;
-  padding: 12px; display: flex; flex-direction: column; transition: 0.2s;
-  &:focus-within { border-color: var(--dt-brand-color); background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+  background: var(--dt-bg-input); border: 1.5px solid var(--dt-border-light); border-radius: var(--dt-radius-lg);
+  padding: 12px; display: flex; flex-direction: column; transition: var(--dt-transition-fast);
+  &:focus-within { border-color: var(--dt-brand-color); background: var(--dt-bg-card); }
   
   textarea {
     border: none; background: transparent; outline: none; resize: none;
@@ -387,8 +385,8 @@ onMounted(() => {
       background: none; border: none; cursor: pointer; &:hover { color: var(--dt-error-color); }
     }
     .send-btn {
-      width: 32px; height: 32px; border-radius: 8px; background: var(--dt-brand-color); color: #fff;
-      border: none; cursor: pointer; transition: 0.2s; @include flex-center;
+      width: 32px; height: 32px; border-radius: var(--dt-radius-lg); background: var(--dt-brand-color); color: var(--dt-text-white);
+      border: none; cursor: pointer; transition: var(--dt-transition-fast); @include flex-center;
       &:disabled { background: var(--dt-bg-hover); cursor: not-allowed; }
       &:hover:not(:disabled) { background: var(--dt-brand-hover); }
     }
@@ -397,12 +395,12 @@ onMounted(() => {
 
 // 4. 总结侧板
 .ai-summary-panel {
-  width: 320px; background: #fdfdfe; border-left: 1px solid var(--dt-border-light);
+  width: 320px; background: var(--dt-bg-body); border-left: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
   .summary-header { height: 56px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--dt-border-light); }
   .summary-body { flex: 1; overflow-y: auto; padding: 20px; font-size: 13px; line-height: 1.7; }
 }
 
-.slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
-.slide-enter-from, .slide-leave-to { transform: translateX(100%); }
+.slide-enter-active, .slide-leave-active { transition: opacity 0.3s ease; }
+.slide-enter-from, .slide-leave-to { opacity: 0; }
 </style>

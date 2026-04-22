@@ -53,7 +53,6 @@ defineEmits([
   background-color: var(--dt-brand-color);
   color: var(--dt-text-white);
   flex-shrink: 0;
-  box-shadow: var(--dt-shadow-brand);
 }
 
 .selection-info {

@@ -428,29 +428,29 @@ const confirmAction = async () => {
 
 <style scoped>
 .approval-detail {
-  padding: var(--dt-spacing-md) 0;
+  padding: var(--dt-spacing-lg) 0;
 }
 
 .detail-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
+  margin-bottom: var(--dt-spacing-lg);
+  padding-bottom: var(--dt-spacing-lg);
   border-bottom: 1px solid var(--dt-border-light);
 }
 
 .detail-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--dt-text-main);
+  font-size: var(--dt-font-size-xl);
+  font-weight: var(--dt-font-weight-semibold);
+  color: var(--dt-text-primary);
   margin: 0;
 }
 
 .status-badge {
   padding: 4px 12px;
   border-radius: var(--dt-radius-xl);
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -471,12 +471,12 @@ const confirmAction = async () => {
 }
 
 .detail-section {
-  margin-bottom: 20px;
+  margin-bottom: var(--dt-spacing-lg);
 }
 
 .section-label {
-  font-size: 12px;
-  color: var(--dt-text-desc);
+  font-size: var(--dt-font-size-sm);
+  color: var(--dt-text-secondary);
   margin-bottom: 8px;
 }
 
@@ -484,8 +484,8 @@ const confirmAction = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
-  color: var(--dt-text-main);
+  font-size: var(--dt-font-size-base);
+  color: var(--dt-text-primary);
 }
 
 .type-tag {
@@ -497,7 +497,7 @@ const confirmAction = async () => {
 
 .apply-time {
   font-size: 12px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
   margin-left: auto;
 }
 
@@ -525,12 +525,12 @@ const confirmAction = async () => {
 
 .item-label {
   font-size: 12px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
 }
 
 .item-value {
   font-size: 14px;
-  color: var(--dt-text-main);
+  color: var(--dt-text-primary);
 }
 
 .flow-list {
@@ -585,13 +585,13 @@ const confirmAction = async () => {
 .flow-name {
   font-size: 14px;
   font-weight: 500;
-  color: var(--dt-text-main);
+  color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .flow-time {
   font-size: 12px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
 }
 
 .flow-comment {
@@ -600,7 +600,7 @@ const confirmAction = async () => {
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
   font-size: 13px;
-  color: var(--dt-text-desc);
+  color: var(--dt-text-secondary);
 }
 
 .dialog-footer {
@@ -624,11 +624,11 @@ const confirmAction = async () => {
 :deep(.dark) .reason-content,
 :deep(.dark) .detail-grid,
 :deep(.dark) .flow-comment {
-  background: rgba(30, 41, 59, 0.5);
+  background: var(--dt-bg-hover-dark);
 }
 
 :deep(.dark) .type-tag {
-  background: rgba(51, 65, 85, 0.5);
+  background: var(--dt-bg-active-dark);
 }
 
 /* 抄送表单 */

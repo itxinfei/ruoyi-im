@@ -49,13 +49,13 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
 
 <style scoped lang="scss">
 .slack-chat-header {
-  height: 52px; // Slack 标准高度
-  padding: 0 16px 0 20px;
+  height: var(--dt-header-height, 56px);
+  padding: 0 var(--dt-spacing-lg) 0 var(--dt-spacing-xl);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fff;
-  border-bottom: 1px solid #e3e5e8;
+  background-color: var(--dt-bg-card);
+  border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
   z-index: 100;
 }
@@ -63,31 +63,31 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--dt-spacing-md);
 
   .channel-info {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 8px;
+    padding: 4px var(--dt-spacing-sm);
     margin-left: -8px;
-    border-radius: 6px;
+    border-radius: var(--dt-radius-md);
     cursor: pointer;
     transition: background 0.15s;
 
-    &:hover { background: #f8f9fa; }
+    &:hover { background: var(--dt-bg-hover); }
 
-    .channel-prefix { font-size: 18px; font-weight: 800; color: #86868b; }
-    .user-avatar { border-radius: 4px; }
-    .channel-name { font-size: 16px; font-weight: 800; color: #1d1d1f; }
-    .arrow-down { font-size: 12px; color: #86868b; }
+    .channel-prefix { font-size: 18px; font-weight: 800; color: var(--dt-text-tertiary); }
+    .user-avatar { border-radius: var(--dt-radius-sm); }
+    .channel-name { font-size: 16px; font-weight: 800; color: var(--dt-text-primary); }
+    .arrow-down { font-size: 12px; color: var(--dt-text-tertiary); }
   }
 
   .channel-meta {
     .member-stack {
       display: flex; align-items: center;
-      .stack-avatar { width: 24px; height: 24px; border-radius: 4px; background: #e3e5e8; border: 2px solid #fff; margin-left: -8px; &:first-child { margin-left: 0; } }
-      .count { font-size: 13px; font-weight: 600; color: #5f6368; margin-left: 6px; }
+      .stack-avatar { width: 24px; height: 24px; border-radius: var(--dt-radius-sm); background: var(--dt-border-light); border: 2px solid var(--dt-bg-card); margin-left: -8px; &:first-child { margin-left: 0; } }
+      .count { font-size: 13px; font-weight: 600; color: var(--dt-text-secondary); margin-left: 6px; }
     }
   }
 }
@@ -95,17 +95,17 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
 .header-right {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--dt-spacing-xs);
 
-  .s-divider { width: 1px; height: 16px; background: #e3e5e8; margin: 0 8px; }
+  .s-divider { width: 1px; height: 16px; background: var(--dt-border-light); margin: 0 var(--dt-spacing-sm); }
 
   .s-tool-btn {
     width: 32px; height: 32px; border: none; background: transparent;
-    color: #5f6368; border-radius: 6px; cursor: pointer;
-    @include flex-center; font-size: 18px; transition: 0.15s;
+    color: var(--dt-text-secondary); border-radius: var(--dt-radius-md); cursor: pointer;
+    @include flex-center; font-size: 18px; transition: var(--dt-transition-fast);
 
-    &:hover { background: #f8f9fa; color: #1d1d1f; }
-    &.active { background: #e3e5e8; color: #1d1d1f; }
+    &:hover { background: var(--dt-bg-hover); color: var(--dt-text-primary); }
+    &.active { background: var(--dt-border-light); color: var(--dt-text-primary); }
   }
 }
 </style>

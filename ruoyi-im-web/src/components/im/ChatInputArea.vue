@@ -84,22 +84,32 @@ const executeSendMessage = () => {
   hasContent.value = false
 }
 
+const handleDragOver = () => { isDragover.value = true }
+const handleDragLeave = () => { isDragover.value = false }
+const handleDrop = (e) => {
+  isDragover.value = false
+  const files = e.dataTransfer?.files
+  if (files?.length) {
+    // 文件上传逻辑将通过 emit 通知父组件
+  }
+}
+
 onMounted(() => editorRef.value?.focus())
 </script>
 
 <style scoped lang="scss">
 .slack-input-wrapper {
-  padding: 0 20px 20px;
-  background: #fff; // Slack 整个聊天区背景通常都是纯白
+  padding: 0 var(--dt-spacing-xl) var(--dt-spacing-xl);
+  background: var(--dt-bg-card);
   position: relative;
   display: flex;
   flex-direction: column;
 }
 
 .slack-input-box {
-  border: 1px solid #86868b; // Slack 特色的灰色边框
-  border-radius: 8px;
-  background: #fff;
+  border: 1px solid var(--dt-border-color);
+  border-radius: var(--dt-radius-lg);
+  background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
   transition: box-shadow 0.2s, border-color 0.2s;
@@ -107,7 +117,7 @@ onMounted(() => editorRef.value?.focus())
 
   &.is-focused {
     border-color: transparent;
-    box-shadow: 0 0 0 1px var(--dt-brand-color), 0 0 0 4px rgba(39, 126, 251, 0.2); // 典型的 focus ring
+    box-shadow: 0 0 0 1px var(--dt-brand-color), 0 0 0 4px var(--dt-brand-lighter);
   }
 }
 
@@ -124,12 +134,12 @@ onMounted(() => editorRef.value?.focus())
     outline: none;
     font-size: 15px;
     line-height: 1.5;
-    color: #1d1d1f;
+    color: var(--dt-text-primary);
     word-break: break-all;
 
     &:empty::before {
       content: attr(placeholder);
-      color: #86868b;
+      color: var(--dt-text-tertiary);
       pointer-events: none;
     }
   }
@@ -140,9 +150,9 @@ onMounted(() => editorRef.value?.focus())
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
-  background: #f8f9fa; // 极淡的底部栏背景
-  border-top: 1px solid #f0f0f0;
+  padding: 6px var(--dt-spacing-sm);
+  background: var(--dt-bg-input);
+  border-top: 1px solid var(--dt-border-lighter);
 
   .tools-left {
     display: flex;
@@ -153,7 +163,7 @@ onMounted(() => editorRef.value?.focus())
   .sep {
     width: 1px;
     height: 16px;
-    background: #dcdfe6;
+    background: var(--dt-border-color);
     margin: 0 6px;
   }
 
@@ -162,16 +172,16 @@ onMounted(() => editorRef.value?.focus())
     height: 28px;
     border: none;
     background: transparent;
-    color: #5f6368;
-    border-radius: 4px;
+    color: var(--dt-text-secondary);
+    border-radius: var(--dt-radius-sm);
     cursor: pointer;
     @include flex-center;
     font-size: 16px;
-    transition: 0.15s;
+    transition: var(--dt-transition-fast);
 
     &:hover {
-      background: #e3e5e8;
-      color: #1d1d1f;
+      background: var(--dt-bg-hover);
+      color: var(--dt-text-primary);
     }
   }
 }
@@ -180,41 +190,40 @@ onMounted(() => editorRef.value?.focus())
 .slack-send-btn {
   width: 32px;
   height: 32px;
-  border-radius: 6px;
+  border-radius: var(--dt-radius-sm);
   border: none;
   background: transparent;
-  color: #aaa;
+  color: var(--dt-text-quaternary);
   @include flex-center;
   font-size: 16px;
   transition: all 0.2s;
 
   &.can-send {
-    background: #007a5a; // Slack 标志性绿色
-    color: #fff;
+    background: var(--dt-brand-color);
+    color: var(--dt-text-white);
     cursor: pointer;
-    
-    &:hover { background: #148567; }
-    &:active { transform: scale(0.95); }
+
+    &:hover { background: var(--dt-brand-hover); }
   }
 }
 
 .slack-footer-tip {
   text-align: right;
-  margin-top: 8px;
+  margin-top: var(--dt-spacing-sm);
   font-size: 11px;
-  color: #86868b;
-  padding-right: 4px;
-  
-  strong { font-weight: 600; color: #555; }
+  color: var(--dt-text-tertiary);
+  padding-right: var(--dt-spacing-xs);
+
+  strong { font-weight: 600; color: var(--dt-text-secondary); }
 }
 
 .drag-overlay {
   position: absolute; inset: 0; background: rgba(255,255,255,0.9);
   z-index: 100; @include flex-center;
   .overlay-inner {
-    border: 2px dashed #007a5a; border-radius: 12px; padding: 32px;
-    color: #007a5a; text-align: center; font-weight: 700;
-    .el-icon { font-size: 48px; margin-bottom: 16px; }
+    border: 2px dashed var(--dt-brand-color); border-radius: var(--dt-radius-lg); padding: 32px;
+    color: var(--dt-brand-color); text-align: center; font-weight: 700;
+    .el-icon { font-size: 48px; margin-bottom: var(--dt-spacing-md); }
   }
 }
 </style>
