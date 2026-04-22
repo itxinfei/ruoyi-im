@@ -45,6 +45,18 @@
         @close="mentionPickerVisible = false"
       />
 
+      <!-- 表情选择器 -->
+      <div v-if="emojiPickerVisible" class="emoji-picker-popover">
+        <div class="emoji-grid">
+          <span
+            v-for="emoji in commonEmojis"
+            :key="emoji"
+            class="emoji-item"
+            @click="handleSelectEmoji(emoji)"
+          >{{ emoji }}</span>
+        </div>
+      </div>
+
       <!-- 多选操作条 (悬浮覆盖) -->
       <SelectionActionBar
         v-if="isSelectionMode"
@@ -72,7 +84,7 @@
 <script setup lang="js">
 import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
 import ChatMessageList from './ChatWindow/ChatMessageList.vue'
 import ChatInputArea from './ChatInputArea.vue'
@@ -98,6 +110,17 @@ const forwardDialogRef = ref(null)
 const mentionPickerVisible = ref(false)
 const mentionPickerPosition = ref({ top: 0, left: 0 })
 const mentionMembers = ref([])
+
+// 表情选择器状态
+const emojiPickerVisible = ref(false)
+
+// 常用表情数据
+const commonEmojis = [
+  '😀', '😃', '😄', '😁', '😅', '😂', '🤣', '😊', '😇', '🙂',
+  '😉', '😌', '😍', '🥰', '😘', '😋', '😛', '🤔', '👍', '👎',
+  '👏', '🙌', '🤝', '🙏', '💪', '❤️', '🧡', '💛', '💚', '💙',
+  '💜', '🖤', '🤍', '💯', '🔥', '⭐', '✨', '🎉', '🎊', '💬'
+]
 
 const currentSession = computed(() => store.state.im.session.currentSession)
 const messages = computed(() => store.state.im.message.messages)
@@ -145,8 +168,15 @@ const handleUploadFiles = async (files) => {
 }
 
 const handleOpenEmoji = () => {
-  // TODO: 打开表情选择器
-  ElMessage.info('表情选择器开发中')
+  emojiPickerVisible.value = !emojiPickerVisible.value
+}
+
+// 选择表情
+const handleSelectEmoji = (emoji) => {
+  if (chatInputAreaRef.value) {
+    chatInputAreaRef.value.insertText(emoji)
+  }
+  emojiPickerVisible.value = false
 }
 
 const handleOpenMention = async () => {
@@ -196,9 +226,25 @@ const handleSelectMention = (member) => {
   mentionPickerVisible.value = false
 }
 
-const handleInsertLink = () => {
-  // TODO: 插入链接
-  ElMessage.info('链接功能开发中')
+const handleInsertLink = async () => {
+  try {
+    const result = await ElMessageBox.prompt('请输入链接地址', '插入链接', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      inputPattern: /^(https?:\/\/)?[\w.-]+\.[a-zA-Z]{2,}(\/\S*)?$/,
+      inputErrorMessage: '请输入有效的网址'
+    })
+
+    if (result.value && chatInputAreaRef.value) {
+      let url = result.value
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url
+      }
+      chatInputAreaRef.value.insertText(url)
+    }
+  } catch {
+    // 用户取消
+  }
 }
 
 // 加载更多历史消息
@@ -352,5 +398,43 @@ const handleVideoCall = () => {
 }
 .push-sidebar-enter-from, .push-sidebar-leave-to {
   width: 0;
+}
+
+/* 表情选择器 */
+.emoji-picker-popover {
+  position: absolute;
+  bottom: 140px;
+  left: 20px;
+  width: 320px;
+  max-height: 200px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-float);
+  border: 1px solid var(--dt-border-light);
+  padding: var(--dt-spacing-sm);
+  z-index: var(--dt-z-popover);
+  overflow-y: auto;
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+
+    .emoji-item {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: var(--dt-radius-sm);
+      transition: background-color var(--dt-transition-fast);
+
+      &:hover {
+        background: var(--dt-bg-hover);
+      }
+    }
+  }
 }
 </style>
