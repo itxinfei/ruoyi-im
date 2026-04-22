@@ -70,6 +70,9 @@
 
       <!-- 转发对话框 -->
       <ForwardDialog ref="forwardDialogRef" />
+
+      <!-- 通话对话框 -->
+      <CallDialog ref="callDialogRef" :session="currentSession" />
     </div>
 
     <!-- 2. 侧边详情区 (去虚构：Push 布局而非覆盖) -->
@@ -92,6 +95,7 @@ import SelectionActionBar from './ChatWindow/SelectionActionBar.vue'
 import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
 import AtMemberPicker from './AtMemberPicker.vue'
+import CallDialog from '@/components/Chat/CallDialog.vue'
 import { uploadFile } from '@/api/im/file'
 import { getGroupMembers } from '@/api/im/group'
 
@@ -105,6 +109,7 @@ const chatMessageListRef = ref(null)
 const chatInputAreaRef = ref(null)
 const isLoadingHistory = ref(false)
 const forwardDialogRef = ref(null)
+const callDialogRef = ref(null)
 
 // @提及选择器状态
 const mentionPickerVisible = ref(false)
@@ -348,12 +353,36 @@ const handleOpenForwardDialog = () => {
 
 // 发起语音通话
 const handleVoiceCall = () => {
-  ElMessage.info('语音通话功能开发中')
+  if (!currentSession.value?.id) {
+    ElMessage.warning('请先选择一个会话')
+    return
+  }
+  const session = currentSession.value
+  if (callDialogRef.value) {
+    callDialogRef.value.open('voice', {
+      peerId: session.peerId || session.userId,
+      peerName: session.nickname || session.name || '对方',
+      peerAvatar: session.avatar,
+      callId: `call-${Date.now()}`
+    })
+  }
 }
 
 // 发起视频通话
 const handleVideoCall = () => {
-  ElMessage.info('视频通话功能开发中')
+  if (!currentSession.value?.id) {
+    ElMessage.warning('请先选择一个会话')
+    return
+  }
+  const session = currentSession.value
+  if (callDialogRef.value) {
+    callDialogRef.value.open('video', {
+      peerId: session.peerId || session.userId,
+      peerName: session.nickname || session.name || '对方',
+      peerAvatar: session.avatar,
+      callId: `call-${Date.now()}`
+    })
+  }
 }
 </script>
 
