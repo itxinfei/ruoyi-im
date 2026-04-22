@@ -156,7 +156,7 @@ const handleLocationClick = () => {
 const handleCardClick = () => {
   const { userId } = cardInfo.value
   if (userId) {
-    // 打开用户资料对话框
+    emit('show-user', userId)
   }
 }
 
