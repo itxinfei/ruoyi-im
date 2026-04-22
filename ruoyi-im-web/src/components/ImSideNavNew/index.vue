@@ -35,15 +35,15 @@
       </div>
       
       <!-- 更多：定制暗色系弹出菜单 -->
-      <el-dropdown trigger="click" placement="right-end" popper-class="dt-l1-dropdown-v4">
+      <el-dropdown trigger="click" placement="right-end" popper-class="dt-l1-dropdown-v4" @command="handleDropdownCommand">
         <div class="footer-action">
           <el-icon><MoreFilled /></el-icon>
         </div>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item :icon="Setting">系统设置</el-dropdown-item>
-            <el-dropdown-item :icon="Connection">网络检测</el-dropdown-item>
-            <el-dropdown-item :icon="InfoFilled" divided>关于 RuoYi-IM</el-dropdown-item>
+            <el-dropdown-item command="settings" :icon="Setting">系统设置</el-dropdown-item>
+            <el-dropdown-item command="network" :icon="Connection">网络检测</el-dropdown-item>
+            <el-dropdown-item command="about" :icon="InfoFilled" divided>关于 RuoYi-IM</el-dropdown-item>
           </el-dropdown-menu>
         </template>
       </el-dropdown>
@@ -69,9 +69,24 @@ import {
   UserFilled, BellFilled, Grid, List,
   PhoneFilled, Connection
 } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
+
+const handleDropdownCommand = (command) => {
+  switch (command) {
+    case 'settings':
+      emit('open-system-settings')
+      break
+    case 'network':
+      ElMessage.info('网络连接正常')
+      break
+    case 'about':
+      ElMessage.info('RuoYi-IM v1.0.0 - 企业即时通讯平台')
+      break
+  }
+}
 
 defineProps({ activeModule: String })
-const emit = defineEmits(['switch-module', 'open-edit-profile'])
+const emit = defineEmits(['switch-module', 'open-edit-profile', 'open-system-settings'])
 
 const topNavs = [
   { id: 'chat', name: '消息', icon: markRaw(ChatLineRound), activeIcon: markRaw(ChatDotRound), badge: 5 },
