@@ -25,7 +25,7 @@
             <div class="group-title">{{ group.label }}</div>
             <div class="group-items">
               <div 
-                v-for="(item, idx) in group.list" 
+                v-for="item in group.list" 
                 :key="item.id" 
                 class="res-item"
                 :class="{ active: selectedId === item.id }"
