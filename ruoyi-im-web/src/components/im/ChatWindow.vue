@@ -68,6 +68,7 @@ import ChatInputArea from './ChatInputArea.vue'
 import SelectionActionBar from './ChatWindow/SelectionActionBar.vue'
 import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
+import { uploadFile } from '@/api/im/file'
 
 const store = useStore()
 const isDetailOpen = ref(false)
@@ -106,12 +107,21 @@ const handleOpenFilePicker = () => {
   input.click()
 }
 
-const handleUploadFiles = (files) => {
-  Array.from(files).forEach(file => {
-    store.dispatch('im/message/sendFile', {
-      file,
-      sessionId: currentSession.value.id
-    })
+const handleUploadFiles = async (files) => {
+  Array.from(files).forEach(async file => {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('conversationId', currentSession.value.id)
+
+    try {
+      const res = await uploadFile(formData)
+      if (res.code === 200) {
+        ElMessage.success('文件发送成功')
+      }
+    } catch (error) {
+      console.error('文件上传失败:', error)
+      ElMessage.error('文件发送失败')
+    }
   })
 }
 
