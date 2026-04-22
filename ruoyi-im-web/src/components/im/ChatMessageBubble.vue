@@ -46,7 +46,6 @@
 
         <!-- 文件 (Slack风格卡片) -->
         <div v-else-if="messageType === 'FILE'" class="file-card" @click="handleFileClick">
-          &.online { background: var(--dt-success-color); }
           <div class="file-info">
             <div class="f-name">{{ resolvedFileName }}</div>
             <div class="f-meta">{{ formatReadableFileSize(resolvedFileSize) }} · <span>点击下载</span></div>
@@ -102,7 +101,7 @@
 <script setup lang="js">
 import { ref, computed } from 'vue'
 import {
-  Check, Document, CaretRight, CircleCheck, ChatDotSquare, Share, MoreFilled, Location
+  Check, Document, CaretRight, ChatDotSquare, Share, MoreFilled, Location
 } from '@element-plus/icons-vue'
 
 const props = defineProps({

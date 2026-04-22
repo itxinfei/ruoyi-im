@@ -126,6 +126,7 @@ const toggleGroup = (t) => collapsedGroups.value[t] = !collapsedGroups.value[t]
 const togglePin = (s) => store.dispatch('im/session/pinSession', { sessionId: s.id, pinned: !s.isPinned })
 const toggleMute = (s) => store.dispatch('im/session/muteSession', { sessionId: s.id, muted: !s.isMuted })
 const handleDelete = (s) => store.dispatch('im/session/deleteSession', s.id)
+const handleContextMenu = (event, session) => { /* 右键菜单预留 */ }
 const formatTime = (t) => t ? new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
 const handleGlobalClick = () => { /* 预留全局点击处理 */ }
 const handleOpenCreateChat = () => { /* 预留创建会话 */ }
