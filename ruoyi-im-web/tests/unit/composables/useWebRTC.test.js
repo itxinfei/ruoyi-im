@@ -2,6 +2,24 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { ref } from 'vue'
 import { useWebRTC } from '@/composables/useWebRTC'
 
+// Mock RTCPeerConnection (must be class, not fn, because of `new`)
+class MockRTCPeerConnection {
+  constructor(config) {
+    this.config = config
+    this.iceConnectionState = 'new'
+    this.localDescription = { type: 'offer', sdp: 'mock-sdp' }
+    this.remoteDescription = null
+  }
+  createOffer() { return Promise.resolve(this.localDescription) }
+  createAnswer() { return Promise.resolve({ type: 'answer', sdp: 'mock-answer' }) }
+  setLocalDescription(desc) { this.localDescription = desc }
+  setRemoteDescription(desc) { this.remoteDescription = desc }
+  addIceCandidate(candidate) { return Promise.resolve() }
+  close() {}
+  getStats() { return Promise.resolve([]) }
+}
+global.RTCPeerConnection = MockRTCPeerConnection
+
 // Mock element-plus ElMessage
 vi.mock('element-plus', () => ({
   ElMessage: { error: vi.fn() }
