@@ -87,15 +87,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
-import { PhoneFilled, CloseBold, Microphone, VideoCamera, VideoCameraFilled, Close, Mute, RefreshRight } from '@element-plus/icons-vue'
+import { PhoneFilled, CloseBold, Microphone, VideoCamera, VideoCameraFilled, Close, Mute } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 import { acceptCall, rejectCall, endCall, initiateCall } from '@/api/im/videoCall'
 
-const props = defineProps({ session: Object })
+defineProps({ session: Object })
 const emit = defineEmits(['closed'])
 
 const { sendMessage } = useImWebSocket()

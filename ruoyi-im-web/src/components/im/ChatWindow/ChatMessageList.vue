@@ -1,5 +1,5 @@
 <template>
-  <div ref="containerRef" class="v6-message-viewport custom-scrollbar">
+  <div ref="containerRef" class="v6-message-viewport custom-scrollbar" @scroll="handleScroll">
     <div class="v6-message-content">
       <div
         v-for="(message, index) in messages"
@@ -26,7 +26,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, nextTick } from 'vue'
 import ChatMessageBubble from '../ChatMessageBubble.vue'
 
 const props = defineProps({

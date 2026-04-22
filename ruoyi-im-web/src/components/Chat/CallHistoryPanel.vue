@@ -11,9 +11,9 @@
       <!-- 2. 通话记录列表 (对齐邮件列表风格) -->
       <div class="call-list-container custom-scrollbar">
         <div v-if="calls.length === 0" class="empty-view">暂无通话记录</div>
-        <div 
-          v-for="call in calls" 
-          :key="call.id" 
+        <div
+          v-for="call in calls"
+          :key="call.id"
           class="call-row"
           :class="{ missed: call.status === 'MISSED' }"
           @click="selectedCall = call"
@@ -66,7 +66,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { Phone, VideoCamera, PhoneFilled, VideoCameraFilled } from '@element-plus/icons-vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -80,7 +80,7 @@ const getStatusText = (c) => c.status === 'MISSED' ? '未接来电' : '已接通
 const formatTime = (t) => new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
 const formatFullTime = (t) => new Date(t).toLocaleString()
 
-const handleRedial = (c) => { /* 拨号逻辑 */ }
+const handleRedial = (_call) => { /* TODO: 拨号逻辑 */ }
 </script>
 
 <style scoped lang="scss">

@@ -127,10 +127,10 @@ import { ref, computed, watch, nextTick } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { 
-  Camera, EditPen, Plus, More, Bell, FolderOpened, 
-  Link, ArrowRight, StarFilled, Microphone, Close
+  Camera, EditPen, Plus, More, Bell, FolderOpened,
+  Link, ArrowRight, StarFilled, Microphone
 } from '@element-plus/icons-vue'
-import { getGroup, updateGroup, getGroupMembers, getGroupAnnouncements, leaveGroup } from '@/api/im/group'
+import { getGroupMembers, getGroupAnnouncements, leaveGroup } from '@/api/im/group'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import GroupFilePanel from '@/components/GroupDetailDrawer/GroupFilePanel.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
