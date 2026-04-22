@@ -20,15 +20,29 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'element-plus': ['element-plus'],
-          'vue-vendor': ['vue', 'vue-router', 'vuex'],
-          'echarts': ['echarts'],
-          'utils': ['axios', 'dayjs', 'dompurify']
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            // Vue 核心
+            if (id.includes('vue') || id.includes('vuex') || id.includes('vue-router')) {
+              return 'vue-vendor'
+            }
+            // Element Plus
+            if (id.includes('element-plus')) {
+              return 'element-plus'
+            }
+            // ECharts
+            if (id.includes('echarts') || id.includes('zrender')) {
+              return 'echarts'
+            }
+            // 工具库
+            if (id.includes('axios') || id.includes('dayjs') || id.includes('dompurify')) {
+              return 'utils'
+            }
+          }
         }
       }
     },
-    chunkSizeWarningLimit: 600
+    chunkSizeWarningLimit: 800
   },
   server: {
     port: 3000,
