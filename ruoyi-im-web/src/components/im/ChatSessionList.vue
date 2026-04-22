@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import { Search, Plus, ArrowDown, BellFilled, Top, Bottom, Delete, Mute } from '@element-plus/icons-vue'
 
@@ -94,6 +94,7 @@ const isSearchFocused = ref(false)
 const searchKeyword = ref('')
 const filterType = ref(localStorage.getItem('dt_session_filter') || 'all')
 const collapsedGroups = ref({ PINNED: false, PRIVATE: false, GROUP: false })
+const loading = ref(false)
 
 const tabs = [{ label: '全部', value: 'all' }, { label: '单聊', value: 'PRIVATE' }, { label: '群聊', value: 'GROUP' }]
 
