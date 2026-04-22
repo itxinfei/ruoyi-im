@@ -386,45 +386,140 @@ public class ImAIServiceImpl implements ImAIService {
     }
 
     /**
-     * 模拟AI回复
+     * 模拟AI回复 - 增强版
+     * 支持常见场景：问候、润色、翻译、总结、问答等
      */
     private String chatWithMock(String message, List<String> history) {
-        // 简单的模拟回复逻辑
-        if (message.contains("你好") || message.contains("hi") || message.contains("hello")) {
-            return "你好！我是AI助手，有什么可以帮助你的吗？";
-        } else if (message.contains("天气")) {
-            return "抱歉，我暂时无法查询实时天气信息。你可以尝试访问天气预报网站获取最新天气。";
-        } else if (message.contains("谢谢") || message.contains("感谢")) {
-            return "不客气！如果还有其他问题，随时可以问我。";
-        } else if (message.contains("再见") || message.contains("拜拜")) {
-            return "再见！祝你有个愉快的一天！";
-        } else {
-            return "我收到了你的消息：\"" + message + "\"。这是一个模拟回复，配置真实的AI API密钥后可获得更智能的回答。";
+        String lowerMsg = message.toLowerCase();
+
+        // 问候类
+        if (containsAny(lowerMsg, "你好", "hi", "hello", "嗨", "您好")) {
+            return "你好！我是AI助手，有什么可以帮助你的吗？\n\n我可以帮你：\n• 润色周报、月报等文档\n• 中英文翻译\n• 总结长文本要点\n• 回答各种问题\n• 起草通知、邮件等";
         }
+
+        // 润色类
+        if (containsAny(lowerMsg, "润色", "修改", "改写", "优化", "polish")) {
+            return "好的，我来帮你润色文档。\n\n【润色建议】\n1. 语言表达更精炼\n2. 结构层次更清晰\n3. 专业术语更准确\n4. 语气措辞更得体\n\n请提供需要润色的具体内容，我会给出优化建议。\n\n---\n*提示：配置真实的AI API（如通义千问/GPT）可获得更智能的润色效果*";
+        }
+
+        // 翻译类
+        if (containsAny(lowerMsg, "翻译", "translate", "英文", "中文", "english", "chinese")) {
+            if (containsAny(lowerMsg, "英", "en")) {
+                return "【中译英参考】\n\n以下是你的中文内容翻译：\n\n[此处将显示英文翻译结果]\n\n---\n*提示：配置真实的AI API可获得更准确、地道的翻译*";
+            } else {
+                return "【英译中参考】\n\n以下是你的英文内容翻译：\n\n[此处将显示中文翻译结果]\n\n---\n*提示：配置真实的AI API可获得更准确、地道的翻译*";
+            }
+        }
+
+        // 总结类
+        if (containsAny(lowerMsg, "总结", "摘要", "概括", "summarize", "summary")) {
+            return "【文本总结】\n\n请提供需要总结的内容，我可以帮你：\n\n• 提取核心观点\n• 生成简洁摘要\n• 列出关键要点\n• 梳理逻辑结构\n\n---\n*提示：配置真实的AI API可获得更智能的总结效果*";
+        }
+
+        // 起草类
+        if (containsAny(lowerMsg, "起草", "写", "draft", "通知", "邮件", "email")) {
+            return "【文档起草】\n\n好的，我来帮你起草文档。\n\n请告诉我：\n1. 文档类型（通知/邮件/报告/申请...）\n2. 主要内容要点\n3. 收件对象（如有）\n4. 特殊格式要求（如有）\n\n---\n*提示：配置真实的AI API可获得更专业的起草效果*";
+        }
+
+        // 问答类
+        if (containsAny(lowerMsg, "什么是", "怎么", "如何", "why", "how", "what", "解释")) {
+            return "【问答参考】\n\n关于你的问题，这是一个模拟回复。\n\n要获得准确的答案，建议：\n1. 搜索权威技术文档\n2. 咨询相关领域专家\n3. 配置真实的AI API进行问答\n\n---\n*当前为模拟模式，配置真实API可获得准确答案*";
+        }
+
+        // 感谢类
+        if (containsAny(lowerMsg, "谢谢", "感谢", "thanks", "thank")) {
+            return "不客气！很高兴能帮到你。如果还有其他问题，随时可以问我。";
+        }
+
+        // 再见类
+        if (containsAny(lowerMsg, "再见", "拜拜", "bye", "下次见")) {
+            return "再见！祝你工作顺利。有需要随时来找我。";
+        }
+
+        // 默认回复
+        return "我收到了你的消息。\n\n当前为**模拟模式**，要获得智能回复，请配置真实的AI API密钥。\n\n支持的配置：\n• 通义千问（阿里云百炼）\n• OpenAI GPT\n• 百度文心一言\n• 腾讯混元\n• 讯飞星火\n\n---\n你也可以尝试问我：\n• \"帮我润色周报\"\n• \"翻译成英文\"\n• \"总结这段文字\"\n• \"起草一封邮件\"";
     }
 
     /**
-     * 生成文档摘要
+     * 检查消息是否包含任意关键词
+     */
+    private boolean containsAny(String message, String... keywords) {
+        for (String keyword : keywords) {
+            if (message.contains(keyword.toLowerCase())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 生成文档摘要 - 增强版
      */
     private String generateSummary(String content, String summaryType) {
-        // 模拟摘要生成
-        int maxLength = content.length() > 500 ? 500 : content.length();
-        String preview = content.substring(0, maxLength);
+        // 计算基本统计
+        int charCount = content.length();
+        int wordCount = content.split("\\s+").length;
+        int sentenceCount = content.split("[。！？.!?]+").length;
+
+        // 提取前N个字符作为预览
+        int previewLen = Math.min(200, content.length());
+        String preview = content.substring(0, previewLen);
+
+        StringBuilder sb = new StringBuilder();
 
         switch (summaryType) {
             case "brief":
-                return "这是一篇" + content.length() + "字符的文档，主要讲述..." + preview.substring(0, Math.min(50, preview.length())) + "...";
+                sb.append("【简短摘要】\n\n");
+                sb.append("原文共").append(charCount).append("字符，");
+                sb.append(wordCount).append("个词语，");
+                sb.append(sentenceCount).append("个句子。\n\n");
+                sb.append("核心内容：\n");
+                sb.append(preview);
+                if (content.length() > previewLen) {
+                    sb.append("...\n\n（以上为前").append(previewLen).append("字符预览）");
+                }
+                break;
+
             case "detailed":
-                return "【详细摘要】\n" +
-                        "原文共" + content.length() + "字符。\n\n" +
-                        "主要内容：\n" +
-                        "1. " + preview.substring(0, Math.min(100, preview.length())) + "...\n" +
-                        "2. 文档中段讨论了相关主题...\n" +
-                        "3. 最后总结了核心观点。\n\n" +
-                        "这是一个模拟摘要，配置真实的AI API后可获得更准确的摘要。";
+                sb.append("【详细摘要】\n\n");
+                sb.append("📊 基本统计\n");
+                sb.append("• 字符数：").append(charCount).append("\n");
+                sb.append("• 词数：").append(wordCount).append("\n");
+                sb.append("• 句子数：").append(sentenceCount).append("\n\n");
+                sb.append("📝 内容预览\n");
+                sb.append(preview);
+                if (content.length() > previewLen) {
+                    sb.append("...\n\n（以上为前").append(previewLen).append("字符）");
+                }
+                sb.append("\n\n【结构分析】\n");
+                // 简单分析段落
+                String[] paragraphs = content.split("\n");
+                sb.append("• 段落数：").append(paragraphs.length).append("\n");
+                // 找出最短和最长的句子
+                String[] sentences = content.split("[。！？.!?]+");
+                if (sentences.length > 0) {
+                    int minLen = sentences[0].length();
+                    int maxLen = sentences[0].length();
+                    for (String s : sentences) {
+                        if (s.length() < minLen) minLen = s.length();
+                        if (s.length() > maxLen) maxLen = s.length();
+                    }
+                    sb.append("• 句子长度：").append(minLen).append("-").append(maxLen).append("字符\n");
+                }
+                break;
+
             default:
-                return "这是一份" + content.length() + "字符的文档。主要内容摘要：" + preview + "...\n\n（这是模拟摘要，配置真实AI API后可获得更准确的结果）";
+                sb.append("【摘要】\n\n");
+                sb.append("原文共").append(charCount).append("字符。\n\n");
+                sb.append("主要内容：\n");
+                sb.append(preview);
+                if (content.length() > previewLen) {
+                    sb.append("...\n\n（以上为前").append(previewLen).append("字符预览）");
+                }
         }
+
+        sb.append("\n\n---\n*提示：配置真实的AI API（如通义千问/GPT）可获得更智能、更准确的摘要*");
+        return sb.toString();
     }
 
     /**

@@ -49,6 +49,12 @@
             <div class="ai-icon-large"><el-icon><Promotion /></el-icon></div>
             <h1>你好，我是你的 AI 助理</h1>
             <p>基于大语言模型，我可以帮你处理文档、总结记录或回答问题。</p>
+            <div class="feature-chips">
+              <span class="feature-chip">💼 润色周报</span>
+              <span class="feature-chip">🌐 中英互译</span>
+              <span class="feature-chip">📊 数据总结</span>
+              <span class="feature-chip">📝 起草文档</span>
+            </div>
           </div>
         </div>
 
@@ -131,8 +137,8 @@ const scrollRef = ref(null)
 // 基础数据
 const currentUser = computed(() => store.getters['user/currentUser'] || {})
 const userInitial = computed(() => (currentUser.value.nickname || '我').charAt(0))
-const availableModels = ref(['Qwen-Max', 'GPT-4', 'DeepSeek-V3'])
-const selectedModel = ref('Qwen-Max')
+const availableModels = ref(['通义千问', 'GPT-4', 'DeepSeek-V3', '文心一言'])
+const selectedModel = ref('通义千问')
 
 // 状态管理
 const inputMessage = ref('')
@@ -150,10 +156,12 @@ const currentChatTitle = computed(() => {
 
 // 快捷指令
 const quickActions = [
-  { id: 1, label: '润色周报', prompt: '请帮我润色以下周报内容，使其更专业：' },
-  { id: 2, label: '中英翻译', prompt: '请将以下内容翻译成英文：' },
-  { id: 3, label: '数据总结', prompt: '请帮我总结以下数据的核心指标：' },
-  { id: 4, label: '起草通知', prompt: '请帮我起草一份关于' }
+  { id: 1, label: '💼 润色周报', prompt: '请帮我润色以下周报内容，使其更专业、简洁有条理：\n\n' },
+  { id: 2, label: '🌐 中英互译', prompt: '请将以下内容翻译成英文（保持原意，地道表达）：\n\n' },
+  { id: 3, label: '📊 数据总结', prompt: '请帮我分析并总结以下数据的核心指标和关键洞察：\n\n' },
+  { id: 4, label: '📝 起草通知', prompt: '请帮我起草一份公司内部通知，包括：标题、正文（背景/事项/要求）、落款\n\n' },
+  { id: 5, label: '📧 写邮件', prompt: '请帮我起草一封专业邮件，包括：主题、正文（问候/目的/内容/期待行动/礼貌结语）\n\n收件人：\n主题：\n' },
+  { id: 6, label: '📋 项目方案', prompt: '请帮我规划一个项目方案，包括：背景目标、核心模块、实施步骤、预期成果、风险评估\n\n项目主题：\n' }
 ]
 
 // --- 逻辑实现 ---
@@ -247,6 +255,19 @@ const formatMessage = (c) => formatAIMessage(c)
 const scrollToBottom = () => { if (scrollRef.value) scrollRef.value.scrollTop = scrollRef.value.scrollHeight }
 const copyMessage = (c) => { navigator.clipboard.writeText(c); ElMessage.success('已复制') }
 
+// 重新生成上一条回复
+const regenerateMessage = () => {
+  if (messages.value.length < 2) return
+  // 移除最后一条AI回复
+  messages.value.pop()
+  // 重新发送最后一条用户消息
+  const lastUserMsg = messages.value[messages.value.length - 1]
+  if (lastUserMsg && lastUserMsg.role === 'user') {
+    inputMessage.value = lastUserMsg.content
+    sendMessage()
+  }
+}
+
 onMounted(() => {
   const saved = localStorage.getItem('ai_chat_history')
   if (saved) chatHistory.value = JSON.parse(saved)
@@ -303,10 +324,19 @@ onMounted(() => {
 .welcome-view {
   height: 80%; display: flex; align-items: center; justify-content: center;
   .welcome-card {
-    text-align: center; max-width: 400px;
+    text-align: center; max-width: 500px;
     .ai-icon-large { font-size: 48px; color: var(--dt-brand-color); margin-bottom: 20px; }
     h1 { font-size: 20px; color: var(--dt-text-primary); margin-bottom: 12px; }
-    p { color: var(--dt-text-tertiary); font-size: 14px; line-height: 1.6; }
+    p { color: var(--dt-text-tertiary); font-size: 14px; line-height: 1.6; margin-bottom: 24px; }
+    .feature-chips {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
+      .feature-chip {
+        padding: 6px 14px; background: var(--dt-bg-input); border: 1px solid var(--dt-border-light);
+        border-radius: 16px; font-size: 13px; color: var(--dt-text-secondary); cursor: pointer;
+        transition: var(--dt-transition-fast);
+        &:hover { border-color: var(--dt-brand-color); color: var(--dt-brand-color); background: var(--dt-brand-bg); }
+      }
+    }
   }
 }
 
