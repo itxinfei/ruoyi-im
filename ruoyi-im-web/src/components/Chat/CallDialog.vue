@@ -93,7 +93,7 @@ import { PhoneFilled, CloseBold, Microphone, VideoCamera, VideoCameraFilled, Clo
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { useWebRTC } from '@/composables/useWebRTC'
 import { useImWebSocket } from '@/composables/useImWebSocket'
-import { acceptCall, rejectCall, endCall } from '@/api/im/videoCall'
+import { acceptCall, rejectCall, endCall, initiateCall } from '@/api/im/videoCall'
 
 const props = defineProps({ session: Object })
 const emit = defineEmits(['closed'])
@@ -165,10 +165,22 @@ const open = async (callType, options = {}) => {
   type.value = callType; status.value = options.status || 'calling'; callId.value = options.callId || `call-${Date.now()}`
   peerId.value = options.peerId; peerName.value = options.peerName; peerAvatar.value = options.peerAvatar
   pendingOffer.value = options.pendingOffer; visible.value = true; duration.value = 0
-  
+
   if (status.value === 'incoming') playAudio('ring')
   if (status.value === 'calling') {
     playAudio('dial')
+    // 先调用后端 API 发起通话
+    try {
+      const res = await initiateCall({
+        calleeId: peerId.value,
+        callType: callType.toUpperCase()
+      })
+      if (res.code === 200) {
+        callId.value = res.data // 使用后端返回的 callId
+      }
+    } catch (e) {
+      console.error('发起通话失败:', e)
+    }
     if (await getMediaStream(callType === 'video')) {
       createOffer(callId.value, peerId.value, localStream)
       timeoutTimer = setTimeout(() => { if (status.value === 'calling') handleCancel() }, 45000)
