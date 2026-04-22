@@ -26,12 +26,23 @@
 
       <!-- 底部输入区 (对齐钉钉：通铺纯白) -->
       <ChatInputArea
+        ref="chatInputAreaRef"
         v-model="currentDraft"
         @send="processSendMessage"
         @attach-click="handleOpenFilePicker"
         @emoji-click="handleOpenEmoji"
         @mention-click="handleOpenMention"
         @link-click="handleInsertLink"
+      />
+
+      <!-- @提及选择器 -->
+      <AtMemberPicker
+        v-if="mentionPickerVisible"
+        :visible="mentionPickerVisible"
+        :members="mentionMembers"
+        :position="mentionPickerPosition"
+        @select="handleSelectMention"
+        @close="mentionPickerVisible = false"
       />
 
       <!-- 多选操作条 (悬浮覆盖) -->
@@ -68,7 +79,9 @@ import ChatInputArea from './ChatInputArea.vue'
 import SelectionActionBar from './ChatWindow/SelectionActionBar.vue'
 import ChatDetailDrawer from '@/components/Chat/ChatDetailDrawer.vue'
 import ForwardDialog from '@/components/ForwardDialog/index.vue'
+import AtMemberPicker from './AtMemberPicker.vue'
 import { uploadFile } from '@/api/im/file'
+import { getGroupMembers } from '@/api/im/group'
 
 const store = useStore()
 const isDetailOpen = ref(false)
@@ -77,8 +90,14 @@ const selectedMessages = ref(new Set())
 const currentDraft = ref('')
 const messageListRef = ref(null)
 const chatMessageListRef = ref(null)
+const chatInputAreaRef = ref(null)
 const isLoadingHistory = ref(false)
 const forwardDialogRef = ref(null)
+
+// @提及选择器状态
+const mentionPickerVisible = ref(false)
+const mentionPickerPosition = ref({ top: 0, left: 0 })
+const mentionMembers = ref([])
 
 const currentSession = computed(() => store.state.im.session.currentSession)
 const messages = computed(() => store.state.im.message.messages)
@@ -130,9 +149,51 @@ const handleOpenEmoji = () => {
   ElMessage.info('表情选择器开发中')
 }
 
-const handleOpenMention = () => {
-  // TODO: 打开 @提及 选择器
-  ElMessage.info('提及功能开发中')
+const handleOpenMention = async () => {
+  if (!currentSession.value?.id) return
+
+  // 获取群成员（如果是群聊）
+  const session = currentSession.value
+  if (session.type === 'group' || session.chatType === 'group') {
+    try {
+      const res = await getGroupMembers(session.id)
+      if (res.code === 200 && res.data) {
+        mentionMembers.value = res.data.map(m => ({
+          userId: m.userId || m.id,
+          nickname: m.nickname || m.name,
+          name: m.nickname || m.name,
+          avatar: m.avatar,
+          role: m.role
+        }))
+      }
+    } catch (e) {
+      console.error('获取群成员失败:', e)
+      mentionMembers.value = []
+    }
+  } else {
+    // 私聊：只显示对方
+    mentionMembers.value = [{
+      userId: session.userId || session.peerId,
+      nickname: session.nickname || session.name || '对方',
+      name: session.nickname || session.name || '对方',
+      avatar: session.avatar
+    }]
+  }
+
+  // 计算弹窗位置（在输入框上方）
+  mentionPickerPosition.value = {
+    top: -300,
+    left: 20
+  }
+  mentionPickerVisible.value = true
+}
+
+// 处理选择提及成员
+const handleSelectMention = (member) => {
+  if (chatInputAreaRef.value) {
+    chatInputAreaRef.value.insertText(`@${member.nickname} `)
+  }
+  mentionPickerVisible.value = false
 }
 
 const handleInsertLink = () => {

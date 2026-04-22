@@ -152,7 +152,32 @@ const handleCode = () => {
   }
 }
 
+// 插入文本到光标位置（供父组件调用）
+const insertText = (text) => {
+  const editor = editorRef.value
+  if (!editor) return
+
+  editor.focus()
+  const selection = window.getSelection()
+  if (selection?.rangeCount) {
+    const range = selection.getRangeAt(0)
+    range.deleteContents()
+    range.insertNode(document.createTextNode(text))
+    range.collapse(false)
+  } else {
+    document.execCommand('insertText', false, text)
+  }
+
+  // 触发 input 事件更新状态
+  handleInput()
+}
+
 onMounted(() => editorRef.value?.focus())
+
+// 暴露方法给父组件调用
+defineExpose({
+  insertText
+})
 </script>
 
 <style scoped lang="scss">
