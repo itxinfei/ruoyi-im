@@ -64,11 +64,12 @@ public class ImVideoCallController {
     
     @PostMapping("/{callId}/accept")
     public Result<Void> acceptCall(
-            @PathVariable Long callId) {
+            @PathVariable String callId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.acceptCall(callId, userId);
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.acceptCall(parsedCallId, userId);
             return Result.success("接听成功");
         } catch (Exception e) {
             log.error("接听通话失败: {}", e.getMessage());
@@ -82,12 +83,13 @@ public class ImVideoCallController {
     
     @PostMapping("/{callId}/reject")
     public Result<Void> rejectCall(
-            @PathVariable Long callId,
+            @PathVariable String callId,
             @RequestParam(required = false) String reason) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.rejectCall(callId, userId, reason);
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.rejectCall(parsedCallId, userId, reason);
             return Result.success("已拒绝");
         } catch (Exception e) {
             log.error("拒绝通话失败: {}", e.getMessage());
@@ -101,15 +103,37 @@ public class ImVideoCallController {
     
     @PostMapping("/{callId}/end")
     public Result<Void> endCall(
-            @PathVariable Long callId) {
+            @PathVariable String callId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.endCall(callId, userId);
+            // 处理前端临时生成的callId格式 (call-1776910478925)
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.endCall(parsedCallId, userId);
             return Result.success("通话已结束");
         } catch (Exception e) {
             log.error("结束通话失败: {}", e.getMessage());
             return Result.fail(e.getMessage());
+        }
+    }
+    
+    /**
+     * 解析通话ID，处理前端临时生成的格式
+     */
+    private Long parseCallId(String callId) {
+        try {
+            // 如果是数字字符串，直接转换
+            if (callId.matches("\\d+")) {
+                return Long.parseLong(callId);
+            }
+            // 如果是前端临时生成的格式 (call-1776910478925)
+            else if (callId.startsWith("call-")) {
+                String numericPart = callId.substring(5);
+                return Long.parseLong(numericPart);
+            }
+            throw new NumberFormatException("Invalid callId format");
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid callId: " + callId, e);
         }
     }
 
@@ -118,9 +142,10 @@ public class ImVideoCallController {
      */
     
     @GetMapping("/{callId}")
-    public Result<Object> getCallInfo(@PathVariable Long callId) {
+    public Result<Object> getCallInfo(@PathVariable String callId) {
         try {
-            Object callInfo = videoCallService.getCallInfo(callId);
+            Long parsedCallId = parseCallId(callId);
+            Object callInfo = videoCallService.getCallInfo(parsedCallId);
             if (callInfo == null) {
                 return Result.fail("通话不存在或已过期");
             }
@@ -241,11 +266,12 @@ public class ImVideoCallController {
     
     @PostMapping("/group/{callId}/join")
     public Result<Void> joinGroupCall(
-            @PathVariable Long callId) {
+            @PathVariable String callId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.joinGroupCall(callId, userId);
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.joinGroupCall(parsedCallId, userId);
             return Result.success("加入成功");
         } catch (Exception e) {
             log.error("加入群组通话失败: {}", e.getMessage());
@@ -259,11 +285,12 @@ public class ImVideoCallController {
     
     @PostMapping("/group/{callId}/leave")
     public Result<Void> leaveGroupCall(
-            @PathVariable Long callId) {
+            @PathVariable String callId) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.leaveGroupCall(callId, userId);
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.leaveGroupCall(parsedCallId, userId);
             return Result.success("已离开");
         } catch (Exception e) {
             log.error("离开群组通话失败: {}", e.getMessage());
@@ -277,9 +304,10 @@ public class ImVideoCallController {
     
     @GetMapping("/group/{callId}/participants")
     public Result<List<?>> getParticipants(
-            @PathVariable Long callId) {
+            @PathVariable String callId) {
         try {
-            List<?> participants = videoCallService.getCallParticipants(callId);
+            Long parsedCallId = parseCallId(callId);
+            List<?> participants = videoCallService.getCallParticipants(parsedCallId);
             return Result.success(participants);
         } catch (Exception e) {
             log.error("获取参与者列表失败: {}", e.getMessage());
@@ -293,12 +321,13 @@ public class ImVideoCallController {
     
     @PostMapping("/group/{callId}/mute")
     public Result<Void> toggleMute(
-            @PathVariable Long callId,
+            @PathVariable String callId,
             @RequestParam Boolean muted) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.toggleMute(callId, userId, muted);
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.toggleMute(parsedCallId, userId, muted);
             return Result.success(muted ? "已静音" : "已取消静音");
         } catch (Exception e) {
             log.error("切换麦克风状态失败: {}", e.getMessage());
@@ -312,12 +341,13 @@ public class ImVideoCallController {
     
     @PostMapping("/group/{callId}/camera")
     public Result<Void> toggleCamera(
-            @PathVariable Long callId,
+            @PathVariable String callId,
             @RequestParam Boolean cameraOff) {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
-            videoCallService.toggleCamera(callId, userId, cameraOff);
+            Long parsedCallId = parseCallId(callId);
+            videoCallService.toggleCamera(parsedCallId, userId, cameraOff);
             return Result.success(cameraOff ? "已关闭摄像头" : "已开启摄像头");
         } catch (Exception e) {
             log.error("切换摄像头状态失败: {}", e.getMessage());

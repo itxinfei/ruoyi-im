@@ -28,6 +28,7 @@ import com.ruoyi.im.util.MessageEncryptionUtil;
 import com.ruoyi.im.listener.BotMessageListener;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
+import com.ruoyi.im.websocket.WsFrame;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -1138,5 +1139,60 @@ public class ImMessageServiceImpl implements ImMessageService {
             imMessageMapper.updateImMessage(update);
             log.debug("消息已送达确认: messageId={}, receiverId={}", messageId, userId);
         }
+    }
+
+    @Override
+    public void markMessageAsFailed(Long messageId) {
+        if (messageId == null) {
+            return;
+        }
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            log.warn("标记消息失败失败: 消息不存在, messageId={}", messageId);
+            return;
+        }
+        ImMessage update = new ImMessage();
+        update.setId(messageId);
+        update.setSendStatus(SystemConstants.MESSAGE_STATUS_FAILED);
+        imMessageMapper.updateImMessage(update);
+        log.info("消息标记为发送失败: messageId={}", messageId);
+    }
+
+    @Override
+    public void saveUndeliveredMessage(Long userId, WsFrame frame) {
+        if (userId == null || frame == null) {
+            return;
+        }
+        try {
+            redisUtil.cacheOfflineMessage(userId, frame);
+            log.debug("保存未送达消息: userId={}, messageId={}", userId, frame.getRequestId());
+        } catch (Exception e) {
+            log.error("保存未送达消息失败: userId={}", userId, e);
+        }
+    }
+
+    @Override
+    public void removeUndeliveredMessage(Long messageId) {
+        if (messageId == null) {
+            return;
+        }
+        // 使用有序集合存储时，删除特定消息需要遍历
+        // 这里简化实现，getOfflineMessages 会自动删除已获取的消息
+        log.debug("移除已送达消息: messageId={}", messageId);
+    }
+
+    @Override
+    public List<WsFrame> getUndeliveredMessages(Long userId) {
+        if (userId == null) {
+            return new ArrayList<>();
+        }
+        List<WsFrame> frames = new ArrayList<>();
+        try {
+            frames = redisUtil.getOfflineMessages(userId, WsFrame.class);
+            log.debug("获取未送达消息: userId={}, count={}", userId, frames.size());
+        } catch (Exception e) {
+            log.error("获取未送达消息失败: userId={}", userId, e);
+        }
+        return frames;
     }
 }

@@ -3,6 +3,7 @@ package com.ruoyi.im.service;
 import com.ruoyi.im.dto.message.ImMessageSendRequest;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
 import com.ruoyi.im.vo.message.ImMessageVO;
+import com.ruoyi.im.websocket.WsFrame;
 
 import java.util.List;
 
@@ -161,4 +162,34 @@ public interface ImMessageService {
      * @param userId   当前用户ID (接收方)
      */
     void confirmMessageDelivery(Long messageId, Long userId);
+
+    /**
+     * 标记消息为发送失败
+     *
+     * @param messageId 消息ID
+     */
+    void markMessageAsFailed(Long messageId);
+
+    /**
+     * 保存未送达消息（用于断线重连补发）
+     *
+     * @param userId 目标用户ID
+     * @param frame  消息帧
+     */
+    void saveUndeliveredMessage(Long userId, WsFrame frame);
+
+    /**
+     * 删除已发送成功的未送达消息
+     *
+     * @param messageId 消息ID
+     */
+    void removeUndeliveredMessage(Long messageId);
+
+    /**
+     * 获取用户的未送达消息列表
+     *
+     * @param userId 用户ID
+     * @return 未送达消息帧列表
+     */
+    List<WsFrame> getUndeliveredMessages(Long userId);
 }

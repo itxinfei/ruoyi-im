@@ -61,7 +61,28 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
     @Override
     public String getHeader(String name) {
         String value = super.getHeader(name);
+        // 跳过CORS相关请求头的XSS过滤，避免破坏Origin等header
+        if (isCorsHeader(name)) {
+            return value;
+        }
         return cleanXss(value);
+    }
+
+    /**
+     * 判断是否为CORS相关header
+     */
+    private boolean isCorsHeader(String name) {
+        if (name == null) return false;
+        String lowerName = name.toLowerCase();
+        return lowerName.equals("origin")
+                || lowerName.equals("access-control-request-method")
+                || lowerName.equals("access-control-request-headers")
+                || lowerName.equals("sec-fetch-mode")
+                || lowerName.equals("sec-fetch-site")
+                || lowerName.equals("sec-fetch-page")
+                || lowerName.equals("sec-ch-ua")
+                || lowerName.equals("sec-ch-ua-mobile")
+                || lowerName.equals("sec-ch-ua-platform");
     }
 
     @Override

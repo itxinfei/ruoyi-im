@@ -205,6 +205,9 @@ public final class SystemConstants {
     /** 消息状态：已读 */
     public static final String MESSAGE_STATUS_READ = "READ";
 
+    /** 消息状态：发送失败 */
+    public static final String MESSAGE_STATUS_FAILED = "FAILED";
+
     // ========== 视频会议状态 ==========
 
     /** 视频会议状态：进行中 */

@@ -25,4 +25,7 @@ public class ImLoginRequest implements Serializable {
 
     /** 客户端类型: web, mobile, pc */
     private String clientType;
+
+    /** 记住登录状态 */
+    private Boolean rememberMe;
 }
