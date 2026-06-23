@@ -120,6 +120,18 @@
   --dt-file-ppt: #FF7A00;     /* 钉钉规范：PPT文件图标色 */
   --dt-file-other: #ADB1B8;   /* 钉钉规范：其他文件图标色 */
 
+  // === DingTalk Signature Colors (钉钉特色色 - "钉钉味"核心) ===
+  // ⚠️ 权威依据：docs/00-钉钉8.2像素级权威基线.md §2.6
+  --dt-mention-color: #FF7D00;  /* @提醒文字色（会话前缀+消息正文） */
+  --dt-mention-bg: rgba(255, 125, 0, 0.08);  /* @提醒底色（轻浅） */
+  --dt-draft-color: #F53F3F;  /* 会话列表[草稿]前缀色 */
+  --dt-ding-border: #FF7D00;  /* DING 消息气泡边框 */
+  --dt-ding-btn-bg: #FF7D00;  /* 输入区右侧 DING 按钮背景 */
+  --dt-ding-btn-hover: #E66B00;  /* DING 按钮 hover */
+  --dt-read-check-color: #277EFB;  /* 已读双勾蓝色 ✓✓ */
+  --dt-delivered-check-color: #8A9099;  /* 已送达单勾灰色 ✓ */
+  --dt-recall-text-color: #8A9099;  /* 撤回提示文字色（中性灰） */
+
   // === Font Sizes ===
   --dt-font-size-xs: 11px;
   --dt-font-size-sm: 12px;
@@ -166,11 +178,15 @@
   --dt-scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);  /* 滚动条滑块背景 */
   --dt-scrollbar-thumb-bg-hover: rgba(0, 0, 0, 0.35);  /* 滚动条滑块hover背景 */
 
-  // === Navigation Sidebar (侧边栏) ===
-  --dt-nav-sidebar-bg: #2B2D33;  /* 侧边栏背景色（深灰） */
-  --dt-nav-hover: rgba(255,255,255,0.05);  /* 侧边栏hover背景 */
-  --dt-nav-active: rgba(255,255,255,0.08);  /* 侧边栏激活背景 */
-  --dt-border-subtle: rgba(255,255,255,0.05);  /* 暗色边框 */
+  // === Navigation Sidebar (侧边栏 - 钉钉 8.2 深灰基线) ===
+  // ⚠️ 权威依据：docs/00-钉钉8.2像素级权威基线.md §2.2
+  // ❌ 禁止改为 #0089FF（旧蓝主色，已废弃）
+  --dt-nav-sidebar-bg: #2B2D33;  /* L1 侧边栏背景（钉钉 8.2 深灰） */
+  --dt-nav-sidebar-text: rgba(255, 255, 255, 0.7);  /* 侧边栏默认文字色 */
+  --dt-nav-sidebar-text-active: #ffffff;  /* 侧边栏激活文字色 */
+  --dt-nav-hover: rgba(255, 255, 255, 0.08);  /* 侧边栏 hover 背景 */
+  --dt-nav-active: rgba(255, 255, 255, 0.12);  /* 侧边栏激活背景 */
+  --dt-border-subtle: rgba(255, 255, 255, 0.08);  /* 暗色边框 */
 
   // === Transition ===
   --dt-transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
@@ -185,11 +201,12 @@
   --dt-avatar-size-lg: 44px;
   --dt-avatar-session: 40px;  // 会话列表头像 钉钉标准
   --dt-session-item-height: 56px;  // 会话项固定高度 钉钉标准
-  --dt-session-panel-width: 250px;
-  --dt-contact-panel-width: 240px;
+  --dt-session-panel-width: 250px;  // 消息会话列表（钉钉刻意比通讯录宽 10px）
+  --dt-contact-panel-width: 240px;  // 通讯录/待办/云盘/工作台等其他模块
+  --dt-drawer-width: 320px;  // 详情抽屉（聊天详情/个人资料/群信息）
   --dt-chat-min-width: 480px;
   --dt-header-height: 56px;
-  --dt-chat-header-height: 56px;
+  --dt-chat-header-height: 56px;  // 与全局 header 一致（不再 60px）
   --dt-chat-input-height: 96px;
 
   // === Spacing System (8px 栅格) ===
@@ -269,6 +286,38 @@
 
   // === Font Family ===
   --dt-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  // === Extra Semantic Colors (扩展语义色) ===
+  --dt-purple-color: #722ed1;
+  --dt-purple-bg: rgba(114, 46, 209, 0.1);
+  --dt-cyan-color: #13c2c2;
+  --dt-cyan-bg: rgba(19, 194, 194, 0.1);
+
+  // === Chart Colors (图表专用色) ===
+  --dt-chart-blue: #277EFB;
+  --dt-chart-green: #00B42A;
+  --dt-chart-orange: #FF7D00;
+  --dt-chart-red: #F53F3F;
+  --dt-chart-purple: #722ed1;
+  --dt-chart-cyan: #13c2c2;
+
+  // === Avatar Colors (头像背景色) ===
+  --dt-avatar-color-1: #F5A623;
+  --dt-avatar-color-2: #6DD400;
+  --dt-avatar-color-3: #44B6AE;
+  --dt-avatar-color-4: #4A90E2;
+  --dt-avatar-color-5: #9013FE;
+  --dt-avatar-color-6: #F5E066;
+  --dt-avatar-color-7: #FF6B6B;
+  --dt-avatar-color-8: #6BCF7F;
+  --dt-avatar-color-9: #4ECDC4;
+  --dt-avatar-color-10: #45B7D1;
+  --dt-avatar-color-11: #96CEB4;
+  --dt-avatar-color-12: #FFEAA7;
+  --dt-avatar-color-13: #DFE6E9;
+  --dt-avatar-color-14: #74B9FF;
+  --dt-avatar-color-15: #A29BFE;
+  --dt-avatar-color-default: #4A90E2;
 }
 
 // Dark Mode Overrides (钉钉暗色模式)
@@ -323,13 +372,13 @@ html.dark {
   // === Component Colors (暗色模式组件专用色) ===
   --dt-send-btn-empty-bg: #3b4252;  /* 暗色模式发送按钮空状态背景 */
 
-  // === Navigation Sidebar (暗色模式侧边栏) ===
-  --dt-nav-sidebar-bg: #1e293b;  /* 暗色模式侧边栏背景 */
-  --dt-nav-sidebar-text: rgba(255, 255, 255, 0.7);  /* 暗色模式侧边栏文字色 */
-  --dt-nav-sidebar-text-hover: rgba(255, 255, 255, 0.95);  /* 暗色模式侧边栏hover文字色 */
-  --dt-nav-sidebar-text-active: #ffffff;  /* 暗色模式侧边栏激活文字色 */
-  --dt-nav-sidebar-hover: rgba(255, 255, 255, 0.08);  /* 暗色模式侧边栏hover背景 */
-  --dt-nav-sidebar-active: rgba(255, 255, 255, 0.12);  /* 暗色模式侧边栏激活背景 */
+  // === Navigation Sidebar (暗色模式侧边栏 - 与亮色模式一致) ===
+  --dt-nav-sidebar-bg: #1F2126;  /* 暗色模式下略深 */
+  --dt-nav-sidebar-text: rgba(255, 255, 255, 0.7);
+  --dt-nav-sidebar-text-hover: #ffffff;
+  --dt-nav-sidebar-text-active: #ffffff;
+  --dt-nav-sidebar-hover: rgba(255, 255, 255, 0.08);
+  --dt-nav-sidebar-active: rgba(255, 255, 255, 0.12);
   --dt-nav-logo-bg: linear-gradient(160deg, #1e3a5f 0%, #1e293b 100%);  /* 暗色模式Logo背景 */
   --dt-avatar-ring-bg-dark: rgba(255, 255, 255, 0.1);  /* 暗色模式头像ring背景 */
   --dt-avatar-ring-border-dark: rgba(255, 255, 255, 0.15);  /* 暗色模式头像ring边框 */

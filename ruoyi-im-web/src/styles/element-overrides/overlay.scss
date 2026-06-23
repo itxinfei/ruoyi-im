@@ -1,0 +1,165 @@
+// ============================================================================
+// Overlay & Feedback - 覆盖层与反馈组件
+// Dialog, Drawer, Dropdown, Popover, Tooltip, Popconfirm,
+// Message, Notification, Loading, Backtop, Alert
+// ============================================================================
+
+// Dialog 弹窗
+.el-dialog {
+  border-radius: var(--dt-radius-xl) !important;
+  box-shadow: var(--dt-shadow-modal) !important;
+
+  .el-dialog__header {
+    padding: 20px 24px 16px !important;
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+
+  .el-dialog__title {
+    font-size: var(--dt-font-size-xl) !important;
+    font-weight: var(--dt-font-weight-semibold) !important;
+    color: var(--dt-text-primary) !important;
+  }
+
+  .el-dialog__body {
+    padding: 20px 24px !important;
+  }
+
+  .el-dialog__footer {
+    padding: 16px 24px 20px !important;
+    border-top: 1px solid var(--dt-border-light);
+  }
+}
+
+// Drawer 抽屉
+.el-drawer {
+  .el-drawer__header {
+    padding: 20px 24px 16px !important;
+    margin-bottom: 0 !important;
+    border-bottom: 1px solid var(--dt-border-light);
+  }
+
+  .el-drawer__title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: var(--dt-text-primary) !important;
+  }
+
+  .el-drawer__body {
+    padding: 20px 24px !important;
+  }
+}
+
+// Dropdown 下拉菜单
+.el-dropdown-menu {
+  border-radius: var(--dt-radius-xl) !important;
+  padding: 4px !important;
+  box-shadow: var(--dt-shadow-3) !important;
+  border: 1px solid var(--dt-border-light) !important;
+
+  .el-dropdown-menu__item {
+    border-radius: var(--dt-radius-lg) !important;
+    padding: 10px 16px !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+
+    &:hover {
+      background-color: var(--dt-brand-bg) !important;
+      color: var(--dt-brand-color) !important;
+    }
+
+    &--divided {
+      margin-top: 4px !important;
+      padding-top: 10px !important;
+      border-top: 1px solid var(--dt-border-light) !important;
+    }
+  }
+}
+
+// Popover 气泡卡片
+.el-popover.el-popper {
+  border-radius: var(--dt-radius-xl) !important;
+  padding: 8px !important;
+  box-shadow: var(--dt-shadow-3) !important;
+  border: 1px solid var(--dt-border-light) !important;
+}
+
+// Tooltip 文字提示
+.el-tooltip__popper {
+  border-radius: var(--dt-radius-lg) !important;
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+  box-shadow: var(--dt-shadow-2) !important;
+
+  .el-tooltip__arrow::before {
+    background: #fff !important;
+  }
+}
+
+// Popconfirm 气泡确认框
+.el-popconfirm {
+  .el-popconfirm__main {
+    padding: 16px !important;
+  }
+
+  .el-popconfirm__action {
+    padding: 8px 16px 16px !important;
+  }
+}
+
+// Message 消息提示
+.el-message {
+  border-radius: var(--dt-radius-lg) !important;
+  padding: 12px 20px !important;
+  box-shadow: var(--dt-shadow-2) !important;
+
+  .el-message__content {
+    font-size: var(--dt-font-size-base) !important;
+  }
+}
+
+// Notification 通知
+.el-notification {
+  border-radius: var(--dt-radius-lg) !important;
+  box-shadow: var(--dt-shadow-3) !important;
+  border: 1px solid var(--dt-border-light) !important;
+
+  .el-notification__title {
+    font-size: var(--dt-font-size-base) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+    color: var(--dt-text-primary) !important;
+  }
+
+  .el-notification__content {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Loading 加载
+.el-loading-mask {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+// Backtop 回到顶部
+.el-backtop {
+  border-radius: var(--dt-radius-lg) !important;
+  box-shadow: var(--dt-shadow-2) !important;
+
+  &:hover {
+    background-color: var(--dt-brand-color) !important;
+  }
+}
+
+// Alert 警告提示
+.el-alert {
+  border-radius: var(--dt-radius-sm) !important;
+  padding: 12px 16px !important;
+
+  .el-alert__title {
+    font-size: var(--dt-font-size-base) !important;
+  }
+
+  .el-alert__description {
+    font-size: var(--dt-font-size-sm) !important;
+  }
+}

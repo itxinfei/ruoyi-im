@@ -1,0 +1,114 @@
+// ============================================================================
+// Navigation - 导航组件
+// Tabs, Breadcrumb, Steps, Collapse, Anchor
+// ============================================================================
+
+// Tabs 标签页
+.el-tabs {
+  .el-tabs__header {
+    margin-bottom: 0 !important;
+  }
+
+  .el-tabs__item {
+    height: 40px !important;
+    line-height: 40px !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+
+    &:hover {
+      color: var(--dt-brand-color) !important;
+    }
+
+    &.is-active {
+      color: var(--dt-brand-color) !important;
+      font-weight: var(--dt-font-weight-medium) !important;
+    }
+  }
+
+  .el-tabs__active-bar {
+    height: 2px !important;
+    background-color: var(--dt-brand-color) !important;
+  }
+
+  .el-tabs__content {
+    padding: var(--dt-spacing-xl) 0 !important;
+  }
+}
+
+// Breadcrumb 面包屑
+.el-breadcrumb {
+  .el-breadcrumb__inner {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+
+    &.is-link:hover {
+      color: var(--dt-brand-color) !important;
+    }
+  }
+
+  .el-breadcrumb__separator {
+    color: var(--dt-text-quaternary) !important;
+  }
+}
+
+// Steps 步骤条
+.el-steps {
+  .el-step__head.is-process {
+    color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+
+  .el-step__title.is-process {
+    color: var(--dt-brand-color) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+  }
+
+  .el-step__description.is-process {
+    color: var(--dt-text-primary) !important;
+  }
+}
+
+// Collapse 折叠面板
+.el-collapse {
+  border: none !important;
+
+  .el-collapse-item__header {
+    height: 48px !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+    border-bottom: 1px solid var(--dt-border-light) !important;
+
+    &:hover {
+      color: var(--dt-brand-color) !important;
+    }
+  }
+
+  .el-collapse-item__content {
+    padding: var(--dt-spacing-lg) 0 !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Anchor 锚点
+.el-anchor {
+  .el-anchor__link {
+    .el-anchor__link-title {
+      color: var(--dt-text-secondary) !important;
+      font-size: var(--dt-font-size-base) !important;
+
+      &:hover {
+        color: var(--dt-brand-color) !important;
+      }
+
+      &.is-active {
+        color: var(--dt-brand-color) !important;
+        font-weight: var(--dt-font-weight-medium) !important;
+      }
+    }
+  }
+
+  .el-anchor__indicator {
+    background-color: var(--dt-brand-color) !important;
+  }
+}

@@ -1,0 +1,652 @@
+// ============================================================================
+// 消息气泡样式 - 独立SCSS文件
+// 规范: docs/22-UI视觉与交互红线.md, .claude/rules/dingtalk-ui-prompt.md
+// ============================================================================
+
+// 消息行基础布局
+.message-row {
+  display: flex;
+  align-items: flex-start;
+  padding: 4px var(--dt-spacing-xl);
+  position: relative;
+  width: 100%;
+  box-sizing: border-box;
+
+  &:hover {
+    background-color: var(--dt-bg-hover);
+  }
+
+  &.is-selected {
+    background-color: var(--dt-bg-session-active);
+  }
+}
+
+// 连续消息：压缩间距
+.message-row.is-consecutive {
+  padding-top: 2px;
+  padding-bottom: 2px;
+
+  .meta-row {
+    display: none;
+  }
+
+  .bubble-wrapper {
+    margin-top: 0;
+  }
+}
+
+// ============================================================================
+// 头像区
+// ============================================================================
+
+.avatar-zone {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  margin-right: var(--dt-spacing-lg);
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dt-radius-sm);
+  object-fit: cover;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+.avatar-placeholder {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--dt-radius-sm);
+  background: var(--dt-brand-color);
+  color: var(--dt-text-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+// 时间区 (连续消息)
+.time-zone {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--dt-spacing-lg);
+
+  .time-text {
+    font-size: 10px;
+    color: var(--dt-text-tertiary);
+  }
+}
+
+// ============================================================================
+// 消息内容区
+// ============================================================================
+
+.content-zone {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 70%;
+}
+
+// 元数据行
+.meta-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+
+  .sender-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+  }
+
+  .timestamp {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    font-weight: 400;
+  }
+}
+
+// 气泡容器
+.bubble-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+// ============================================================================
+// 消息气泡基础样式
+// ============================================================================
+
+.bubble {
+  padding: 8px 12px;
+  border-radius: var(--dt-bubble-radius, 8px);
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-width: 100%;
+  position: relative;
+}
+
+// 接收方气泡 (左侧)
+.message-row:not(.is-sent) .bubble-text {
+  background-color: var(--dt-bubble-left-bg);
+  color: var(--dt-text-primary);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 4px 8px 8px 8px;
+}
+
+// 发送方气泡 (右侧)
+.message-row.is-sent .bubble-text {
+  background-color: var(--dt-bubble-right-bg);
+  color: var(--dt-text-white);
+  border-radius: 8px 4px 8px 8px;
+}
+
+// ============================================================================
+// 图片消息
+// ============================================================================
+
+.bubble-image {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--dt-bubble-radius);
+
+  .message-image {
+    max-width: 280px;
+    max-height: 280px;
+    border-radius: var(--dt-bubble-radius);
+    display: block;
+  }
+}
+
+// ============================================================================
+// 视频消息
+// ============================================================================
+
+.bubble-video {
+  padding: 0;
+  background: transparent;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  max-width: 320px;
+
+  .message-video {
+    width: 100%;
+    max-height: 200px;
+    border-radius: var(--dt-bubble-radius);
+    display: block;
+  }
+
+  .video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: var(--dt-bubble-radius);
+
+    .play-icon {
+      font-size: 48px;
+      color: var(--dt-text-white);
+      opacity: 0.9;
+    }
+  }
+
+  &:hover .video-overlay {
+    background: rgba(0, 0, 0, 0.4);
+  }
+}
+
+// ============================================================================
+// 文件消息
+// ============================================================================
+
+.bubble-file {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  max-width: 280px;
+  cursor: pointer;
+
+  .file-icon-wrapper {
+    width: 40px;
+    height: 40px;
+    background: var(--dt-brand-bg);
+    border-radius: var(--dt-radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    .file-icon {
+      font-size: 20px;
+      color: var(--dt-brand-color);
+    }
+  }
+
+  .file-info {
+    flex: 1;
+    min-width: 0;
+
+    .file-name {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--dt-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-size {
+      font-size: 12px;
+      color: var(--dt-text-tertiary);
+      margin-top: 2px;
+    }
+  }
+
+  .download-icon {
+    font-size: 16px;
+    color: var(--dt-text-tertiary);
+  }
+
+  &:hover {
+    background: var(--dt-bg-hover);
+  }
+}
+
+// 发送方文件消息
+.message-row.is-sent .bubble-file {
+  .file-icon-wrapper {
+    background: rgba(255, 255, 255, 0.2);
+
+    .file-icon {
+      color: var(--dt-text-white);
+    }
+  }
+
+  .file-info .file-name {
+    color: var(--dt-text-white);
+  }
+
+  .file-info .file-size {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .download-icon {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+// ============================================================================
+// 名片消息
+// ============================================================================
+
+.bubble-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  max-width: 280px;
+
+  .card-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--dt-radius-md);
+    flex-shrink: 0;
+  }
+
+  .card-info {
+    flex: 1;
+    min-width: 0;
+
+    .card-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+    }
+
+    .card-dept {
+      font-size: 12px;
+      color: var(--dt-text-tertiary);
+      margin-top: 2px;
+    }
+  }
+}
+
+// 发送方名片消息
+.message-row.is-sent .bubble-card {
+  .card-info .card-name {
+    color: var(--dt-text-white);
+  }
+
+  .card-info .card-dept {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+// ============================================================================
+// 位置消息
+// ============================================================================
+
+.bubble-location {
+  padding: 0;
+  max-width: 240px;
+
+  .location-map {
+    width: 100%;
+    height: 120px;
+    background: var(--dt-bg-placeholder);
+    border-radius: var(--dt-bubble-radius) var(--dt-bubble-radius) 0 0;
+    overflow: hidden;
+
+    .map-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--dt-text-tertiary);
+    }
+  }
+
+  .location-info {
+    padding: 10px 12px;
+
+    .location-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dt-text-primary);
+    }
+
+    .location-address {
+      font-size: 12px;
+      color: var(--dt-text-tertiary);
+      margin-top: 2px;
+    }
+  }
+}
+
+// 发送方位置消息
+.message-row.is-sent .bubble-location {
+  .location-info .location-title {
+    color: var(--dt-text-white);
+  }
+
+  .location-info .location-address {
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+// ============================================================================
+// 语音消息
+// ============================================================================
+
+.bubble-voice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  max-width: 200px;
+  cursor: pointer;
+
+  .voice-icon {
+    font-size: 20px;
+    color: var(--dt-brand-color);
+  }
+
+  .voice-wave {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 20px;
+
+    span {
+      width: 3px;
+      background: currentColor;
+      border-radius: 1px;
+      opacity: 0.6;
+      transition: height 0.15s ease;
+
+      &:nth-child(1) { height: 8px; }
+      &:nth-child(2) { height: 14px; }
+      &:nth-child(3) { height: 20px; }
+      &:nth-child(4) { height: 14px; }
+      &:nth-child(5) { height: 8px; }
+    }
+
+    &.is-playing span {
+      animation: voiceWave 0.5s ease-in-out infinite;
+    }
+  }
+
+  .voice-progress {
+    position: absolute;
+    bottom: 0;
+    left: 32px;
+    right: 36px;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 1px;
+    overflow: hidden;
+
+    .voice-progress-bar {
+      height: 100%;
+      background: var(--dt-brand-color);
+      transition: width 0.1s linear;
+    }
+  }
+
+  @keyframes voiceWave {
+    0%, 100% { transform: scaleY(1); }
+    50% { transform: scaleY(0.5); }
+  }
+
+  .voice-duration {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    margin-left: auto;
+  }
+
+  &:hover {
+    opacity: 0.9;
+  }
+}
+
+// 发送方语音消息
+.message-row.is-sent .bubble-voice {
+  .voice-icon {
+    color: var(--dt-text-white);
+  }
+
+  .voice-wave span {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  .voice-duration {
+    color: rgba(255, 255, 255, 0.8);
+  }
+
+  .voice-progress {
+    background: rgba(255, 255, 255, 0.2);
+
+    .voice-progress-bar {
+      background: var(--dt-text-white);
+    }
+  }
+}
+
+// ============================================================================
+// 消息状态
+// ============================================================================
+
+.message-status {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  margin-left: 4px;
+
+  .status-icon {
+    font-size: 14px;
+
+    &.sent { color: var(--dt-text-tertiary); }
+    &.read { color: var(--dt-brand-color); }
+    &.failed { color: var(--dt-error-color); }
+  }
+}
+
+// 发送方消息状态在气泡下方显示
+.message-row.is-sent .message-status {
+  justify-content: flex-end;
+}
+
+// ============================================================================
+// Reactions
+// ============================================================================
+
+.reactions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+  max-width: 100%;
+}
+
+.reaction-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px 8px;
+  background: var(--dt-bg-input);
+  border: 1px solid var(--dt-border-light);
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  .reaction-emoji { font-size: 14px; }
+  .reaction-count { color: var(--dt-text-secondary); }
+
+  &:hover {
+    background: var(--dt-bg-hover);
+  }
+
+  &.is-me {
+    background: var(--dt-brand-bg);
+    border-color: var(--dt-brand-color);
+
+    .reaction-count { color: var(--dt-brand-color); }
+  }
+}
+
+// ============================================================================
+// 悬浮操作栏
+// ============================================================================
+
+.action-bar {
+  position: absolute;
+  top: -12px;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  background: var(--dt-bg-card);
+  border: 1px solid var(--dt-border-light);
+  border-radius: var(--dt-radius-md);
+  box-shadow: var(--dt-shadow-action-bar);
+  z-index: var(--dt-z-base);
+}
+
+// 接收方操作栏在右侧
+.message-row:not(.is-sent) .action-bar {
+  left: auto;
+}
+
+// 发送方操作栏在左侧
+.message-row.is-sent .action-bar {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.action-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--dt-text-secondary);
+  border-radius: var(--dt-radius-sm);
+  cursor: pointer;
+  font-size: 16px;
+  transition: all 0.15s;
+
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-primary);
+  }
+}
+
+// 操作栏动画
+.action-fade-enter-active,
+.action-fade-leave-active {
+  transition: opacity 0.1s, transform 0.1s;
+}
+
+.action-fade-enter-from,
+.action-fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+// ============================================================================
+// 发送方样式覆盖
+// ============================================================================
+
+.message-row.is-sent {
+  flex-direction: row-reverse;
+
+  .avatar-zone {
+    margin-right: 0;
+    margin-left: var(--dt-spacing-lg);
+  }
+
+  .time-zone {
+    margin-right: 0;
+    margin-left: var(--dt-spacing-lg);
+  }
+
+  .content-zone {
+    align-items: flex-end;
+  }
+
+  .meta-row {
+    flex-direction: row-reverse;
+  }
+}

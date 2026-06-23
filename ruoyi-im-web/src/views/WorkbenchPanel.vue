@@ -21,8 +21,8 @@
         <!-- 玻璃拟态 Banner -->
         <section class="premium-banner">
           <div class="banner-info">
-            <h1 class="greeting">下午好，架构师</h1>
-            <p class="date-desc">2026年4月18日 · 星期六</p>
+            <h1 class="greeting">{{ greeting }}，{{ userName }}</h1>
+            <p class="date-desc">{{ currentDate }}</p>
           </div>
           <div class="banner-stats">
             <div class="stat-box" @click="$emit('switch-module', 'todo')">
@@ -74,13 +74,42 @@
 
 <script setup lang="js">
 import { ref, computed } from 'vue'
-import { 
-  Files, Finished, Clock, Notebook, Calendar, 
-  Promotion, Tickets, Management, FolderOpened 
+import { useStore } from 'vuex'
+import {
+  Files, Finished, Clock, Notebook, Calendar,
+  Promotion, Tickets, Management, FolderOpened
 } from '@element-plus/icons-vue'
 
+const store = useStore()
 const activeMenu = ref('center')
 const stats = ref({ todoCount: 8, dingCount: 2 })
+
+// 用户名（响应式，从 store 读取）
+const userName = computed(() => {
+  return store.state.user?.userInfo?.nickName
+    || store.state.user?.userInfo?.userName
+    || store.state.user?.name
+    || '同事'
+})
+
+// 问候语（按时段切换）
+const greeting = computed(() => {
+  const hour = new Date().getHours()
+  if (hour < 6) return '凌晨好'
+  if (hour < 9) return '早上好'
+  if (hour < 12) return '上午好'
+  if (hour < 14) return '中午好'
+  if (hour < 18) return '下午好'
+  if (hour < 22) return '晚上好'
+  return '夜深了'
+})
+
+// 当前日期
+const currentDate = computed(() => {
+  const now = new Date()
+  const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+  return `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · ${weekDays[now.getDay()]}`
+})
 
 const menus = [
   { id: 'center', label: '应用中心', icon: Files },
@@ -96,8 +125,8 @@ const recentApps = [
 
 const baseApps = [
   { id: 10, name: '智能报销', desc: '快速提交差旅费', icon: Tickets, color: 'var(--dt-brand-color)', bgColor: 'var(--dt-brand-bg)' },
-  { id: 11, name: '人事自助', desc: '请假、入职、证明', icon: Management, color: '#722ed1', bgColor: '#f9f0ff' },
-  { id: 12, name: '资产申领', desc: '办公用品领用', icon: FolderOpened, color: '#13c2c2', bgColor: '#e6fffb' }
+  { id: 11, name: '人事自助', desc: '请假、入职、证明', icon: Management, color: 'var(--dt-purple-color)', bgColor: 'var(--dt-purple-bg)' },
+  { id: 12, name: '资产申领', desc: '办公用品领用', icon: FolderOpened, color: 'var(--dt-cyan-color)', bgColor: 'var(--dt-cyan-bg)' }
 ]
 
 const handleAppClick = (app) => {}
@@ -107,7 +136,7 @@ const handleAppClick = (app) => {}
 .workbench-premium-v3 { display: flex; height: 100%; background: var(--dt-bg-card); overflow: hidden; }
 
 .wb-sidebar-v3 {
-  width: 220px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
+  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
   .sidebar-header { height: 56px; padding: 0 20px; @include flex-center; justify-content: flex-start; font-size: 16px; font-weight: 700; }
   .sidebar-nav { padding: 10px 8px; .nav-item { height: 40px; padding: 0 12px; display: flex; align-items: center; gap: 12px; border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); transition: var(--dt-transition-fast); &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; } &:hover:not(.active) { background: var(--dt-bg-hover); } } }
@@ -139,7 +168,8 @@ const handleAppClick = (app) => {}
   .recent-grid { display: flex; gap: 24px; }
   .recent-item {
     display: flex; flex-direction: column; align-items: center; gap: 10px; cursor: pointer;
-    .app-icon-circle { width: 48px; height: 48px; border-radius: 14px; @include flex-center; color: var(--dt-text-white); font-size: 24px; transition: var(--dt-transition-fast); }
+    /* 钉钉规范：禁止超过 12px 圆角，改为 8px */
+    .app-icon-circle { width: 48px; height: 48px; border-radius: var(--dt-radius-lg); @include flex-center; color: var(--dt-text-white); font-size: 24px; transition: var(--dt-transition-fast); }
     .app-name { font-size: 12px; color: var(--dt-text-secondary); }
   }
 }
@@ -152,7 +182,8 @@ const handleAppClick = (app) => {}
   display: flex; align-items: center; gap: 16px; cursor: pointer; transition: var(--dt-transition-fast);
   &:hover { border-color: var(--dt-brand-color); box-shadow: var(--dt-shadow-2); }
 
-  .card-icon { width: 44px; height: 44px; border-radius: 10px; @include flex-center; font-size: 20px; }
+  /* 钉钉规范：禁止超过 12px 圆角，改为 8px */
+  .card-icon { width: 44px; height: 44px; border-radius: var(--dt-radius-lg); @include flex-center; font-size: 20px; }
   .card-info { .name { font-size: 14px; font-weight: 600; color: var(--dt-text-primary); } .desc { font-size: 11px; color: var(--dt-text-quaternary); margin-top: 2px; } }
 }
 </style>

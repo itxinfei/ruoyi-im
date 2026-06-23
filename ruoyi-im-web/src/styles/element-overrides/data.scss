@@ -1,0 +1,143 @@
+// ============================================================================
+// Data Display - 数据展示组件
+// Table, Card, Descriptions, Tree, Empty, Result, Skeleton, Avatar, Badge
+// ============================================================================
+
+// Table 表格
+.el-table {
+  border-radius: var(--dt-radius-lg) !important;
+
+  th.el-table__cell {
+    background-color: var(--dt-bg-body) !important;
+    font-size: var(--dt-font-size-base) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+    color: var(--dt-text-primary) !important;
+    height: 48px !important;
+    border-color: var(--dt-border-light) !important;
+  }
+
+  td.el-table__cell {
+    height: 48px !important;
+    border-color: var(--dt-border-light) !important;
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+  }
+
+  .el-table__body tr:hover > td {
+    background-color: var(--dt-bg-session-hover) !important;
+  }
+
+  &--striped .el-table__body tr.el-table__row--striped td {
+    background-color: var(--dt-bg-input) !important;
+  }
+
+  .el-table__empty-text {
+    color: var(--dt-text-tertiary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+}
+
+// Card 卡片
+.el-card {
+  border-radius: var(--dt-radius-lg) !important;
+  border: 1px solid var(--dt-border-light) !important;
+  box-shadow: none !important;
+
+  .el-card__header {
+    padding: 16px 24px !important;
+    border-bottom: 1px solid var(--dt-border-light) !important;
+    font-size: var(--dt-font-size-lg) !important;
+    font-weight: var(--dt-font-weight-medium) !important;
+    color: var(--dt-text-primary) !important;
+  }
+
+  .el-card__body {
+    padding: var(--dt-spacing-lg) !important;
+  }
+}
+
+// Descriptions 描述列表
+.el-descriptions {
+  .el-descriptions__label {
+    color: var(--dt-text-secondary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+
+  .el-descriptions__content {
+    color: var(--dt-text-primary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+
+  .el-descriptions-item__cell {
+    padding: var(--dt-spacing-lg) !important;
+  }
+}
+
+// Tree 树形控件
+.el-tree {
+  .el-tree-node__content {
+    height: 36px !important;
+    border-radius: var(--dt-radius-sm) !important;
+
+    &:hover {
+      background-color: var(--dt-bg-session-hover) !important;
+    }
+  }
+
+  .el-tree-node.is-current > .el-tree-node__content {
+    background-color: var(--dt-brand-bg) !important;
+    color: var(--dt-brand-color) !important;
+  }
+}
+
+// Empty 空状态
+.el-empty {
+  .el-empty__description {
+    color: var(--dt-text-tertiary) !important;
+    font-size: var(--dt-font-size-base) !important;
+  }
+
+  .el-empty__image {
+    width: 160px !important;
+  }
+}
+
+// Result 结果页
+.el-result {
+  .el-result__title {
+    font-size: var(--dt-font-size-xl) !important;
+    color: var(--dt-text-primary) !important;
+  }
+
+  .el-result__subtitle {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-secondary) !important;
+  }
+}
+
+// Skeleton 骨架屏
+.el-skeleton {
+  .el-skeleton__item {
+    background-color: var(--dt-bg-session-hover) !important;
+    border-radius: var(--dt-radius-sm) !important;
+  }
+}
+
+// Avatar 头像
+.el-avatar {
+  background-color: var(--dt-brand-color);
+  border: 2px solid var(--dt-bg-body);
+  border-radius: var(--dt-radius-sm) !important;
+}
+
+// Badge 徽标
+.el-badge__content {
+  background-color: var(--dt-error-color) !important;
+  border: none !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  line-height: 18px !important;
+  border-radius: var(--dt-radius-full) !important;
+  font-size: var(--dt-font-size-xs) !important;
+  padding: 0 5px !important;
+}

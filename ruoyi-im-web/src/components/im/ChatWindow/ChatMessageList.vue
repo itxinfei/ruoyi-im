@@ -19,6 +19,7 @@
           :is-selection-mode="isSelectionMode"
           :is-selected="isMessageSelected(message)"
           @select-message="$emit('select-message', $event)"
+          @show-user="$emit('show-user', $event)"
         />
       </div>
     </div>
@@ -35,7 +36,7 @@ const props = defineProps({
   selectedMessages: Object
 })
 
-const emit = defineEmits(['load-more'])
+const emit = defineEmits(['load-more', 'select-message', 'show-user'])
 
 const containerRef = ref(null)
 const messageRefs = ref([])
@@ -68,6 +69,11 @@ const checkShowTime = (index) => {
   if (!cur || !prev) return false
   // 超过 5 分钟显示时间
   return new Date(cur.sendTime) - new Date(prev.sendTime) >= 300000
+}
+
+// 判断消息是否被选中
+const isMessageSelected = (message) => {
+  return props.selectedMessages?.has(message.messageId)
 }
 
 // 滚动事件处理
@@ -113,27 +119,41 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
+/* 钉钉规范：消息列表容器 */
 .v6-message-viewport {
   flex: 1;
-  overflow-y: auto;
-  padding: 12px 0;
-  background-color: var(--dt-bg-card, #ffffff);
+  overflow: visible;
+  padding: var(--dt-spacing-md) 0;
+  background-color: var(--dt-bg-card);
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--dt-scrollbar-thumb-bg);
+    border-radius: var(--dt-radius-xs);
+    &:hover {
+      background: var(--dt-scrollbar-thumb-bg-hover);
+    }
+  }
 }
 
 .v6-message-content {
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 var(--dt-spacing-xl, 24px);
 }
 
+/* 消息行间距 */
 .v6-message-row-wrapper {
   padding: 0;
-  margin-bottom: var(--dt-spacing-md, 12px);
+  margin-bottom: var(--dt-spacing-sm);  // 8px 间距
 
+  /* 连续消息：压缩间距 */
   &.is-cluster {
-    margin-top: calc(-1 * var(--dt-spacing-sm, 8px));
-    margin-bottom: var(--dt-spacing-xs, 4px);
+    margin-top: -4px;  // 钉钉：连续消息压缩 -4px
+    margin-bottom: 0;
   }
 }
 </style>

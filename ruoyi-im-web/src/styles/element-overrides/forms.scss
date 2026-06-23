@@ -1,0 +1,157 @@
+// ============================================================================
+// Form Controls - 表单控件样式覆盖
+// Button, Input, Textarea, InputNumber, Switch, Radio, Checkbox, Select, Form
+// ============================================================================
+
+// Button Primary
+.el-button--primary {
+  background-color: var(--dt-brand-color);
+  border-color: var(--dt-brand-color);
+
+  &:hover {
+    background-color: var(--dt-brand-hover);
+    border-color: var(--dt-brand-hover);
+  }
+
+  &:active {
+    background-color: var(--dt-brand-active);
+    border-color: var(--dt-brand-active);
+  }
+}
+
+// Input
+.el-input__wrapper {
+  border-radius: var(--dt-radius-sm);
+  transition: border-color var(--dt-transition-fast);
+
+  &:hover {
+    border-color: var(--dt-border-dark);
+  }
+
+  &.is-focus {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
+    transition:
+      border-color var(--dt-transition-fast),
+      box-shadow var(--dt-transition-fast);
+  }
+}
+
+// Textarea
+.el-textarea__inner {
+  border-radius: var(--dt-radius-sm);
+  transition: border-color var(--dt-transition-fast);
+
+  &:focus {
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 2px var(--dt-brand-light);
+    transition:
+      border-color var(--dt-transition-fast),
+      box-shadow var(--dt-transition-fast);
+  }
+}
+
+// InputNumber
+.el-input-number {
+  .el-input__wrapper {
+    border-radius: var(--dt-radius-sm) !important;
+  }
+}
+
+// Switch
+.el-switch {
+  &.is-checked .el-switch__core {
+    background-color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+
+  .el-switch__core {
+    background-color: var(--dt-border-color) !important;
+    border-color: var(--dt-border-color) !important;
+    height: 20px !important;
+  }
+}
+
+// Radio
+.el-radio {
+  .el-radio__input.is-checked .el-radio__inner {
+    background-color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+
+  .el-radio__input.is-checked + .el-radio__label {
+    color: var(--dt-brand-color) !important;
+  }
+
+  .el-radio__inner {
+    border-color: var(--dt-border-color) !important;
+  }
+
+  .el-radio__label {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+  }
+}
+
+// Checkbox
+.el-checkbox {
+  .el-checkbox__input.is-checked .el-checkbox__inner {
+    background-color: var(--dt-brand-color) !important;
+    border-color: var(--dt-brand-color) !important;
+  }
+
+  .el-checkbox__input.is-checked + .el-checkbox__label {
+    color: var(--dt-brand-color) !important;
+  }
+
+  .el-checkbox__inner {
+    border-radius: var(--dt-radius-sm) !important;
+    border-color: var(--dt-border-color) !important;
+  }
+
+  .el-checkbox__label {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+  }
+}
+
+// Select
+.el-select-dropdown {
+  border-radius: var(--dt-radius-xl) !important;
+  padding: 8px !important;
+  box-shadow: var(--dt-shadow-3) !important;
+
+  .el-select-dropdown__item {
+    border-radius: var(--dt-radius-lg) !important;
+    padding: 10px 16px !important;
+    font-size: var(--dt-font-size-base) !important;
+
+    &:hover {
+      background-color: var(--dt-brand-bg) !important;
+    }
+
+    &.selected {
+      color: var(--dt-brand-color) !important;
+      font-weight: var(--dt-font-weight-medium) !important;
+    }
+  }
+}
+
+// Form
+.el-form {
+  .el-form-item__label {
+    font-size: var(--dt-font-size-base) !important;
+    color: var(--dt-text-primary) !important;
+    font-weight: var(--dt-font-weight-normal) !important;
+  }
+
+  .el-form-item {
+    margin-bottom: var(--dt-spacing-xl) !important;
+  }
+
+  .el-form-item__error {
+    font-size: var(--dt-font-size-sm) !important;
+    color: var(--dt-error-color) !important;
+    padding-top: 4px !important;
+  }
+}

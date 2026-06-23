@@ -1,0 +1,28 @@
+// ============================================================================
+// Dark Mode Overrides
+// 暗色模式全局覆盖
+// ============================================================================
+
+.dark {
+  .el-dialog,
+  .el-drawer,
+  .el-message-box {
+    background-color: var(--dt-bg-card) !important;
+    border-color: var(--dt-border-color);
+  }
+
+  .el-popover.el-popper,
+  .el-select__popper.el-popper {
+    background-color: var(--dt-bg-card) !important;
+    border-color: var(--dt-border-color) !important;
+  }
+
+  // 滚动条暗色适配
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}

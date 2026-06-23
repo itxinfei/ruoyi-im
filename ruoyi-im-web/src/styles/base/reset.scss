@@ -1,0 +1,112 @@
+// ============================================================================
+// Base Reset & Typography
+// 全局重置、字体、滚动条、阴影系统
+// ============================================================================
+
+// Reset
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+// html / body 基础
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: background-color var(--dt-transition-base), color var(--dt-transition-base);
+}
+
+// 字体与排版
+body {
+  font-family: var(--dt-font-family);
+  font-size: var(--dt-font-size-base);
+  line-height: 1.6;
+  color: var(--dt-text-primary);
+  background-color: var(--dt-bg-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// 统一图标字体渲染
+.material-icons-outlined {
+  font-weight: 300 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+}
+
+// 基础元素
+a {
+  color: var(--dt-brand-color);
+  text-decoration: none;
+  transition: color var(--dt-transition-fast);
+
+  &:hover {
+    color: var(--dt-brand-hover);
+  }
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  outline: none;
+}
+
+// Focus styles for accessibility
+*:focus-visible {
+  outline: 2px solid var(--dt-brand-color);
+  outline-offset: 2px;
+}
+
+// ============================================================================
+// Scrollbar - 钉钉标准 (非活跃态隐藏，活跃态 4px 极简)
+// ============================================================================
+
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 2px;
+  transition: background 0.3s;
+}
+
+// Hover 容器时显示滚动条
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15) !important;
+}
+
+// ============================================================================
+// Shadow System - 钉钉 Premium 阴影
+// ============================================================================
+
+:root {
+  --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dt-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --dt-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --dt-shadow-brand: 0 4px 12px rgba(39, 126, 251, 0.2);
+}

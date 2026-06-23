@@ -805,7 +805,7 @@ onMounted(() => {
 }
 
 .search-box {
-  width: 240px; height: 32px; background: var(--dt-bg-hover); border-radius: 16px;
+  width: 240px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm);
   display: flex; align-items: center; padding: 0 12px;
   input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; }
   .search-icon { color: var(--dt-text-tertiary); margin-right: 8px; }
@@ -813,7 +813,7 @@ onMounted(() => {
 
 .new-btn {
   height: 32px; padding: 0 16px; background: var(--dt-brand-color); color: var(--dt-text-white);
-  border: none; border-radius: 6px; font-weight: 600; cursor: pointer;
+  border: none; border-radius: var(--dt-radius-sm); font-weight: 600; cursor: pointer;
   display: flex; align-items: center; gap: 6px;
   &:hover { background: var(--dt-brand-hover); }
 }
@@ -865,11 +865,15 @@ onMounted(() => {
   width: 32px; height: 32px; border-radius: var(--dt-radius-md); @include flex-center; font-size: 16px;
   &.icon-folder { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
   &.icon-doc { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
-  &.icon-image { background: #f3e5f5; color: #9c27b0; }
+  &.icon-image { background: var(--dt-purple-bg); color: var(--dt-purple-color); }
 }
 
 .empty-view {
   height: 80%; @include flex-center; color: var(--dt-text-tertiary);
-  .empty-box { text-align: center; .empty-icon { font-size: 64px; opacity: 0.2; margin-bottom: 16px; } }
+  .empty-box {
+    text-align: center;
+    .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
+    p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0 0 var(--dt-spacing-lg); }
+  }
 }
 </style>

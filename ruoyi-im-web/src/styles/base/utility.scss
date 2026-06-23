@@ -1,0 +1,102 @@
+// ============================================================================
+// Utility Classes
+// 工具类：Flex、文本省略、过渡、间距
+// ============================================================================
+
+// Flex 工具
+.u-flex {
+  display: flex;
+}
+
+.u-flex-column {
+  flex-direction: column;
+}
+
+.u-flex-center {
+  align-items: center;
+  justify-content: center;
+}
+
+.u-flex-between {
+  justify-content: space-between;
+}
+
+.u-flex-1 {
+  flex: 1;
+}
+
+// 文本工具
+.u-text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.u-text-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 过渡工具
+.u-transition-all {
+  transition: all var(--dt-transition-base);
+}
+
+.u-transition-color {
+  transition:
+    color var(--dt-transition-fast),
+    background-color var(--dt-transition-fast),
+    border-color var(--dt-transition-fast);
+}
+
+// ============================================================================
+// Spacing Utilities (8px grid)
+// ============================================================================
+
+// Margin Top
+.mt-8 { margin-top: var(--dt-spacing-sm); }
+.mt-12 { margin-top: var(--dt-spacing-md); }
+.mt-16 { margin-top: var(--dt-spacing-lg); }
+.mt-24 { margin-top: var(--dt-spacing-xl); }
+.mt-32 { margin-top: var(--dt-spacing-2xl); }
+
+// Margin Bottom
+.mb-8 { margin-bottom: var(--dt-spacing-sm); }
+.mb-12 { margin-bottom: var(--dt-spacing-md); }
+.mb-16 { margin-bottom: var(--dt-spacing-lg); }
+.mb-24 { margin-bottom: var(--dt-spacing-xl); }
+.mb-32 { margin-bottom: var(--dt-spacing-2xl); }
+
+// Margin Left
+.ml-8 { margin-left: var(--dt-spacing-sm); }
+.ml-16 { margin-left: var(--dt-spacing-lg); }
+
+// Margin Right
+.mr-8 { margin-right: var(--dt-spacing-sm); }
+.mr-16 { margin-right: var(--dt-spacing-lg); }
+
+// Padding
+.p-8 { padding: var(--dt-spacing-sm); }
+.p-12 { padding: var(--dt-spacing-md); }
+.p-16 { padding: var(--dt-spacing-lg); }
+.p-24 { padding: var(--dt-spacing-xl); }
+
+// Padding X
+.px-8 { padding-left: var(--dt-spacing-sm); padding-right: var(--dt-spacing-sm); }
+.px-16 { padding-left: var(--dt-spacing-lg); padding-right: var(--dt-spacing-lg); }
+.px-24 { padding-left: var(--dt-spacing-xl); padding-right: var(--dt-spacing-xl); }
+
+// Padding Y
+.py-8 { padding-top: var(--dt-spacing-sm); padding-bottom: var(--dt-spacing-sm); }
+.py-12 { padding-top: var(--dt-spacing-md); padding-bottom: var(--dt-spacing-md); }
+.py-16 { padding-top: var(--dt-spacing-lg); padding-bottom: var(--dt-spacing-lg); }
+.py-24 { padding-top: var(--dt-spacing-xl); padding-bottom: var(--dt-spacing-xl); }
+
+// Gap
+.gap-4 { gap: var(--dt-spacing-xs); }
+.gap-8 { gap: var(--dt-spacing-sm); }
+.gap-12 { gap: var(--dt-spacing-md); }
+.gap-16 { gap: var(--dt-spacing-lg); }
+.gap-24 { gap: var(--dt-spacing-xl); }

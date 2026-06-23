@@ -12,8 +12,8 @@
     <main class="dt-main-view">
       <transition name="view-slide" mode="out-in">
         <keep-alive>
-          <component 
-            :is="activeViewComponent" 
+          <component
+            :is="activeViewComponent"
             :key="activeModule"
             @switch-module="handleSwitchModule"
           />
@@ -44,6 +44,8 @@ const views = {
   todo: defineAsyncComponent(() => import('@/views/TodoPanel.vue')),
   calendar: defineAsyncComponent(() => import('@/views/CalendarPanel.vue')),
   documents: defineAsyncComponent(() => import('@/views/DocumentsPanel.vue')),
+  approval: defineAsyncComponent(() => import('@/views/ApprovalPanel.vue')),
+  mail: defineAsyncComponent(() => import('@/views/MailPanel.vue')),
   ding: defineAsyncComponent(() => import('@/views/DingPanel.vue')),
   call: defineAsyncComponent(() => import('@/components/Chat/CallHistoryPanel.vue'))
 }
@@ -78,21 +80,35 @@ onUnmounted(() => window.removeEventListener('keydown', handleGlobalKeydown))
 </script>
 
 <style scoped lang="scss">
+// ============================================================================
+// 主布局 - 三栏结构
+// ============================================================================
+
 .dt-main-layout {
-  display: flex; width: 100vw; height: 100vh; overflow: hidden; background: var(--dt-bg-body);
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--dt-bg-body);
 }
 
 .dt-main-view {
-  flex: 1; min-width: 0; height: 100%; position: relative;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  position: relative;
 }
 
-/* 视图切换动效：opacity-only */
-.view-slide-enter-active, .view-slide-leave-active {
+// ============================================================================
+// 视图切换动效 (opacity-only)
+// ============================================================================
+
+.view-slide-enter-active,
+.view-slide-leave-active {
   transition: opacity 0.2s ease;
 }
-.view-slide-enter-from {
-  opacity: 0;
-}
+
+.view-slide-enter-from,
 .view-slide-leave-to {
   opacity: 0;
 }
