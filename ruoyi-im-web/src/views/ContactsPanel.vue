@@ -123,11 +123,11 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 }
 
 // ============================================================================
-// 侧栏 (280px)
+// 侧栏 - 钉钉规范：240px
 // ============================================================================
 
 .contacts-sidebar {
-  width: 280px;
+  width: var(--dt-contact-panel-width);
   background: var(--dt-bg-card);
   border-right: 1px solid var(--dt-border-light);
   display: flex;

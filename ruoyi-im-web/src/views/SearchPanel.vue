@@ -189,8 +189,9 @@ onMounted(() => {
   height: 100%; display: flex; flex-direction: column; background: var(--dt-bg-card);
 }
 
+// 钉钉规范：头部高度 56px
 .search-top-bar {
-  height: 64px; padding: 0 24px; display: flex; align-items: center; border-bottom: 1px solid var(--dt-border-light);
+  height: var(--dt-header-height); padding: 0 24px; display: flex; align-items: center; border-bottom: 1px solid var(--dt-border-light);
 }
 
 .search-input-box {

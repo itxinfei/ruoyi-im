@@ -97,8 +97,9 @@ onMounted(loadData)
 <style scoped lang="scss">
 .report-v2 { display: flex; flex-direction: column; height: 100%; background: var(--dt-bg-body); }
 
+// 钉钉规范：头部高度 56px
 .report-header {
-  height: 64px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+  height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
   .view-title { font-size: 18px; font-weight: 700; margin: 0; }
 }
