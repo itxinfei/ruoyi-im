@@ -141,5 +141,9 @@ onMounted(loadData)
   }
 }
 
-.empty-view { padding-top: 100px; text-align: center; color: var(--dt-text-quaternary); .el-icon { font-size: 64px; opacity: 0.3; } }
+.empty-view {
+  padding-top: 100px; text-align: center;
+  .el-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
+  p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+}
 </style>

@@ -44,7 +44,7 @@
           >
             <!-- 头像与角标 -->
             <div class="avatar-area">
-              <img :src="session.avatar || '/avatars/default.png'" class="avatar-img">
+              <img :src="session.avatar || '/avatars/default-user.svg'" class="avatar-img">
               <div v-if="session.unreadCount > 0" class="unread-badge" :class="{ dot: session.isMuted }">
                 {{ session.isMuted ? '' : (session.unreadCount > 99 ? '99+' : session.unreadCount) }}
               </div>
@@ -85,7 +85,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { Search, Plus, ArrowDown, BellFilled, Top, Bottom, Delete, Mute } from '@element-plus/icons-vue'
 
@@ -94,7 +94,12 @@ const isSearchFocused = ref(false)
 const searchKeyword = ref('')
 const filterType = ref(localStorage.getItem('dt_session_filter') || 'all')
 const collapsedGroups = ref({ PINNED: false, PRIVATE: false, GROUP: false })
-const loading = ref(false)
+const loading = computed(() => store.state.im.session.loading)
+
+// 加载会话列表
+onMounted(() => {
+  store.dispatch('im/session/loadSessions')
+})
 
 const tabs = [{ label: '全部', value: 'all' }, { label: '单聊', value: 'PRIVATE' }, { label: '群聊', value: 'GROUP' }]
 
@@ -134,7 +139,7 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
 
 <style scoped lang="scss">
 .session-panel-v4 {
-  width: 280px; height: 100%; background: var(--dt-bg-card); border-right: 1px solid var(--dt-border-light);
+  width: var(--dt-session-panel-width); height: 100%; background: var(--dt-bg-session-list); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
 }
 
@@ -170,33 +175,42 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
 .session-item-v4 {
   height: 56px; display: flex; align-items: center; padding: 0 var(--dt-spacing-md); gap: var(--dt-spacing-md); cursor: pointer;
   transition: background-color 0.1s; position: relative;
-  &:hover { background-color: var(--dt-bg-session-hover); .time { display: none; } .quick-actions { opacity: 1; } }
-  &.active { background-color: var(--dt-bg-session-active) !important; }
+  &:hover {
+    background-color: var(--dt-bg-session-hover);
+    .time { opacity: 0; }
+    .quick-actions { opacity: 1; }
+  }
+  /* 钉钉规范：选中态背景 + 左侧 3px 蓝色指示条 */
+  &.active {
+    background-color: var(--dt-bg-session-active) !important;
+    &::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--dt-brand-color); }
+  }
   &.pinned { background-color: rgba(23, 26, 29, 0.02); }
 
   .avatar-area {
-    position: relative; width: 40px; height: 40px;
+    position: relative; width: 40px; height: 40px; flex-shrink: 0;
     .avatar-img { width: 100%; height: 100%; border-radius: var(--dt-radius-sm); object-fit: cover; }
+    /* 钉钉规范：未读 Badge - 高 18px，最小宽 18px，圆角 9px（胶囊形） */
     .unread-badge {
-      position: absolute; top: -5px; right: -5px; height: 16px; min-width: 16px; padding: 0 4px;
-      background: var(--dt-error-color); color: var(--dt-text-white); font-size: 10px; font-weight: 700; border-radius: 9px;
+      position: absolute; top: -4px; right: -4px; height: 18px; min-width: 18px; padding: 0 4px;
+      background: var(--dt-error-color); color: var(--dt-text-white); font-size: var(--dt-font-size-xs); font-weight: 700; border-radius: 9px;
       @include flex-center; border: 1.5px solid var(--dt-bg-card);
-      &.dot { width: 8px; height: 8px; min-width: 8px; top: -1px; right: -1px; padding: 0; border-radius: 50%; }
+      &.dot { width: 8px; height: 8px; min-width: 8px; padding: 0; top: 0; right: 0; border-radius: 50%; }
     }
   }
 
   .info-area {
     flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px;
-    .row-top { display: flex; justify-content: space-between; align-items: center;
+    .row-top { display: flex; justify-content: space-between; align-items: center; gap: 8px;
       .name { font-size: var(--dt-font-size-base); font-weight: 500; color: var(--dt-text-primary); @include text-ellipsis; }
 
       .meta-side {
-        position: relative; height: 20px; display: flex; align-items: center;
-        .time { font-size: 11px; color: var(--dt-text-tertiary); }
+        position: relative; display: flex; align-items: center; flex-shrink: 0;
+        .time { font-size: 11px; color: var(--dt-text-tertiary); opacity: 1; transition: opacity 0.2s; }
 
         /* 快捷操作组 */
         .quick-actions {
-          position: absolute; right: 0; display: flex; gap: 2px; opacity: 0;
+          display: flex; gap: 2px; opacity: 0;
           transition: opacity 0.2s;
           .action-btn {
             width: 22px; height: 22px; @include flex-center; border: none; background: transparent;
@@ -208,9 +222,9 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
       }
     }
     .row-bottom { display: flex; align-items: center; gap: 4px;
-      .draft-tag { font-size: var(--dt-font-size-sm); color: var(--dt-error-color); flex-shrink: 0; }
+      .draft-tag { font-size: 11px; color: var(--dt-warning-color); flex-shrink: 0; font-weight: 500; }
       .msg-preview { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); @include text-ellipsis; flex: 1; }
-      .mute-icon { font-size: 12px; color: var(--dt-border-color); }
+      .mute-icon { font-size: 12px; color: var(--dt-text-quaternary); }
     }
   }
 }

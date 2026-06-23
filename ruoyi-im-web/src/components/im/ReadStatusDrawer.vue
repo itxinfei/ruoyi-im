@@ -63,7 +63,7 @@
           <div class="list-container">
             <div class="user-list">
               <div v-for="user in filteredUnreadUsers" :key="user.userId" class="user-item">
-                <img :src="user.avatar || '/avatars/default.png'" class="user-avatar" alt="avatar">
+                <img :src="user.avatar || '/avatars/default-user.svg'" class="user-avatar" alt="avatar">
                 <span class="user-name">{{ user.nickname }}</span>
               </div>
               
@@ -87,7 +87,7 @@
           <div class="list-container">
             <div class="user-list">
               <div v-for="user in filteredReadUsers" :key="user.userId" class="user-item">
-                <img :src="user.avatar || '/avatars/default.png'" class="user-avatar" alt="avatar">
+                <img :src="user.avatar || '/avatars/default-user.svg'" class="user-avatar" alt="avatar">
                 <div class="user-info">
                   <span class="user-name">{{ user.nickname }}</span>
                   <span class="read-time">{{ formatTime(user.readTime) }}</span>

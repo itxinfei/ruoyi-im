@@ -46,7 +46,7 @@ export function getContact(contactId) {
 /**
  * 发送好友申请
  * @param {Object} data - 申请数据
- * @param {number} data.userId - 目标用户ID
+ * @param {number} data.userId - 目标用户ID (后端字段名为 targetUserId)
  * @param {string} data.remark - 备注信息
  * @returns {Promise}
  */
@@ -54,7 +54,11 @@ export function sendFriendRequest(data) {
   return request({
     url: '/api/im/contact/request/send',
     method: 'post',
-    data
+    data: {
+      targetUserId: data.userId,
+      message: data.remark,
+      groupName: data.groupName
+    }
   })
 }
 

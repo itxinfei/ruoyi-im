@@ -192,12 +192,18 @@ onMounted(loadTodos)
 }
 
 .todo-search {
-  width: 200px; height: 32px; background: var(--dt-bg-hover); border-radius: 16px;
+  width: 200px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-lg); /* 钉钉规范：8px */
   display: flex; align-items: center; padding: 0 12px; color: var(--dt-text-tertiary);
   input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; margin-left: 8px; }
 }
 
 .todo-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
+
+.empty-view {
+  height: 80%; @include flex-center; flex-direction: column; text-align: center;
+  .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
+  p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+}
 
 .todo-card-v2 {
   position: relative; display: flex; align-items: center; padding: 12px 16px;

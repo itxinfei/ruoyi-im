@@ -106,7 +106,7 @@ const handleApprovalAction = () => loadData()
 .approval-v2 { display: flex; flex-direction: column; height: 100%; background: var(--dt-bg-card); }
 
 .view-header {
-  height: 64px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+  height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
   .header-left { display: flex; align-items: center; gap: 40px; }
   .view-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--dt-text-primary); }
@@ -115,7 +115,7 @@ const handleApprovalAction = () => loadData()
 .header-tab-bar {
   display: flex; gap: 32px; height: 100%;
   .header-tab-item {
-    height: 64px; line-height: 64px; font-size: 14px; color: var(--dt-text-secondary);
+    height: var(--dt-header-height); line-height: var(--dt-header-height); font-size: 14px; color: var(--dt-text-secondary);
     cursor: pointer; position: relative; transition: var(--dt-transition-fast);
     &:hover { color: var(--dt-brand-color); }
     &.active {
@@ -154,5 +154,11 @@ const handleApprovalAction = () => loadData()
   .card-footer { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--dt-border-light); font-size: 12px; color: var(--dt-text-secondary); }
 }
 
-.empty-view { height: 100%; @include flex-center; color: var(--dt-text-tertiary); opacity: 0.5; text-align: center; .empty-icon { font-size: 64px; margin-bottom: 16px; } }
+.empty-view {
+  height: 100%; @include flex-center; text-align: center;
+  .empty-box {
+    .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
+    p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+  }
+}
 </style>

@@ -24,10 +24,11 @@ import ChatWindow from '@/components/im/ChatWindow.vue'
   overflow: hidden;
 }
 
+/* 钉钉规范：分割线颜色 rgba(23, 26, 29, 0.08) */
 .resizer-v {
   width: 1px;
   height: 100%;
-  background: rgba(0, 0, 0, 0.05);
+  background: var(--dt-border-light);
   flex-shrink: 0;
 }
 </style>

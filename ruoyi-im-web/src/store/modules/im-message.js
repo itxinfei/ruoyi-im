@@ -62,6 +62,7 @@ const VALID_STATUS_TRANSITIONS = {
   [MESSAGE_SEND_STATUS.SENDING]: [MESSAGE_SEND_STATUS.SENT, MESSAGE_SEND_STATUS.FAILED],
   [MESSAGE_SEND_STATUS.SENT]: [MESSAGE_SEND_STATUS.DELIVERED, MESSAGE_READ_STATUS.READ, MESSAGE_SPECIAL_STATUS.RECALLED],
   [MESSAGE_SEND_STATUS.DELIVERED]: [MESSAGE_READ_STATUS.READ, MESSAGE_SPECIAL_STATUS.RECALLED],
+  [MESSAGE_SEND_STATUS.FAILED]: [MESSAGE_SEND_STATUS.SENDING], // 失败后可重试
   [MESSAGE_READ_STATUS.UNREAD]: [MESSAGE_READ_STATUS.READ],
   [MESSAGE_READ_STATUS.READ]: [MESSAGE_SPECIAL_STATUS.RECALLED]
 }
@@ -89,8 +90,21 @@ export const MESSAGE_ID_FIELD = 'messageId'
 function normalizeMessage(msg) {
   if (!msg) return msg
   const normalized = { ...msg }
+  // id -> messageId
   if (normalized.id !== undefined && normalized.messageId === undefined) {
     normalized.messageId = normalized.id
+  }
+  // type -> messageType (兼容不同后端字段名)
+  if (normalized.type !== undefined && normalized.messageType === undefined) {
+    normalized.messageType = normalized.type
+  }
+  // timestamp -> sendTime (兼容不同后端字段名)
+  if (normalized.timestamp !== undefined && normalized.sendTime === undefined) {
+    normalized.sendTime = normalized.timestamp
+  }
+  // senderNickname -> senderName (兼容不同后端字段名)
+  if (normalized.senderNickname !== undefined && normalized.senderName === undefined) {
+    normalized.senderName = normalized.senderNickname
   }
   return normalized
 }
@@ -262,6 +276,17 @@ export default {
           favoriteId
         }
       }
+    },
+
+    // 批量更新所有未读消息状态为已读
+    UPDATE_ALL_UNREAD_STATUS(state, { sessionId }) {
+      if (!state.messages[sessionId]) return
+      state.messages[sessionId] = state.messages[sessionId].map(msg => {
+        if (msg.status === MESSAGE_READ_STATUS.UNREAD) {
+          return { ...msg, status: MESSAGE_READ_STATUS.READ }
+        }
+        return msg
+      })
     }
   },
 
@@ -394,6 +419,55 @@ export default {
         id: conversationId,
         unreadCount: 0
       }, { root: true })
+    },
+
+    // 批量标记会话中所有未读消息为已读
+    async markAllAsRead({ commit, state }, sessionId) {
+      if (!state.messages[sessionId]) return
+      
+      const unreadMessages = state.messages[sessionId].filter(
+        msg => msg.status === MESSAGE_READ_STATUS.UNREAD
+      )
+      
+      if (unreadMessages.length > 0) {
+        const lastMessage = state.messages[sessionId].slice(-1)[0]
+        await markAsRead({ conversationId: sessionId, messageId: lastMessage.messageId })
+      }
+      
+      // 更新所有未读消息状态为已读
+      commit('UPDATE_ALL_UNREAD_STATUS', { sessionId })
+      
+      commit('im/session/UPDATE_SESSION', {
+        id: sessionId,
+        unreadCount: 0
+      }, { root: true })
+    },
+
+    // 处理已读回执（收到对方已读通知）
+    async handleReadReceipt({ commit, rootState }, { conversationId, messageId }) {
+      const sessionId = conversationId
+      if (!rootState.message.messages[sessionId]) return
+      
+      // 更新指定消息状态为已读
+      commit('UPDATE_MESSAGE_STATUS', {
+        sessionId,
+        messageId,
+        status: MESSAGE_READ_STATUS.READ
+      })
+      
+      // 更新会话未读数
+      const session = rootState.session.sessions.find(s => s.id === sessionId)
+      if (session && session.unreadCount > 0) {
+        commit('im/session/UPDATE_SESSION', {
+          id: sessionId,
+          unreadCount: Math.max(0, session.unreadCount - 1)
+        }, { root: true })
+      }
+    },
+
+    // 发送已读回执给对方
+    async sendReadReceipt({ commit }, { conversationId, messageId }) {
+      await markAsRead({ conversationId, messageId })
     },
 
     // 删除消息

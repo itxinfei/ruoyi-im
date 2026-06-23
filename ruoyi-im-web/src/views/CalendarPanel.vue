@@ -177,7 +177,7 @@ const handleCreateEvent = () => {}
 
 /* 🏁 纠偏：日历主网格工业化对比 */
 .month-view-grid {
-  display: grid; grid-template-columns: repeat(7, 1fr); height: 100%; min-height: 800px;
+  display: grid; grid-template-columns: repeat(7, 1fr); height: 100%; min-height: 100%;
   .grid-header-cell { height: 32px; background: var(--dt-bg-card); border-bottom: 1px solid var(--dt-border-light); @include flex-center; font-size: 12px; color: var(--dt-text-tertiary); }
   .grid-day-cell {
     background: var(--dt-bg-card); border-right: 1px solid var(--dt-border-light); border-bottom: 1px solid var(--dt-border-light); padding: 8px;

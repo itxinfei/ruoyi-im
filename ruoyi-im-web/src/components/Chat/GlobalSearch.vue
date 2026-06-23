@@ -35,7 +35,7 @@
                 <div class="item-left">
                   <div class="icon-avatar" :class="group.type">
                     <el-icon v-if="group.type === 'file'"><Document /></el-icon>
-                    <img v-else :src="item.avatar || '/avatars/default.png'" />
+                    <img v-else :src="item.avatar || '/avatars/default-user.svg'" />
                   </div>
                   <div class="item-meta">
                     <div class="name" v-html="highlight(item.name)"></div>

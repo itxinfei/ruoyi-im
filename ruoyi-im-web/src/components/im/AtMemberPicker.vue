@@ -25,7 +25,7 @@
         @mouseenter="activeIndex = index"
       >
         <img
-          :src="member.avatar || '/avatars/default.png'"
+          :src="member.avatar || '/avatars/default-user.svg'"
           class="member-avatar"
           alt="avatar"
         >

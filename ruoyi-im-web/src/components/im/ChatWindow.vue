@@ -21,6 +21,7 @@
           :selected-messages="selectedMessages"
           @select-message="handleMessageClick"
           @load-more="handleLoadMore"
+          @show-user="handleShowUser"
         />
       </div>
 
@@ -85,7 +86,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
@@ -110,6 +111,7 @@ const chatInputAreaRef = ref(null)
 const isLoadingHistory = ref(false)
 const forwardDialogRef = ref(null)
 const callDialogRef = ref(null)
+const showGlobalSearch = ref(false)
 
 // @提及选择器状态
 const mentionPickerVisible = ref(false)
@@ -128,7 +130,23 @@ const commonEmojis = [
 ]
 
 const currentSession = computed(() => store.state.im.session.currentSession)
-const messages = computed(() => store.state.im.message.messages)
+const messages = computed(() => {
+  if (!currentSession.value?.id) return []
+  return store.state.im.message.messages[currentSession.value.id] || []
+})
+
+// 监听会话切换，加载消息
+watch(currentSession, async (newSession) => {
+  if (newSession?.id) {
+    await store.dispatch('im/message/loadMessages', { sessionId: newSession.id })
+  }
+}, { immediate: true })
+
+// 显示用户信息（点击头像时）
+const handleShowUser = (userId) => {
+  // 可以打开用户详情面板或发起聊天
+  console.log('Show user:', userId)
+}
 
 // 发送消息
 const processSendMessage = (content) => {
@@ -189,7 +207,7 @@ const handleOpenMention = async () => {
 
   // 获取群成员（如果是群聊）
   const session = currentSession.value
-  if (session.type === 'group' || session.chatType === 'group') {
+  if (session.type === 'GROUP' || session.chatType === 'GROUP') {
     try {
       const res = await getGroupMembers(session.id)
       if (res.code === 200 && res.data) {
@@ -387,6 +405,7 @@ const handleVideoCall = () => {
 </script>
 
 <style scoped lang="scss">
+/* 钉钉规范：聊天窗口布局 */
 .chat-main-v4 {
   flex: 1;
   display: flex;
@@ -399,14 +418,16 @@ const handleVideoCall = () => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-width: 400px;
+  min-width: var(--dt-chat-min-width);
   height: 100%;
   position: relative;
 }
 
 .message-area-scroller {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 0;
 }
 

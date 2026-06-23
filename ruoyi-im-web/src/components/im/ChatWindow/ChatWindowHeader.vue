@@ -50,14 +50,14 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
 <style scoped lang="scss">
 .slack-chat-header {
   height: var(--dt-header-height, 56px);
-  padding: 0 var(--dt-spacing-lg) 0 var(--dt-spacing-xl);
+  padding: 0 var(--dt-chat-gutter);
   display: flex;
   align-items: center;
   justify-content: space-between;
   background-color: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   flex-shrink: 0;
-  z-index: 100;
+  z-index: var(--dt-z-sticky);
 }
 
 .header-left {
@@ -79,7 +79,8 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
 
     .channel-prefix { font-size: 18px; font-weight: 800; color: var(--dt-text-tertiary); }
     .user-avatar { border-radius: var(--dt-radius-sm); }
-    .channel-name { font-size: 16px; font-weight: 800; color: var(--dt-text-primary); }
+    /* 钉钉规范：标题 17px，字重 600 */
+    .channel-name { font-size: 17px; font-weight: var(--dt-font-weight-semibold, 600); color: var(--dt-text-primary); }
     .arrow-down { font-size: 12px; color: var(--dt-text-tertiary); }
   }
 

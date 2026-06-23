@@ -3,7 +3,6 @@
     <!-- 1. 沉浸式动态背景 (对齐钉钉：深邃且冷静) -->
     <div class="v5-bg-engine">
       <div class="mesh-gradient"></div>
-      <div class="noise-overlay"></div>
     </div>
 
     <!-- 2. 极简登录容器 -->
@@ -119,7 +118,6 @@ const handleLogin = async () => {
                 radial-gradient(at 90% 10%, rgba(114, 46, 209, 0.04) 0px, transparent 50%),
                 radial-gradient(at 50% 80%, rgba(34, 171, 92, 0.03) 0px, transparent 50%);
   }
-  .noise-overlay { position: absolute; inset: 0; opacity: 0.02; background: url('https://grainy-gradients.vercel.app/noise.svg'); filter: contrast(150%) brightness(100%); }
 }
 
 // 2. 极简卡片
@@ -156,7 +154,7 @@ const handleLogin = async () => {
 }
 
 .v5-login-btn {
-  width: 100%; height: 44px; border: none; border-radius: 22px;
+  width: 100%; height: 44px; border: none; border-radius: var(--dt-radius-sm);
   background: var(--dt-brand-color); color: var(--dt-text-white); font-size: 15px; font-weight: 600;
   cursor: pointer; transition: var(--dt-transition-fast);
   &:hover { background: var(--dt-brand-hover); }

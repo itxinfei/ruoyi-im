@@ -113,14 +113,14 @@ onMounted(loadData)
 .mail-v2 { display: flex; height: 100%; background: var(--dt-bg-card); overflow: hidden; }
 
 .mail-sidebar {
-  width: 180px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
+  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
   .sidebar-header { padding: 20px 16px; .compose-btn { width: 100%; height: 36px; font-weight: 600; } }
   .folder-list {
     flex: 1; padding: 0 8px;
     .folder-item {
-      height: 38px; display: flex; align-items: center; gap: 10px; padding: 0 12px;
-      border-radius: var(--dt-radius-md); cursor: pointer; color: var(--dt-text-secondary); font-size: 13px;
+      height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
+      border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); font-size: 14px;
       &:hover { background: var(--dt-bg-hover); }
       &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
       .badge { margin-left: auto; font-size: 11px; opacity: 0.7; }
@@ -161,5 +161,9 @@ onMounted(loadData)
   .mail-body { flex: 1; overflow-y: auto; padding: 40px; font-size: 15px; line-height: 1.8; color: var(--dt-text-primary); }
 }
 
-.reader-empty { height: 100%; @include flex-center; flex-direction: column; color: var(--dt-text-tertiary); opacity: 0.3; .empty-icon { font-size: 80px; margin-bottom: 20px; } }
+.reader-empty {
+  height: 100%; @include flex-center; flex-direction: column;
+  .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
+  p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+}
 </style>

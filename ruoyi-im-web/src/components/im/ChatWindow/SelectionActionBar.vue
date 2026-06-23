@@ -68,7 +68,7 @@ defineEmits([
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 100;
+  z-index: var(--dt-z-sticky);
   transition: opacity 0.2s;
 }
 
