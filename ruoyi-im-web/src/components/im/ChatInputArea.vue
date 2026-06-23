@@ -1,18 +1,18 @@
 <template>
   <div
-    class="slack-input-wrapper"
+    class="chat-input-wrapper"
     :class="{ 'is-dragover': isDragover }"
     @dragover.prevent="handleDragOver"
     @dragleave.prevent="handleDragLeave"
     @drop.prevent="handleDrop"
   >
-    <div class="slack-input-box" :class="{ 'is-focused': isFocused }">
+    <div class="chat-input-box" :class="{ 'is-focused': isFocused }">
       <!-- 1. 富文本编辑区 -->
       <div class="editor-zone">
-        <div
-          ref="editorRef"
-          class="slack-rich-editor"
-          contenteditable="true"
+          <div
+            ref="editorRef"
+            class="chat-rich-editor"
+            contenteditable="true"
           placeholder="给同事发送消息..."
           @focus="isFocused = true"
           @blur="isFocused = false"
@@ -34,7 +34,7 @@
         <div class="tools-right">
           <span class="char-count" v-if="charCount > 0">{{ charCount }}/2000</span>
           <button
-            class="slack-send-btn"
+            class="chat-send-btn"
             :class="{ 'can-send': canSend, 'is-loading': isSending }"
             :disabled="!canSend"
             @click="executeSendMessage"
@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <div class="slack-footer-tip">
+    <div class="chat-footer-tip">
       <span v-if="!canSend"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> 换行</span>
       <span v-else><kbd>Enter</kbd> 发送，<kbd>Ctrl</kbd> + <kbd>Enter</kbd> 换行</span>
     </div>
@@ -182,8 +182,11 @@ defineExpose({
 </script>
 
 <style scoped lang="scss">
-/* 钉钉规范：输入区布局 */
-.slack-input-wrapper {
+// ============================================================================
+// 聊天输入区 - 钉钉 8.2 规范
+// ============================================================================
+
+.chat-input-wrapper {
   padding: 0 var(--dt-spacing-xl) var(--dt-spacing-xl);
   background: var(--dt-bg-card);
   position: relative;
@@ -191,7 +194,7 @@ defineExpose({
   flex-direction: column;
 }
 
-.slack-input-box {
+.chat-input-box {
   border: 1px solid var(--dt-border-color);
   border-radius: var(--dt-radius-lg);
   background: var(--dt-bg-card);
@@ -200,89 +203,101 @@ defineExpose({
   transition: border-color 0.2s;
   overflow: hidden;
 
-  /* 钉钉规范：焦点态无蓝色边框，保持扁平化 */
+  // 钉钉规范：焦点态蓝色边框
   &.is-focused {
     border-color: var(--dt-brand-color);
   }
 }
 
-/* 1. 编辑区 */
+// ============================================================================
+// 编辑区
+// ============================================================================
+
 .editor-zone {
-  padding: 8px 0;  // 钉钉：上下 8px
+  padding: 8px 0;
   min-height: var(--dt-input-min-height);
   max-height: var(--dt-input-max-height);
   overflow-y: auto;
+}
 
-  .slack-rich-editor {
-    width: 100%;
-    height: 100%;
-    outline: none;
-    font-size: var(--dt-font-size-md);
-    line-height: 1.7;  // 钉钉：行高 1.7
-    color: var(--dt-text-primary);
-    word-break: break-all;
-    padding: 0 var(--dt-spacing-xl);  // 钉钉：左右 24px
+.chat-rich-editor {
+  width: 100%;
+  height: 100%;
+  outline: none;
+  font-size: var(--dt-font-size-md);
+  line-height: 1.7;
+  color: var(--dt-text-primary);
+  word-break: break-all;
+  padding: 0 var(--dt-spacing-xl);
 
-    &:empty::before {
-      content: attr(placeholder);
-      color: var(--dt-text-tertiary);
-      pointer-events: none;
-    }
+  &:empty::before {
+    content: attr(placeholder);
+    color: var(--dt-text-tertiary);
+    pointer-events: none;
   }
 }
 
-/* 2. 工具栏 */
+// ============================================================================
+// 工具栏
+// ============================================================================
+
 .toolbar-zone {
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: var(--dt-toolbar-height);
-  padding: 0 var(--dt-spacing-lg);  // 钉钉：左右 16px
+  padding: 0 var(--dt-spacing-lg);
   background: var(--dt-bg-input);
   border-top: 1px solid var(--dt-border-lighter);
+}
 
-  .tools-left {
-    display: flex;
-    align-items: center;
-    gap: 8px;  // 钉钉：图标间距 8px
-  }
+.tools-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 
-  .sep {
-    width: 1px;
-    height: 16px;
-    background: var(--dt-border-color);
-  }
+.sep {
+  width: 1px;
+  height: 16px;
+  background: var(--dt-border-color);
+}
 
-  .tool-btn {
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    color: var(--dt-text-secondary);
-    border-radius: var(--dt-radius-lg);  // 钉钉：图标容器圆角 8px
-    cursor: pointer;
-    @include flex-center;
-    font-size: var(--dt-toolbar-icon-size);
-    transition: var(--dt-transition-fast);
+// 钉钉规范：工具按钮 32x32px
+.tool-btn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--dt-text-secondary);
+  border-radius: var(--dt-radius-lg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--dt-toolbar-icon-size);
+  transition: var(--dt-transition-fast);
 
-    &:hover {
-      background: var(--dt-bg-hover);
-      color: var(--dt-text-primary);
-    }
+  &:hover {
+    background: var(--dt-bg-hover);
+    color: var(--dt-text-primary);
   }
 }
 
-/* 发送按钮 */
-.slack-send-btn {
+// ============================================================================
+// 发送按钮 - 钉钉规范
+// ============================================================================
+
+.chat-send-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 64px;  // 钉钉：按钮宽度 64px
-  height: 32px;  // 钉钉：按钮高度 32px
-  border-radius: var(--dt-radius-sm);  // 4px 圆角
+  width: 64px;
+  height: 32px;
+  border-radius: var(--dt-radius-sm);
   border: none;
-  background: var(--dt-send-btn-empty-bg);  // 钉钉：空状态背景
+  background: var(--dt-send-btn-empty-bg);
   color: var(--dt-text-white);
   font-size: var(--dt-font-size-base);
   font-weight: 500;
@@ -294,7 +309,7 @@ defineExpose({
   }
 
   &.can-send {
-    background: var(--dt-brand-color);  // 钉钉：有内容时蓝色
+    background: var(--dt-brand-color);
     color: var(--dt-text-white);
     cursor: pointer;
 
@@ -328,7 +343,11 @@ defineExpose({
   margin-right: var(--dt-spacing-sm);
 }
 
-.slack-footer-tip {
+// ============================================================================
+// 底部提示
+// ============================================================================
+
+.chat-footer-tip {
   text-align: right;
   margin-top: var(--dt-spacing-sm);
   font-size: 12px;
@@ -347,13 +366,31 @@ defineExpose({
   }
 }
 
+// ============================================================================
+// 拖拽浮层
+// ============================================================================
+
 .drag-overlay {
-  position: absolute; inset: 0; background: rgba(255,255,255,0.9);
-  z-index: var(--dt-z-sticky); @include flex-center;
-  .overlay-inner {
-    border: 2px dashed var(--dt-brand-color); border-radius: var(--dt-radius-lg); padding: 32px;
-    color: var(--dt-brand-color); text-align: center; font-weight: 700;
-    .el-icon { font-size: 48px; margin-bottom: var(--dt-spacing-md); }
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: var(--dt-z-sticky);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.overlay-inner {
+  border: 2px dashed var(--dt-brand-color);
+  border-radius: var(--dt-radius-lg);
+  padding: 32px;
+  color: var(--dt-brand-color);
+  text-align: center;
+  font-weight: 700;
+
+  .el-icon {
+    font-size: 48px;
+    margin-bottom: var(--dt-spacing-md);
   }
 }
 </style>
