@@ -484,7 +484,7 @@ onMounted(() => {
 }
 
 .view-header {
-  height: 56px;
+  height: var(--dt-header-height);
   padding: 0 var(--dt-spacing-lg);
   display: flex;
   align-items: center;

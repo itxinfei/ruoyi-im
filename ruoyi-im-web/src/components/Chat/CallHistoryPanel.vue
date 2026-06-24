@@ -86,7 +86,7 @@ const handleRedial = (_call) => { /* TODO: 拨号逻辑 */ }
 <style scoped lang="scss">
 .call-history-v2 { display: flex; flex-direction: column; height: 100%; background: var(--dt-bg-card); }
 
-.view-header { height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light); @include flex-center; .view-title { font-size: 16px; font-weight: 700; } }
+.view-header { height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light); @include flex-center; .view-title { font-size: 16px; font-weight: 700; } }
 
 .view-body { flex: 1; display: flex; overflow: hidden; }
 

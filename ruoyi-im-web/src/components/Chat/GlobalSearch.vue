@@ -119,7 +119,7 @@ const handleConfirm = (item) => {
 }
 
 .spotlight-header {
-  height: 56px; display: flex; align-items: center; padding: 0 20px;
+  height: var(--dt-header-height); display: flex; align-items: center; padding: 0 20px;
   border-bottom: 1px solid var(--dt-border-light); gap: 14px;
 
   .search-icon { font-size: 20px; color: var(--dt-brand-color); }

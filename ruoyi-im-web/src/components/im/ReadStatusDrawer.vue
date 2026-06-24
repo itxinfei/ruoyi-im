@@ -200,7 +200,7 @@ const formatTime = (ts) => {
 
 <style scoped lang="scss">
 .drawer-header {
-  height: 56px;
+  height: var(--dt-header-height);
   padding: 0 20px;
   display: flex;
   align-items: center;

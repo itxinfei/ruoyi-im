@@ -60,7 +60,7 @@ defineEmits([
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: var(--dt-header-height);
   padding: 0 24px;
   background-color: var(--dt-bg-card);
   border-top: 1px solid var(--dt-border-light);

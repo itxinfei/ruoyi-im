@@ -103,7 +103,7 @@ onMounted(() => {
 }
 
 .view-header {
-  height: 56px;
+  height: var(--dt-header-height);
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
   display: flex;
