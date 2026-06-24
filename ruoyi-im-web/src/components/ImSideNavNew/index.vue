@@ -115,12 +115,12 @@ const topNavs = [
 // ============================================================================
 
 .l1-header {
-  margin-bottom: var(--dt-spacing-md);
+  margin-bottom: var(--dt-spacing-lg);
 }
 
 .logo-box {
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   background: var(--dt-brand-gradient);
   border-radius: var(--dt-radius-lg);
   display: flex;
@@ -128,6 +128,7 @@ const topNavs = [
   justify-content: center;
   color: #fff;
   font-size: 18px;
+  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
 }
 
 // ============================================================================
@@ -149,52 +150,59 @@ const topNavs = [
 .nav-v4-item-wrap {
   position: relative;
   width: 100%;
-  height: 48px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.15s;
 
   .indicator {
     position: absolute;
     left: 0;
     width: 3px;
-    height: 16px;
+    height: 18px;
     background: var(--dt-brand-color);
     border-radius: 0 2px 2px 0;
     opacity: 0;
-    transition: opacity 0.2s;
+    transition: opacity 0.2s, height 0.2s;
   }
 
   .nav-v4-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    color: rgba(255, 255, 255, 0.85);
+    gap: 3px;
+    color: rgba(255, 255, 255, 0.65);
     transition: color 0.2s;
 
     .icon {
       font-size: 20px;
+      transition: transform 0.15s;
     }
 
     .label {
       font-size: 10px;
+      font-weight: 500;
     }
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.1);
 
     .nav-v4-content {
-      color: #fff;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .nav-v4-content .icon {
+      transform: scale(1.1);
     }
   }
 
   &.active {
     .indicator {
       opacity: 1;
+      height: 22px;
     }
 
     .nav-v4-content {
@@ -202,7 +210,7 @@ const topNavs = [
       font-weight: 600;
     }
 
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -212,19 +220,20 @@ const topNavs = [
 
 .v4-badge {
   position: absolute;
-  top: 8px;
-  right: 12px;
+  top: 6px;
+  right: 10px;
   background: var(--dt-error-color);
   color: var(--dt-text-white);
   font-size: 10px;
-  height: 14px;
-  min-width: 14px;
-  border-radius: var(--dt-radius-sm);
+  height: 16px;
+  min-width: 16px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
   border: 1.5px solid var(--dt-nav-sidebar-bg);
+  font-weight: 700;
 }
 
 // ============================================================================
@@ -236,22 +245,22 @@ const topNavs = [
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--dt-spacing-sm);
+  gap: 4px;
   padding-bottom: var(--dt-spacing-md);
 }
 
 .footer-action {
-  width: 60px;
-  height: 48px;
+  width: 52px;
+  height: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  color: rgba(255, 255, 255, 0.85);
-  border-radius: var(--dt-radius-lg);
+  gap: 2px;
+  color: rgba(255, 255, 255, 0.65);
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
-  transition: background-color 0.2s, color 0.2s;
+  transition: background-color 0.15s, color 0.15s;
 
   .action-label {
     font-size: 10px;
@@ -259,13 +268,13 @@ const topNavs = [
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9);
   }
 
   &.active {
     color: #fff;
-    background: rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.15);
   }
 }
 
@@ -278,6 +287,7 @@ const topNavs = [
   width: 36px;
   height: 36px;
   cursor: pointer;
+  margin-top: 4px;
 }
 
 .avatar-container {
@@ -292,6 +302,11 @@ const topNavs = [
   border-radius: var(--dt-radius-lg);
   background: var(--dt-nav-sidebar-bg);
   object-fit: cover;
+  transition: transform 0.15s;
+
+  &:hover {
+    transform: scale(1.05);
+  }
 }
 
 .status-ring {
@@ -305,6 +320,7 @@ const topNavs = [
 
   &.online {
     background: var(--dt-success-color);
+    box-shadow: 0 0 4px var(--dt-success-color);
   }
 }
 </style>

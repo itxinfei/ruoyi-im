@@ -772,12 +772,12 @@ onMounted(() => {
 
 // 1. 侧边栏
 .docs-sidebar {
-  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
+  width: var(--dt-contact-panel-width); background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
 }
 
 .sidebar-header {
-  height: 56px; padding: 0 20px; display: flex; align-items: center;
+  height: var(--dt-header-height); padding: 0 20px; display: flex; align-items: center;
   .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); }
 }
 
@@ -795,7 +795,7 @@ onMounted(() => {
 
 // 2. 主区头部
 .docs-header {
-  height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+  height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
 }
 

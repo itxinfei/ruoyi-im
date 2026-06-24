@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import store from '@/store'
+import tokenManager from '@/utils/tokenManager'
 
 const routes = [
   {
@@ -81,7 +82,26 @@ router.beforeEach((to, from, next) => {
     return
   }
 
-  // 2. 检查登录状态 (同步获取，不阻塞)
+  // 2. 开发环境自动放行（后端 security.enabled=false 已关闭认证）
+  if (import.meta.env.DEV) {
+    // 如果没有 token，注入一个开发用假 token
+    const token = store.getters['user/isLoggedIn']
+    if (!token) {
+      const devToken = 'dev-mock-token'
+      // SET_TOKEN 内部会同步设置 tokenManager
+      store.commit('user/SET_TOKEN', devToken)
+      // 设置开发用户信息
+      tokenManager.setUserInfo({ id: 23, userName: 'admin', nickName: '管理员', role: 'ADMIN' })
+    }
+    if (to.path === '/login') {
+      next('/')
+    } else {
+      next()
+    }
+    return
+  }
+
+  // 3. 生产环境：检查登录状态
   const token = store.getters['user/isLoggedIn']
 
   if (token) {

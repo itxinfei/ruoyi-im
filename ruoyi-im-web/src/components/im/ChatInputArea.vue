@@ -187,7 +187,7 @@ defineExpose({
 // ============================================================================
 
 .chat-input-wrapper {
-  padding: 0 var(--dt-spacing-xl) var(--dt-spacing-xl);
+  padding: 0 var(--dt-spacing-xl) var(--dt-spacing-lg);
   background: var(--dt-bg-card);
   position: relative;
   display: flex;
@@ -195,17 +195,17 @@ defineExpose({
 }
 
 .chat-input-box {
-  border: 1px solid var(--dt-border-color);
+  border: 1.5px solid var(--dt-border-color);
   border-radius: var(--dt-radius-lg);
   background: var(--dt-bg-card);
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   overflow: hidden;
 
-  // 钉钉规范：焦点态蓝色边框
   &.is-focused {
     border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 3px var(--dt-brand-lighter);
   }
 }
 
@@ -214,7 +214,7 @@ defineExpose({
 // ============================================================================
 
 .editor-zone {
-  padding: 8px 0;
+  padding: 10px 0;
   min-height: var(--dt-input-min-height);
   max-height: var(--dt-input-max-height);
   overflow-y: auto;
@@ -224,7 +224,7 @@ defineExpose({
   width: 100%;
   height: 100%;
   outline: none;
-  font-size: var(--dt-font-size-md);
+  font-size: var(--dt-font-size-base);
   line-height: 1.7;
   color: var(--dt-text-primary);
   word-break: break-all;
@@ -254,23 +254,23 @@ defineExpose({
 .tools-left {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .sep {
   width: 1px;
   height: 16px;
   background: var(--dt-border-color);
+  margin: 0 2px;
 }
 
-// 钉钉规范：工具按钮 32x32px
 .tool-btn {
   width: 32px;
   height: 32px;
   border: none;
   background: transparent;
   color: var(--dt-text-secondary);
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -293,13 +293,13 @@ defineExpose({
   align-items: center;
   justify-content: center;
   gap: 4px;
-  width: 64px;
   height: 32px;
+  padding: 0 12px;
   border-radius: var(--dt-radius-sm);
   border: none;
   background: var(--dt-send-btn-empty-bg);
   color: var(--dt-text-white);
-  font-size: var(--dt-font-size-base);
+  font-size: var(--dt-font-size-sm);
   font-weight: 500;
   transition: all 0.2s;
   cursor: not-allowed;
@@ -319,6 +319,7 @@ defineExpose({
 
     &:hover {
       background: var(--dt-brand-hover);
+      box-shadow: var(--dt-shadow-brand);
     }
   }
 
@@ -349,7 +350,7 @@ defineExpose({
 
 .chat-footer-tip {
   text-align: right;
-  margin-top: var(--dt-spacing-sm);
+  margin-top: 6px;
   font-size: 12px;
   color: var(--dt-text-tertiary);
   padding-right: var(--dt-spacing-xs);
@@ -373,7 +374,8 @@ defineExpose({
 .drag-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(4px);
   z-index: var(--dt-z-sticky);
   display: flex;
   align-items: center;
@@ -382,11 +384,12 @@ defineExpose({
 
 .overlay-inner {
   border: 2px dashed var(--dt-brand-color);
-  border-radius: var(--dt-radius-lg);
-  padding: 32px;
+  border-radius: var(--dt-radius-xl);
+  padding: 40px;
   color: var(--dt-brand-color);
   text-align: center;
-  font-weight: 700;
+  font-weight: 600;
+  background: var(--dt-brand-bg);
 
   .el-icon {
     font-size: 48px;

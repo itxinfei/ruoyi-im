@@ -165,10 +165,10 @@ onMounted(loadTodos)
 }
 
 .todo-sidebar {
-  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
+  width: var(--dt-contact-panel-width); background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .sidebar-header { padding: 24px 20px; display: flex; justify-content: space-between; align-items: center; .sidebar-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--dt-text-primary); } }
-  .add-todo-icon-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: var(--dt-brand-color); color: var(--dt-text-white); cursor: pointer; @include flex-center; }
+  .sidebar-header { padding: 20px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--dt-border-light); .sidebar-title { font-size: 16px; font-weight: 700; margin: 0; color: var(--dt-text-primary); } }
+  .add-todo-icon-btn { width: 28px; height: 28px; border-radius: var(--dt-radius-sm); border: none; background: var(--dt-brand-color); color: var(--dt-text-white); cursor: pointer; @include flex-center; transition: var(--dt-transition-fast); &:hover { background: var(--dt-brand-hover); } }
   .sidebar-content {
     flex: 1; padding: 12px 8px;
     .nav-section { margin-bottom: 20px; .section-title { font-size: 11px; color: var(--dt-text-quaternary); padding: 8px 12px; } }
@@ -186,7 +186,7 @@ onMounted(loadTodos)
 .todo-main { flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); }
 
 .todo-header {
-  height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+  height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
   .view-title { font-size: 16px; font-weight: 600; }
 }
@@ -243,9 +243,9 @@ onMounted(loadTodos)
 }
 
 .todo-detail-aside {
-  width: 320px; background: var(--dt-bg-body); border-left: 1px solid var(--dt-border-light);
+  width: var(--dt-drawer-width); background: var(--dt-bg-body); border-left: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .detail-header { height: 56px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--dt-border-light); }
+  .detail-header { height: var(--dt-header-height); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--dt-border-light); }
   .detail-body { padding: 24px; .detail-title { font-size: 18px; margin-bottom: 24px; } }
 }
 

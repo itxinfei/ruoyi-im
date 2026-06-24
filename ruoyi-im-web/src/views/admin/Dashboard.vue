@@ -131,9 +131,26 @@ const metrics = computed(() => ([
   { key: 'today', label: '今日消息', value: overview.value.todayMessages || 0, icon: ChatLineSquare, iconClass: 'messages' }
 ]))
 
-// 获取暗色模式下对应的颜色值
-const getDarkModeColor = (lightVar, darkVar) => {
-  return isDark.value ? darkVar : lightVar
+// ECharts 颜色映射 - 与 design-tokens.scss 保持同步
+const chartColors = {
+  light: {
+    textPrimary: '#171a1d',
+    textSecondary: '#5f6670',
+    textTertiary: '#8a9099',
+    borderCard: '#ffffff',
+    borderDark: '#1e293b'
+  },
+  dark: {
+    textPrimary: '#f1f5f9',
+    textSecondary: '#94a3b8',
+    textTertiary: '#64748b',
+    borderCard: '#1e293b',
+    borderDark: '#0f172a'
+  }
+}
+
+const getChartColor = (key) => {
+  return isDark.value ? chartColors.dark[key] : chartColors.light[key]
 }
 
 const initMessageChart = async () => {
@@ -147,7 +164,7 @@ const initMessageChart = async () => {
 const updateMessageChart = () => {
   if (!messageChart) return
   const total = messageStats.value.totalMessages || 0
-  const textColor = isDark.value ? '#f1f5f9' : '#5f6670'
+  const textColor = getChartColor('textSecondary')
   const option = {
     tooltip: {
       trigger: 'item',
@@ -165,7 +182,7 @@ const updateMessageChart = () => {
       avoidLabelOverlap: false,
       itemStyle: {
         borderRadius: 4,
-        borderColor: isDark.value ? '#1e293b' : '#ffffff',
+        borderColor: getChartColor('borderCard'),
         borderWidth: 2
       },
       label: { show: false },
@@ -173,9 +190,9 @@ const updateMessageChart = () => {
         label: { show: true, fontSize: 14, fontWeight: 'bold' }
       },
       data: [
-        { value: messageStats.value.textMessages || 0, name: '文本', itemStyle: { color: getDarkModeColor('#277EFB', '#4493FA') } },
-        { value: messageStats.value.imageMessages || 0, name: '图片', itemStyle: { color: getDarkModeColor('#00B42A', '#22C55E') } },
-        { value: messageStats.value.fileMessages || 0, name: '文件', itemStyle: { color: getDarkModeColor('#FF7D00', '#FB923C') } }
+        { value: messageStats.value.textMessages || 0, name: '文本', itemStyle: { color: isDark.value ? '#4493FA' : '#277EFB' } },
+        { value: messageStats.value.imageMessages || 0, name: '图片', itemStyle: { color: isDark.value ? '#22C55E' : '#00B42A' } },
+        { value: messageStats.value.fileMessages || 0, name: '文件', itemStyle: { color: isDark.value ? '#FB923C' : '#FF7D00' } }
       ]
     }],
     graphic: [{
@@ -185,7 +202,7 @@ const updateMessageChart = () => {
       style: {
         text: total.toString(),
         textAlign: 'center',
-        fill: isDark.value ? '#f1f5f9' : '#171a1d',
+        fill: getChartColor('textPrimary'),
         fontSize: 24,
         fontWeight: 'bold'
       }
@@ -196,7 +213,7 @@ const updateMessageChart = () => {
       style: {
         text: '总消息数',
         textAlign: 'center',
-        fill: isDark.value ? '#64748b' : '#8a9099',
+        fill: getChartColor('textTertiary'),
         fontSize: 12
       }
     }]
@@ -214,7 +231,7 @@ const initUserChart = async () => {
 
 const updateUserChart = () => {
   if (!userChart) return
-  const textColor = isDark.value ? '#f1f5f9' : '#5f6670'
+  const textColor = getChartColor('textSecondary')
   const option = {
     tooltip: {
       trigger: 'item',
@@ -232,7 +249,7 @@ const updateUserChart = () => {
       avoidLabelOverlap: false,
       itemStyle: {
         borderRadius: 4,
-        borderColor: isDark.value ? '#1e293b' : '#ffffff',
+        borderColor: getChartColor('borderCard'),
         borderWidth: 2
       },
       label: { show: false },
@@ -240,9 +257,9 @@ const updateUserChart = () => {
         label: { show: true, fontSize: 14, fontWeight: 'bold' }
       },
       data: [
-        { value: userStats.value.superAdminCount || 0, name: '超级管理员', itemStyle: { color: getDarkModeColor('#F53F3F', '#F87171') } },
-        { value: userStats.value.adminCount || 0, name: '管理员', itemStyle: { color: getDarkModeColor('#FF7D00', '#FB923C') } },
-        { value: userStats.value.userCount || 0, name: '普通用户', itemStyle: { color: getDarkModeColor('#8a9099', '#64748b') } }
+        { value: userStats.value.superAdminCount || 0, name: '超级管理员', itemStyle: { color: isDark.value ? '#F87171' : '#F53F3F' } },
+        { value: userStats.value.adminCount || 0, name: '管理员', itemStyle: { color: isDark.value ? '#FB923C' : '#FF7D00' } },
+        { value: userStats.value.userCount || 0, name: '普通用户', itemStyle: { color: isDark.value ? '#64748b' : '#8a9099' } }
       ]
     }],
     graphic: [{
@@ -252,7 +269,7 @@ const updateUserChart = () => {
       style: {
         text: (userStats.value.total || 0).toString(),
         textAlign: 'center',
-        fill: isDark.value ? '#f1f5f9' : '#171a1d',
+        fill: getChartColor('textPrimary'),
         fontSize: 24,
         fontWeight: 'bold'
       }
@@ -263,7 +280,7 @@ const updateUserChart = () => {
       style: {
         text: '总用户数',
         textAlign: 'center',
-        fill: isDark.value ? '#64748b' : '#8a9099',
+        fill: getChartColor('textTertiary'),
         fontSize: 12
       }
     }]

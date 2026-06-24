@@ -127,7 +127,7 @@ const bgColor = computed(() => {
     }
     return colorPalette[Math.abs(hash) % colorPalette.length]
   }
-  return '#4A90E2'
+  return '#277EFB'
 })
 
 const avatarClass = computed(() => {

@@ -77,8 +77,8 @@ textarea {
 // ============================================================================
 
 ::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -87,17 +87,28 @@ textarea {
 
 ::-webkit-scrollbar-thumb {
   background: transparent;
-  border-radius: 2px;
+  border-radius: 3px;
   transition: background 0.3s;
 }
 
 // Hover 容器时显示滚动条
+.custom-scrollbar:hover::-webkit-scrollbar-thumb,
 *:hover::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.08);
+  background: var(--dt-scrollbar-thumb-bg);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.15) !important;
+  background: var(--dt-scrollbar-thumb-bg-hover) !important;
+}
+
+// Firefox scrollbar
+* {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+*:hover {
+  scrollbar-color: var(--dt-scrollbar-thumb-bg) transparent;
 }
 
 // ============================================================================

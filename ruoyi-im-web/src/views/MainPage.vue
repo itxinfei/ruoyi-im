@@ -1,6 +1,6 @@
 <template>
   <div class="dt-main-layout">
-    <!-- 1. 左侧一级导航 (锁定 68px) -->
+    <!-- 1. 左侧一级导航 (64px) -->
     <ImSideNavNew
       :active-module="activeModule"
       @switch-module="handleSwitchModule"
@@ -10,7 +10,7 @@
 
     <!-- 2. 主功能区：流式切换与状态保持 -->
     <main class="dt-main-view">
-      <transition name="view-slide" mode="out-in">
+      <transition :name="transitionName" mode="out-in">
         <keep-alive>
           <component
             :is="activeViewComponent"
@@ -24,19 +24,17 @@
     <!-- 3. 全局辅助组件 -->
     <EditProfileDialog v-model="profileVisible" />
     <SystemSettingsDialog v-model="settingsVisible" />
-    <!-- 全局搜索 Spotlight -->
     <GlobalSearch v-model:visible="showGlobalSearch" @select="handleSearchSelect" />
   </div>
 </template>
 
 <script setup lang="js">
-import { ref, computed, defineAsyncComponent, onMounted, onUnmounted } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted, onUnmounted, watch } from 'vue'
 import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
 import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 
-// 定义所有顶级视图
 const views = {
   chat: defineAsyncComponent(() => import('@/views/ChatPanel.vue')),
   contacts: defineAsyncComponent(() => import('@/views/ContactsPanel.vue')),
@@ -50,24 +48,35 @@ const views = {
   call: defineAsyncComponent(() => import('@/components/Chat/CallHistoryPanel.vue'))
 }
 
+const moduleOrder = ['chat', 'contacts', 'workbench', 'todo', 'calendar', 'documents', 'approval', 'mail', 'ding']
+
 const activeModule = ref('chat')
+const previousModule = ref('chat')
 const profileVisible = ref(false)
 const settingsVisible = ref(false)
 const showGlobalSearch = ref(false)
 
 const activeViewComponent = computed(() => views[activeModule.value] || views.chat)
 
+const transitionName = computed(() => {
+  const prevIdx = moduleOrder.indexOf(previousModule.value)
+  const currIdx = moduleOrder.indexOf(activeModule.value)
+  return currIdx > prevIdx ? 'view-slide-left' : 'view-slide-right'
+})
+
 const handleSwitchModule = (id) => {
   if (id === 'search') {
     showGlobalSearch.value = true
     return
   }
-  activeModule.value = id
+  if (id !== activeModule.value) {
+    previousModule.value = activeModule.value
+    activeModule.value = id
+  }
 }
 
 const handleSearchSelect = (item) => { /* 全局跳转逻辑 */ }
 
-// 监听快捷键 (大厂级体验)
 const handleGlobalKeydown = (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
     e.preventDefault()
@@ -97,19 +106,35 @@ onUnmounted(() => window.removeEventListener('keydown', handleGlobalKeydown))
   min-width: 0;
   height: 100%;
   position: relative;
+  overflow: hidden;
 }
 
 // ============================================================================
-// 视图切换动效 (opacity-only)
+// 视图切换动效 - 左右滑动
 // ============================================================================
 
-.view-slide-enter-active,
-.view-slide-leave-active {
-  transition: opacity 0.2s ease;
+.view-slide-left-enter-active,
+.view-slide-left-leave-active,
+.view-slide-right-enter-active,
+.view-slide-right-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.view-slide-enter-from,
-.view-slide-leave-to {
+.view-slide-left-enter-from {
   opacity: 0;
+  transform: translateX(12px);
+}
+.view-slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(-12px);
+}
+
+.view-slide-right-enter-from {
+  opacity: 0;
+  transform: translateX(-12px);
+}
+.view-slide-right-leave-to {
+  opacity: 0;
+  transform: translateX(12px);
 }
 </style>

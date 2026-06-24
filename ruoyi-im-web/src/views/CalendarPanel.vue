@@ -168,7 +168,7 @@ const handleCreateEvent = () => {}
 .cal-main-content { flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); }
 
 .cal-view-header {
-  height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+  height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   @include flex-between;
   .header-left { display: flex; align-items: center; gap: 20px; .view-title-text { font-size: 18px; font-weight: 700; } }
 }

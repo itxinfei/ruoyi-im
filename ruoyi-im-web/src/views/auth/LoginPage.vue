@@ -105,67 +105,181 @@ const handleLogin = async () => {
 
 <style scoped lang="scss">
 .dt-premium-login {
-  width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center;
-  background: var(--dt-bg-body); position: relative; overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--dt-bg-body);
+  position: relative;
+  overflow: hidden;
 }
 
 // 1. 动态背景引擎
 .v5-bg-engine {
-  position: absolute; inset: 0; z-index: 1;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
   .mesh-gradient {
-    position: absolute; inset: 0;
-    background: radial-gradient(at 10% 20%, rgba(39, 126, 251, 0.05) 0px, transparent 50%),
-                radial-gradient(at 90% 10%, rgba(114, 46, 209, 0.04) 0px, transparent 50%),
-                radial-gradient(at 50% 80%, rgba(34, 171, 92, 0.03) 0px, transparent 50%);
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(at 10% 20%, rgba(39, 126, 251, 0.06) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(114, 46, 209, 0.05) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, rgba(34, 171, 92, 0.04) 0px, transparent 50%),
+                radial-gradient(at 80% 60%, rgba(39, 126, 251, 0.03) 0px, transparent 40%);
   }
 }
 
 // 2. 极简卡片
 .v5-login-card {
-  width: 360px; z-index: 10; position: relative;
-  display: flex; flex-direction: column; align-items: center;
+  width: 380px;
+  z-index: 10;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-xl);
+  box-shadow: var(--dt-shadow-modal);
+  border: 1px solid var(--dt-border-light);
 }
 
 .v5-card-header {
-  text-align: center; margin-bottom: 40px;
-  .v5-logo-box { width: 56px; height: 56px; background: var(--dt-brand-color); border-radius: 14px; @include flex-center; color: var(--dt-text-white); font-size: 32px; margin: 0 auto 20px; }
-  .v5-title { font-size: 24px; font-weight: 800; color: var(--dt-text-primary); letter-spacing: -0.5px; }
-  .v5-subtitle { font-size: 13px; color: var(--dt-text-tertiary); margin-top: 8px; }
+  text-align: center;
+  margin-bottom: 36px;
+  .v5-logo-box {
+    width: 60px;
+    height: 60px;
+    background: var(--dt-brand-gradient);
+    border-radius: 16px;
+    @include flex-center;
+    color: var(--dt-text-white);
+    font-size: 32px;
+    margin: 0 auto 20px;
+    box-shadow: 0 4px 16px rgba(39, 126, 251, 0.3);
+  }
+  .v5-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--dt-text-primary);
+    letter-spacing: -0.5px;
+  }
+  .v5-subtitle {
+    font-size: 13px;
+    color: var(--dt-text-tertiary);
+    margin-top: 8px;
+  }
 }
 
 // 3. 去Web化的表单
 .v5-form {
   width: 100%;
   .v5-field {
-    margin-bottom: 24px; border-bottom: 1.5px solid var(--dt-border-light); transition: var(--dt-transition-base);
-    label { font-size: 11px; font-weight: 700; color: var(--dt-text-quaternary); text-transform: uppercase; margin-bottom: 4px; display: block; }
-    .input-wrap { display: flex; align-items: center; height: 36px;
-      input { flex: 1; border: none; background: transparent; outline: none; font-size: 15px; color: var(--dt-text-primary); &::placeholder { color: var(--dt-text-quaternary); } }
-      .eye-icon { color: var(--dt-text-quaternary); cursor: pointer; &:hover { color: var(--dt-brand-color); } }
+    margin-bottom: 20px;
+    border-bottom: 1.5px solid var(--dt-border-light);
+    transition: var(--dt-transition-base);
+    label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--dt-text-quaternary);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      display: block;
+    }
+    .input-wrap {
+      display: flex;
+      align-items: center;
+      height: 40px;
+      input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        outline: none;
+        font-size: 15px;
+        color: var(--dt-text-primary);
+        &::placeholder { color: var(--dt-text-quaternary); }
+      }
+      .eye-icon {
+        color: var(--dt-text-quaternary);
+        cursor: pointer;
+        font-size: 18px;
+        transition: color 0.15s;
+        &:hover { color: var(--dt-brand-color); }
+      }
     }
     &.active { border-bottom-color: var(--dt-brand-color); }
   }
 }
 
 .v5-options {
-  display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  width: 100%;
   :deep(.el-checkbox__label) { font-size: 12px; color: var(--dt-text-tertiary); }
-  .forget-link { background: none; border: none; font-size: 12px; color: var(--dt-brand-color); cursor: pointer; }
+  .forget-link {
+    background: none;
+    border: none;
+    font-size: 12px;
+    color: var(--dt-brand-color);
+    cursor: pointer;
+    transition: color 0.15s;
+    &:hover { color: var(--dt-brand-hover); }
+  }
 }
 
 .v5-login-btn {
-  width: 100%; height: 44px; border: none; border-radius: var(--dt-radius-sm);
-  background: var(--dt-brand-color); color: var(--dt-text-white); font-size: 15px; font-weight: 600;
-  cursor: pointer; transition: var(--dt-transition-fast);
-  &:hover { background: var(--dt-brand-hover); }
+  width: 100%;
+  height: 46px;
+  border: none;
+  border-radius: var(--dt-radius-md);
+  background: var(--dt-brand-gradient);
+  color: var(--dt-text-white);
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--dt-transition-fast);
+  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
+  &:hover {
+    box-shadow: 0 4px 16px rgba(39, 126, 251, 0.4);
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+  }
   &.loading { opacity: 0.8; cursor: not-allowed; }
 }
 
 .v5-footer {
-  margin-top: 60px; text-align: center;
-  .v-ver { font-size: 10px; color: var(--dt-text-quaternary); display: block; margin-bottom: 12px; }
-  .v-links { font-size: 12px; color: var(--dt-text-tertiary); display: flex; align-items: center; gap: 8px; justify-content: center; span:not(.dot) { cursor: pointer; &:hover { color: var(--dt-text-primary); } } }
+  margin-top: 48px;
+  text-align: center;
+  .v-ver {
+    font-size: 10px;
+    color: var(--dt-text-quaternary);
+    display: block;
+    margin-bottom: 12px;
+  }
+  .v-links {
+    font-size: 12px;
+    color: var(--dt-text-tertiary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+    span:not(.dot) {
+      cursor: pointer;
+      transition: color 0.15s;
+      &:hover { color: var(--dt-brand-color); }
+    }
+  }
 }
 
-.v5-copyright { position: absolute; bottom: 24px; font-size: 10px; color: var(--dt-text-quaternary); }
+.v5-copyright {
+  position: absolute;
+  bottom: 24px;
+  font-size: 10px;
+  color: var(--dt-text-quaternary);
+}
 </style>

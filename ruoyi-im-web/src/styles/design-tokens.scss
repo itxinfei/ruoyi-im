@@ -200,14 +200,14 @@
   --dt-avatar-size-md: 36px;
   --dt-avatar-size-lg: 44px;
   --dt-avatar-session: 40px;  // 会话列表头像 钉钉标准
-  --dt-session-item-height: 56px;  // 会话项固定高度 钉钉标准
-  --dt-session-panel-width: 250px;  // 消息会话列表（钉钉刻意比通讯录宽 10px）
-  --dt-contact-panel-width: 240px;  // 通讯录/待办/云盘/工作台等其他模块
-  --dt-drawer-width: 320px;  // 详情抽屉（聊天详情/个人资料/群信息）
-  --dt-chat-min-width: 480px;
-  --dt-header-height: 56px;
-  --dt-chat-header-height: 56px;  // 与全局 header 一致（不再 60px）
-  --dt-chat-input-height: 96px;
+  --dt-session-item-height: 64px;  // 会话项固定高度 钉钉标准（增大触控面积）
+  --dt-session-panel-width: 300px;  // 消息会话列表（加宽至 300px 提升可读性）
+  --dt-contact-panel-width: 260px;  // 通讯录/待办/云盘/工作台等其他模块（加宽）
+  --dt-drawer-width: 340px;  // 详情抽屉（聊天详情/个人资料/群信息）（加宽）
+  --dt-chat-min-width: 420px;
+  --dt-header-height: 52px;
+  --dt-chat-header-height: 52px;  // 略微压缩头部高度，给消息区更多空间
+  --dt-chat-input-height: 100px;
 
   // === Spacing System (8px 栅格) ===
   --dt-spacing-xs: 4px;
@@ -243,14 +243,14 @@
   --dt-bubble-compact-margin-top: -4px;  // 连续消息压缩间距 钉钉标准
 
   // === Component Specific (钉钉风格 - 对齐21文档) ===
-  --dt-bubble-padding-v: 8px;   /* 钉钉规范：上下 8px */
-  --dt-bubble-padding-h: 12px;
+  --dt-bubble-padding-v: 10px;   /* 钉钉规范：上下 10px（略增） */
+  --dt-bubble-padding-h: 14px;
   --dt-bubble-left-bg: #ffffff;
   --dt-bubble-right-bg: #277EFB;
-  --dt-bubble-max-width: 70%;
+  --dt-bubble-max-width: 65%;
   --dt-bubble-right-bg-hover: #4493FA;
-  --dt-chat-gutter: 24px;
-  --dt-chat-gutter-compact: 16px;
+  --dt-chat-gutter: 20px;
+  --dt-chat-gutter-compact: 12px;
   --dt-chat-content-max-width: 1120px;
   --dt-time-divider-bg: rgba(255, 255, 255, 0.82);
   --dt-chat-window-header-bg: #f8fbff;  /* 聊天窗口顶部渐变起始色 */
@@ -259,11 +259,11 @@
   --dt-btn-height-md: 36px;
   --dt-btn-height-lg: 40px;
   --dt-btn-min-width: 80px;
-  --dt-toolbar-height: 48px;  // 工具栏高度 钉钉标准
+  --dt-toolbar-height: 44px;  // 工具栏高度（略压缩）
   --dt-toolbar-icon-size: 20px;  // 工具栏图标尺寸 钉钉标准
   --dt-toolbar-icon-gap: 8px;  // 工具栏图标间距 钉钉标准
   --dt-send-btn-width: 64px;  // 发送按钮宽度 钉钉标准
-  --dt-input-min-height: 96px;
+  --dt-input-min-height: 100px;
   --dt-input-max-height: 300px;
 
   // === Dark Mode Variables (暗色模式专用) ===

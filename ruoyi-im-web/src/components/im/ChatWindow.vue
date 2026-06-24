@@ -428,12 +428,12 @@ const handleVideoCall = () => {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0;
+  padding: var(--dt-spacing-md) 0;
 }
 
 /* 右侧侧边栏 (钉钉 Push 布局) */
 .chat-right-sidebar {
-  width: 320px;
+  width: var(--dt-drawer-width);
   background-color: var(--dt-bg-card);
   border-left: 1px solid var(--dt-border-light);
   height: 100%;

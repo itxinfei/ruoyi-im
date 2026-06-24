@@ -113,9 +113,9 @@ onMounted(loadData)
 .mail-v2 { display: flex; height: 100%; background: var(--dt-bg-card); overflow: hidden; }
 
 .mail-sidebar {
-  width: 240px; background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
+  width: var(--dt-contact-panel-width); background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .sidebar-header { padding: 20px 16px; .compose-btn { width: 100%; height: 36px; font-weight: 600; } }
+  .sidebar-header { padding: 16px 16px 12px; .compose-btn { width: 100%; height: 36px; font-weight: 600; border-radius: var(--dt-radius-md); } }
   .folder-list {
     flex: 1; padding: 0 8px;
     .folder-item {
@@ -129,8 +129,8 @@ onMounted(loadData)
 }
 
 .mail-list-panel {
-  width: 320px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column;
-  .list-header { height: 56px; padding: 0 16px; border-bottom: 1px solid var(--dt-border-light); @include flex-center;
+  width: 340px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column;
+  .list-header { height: var(--dt-header-height); padding: 0 16px; border-bottom: 1px solid var(--dt-border-light); @include flex-center;
     .search-box { width: 100%; height: 32px; background: var(--dt-bg-hover); border-radius: 16px; display: flex; align-items: center; padding: 0 12px; 
       input { border: none; background: transparent; outline: none; font-size: 12px; margin-left: 8px; flex: 1; }
     }

@@ -7,7 +7,7 @@
 .message-row {
   display: flex;
   align-items: flex-start;
-  padding: 4px var(--dt-spacing-xl);
+  padding: 6px var(--dt-chat-gutter);
   position: relative;
   width: 100%;
   box-sizing: border-box;
@@ -570,10 +570,10 @@
 
 .action-bar {
   position: absolute;
-  top: -12px;
+  top: 4px;
   display: flex;
   align-items: center;
-  padding: 2px;
+  padding: 3px;
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);
@@ -583,14 +583,12 @@
 
 // 接收方操作栏在右侧
 .message-row:not(.is-sent) .action-bar {
-  left: auto;
+  right: var(--dt-chat-gutter);
 }
 
 // 发送方操作栏在左侧
 .message-row.is-sent .action-bar {
-  right: auto;
-  left: 50%;
-  transform: translateX(-50%);
+  left: var(--dt-chat-gutter);
 }
 
 .action-btn {

@@ -307,7 +307,7 @@ onMounted(() => {
 .ai-chat-container {
   flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); position: relative;
   .chat-header {
-    height: 56px; padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+    height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
     display: flex; align-items: center; justify-content: space-between;
     .title-info { display: flex; align-items: center; gap: 8px; }
     .ai-badge { background: var(--dt-brand-color); color: var(--dt-text-white); font-size: 10px; padding: 1px 4px; border-radius: var(--dt-radius-sm); }
@@ -427,7 +427,7 @@ onMounted(() => {
 .ai-summary-panel {
   width: 320px; background: var(--dt-bg-body); border-left: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .summary-header { height: 56px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--dt-border-light); }
+  .summary-header { height: var(--dt-header-height); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--dt-border-light); }
   .summary-body { flex: 1; overflow-y: auto; padding: 20px; font-size: 13px; line-height: 1.7; }
 }
 

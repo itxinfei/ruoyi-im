@@ -123,7 +123,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 }
 
 // ============================================================================
-// 侧栏 - 钉钉规范：240px
+// 侧栏 - 钉钉规范
 // ============================================================================
 
 .contacts-sidebar {
@@ -136,7 +136,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 }
 
 .sidebar-header {
-  height: 56px;
+  height: var(--dt-header-height);
   padding: 0 12px;
   display: flex;
   align-items: center;
@@ -146,13 +146,21 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 .search-box {
   width: 100%;
-  height: 32px;
-  background: var(--dt-bg-hover);
+  height: 36px;
+  background: var(--dt-bg-input);
   border-radius: var(--dt-radius-md);
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 12px;
   gap: 8px;
+  transition: all 0.2s;
+  border: 1.5px solid transparent;
+
+  &:focus-within {
+    background: var(--dt-bg-card);
+    border-color: var(--dt-brand-color);
+    box-shadow: 0 0 0 3px var(--dt-brand-lighter);
+  }
 
   input {
     border: none;
@@ -160,6 +168,8 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
     outline: none;
     font-size: 13px;
     flex: 1;
+    color: var(--dt-text-primary);
+    &::placeholder { color: var(--dt-text-tertiary); }
   }
 
   .el-icon {
@@ -182,9 +192,9 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   height: 44px;
   display: flex;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 14px;
   gap: 12px;
-  border-radius: 8px;
+  border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: var(--dt-transition-fast);
   margin-bottom: 2px;
@@ -221,7 +231,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   color: var(--dt-text-tertiary);
   font-weight: 600;
   padding: 24px 12px 12px;
-  text-transform: uppercase;
+  letter-spacing: 0.3px;
 }
 
 // ============================================================================
@@ -237,7 +247,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 }
 
 .main-header {
-  height: 56px;
+  height: var(--dt-header-height);
   padding: 0 24px;
   background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
@@ -255,15 +265,11 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   .root-node,
   .node {
     cursor: pointer;
-
-    &:hover {
-      color: var(--dt-brand-color);
-    }
+    transition: color 0.15s;
+    &:hover { color: var(--dt-brand-color); }
   }
 
-  .root-node {
-    color: var(--dt-text-tertiary);
-  }
+  .root-node { color: var(--dt-text-tertiary); }
 
   .sep {
     margin: 0 8px;
@@ -284,14 +290,14 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 .dept-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 16px;
   margin-bottom: 32px;
 }
 
 .dept-card {
   background: var(--dt-bg-card);
-  padding: 16px 20px;
+  padding: 18px 20px;
   border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   display: flex;
@@ -303,38 +309,36 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   &:hover {
     border-color: var(--dt-brand-light);
     box-shadow: var(--dt-shadow-1);
+    transform: translateY(-1px);
 
-    .arrow-icon {
-      opacity: 1;
-    }
+    .arrow-icon { opacity: 1; }
   }
 }
 
 .folder-icon-box {
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   border-radius: var(--dt-radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
+  flex-shrink: 0;
 }
 
 .folder-info {
   flex: 1;
-
   .name {
     font-size: 15px;
     font-weight: 600;
     color: var(--dt-text-primary);
   }
-
   .count {
     font-size: 12px;
     color: var(--dt-text-tertiary);
-    margin-top: 2px;
+    margin-top: 4px;
   }
 }
 
@@ -342,6 +346,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   font-size: 14px;
   color: var(--dt-text-quaternary);
   opacity: 0;
+  transition: opacity 0.2s;
 }
 
 // ============================================================================
@@ -357,27 +362,27 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 .members-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 16px;
 }
 
 .member-card-v3 {
   background: var(--dt-bg-card);
-  padding: 14px 16px;
+  padding: 16px 18px;
   border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   cursor: pointer;
   transition: var(--dt-transition-fast);
 
   &:hover {
     border-color: var(--dt-brand-color);
+    box-shadow: var(--dt-shadow-1);
+    transform: translateY(-1px);
 
-    .chat-btn {
-      opacity: 1;
-    }
+    .chat-btn { opacity: 1; }
   }
 }
 
@@ -394,13 +399,13 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   .m-post {
     font-size: 12px;
     color: var(--dt-text-tertiary);
-    margin-top: 2px;
+    margin-top: 4px;
   }
 }
 
 .chat-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
   border: none;
