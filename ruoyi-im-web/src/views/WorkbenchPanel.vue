@@ -331,14 +331,13 @@ const handleActionClick = (action) => {
     gap: 32px;
     padding: 20px 32px;
     background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(8px);
     border-radius: var(--dt-radius-lg);
     border: 1px solid rgba(255, 255, 255, 0.2);
     .stat-box {
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s;
-      &:hover { transform: scale(1.05); }
+      transition: opacity var(--dt-transition-fast);
+      &:hover { opacity: 0.85; }
       .num {
         font-size: 28px;
         font-weight: 700;
@@ -383,7 +382,7 @@ const handleActionClick = (action) => {
       color: var(--dt-text-white);
       font-size: 24px;
       transition: var(--dt-transition-fast);
-      &:hover { transform: translateY(-2px); box-shadow: var(--dt-shadow-2); }
+      &:hover { box-shadow: var(--dt-shadow-2); }
     }
     .app-name { font-size: 12px; color: var(--dt-text-secondary); font-weight: 500; }
   }
@@ -415,7 +414,6 @@ const handleActionClick = (action) => {
   &:hover {
     border-color: var(--dt-brand-light);
     box-shadow: var(--dt-shadow-2);
-    transform: translateY(-1px);
   }
 
   .card-icon {

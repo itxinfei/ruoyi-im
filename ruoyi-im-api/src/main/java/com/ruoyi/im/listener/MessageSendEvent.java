@@ -12,8 +12,10 @@ import java.util.List;
 public class MessageSendEvent extends ApplicationEvent {
 
     private final ImMessageVO messageVO;
-    private final List<Long> targetUserIds; // 接收方 ID 列表（单聊为1个，群聊为多个）
-    private final String clientRequestId;   // 用于返回 ACK 的原始请求 ID
+    /** 接收方 ID 列表（单聊为1个，群聊为多个） */
+    private final List<Long> targetUserIds;
+    /** 用于返回 ACK 的原始请求 ID */
+    private final String clientRequestId;
 
     public MessageSendEvent(Object source, ImMessageVO messageVO, List<Long> targetUserIds, String clientRequestId) {
         super(source);

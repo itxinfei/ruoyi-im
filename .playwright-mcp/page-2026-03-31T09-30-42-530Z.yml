@@ -1,0 +1,202 @@
+- generic [ref=e123]:
+  - complementary [ref=e124]:
+    - generic [ref=e127] [cursor=pointer]: IM
+    - generic [ref=e128]:
+      - generic "消息" [ref=e129] [cursor=pointer]:
+        - img [ref=e131]
+        - generic [ref=e134]: "5"
+      - generic "通讯录" [ref=e135] [cursor=pointer]:
+        - img [ref=e137]
+      - generic "DING" [ref=e139] [cursor=pointer]:
+        - img [ref=e141]
+      - generic "工作台" [ref=e145] [cursor=pointer]:
+        - img [ref=e147]
+      - generic "待办" [ref=e149] [cursor=pointer]:
+        - img [ref=e151]
+        - generic [ref=e153]: "2"
+      - generic "日历" [ref=e154] [cursor=pointer]:
+        - img [ref=e156]
+      - generic "云盘" [ref=e158] [cursor=pointer]:
+        - img [ref=e160]
+      - generic "日志" [ref=e162] [cursor=pointer]:
+        - img [ref=e164]
+      - generic "收藏" [ref=e166] [cursor=pointer]:
+        - img [ref=e168]
+    - generic [ref=e171]:
+      - generic "搜索" [ref=e172] [cursor=pointer]:
+        - img [ref=e174]
+      - generic "个人资料" [ref=e176] [cursor=pointer]:
+        - img [ref=e178]
+      - generic "设置" [ref=e180] [cursor=pointer]:
+        - img [ref=e182]
+      - generic "切换主题" [ref=e184] [cursor=pointer]:
+        - img [ref=e186]
+    - generic "个人资料" [ref=e188] [cursor=pointer]:
+      - img "me" [ref=e190]
+  - main [ref=e193]:
+    - generic [ref=e1416]:
+      - complementary [ref=e1417]:
+        - button "新建日程" [ref=e1419] [cursor=pointer]:
+          - generic [ref=e1420]:
+            - img [ref=e1422]
+            - text: 新建日程
+        - generic [ref=e1424]:
+          - generic [ref=e1425]:
+            - button [ref=e1426] [cursor=pointer]:
+              - img [ref=e1429]
+            - generic [ref=e1431]: 2026年3月
+            - button [ref=e1432] [cursor=pointer]:
+              - img [ref=e1435]
+          - generic [ref=e1437]:
+            - generic [ref=e1438]:
+              - generic [ref=e1439]: 日
+              - generic [ref=e1440]: 一
+              - generic [ref=e1441]: 二
+              - generic [ref=e1442]: 三
+              - generic [ref=e1443]: 四
+              - generic [ref=e1444]: 五
+              - generic [ref=e1445]: 六
+            - generic [ref=e1446]:
+              - generic [ref=e1447] [cursor=pointer]: "1"
+              - generic [ref=e1448] [cursor=pointer]: "2"
+              - generic [ref=e1449] [cursor=pointer]: "3"
+              - generic [ref=e1450] [cursor=pointer]: "4"
+              - generic [ref=e1451] [cursor=pointer]: "5"
+              - generic [ref=e1452] [cursor=pointer]: "6"
+              - generic [ref=e1453] [cursor=pointer]: "7"
+              - generic [ref=e1454] [cursor=pointer]: "8"
+              - generic [ref=e1455] [cursor=pointer]: "9"
+              - generic [ref=e1456] [cursor=pointer]: "10"
+              - generic [ref=e1457] [cursor=pointer]: "11"
+              - generic [ref=e1458] [cursor=pointer]: "12"
+              - generic [ref=e1459] [cursor=pointer]: "13"
+              - generic [ref=e1460] [cursor=pointer]: "14"
+              - generic [ref=e1461] [cursor=pointer]: "15"
+              - generic [ref=e1462] [cursor=pointer]: "16"
+              - generic [ref=e1463] [cursor=pointer]: "17"
+              - generic [ref=e1464] [cursor=pointer]: "18"
+              - generic [ref=e1465] [cursor=pointer]: "19"
+              - generic [ref=e1466] [cursor=pointer]: "20"
+              - generic [ref=e1467] [cursor=pointer]: "21"
+              - generic [ref=e1468] [cursor=pointer]: "22"
+              - generic [ref=e1469] [cursor=pointer]: "23"
+              - generic [ref=e1470] [cursor=pointer]: "24"
+              - generic [ref=e1471] [cursor=pointer]: "25"
+              - generic [ref=e1472] [cursor=pointer]: "26"
+              - generic [ref=e1473] [cursor=pointer]: "27"
+              - generic [ref=e1474] [cursor=pointer]: "28"
+              - generic [ref=e1475] [cursor=pointer]: "29"
+              - generic [ref=e1476] [cursor=pointer]: "30"
+              - generic [ref=e1477] [cursor=pointer]: "31"
+              - generic [ref=e1478] [cursor=pointer]: "1"
+              - generic [ref=e1479] [cursor=pointer]: "2"
+              - generic [ref=e1480] [cursor=pointer]: "3"
+              - generic [ref=e1481] [cursor=pointer]: "4"
+              - generic [ref=e1482] [cursor=pointer]: "5"
+              - generic [ref=e1483] [cursor=pointer]: "6"
+              - generic [ref=e1484] [cursor=pointer]: "7"
+              - generic [ref=e1485] [cursor=pointer]: "8"
+              - generic [ref=e1486] [cursor=pointer]: "9"
+              - generic [ref=e1487] [cursor=pointer]: "10"
+              - generic [ref=e1488] [cursor=pointer]: "11"
+        - radiogroup "radio-group" [ref=e1490]:
+          - generic [ref=e1491]:
+            - radio "月" [checked] [ref=e1492]
+            - generic [ref=e1493] [cursor=pointer]: 月
+          - generic [ref=e1494]:
+            - radio "周" [ref=e1495]
+            - generic [ref=e1496] [cursor=pointer]: 周
+          - generic [ref=e1497]:
+            - radio "日" [ref=e1498]
+            - generic [ref=e1499] [cursor=pointer]: 日
+        - generic [ref=e1500]:
+          - generic [ref=e1501]: 日程分类
+          - group "checkbox-group" [ref=e1502]:
+            - generic [ref=e1503] [cursor=pointer]:
+              - generic [ref=e1504]:
+                - checkbox "工作" [checked]
+              - generic [ref=e1506]: 工作
+            - generic [ref=e1507] [cursor=pointer]:
+              - generic [ref=e1508]:
+                - checkbox "会议" [checked]
+              - generic [ref=e1510]: 会议
+            - generic [ref=e1511] [cursor=pointer]:
+              - generic [ref=e1512]:
+                - checkbox "个人" [checked]
+              - generic [ref=e1514]: 个人
+            - generic [ref=e1515] [cursor=pointer]:
+              - generic [ref=e1516]:
+                - checkbox "提醒" [checked]
+              - generic [ref=e1518]: 提醒
+      - main [ref=e1519]:
+        - generic [ref=e1520]:
+          - generic [ref=e1521]:
+            - button "今天" [ref=e1522] [cursor=pointer]:
+              - generic [ref=e1523]: 今天
+            - generic [ref=e1524]:
+              - button [ref=e1525] [cursor=pointer]:
+                - img [ref=e1528]
+              - button [ref=e1530] [cursor=pointer]:
+                - img [ref=e1533]
+            - generic [ref=e1535]: 2026年3月
+          - generic [ref=e1538]:
+            - img [ref=e1541]
+            - textbox "搜索日程" [ref=e1543]
+        - generic [ref=e1545]:
+          - generic [ref=e1546]:
+            - generic [ref=e1547]: 日
+            - generic [ref=e1548]: 一
+            - generic [ref=e1549]: 二
+            - generic [ref=e1550]: 三
+            - generic [ref=e1551]: 四
+            - generic [ref=e1552]: 五
+            - generic [ref=e1553]: 六
+          - generic [ref=e1554]:
+            - generic [ref=e1555]:
+              - generic [ref=e1558] [cursor=pointer]: "1"
+              - generic [ref=e1561] [cursor=pointer]: "2"
+              - generic [ref=e1564] [cursor=pointer]: "3"
+              - generic [ref=e1567] [cursor=pointer]: "4"
+              - generic [ref=e1570] [cursor=pointer]: "5"
+              - generic [ref=e1573] [cursor=pointer]: "6"
+              - generic [ref=e1576] [cursor=pointer]: "7"
+            - generic [ref=e1577]:
+              - generic [ref=e1580] [cursor=pointer]: "8"
+              - generic [ref=e1583] [cursor=pointer]: "9"
+              - generic [ref=e1586] [cursor=pointer]: "10"
+              - generic [ref=e1589] [cursor=pointer]: "11"
+              - generic [ref=e1592] [cursor=pointer]: "12"
+              - generic [ref=e1595] [cursor=pointer]: "13"
+              - generic [ref=e1598] [cursor=pointer]: "14"
+            - generic [ref=e1599]:
+              - generic [ref=e1602] [cursor=pointer]: "15"
+              - generic [ref=e1605] [cursor=pointer]: "16"
+              - generic [ref=e1608] [cursor=pointer]: "17"
+              - generic [ref=e1611] [cursor=pointer]: "18"
+              - generic [ref=e1614] [cursor=pointer]: "19"
+              - generic [ref=e1617] [cursor=pointer]: "20"
+              - generic [ref=e1620] [cursor=pointer]: "21"
+            - generic [ref=e1621]:
+              - generic [ref=e1624] [cursor=pointer]: "22"
+              - generic [ref=e1627] [cursor=pointer]: "23"
+              - generic [ref=e1630] [cursor=pointer]: "24"
+              - generic [ref=e1633] [cursor=pointer]: "25"
+              - generic [ref=e1636] [cursor=pointer]: "26"
+              - generic [ref=e1639] [cursor=pointer]: "27"
+              - generic [ref=e1642] [cursor=pointer]: "28"
+            - generic [ref=e1643]:
+              - generic [ref=e1646] [cursor=pointer]: "29"
+              - generic [ref=e1649] [cursor=pointer]: "30"
+              - generic [ref=e1652] [cursor=pointer]: "31"
+              - generic [ref=e1655] [cursor=pointer]: "1"
+              - generic [ref=e1658] [cursor=pointer]: "2"
+              - generic [ref=e1661] [cursor=pointer]: "3"
+              - generic [ref=e1664] [cursor=pointer]: "4"
+            - generic [ref=e1665]:
+              - generic [ref=e1668] [cursor=pointer]: "5"
+              - generic [ref=e1671] [cursor=pointer]: "6"
+              - generic [ref=e1674] [cursor=pointer]: "7"
+              - generic [ref=e1677] [cursor=pointer]: "8"
+              - generic [ref=e1680] [cursor=pointer]: "9"
+              - generic [ref=e1683] [cursor=pointer]: "10"
+              - generic [ref=e1686] [cursor=pointer]: "11"

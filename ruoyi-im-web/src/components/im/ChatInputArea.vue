@@ -200,7 +200,7 @@ defineExpose({
 }
 
 .chat-input-box {
-  border: 1.5px solid var(--dt-border-color);
+  border: 1px solid var(--dt-border-color);
   border-radius: var(--dt-radius-lg);
   background: var(--dt-bg-card);
   display: flex;
@@ -219,7 +219,7 @@ defineExpose({
 // ============================================================================
 
 .editor-zone {
-  padding: 10px 0;
+  padding: 12px 0;
   min-height: var(--dt-input-min-height);
   max-height: var(--dt-input-max-height);
   overflow-y: auto;
@@ -259,14 +259,14 @@ defineExpose({
 .tools-left {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--dt-spacing-sm);
 }
 
 .sep {
   width: 1px;
   height: 16px;
   background: var(--dt-border-color);
-  margin: 0 2px;
+  margin: 0 var(--dt-spacing-xs);
 }
 
 .tool-btn {
@@ -344,7 +344,7 @@ defineExpose({
 }
 
 .char-count {
-  font-size: 11px;
+  font-size: var(--dt-font-size-xs);
   color: var(--dt-text-tertiary);
   margin-right: var(--dt-spacing-sm);
 }
@@ -355,20 +355,20 @@ defineExpose({
 
 .chat-footer-tip {
   text-align: right;
-  margin-top: 6px;
-  font-size: 12px;
+  margin-top: var(--dt-spacing-sm);
+  font-size: var(--dt-font-size-sm);
   color: var(--dt-text-tertiary);
   padding-right: var(--dt-spacing-xs);
 
   kbd {
     display: inline-block;
-    padding: 1px 5px;
-    font-size: 11px;
+    padding: 2px 8px;
+    font-size: var(--dt-font-size-xs);
     font-family: inherit;
     background: var(--dt-bg-input);
     border: 1px solid var(--dt-border-light);
-    border-radius: 3px;
-    margin: 0 1px;
+    border-radius: var(--dt-radius-sm);
+    margin: 0 var(--dt-spacing-xs);
   }
 }
 
@@ -379,8 +379,7 @@ defineExpose({
 .drag-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(4px);
+  background: rgba(255, 255, 255, 0.95);
   z-index: var(--dt-z-sticky);
   display: flex;
   align-items: center;
@@ -390,7 +389,7 @@ defineExpose({
 .overlay-inner {
   border: 2px dashed var(--dt-brand-color);
   border-radius: var(--dt-radius-xl);
-  padding: 40px;
+  padding: var(--dt-spacing-3xl);
   color: var(--dt-brand-color);
   text-align: center;
   font-weight: 600;

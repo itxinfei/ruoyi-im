@@ -33,7 +33,7 @@ public class ImConfigServiceImpl implements ImConfigService {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // 默认通知设置
+    /** 默认通知设置 */
     private static final Map<String, Object> DEFAULT_NOTIFICATION_SETTINGS = new HashMap<>();
     static {
         DEFAULT_NOTIFICATION_SETTINGS.put("messageNotification", true);
@@ -44,7 +44,7 @@ public class ImConfigServiceImpl implements ImConfigService {
         DEFAULT_NOTIFICATION_SETTINGS.put("muteAll", false);
     }
 
-    // 默认隐私设置
+    /** 默认隐私设置 */
     private static final Map<String, Object> DEFAULT_PRIVACY_SETTINGS = new HashMap<>();
     static {
         DEFAULT_PRIVACY_SETTINGS.put("showOnlineStatus", true);
@@ -54,7 +54,7 @@ public class ImConfigServiceImpl implements ImConfigService {
         DEFAULT_PRIVACY_SETTINGS.put("showLastSeen", false);
     }
 
-    // 默认通用设置
+    /** 默认通用设置 */
     private static final Map<String, Object> DEFAULT_GENERAL_SETTINGS = new HashMap<>();
     static {
         DEFAULT_GENERAL_SETTINGS.put("language", "zh-CN");
@@ -63,7 +63,7 @@ public class ImConfigServiceImpl implements ImConfigService {
         DEFAULT_GENERAL_SETTINGS.put("enterToSend", true);
     }
 
-    // 默认快捷键设置
+    /** 默认快捷键设置 */
     private static final Map<String, Object> DEFAULT_SHORTCUT_SETTINGS = new HashMap<>();
     static {
         DEFAULT_SHORTCUT_SETTINGS.put("enterToSend", true);

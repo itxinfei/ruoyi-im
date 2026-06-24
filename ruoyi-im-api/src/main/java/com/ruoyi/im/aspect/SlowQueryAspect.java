@@ -19,7 +19,7 @@ public class SlowQueryAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(SlowQueryAspect.class);
     
-    // 慢查询阈值（毫秒）
+    /** 慢查询阈值（毫秒） */
     private static final long SLOW_QUERY_THRESHOLD = 500L;
 
     /**

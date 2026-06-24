@@ -1,0 +1,129 @@
+- generic [ref=e123]:
+  - complementary [ref=e124]:
+    - generic [ref=e127] [cursor=pointer]: IM
+    - generic [ref=e128]:
+      - generic "消息" [ref=e129] [cursor=pointer]:
+        - img [ref=e131]
+        - generic [ref=e134]: "5"
+      - generic "通讯录" [ref=e135] [cursor=pointer]:
+        - img [ref=e137]
+      - generic "DING" [ref=e139] [cursor=pointer]:
+        - img [ref=e141]
+      - generic "工作台" [ref=e145] [cursor=pointer]:
+        - img [ref=e147]
+      - generic "待办" [ref=e149] [cursor=pointer]:
+        - img [ref=e151]
+        - generic [ref=e153]: "2"
+      - generic "日历" [ref=e154] [cursor=pointer]:
+        - img [ref=e156]
+      - generic "云盘" [ref=e158] [cursor=pointer]:
+        - img [ref=e160]
+      - generic "日志" [ref=e162] [cursor=pointer]:
+        - img [ref=e164]
+      - generic "收藏" [ref=e166] [cursor=pointer]:
+        - img [ref=e168]
+    - generic [ref=e171]:
+      - generic "搜索" [ref=e172] [cursor=pointer]:
+        - img [ref=e174]
+      - generic "个人资料" [ref=e176] [cursor=pointer]:
+        - img [ref=e178]
+      - generic "设置" [ref=e180] [cursor=pointer]:
+        - img [ref=e182]
+      - generic "切换主题" [ref=e184] [cursor=pointer]:
+        - img [ref=e186]
+    - generic "个人资料" [ref=e188] [cursor=pointer]:
+      - img "me" [ref=e190]
+  - main [ref=e193]:
+    - generic [ref=e1172]:
+      - complementary [ref=e1173]:
+        - heading "工作台" [level=2] [ref=e1175]
+        - navigation [ref=e1176]:
+          - generic [ref=e1177] [cursor=pointer]:
+            - img [ref=e1179]
+            - generic [ref=e1181]: 常用应用
+          - generic [ref=e1182] [cursor=pointer]:
+            - img [ref=e1184]
+            - generic [ref=e1186]: 审批
+            - generic [ref=e1187]: "3"
+          - generic [ref=e1188] [cursor=pointer]:
+            - img [ref=e1190]
+            - generic [ref=e1194]: 考勤
+          - generic [ref=e1195] [cursor=pointer]:
+            - img [ref=e1197]
+            - generic [ref=e1200]: 待办
+            - generic [ref=e1201]: "3"
+          - generic [ref=e1202] [cursor=pointer]:
+            - img [ref=e1204]
+            - generic [ref=e1206]: 日程
+          - generic [ref=e1207] [cursor=pointer]:
+            - img [ref=e1209]
+            - generic [ref=e1211]: 工作报告
+      - main [ref=e1212]:
+        - generic [ref=e1213]:
+          - generic [ref=e1214]:
+            - generic [ref=e1215]:
+              - heading "下午好，张三" [level=1] [ref=e1216]
+              - paragraph [ref=e1217]: 2026年3月31日星期二
+            - generic [ref=e1218]:
+              - img [ref=e1220]
+              - textbox "搜索应用..." [ref=e1222]
+          - generic [ref=e1223]:
+            - generic [ref=e1224]:
+              - heading "常用应用" [level=3] [ref=e1225]
+              - button "管理" [ref=e1227] [cursor=pointer]:
+                - generic [ref=e1228]: 管理
+            - generic [ref=e1229]:
+              - generic [ref=e1230] [cursor=pointer]:
+                - img [ref=e1233]
+                - generic [ref=e1235]: 资产系统
+              - generic [ref=e1236] [cursor=pointer]:
+                - img [ref=e1239]
+                - generic [ref=e1241]: 知识库
+          - generic [ref=e1242]:
+            - heading "全量中心" [level=3] [ref=e1244]
+            - generic [ref=e1245]:
+              - generic [ref=e1246] [cursor=pointer]:
+                - img [ref=e1249]
+                - generic [ref=e1251]: CRM系统
+              - generic [ref=e1252] [cursor=pointer]:
+                - img [ref=e1255]
+                - generic [ref=e1257]: ERP系统
+              - generic [ref=e1258] [cursor=pointer]:
+                - img [ref=e1261]
+                - generic [ref=e1263]: HR系统
+              - generic [ref=e1264] [cursor=pointer]:
+                - img [ref=e1267]
+                - generic [ref=e1269]: 财务系统
+              - generic [ref=e1270] [cursor=pointer]:
+                - img [ref=e1273]
+                - generic [ref=e1275]: 项目管理
+              - generic [ref=e1276] [cursor=pointer]:
+                - img [ref=e1279]
+                - generic [ref=e1281]: 资产系统
+              - generic [ref=e1282] [cursor=pointer]:
+                - img [ref=e1285]
+                - generic [ref=e1287]: 采购系统
+              - generic [ref=e1288] [cursor=pointer]:
+                - img [ref=e1291]
+                - generic [ref=e1293]: 库存系统
+              - generic [ref=e1294] [cursor=pointer]:
+                - img [ref=e1297]
+                - generic [ref=e1299]: 销售系统
+              - generic [ref=e1300] [cursor=pointer]:
+                - img [ref=e1303]
+                - generic [ref=e1305]: 营销系统
+              - generic [ref=e1306] [cursor=pointer]:
+                - img [ref=e1309]
+                - generic [ref=e1311]: 代码仓库
+              - generic [ref=e1312] [cursor=pointer]:
+                - img [ref=e1315]
+                - generic [ref=e1317]: 测试管理
+              - generic [ref=e1318] [cursor=pointer]:
+                - img [ref=e1321]
+                - generic [ref=e1323]: 监控系统
+              - generic [ref=e1324] [cursor=pointer]:
+                - img [ref=e1327]
+                - generic [ref=e1329]: 日志中心
+              - generic [ref=e1330] [cursor=pointer]:
+                - img [ref=e1333]
+                - generic [ref=e1335]: API管理

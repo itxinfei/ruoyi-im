@@ -74,7 +74,7 @@
   .emoji-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: 2px;
+    gap: 4px;
 
     .emoji-item {
       width: 32px;
@@ -109,7 +109,7 @@
 
 .typing-dots {
   display: flex;
-  gap: 3px;
+  gap: 4px;
 
   .dot {
     width: 4px;

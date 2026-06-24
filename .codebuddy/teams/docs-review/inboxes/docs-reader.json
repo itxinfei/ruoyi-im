@@ -1,0 +1,11 @@
+[
+  {
+    "id": "shutdown-1775526550639",
+    "from": "team-lead",
+    "to": "docs-reader",
+    "type": "shutdown_request",
+    "content": "{\"type\":\"shutdown_request\",\"request_id\":\"shutdown-1775526550639\",\"reason\":\"所有文档已分析完毕，任务已完成，请关闭。\",\"from\":\"team-lead\",\"timestamp\":\"2026-04-07T01:49:10.639Z\"}",
+    "timestamp": "2026-04-07T01:49:10.639Z",
+    "read": true
+  }
+]

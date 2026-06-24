@@ -51,8 +51,8 @@
       </div>
 
       <!-- 即将到来的日程提醒 -->
-      <div class="upcoming-events" v-if="upcomingEvents.length">
-        <div class="sidebar-divider" style="margin: 12px 16px;"></div>
+        <div class="upcoming-events" v-if="upcomingEvents.length">
+        <div class="sidebar-divider upcoming-divider"></div>
         <h4 class="sub-title">即将到来</h4>
         <div v-for="event in upcomingEvents" :key="event.id" class="upcoming-item" @click="selectEvent(event)">
           <div class="upcoming-dot" :style="{ background: event.color }"></div>
@@ -310,6 +310,8 @@ const handleCreateEvent = () => {
 }
 
 .sidebar-divider { height: 1px; background: var(--dt-border-light); margin: 0 16px; }
+
+.upcoming-divider { margin: 12px 16px; }
 
 /* 即将到来的日程 */
 .upcoming-events {

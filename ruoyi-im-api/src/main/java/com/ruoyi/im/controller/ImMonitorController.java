@@ -34,12 +34,26 @@ public class ImMonitorController {
 
     /** 系统运行状态 */
     private static final String STATUS_RUNNING = "RUNNING";
-    /** 健康状态 */
-    private static final String STATUS_HEALTHY = "HEALTHY";
-    /** 警告状态 */
-    private static final String STATUS_WARNING = "WARNING";
-    /** 内存使用率警告阈值 */
-    private static final double MEMORY_WARNING_THRESHOLD = 90;
+    /** 健康状态：健康 */
+    private static final String HEALTH_STATUS_HEALTHY = "HEALTHY";
+    /** 健康状态：警告 */
+    private static final String HEALTH_STATUS_WARNING = "WARNING";
+    /** 内存使用率警告阈值（百分比） */
+    private static final double MEMORY_WARNING_THRESHOLD = 90.0;
+    /** 文件大小单位：KB */
+    private static final long SIZE_KB = 1024;
+    /** 文件大小单位：MB */
+    private static final long SIZE_MB = 1024 * 1024;
+    /** 文件大小单位：GB */
+    private static final long SIZE_GB = 1024 * 1024 * 1024;
+    /** 百分比基数 */
+    private static final double PERCENT_BASE = 100.0;
+    /** 每天毫秒数 */
+    private static final long MILLIS_PER_DAY = 24 * 60 * 60 * 1000;
+    /** 每小时毫秒数 */
+    private static final long MILLIS_PER_HOUR = 60 * 60 * 1000;
+    /** 每分钟毫秒数 */
+    private static final long MILLIS_PER_MINUTE = 60 * 1000;
 
     /**
      * 获取系统概览

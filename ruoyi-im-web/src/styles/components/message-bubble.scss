@@ -7,7 +7,7 @@
 .message-row {
   display: flex;
   align-items: flex-start;
-  padding: 6px var(--dt-chat-gutter);
+  padding: 8px var(--dt-chat-gutter);
   position: relative;
   width: 100%;
   box-sizing: border-box;
@@ -83,7 +83,7 @@
   margin-right: var(--dt-spacing-lg);
 
   .time-text {
-    font-size: 10px;
+    font-size: var(--dt-font-size-xs);
     color: var(--dt-text-tertiary);
   }
 }
@@ -376,7 +376,7 @@
   }
 
   .location-info {
-    padding: 10px 12px;
+    padding: 12px;
 
     .location-title {
       font-size: 14px;
@@ -544,7 +544,7 @@
   padding: 2px 8px;
   background: var(--dt-bg-input);
   border: 1px solid var(--dt-border-light);
-  border-radius: 12px;
+  border-radius: var(--dt-radius-full);
   font-size: 12px;
   cursor: pointer;
   transition: all 0.15s;
@@ -573,7 +573,7 @@
   top: 4px;
   display: flex;
   align-items: center;
-  padding: 3px;
+  padding: var(--dt-spacing-xs);
   background: var(--dt-bg-card);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-md);

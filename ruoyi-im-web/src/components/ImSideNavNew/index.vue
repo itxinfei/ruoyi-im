@@ -126,9 +126,9 @@ const topNavs = [
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 18px;
-  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
+  color: var(--dt-text-white);
+  font-size: var(--dt-font-size-xl);
+  box-shadow: var(--dt-shadow-brand);
 }
 
 // ============================================================================
@@ -168,34 +168,29 @@ const topNavs = [
     transition: opacity 0.2s, height 0.2s;
   }
 
-  .nav-v4-content {
+    .nav-v4-content {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
-    color: rgba(255, 255, 255, 0.65);
+    gap: 4px;
+    color: var(--dt-nav-sidebar-text);
     transition: color 0.2s;
 
     .icon {
       font-size: 20px;
-      transition: transform 0.15s;
     }
 
     .label {
-      font-size: 10px;
+      font-size: var(--dt-font-size-xs);
       font-weight: 500;
     }
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--dt-nav-hover);
 
     .nav-v4-content {
-      color: rgba(255, 255, 255, 0.9);
-    }
-
-    .nav-v4-content .icon {
-      transform: scale(1.1);
+      color: var(--dt-nav-sidebar-text-hover, rgba(255, 255, 255, 0.9));
     }
   }
 
@@ -206,11 +201,11 @@ const topNavs = [
     }
 
     .nav-v4-content {
-      color: #fff;
+      color: var(--dt-nav-sidebar-text-active);
       font-weight: 600;
     }
 
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--dt-nav-active);
   }
 }
 
@@ -220,19 +215,19 @@ const topNavs = [
 
 .v4-badge {
   position: absolute;
-  top: 6px;
-  right: 10px;
+  top: 8px;
+  right: 8px;
   background: var(--dt-error-color);
   color: var(--dt-text-white);
-  font-size: 10px;
-  height: 16px;
-  min-width: 16px;
-  border-radius: 8px;
+  font-size: var(--dt-font-size-xs);
+  height: 18px;
+  min-width: 18px;
+  border-radius: var(--dt-radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0 4px;
-  border: 1.5px solid var(--dt-nav-sidebar-bg);
+  border: 2px solid var(--dt-nav-sidebar-bg);
   font-weight: 700;
 }
 
@@ -256,25 +251,25 @@ const topNavs = [
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
-  color: rgba(255, 255, 255, 0.65);
+  gap: 4px;
+  color: var(--dt-nav-sidebar-text);
   border-radius: var(--dt-radius-md);
   cursor: pointer;
   transition: background-color 0.15s, color 0.15s;
 
   .action-label {
-    font-size: 10px;
+    font-size: var(--dt-font-size-xs);
     font-weight: 500;
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
+    background: var(--dt-nav-hover);
+    color: var(--dt-nav-sidebar-text-hover, rgba(255, 255, 255, 0.9));
   }
 
   &.active {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.15);
+    color: var(--dt-nav-sidebar-text-active);
+    background: var(--dt-nav-active);
   }
 }
 
@@ -302,11 +297,6 @@ const topNavs = [
   border-radius: var(--dt-radius-lg);
   background: var(--dt-nav-sidebar-bg);
   object-fit: cover;
-  transition: transform 0.15s;
-
-  &:hover {
-    transform: scale(1.05);
-  }
 }
 
 .status-ring {
@@ -320,7 +310,6 @@ const topNavs = [
 
   &.online {
     background: var(--dt-success-color);
-    box-shadow: 0 0 4px var(--dt-success-color);
   }
 }
 </style>

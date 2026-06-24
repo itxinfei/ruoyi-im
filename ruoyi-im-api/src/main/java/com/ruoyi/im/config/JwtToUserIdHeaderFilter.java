@@ -23,6 +23,8 @@ import java.util.Vector;
 public class JwtToUserIdHeaderFilter implements Filter {
 
     private static final Logger log = LoggerFactory.getLogger(JwtToUserIdHeaderFilter.class);
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final int BEARER_PREFIX_LENGTH = 7;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -35,8 +37,8 @@ public class JwtToUserIdHeaderFilter implements Filter {
         
         // 检查Authorization头
         String authorizationHeader = httpRequest.getHeader("Authorization");
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            String token = authorizationHeader.substring(7); // 移除 "Bearer " 前缀
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER_PREFIX)) {
+            String token = authorizationHeader.substring(BEARER_PREFIX_LENGTH); // 移除 "Bearer " 前缀
             
             if (jwtUtils.validateToken(token)) {
                 Long userId = jwtUtils.getUserIdFromToken(token);

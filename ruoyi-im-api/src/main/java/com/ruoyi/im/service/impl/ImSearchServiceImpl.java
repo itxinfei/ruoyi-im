@@ -91,7 +91,7 @@ public class ImSearchServiceImpl implements ImSearchService {
                 return gr;
             }).collect(Collectors.toList());
             result.setGroups(groupResults);
-            counts.put("group", groupResults.size());
+            counts.put(SEARCH_TYPE_GROUP, groupResults.size());
         }
 
         // 3. 搜索消息
@@ -128,7 +128,7 @@ public class ImSearchServiceImpl implements ImSearchService {
                 return mr;
             }).collect(Collectors.toList());
             result.setMessages(messageResults);
-            counts.put("message", messageResults.size());
+            counts.put(SEARCH_TYPE_MESSAGE, messageResults.size());
         }
 
         result.setCounts(counts);

@@ -148,13 +148,13 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   width: 100%;
   height: 36px;
   background: var(--dt-bg-input);
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-sm);
   display: flex;
   align-items: center;
   padding: 0 12px;
   gap: 8px;
   transition: all 0.2s;
-  border: 1.5px solid transparent;
+  border: 1px solid transparent;
 
   &:focus-within {
     background: var(--dt-bg-card);
@@ -309,7 +309,6 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   &:hover {
     border-color: var(--dt-brand-light);
     box-shadow: var(--dt-shadow-1);
-    transform: translateY(-1px);
 
     .arrow-icon { opacity: 1; }
   }
@@ -380,7 +379,6 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   &:hover {
     border-color: var(--dt-brand-color);
     box-shadow: var(--dt-shadow-1);
-    transform: translateY(-1px);
 
     .chat-btn { opacity: 1; }
   }

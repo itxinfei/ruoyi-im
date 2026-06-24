@@ -241,13 +241,13 @@ const handleLogin = async () => {
   font-weight: 600;
   cursor: pointer;
   transition: var(--dt-transition-fast);
-  box-shadow: 0 2px 8px rgba(39, 126, 251, 0.3);
+  box-shadow: var(--dt-shadow-brand);
   &:hover {
-    box-shadow: 0 4px 16px rgba(39, 126, 251, 0.4);
-    transform: translateY(-1px);
+    background: var(--dt-brand-hover);
+    box-shadow: var(--dt-shadow-brand-strong);
   }
   &:active {
-    transform: translateY(0);
+    background: var(--dt-brand-active);
   }
   &.loading { opacity: 0.8; cursor: not-allowed; }
 }

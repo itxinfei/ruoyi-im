@@ -47,17 +47,13 @@ public class ImMessageController {
     private final ImMessageMentionService mentionService;
     private final ImMessageReadService messageReadService;
     private final ImWebSocketBroadcastService broadcastService;
-    private final ImMessageMapper imMessageMapper;
-    private final ImConversationMemberMapper imConversationMemberMapper;
 
     public ImMessageController(
             ImMessageService imMessageService,
             ImMessageReactionService reactionService,
             ImMessageMentionService mentionService,
             ImMessageReadService messageReadService,
-            ImWebSocketBroadcastService broadcastService,
-            ImMessageMapper imMessageMapper,
-            ImConversationMemberMapper imConversationMemberMapper) {
+            ImWebSocketBroadcastService broadcastService) {
         this.imMessageService = imMessageService;
         this.reactionService = reactionService;
         this.mentionService = mentionService;
@@ -87,6 +83,8 @@ public class ImMessageController {
         if (effectiveLimit == null) {
             effectiveLimit = 20;
         }
+        // 防止恶意请求超大分页
+        effectiveLimit = Math.min(effectiveLimit, 100);
         log.info("getMessages API - 当前登录用户 userId={}, conversationId={}", userId, conversationId);
         List<ImMessageVO> list = imMessageService.getMessages(conversationId, userId, effectiveLastId, effectiveLimit);
         return Result.success(list);
@@ -114,6 +112,12 @@ public class ImMessageController {
      */
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteMessages(@RequestBody List<Long> messageIds) {
+        if (messageIds == null || messageIds.isEmpty()) {
+            return Result.fail("消息ID列表不能为空");
+        }
+        if (messageIds.size() > 100) {
+            return Result.fail("单次最多删除100条消息");
+        }
         Long userId = SecurityUtils.getLoginUserId();
         imMessageService.batchDeleteMessages(messageIds, userId);
         return Result.success("批量删除成功");

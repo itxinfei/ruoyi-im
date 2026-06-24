@@ -13,11 +13,14 @@ import java.util.List;
 @Mapper
 public interface ImUserSessionMapper extends BaseMapper<ImUserSession> {
 
+    /** 查询用户会话状态 */
     ImUserSession selectByUserIdAndConversationId(@Param("userId") Long userId,
                                                   @Param("conversationId") Long conversationId);
 
+    /** 查询用户的所有会话状态列表 */
     List<ImUserSession> selectByUserId(@Param("userId") Long userId);
 
+    /** 更新未读消息数 */
     int updateUnreadCount(@Param("userId") Long userId,
                           @Param("conversationId") Long conversationId,
                           @Param("unreadCount") Integer unreadCount);
@@ -46,10 +49,12 @@ public interface ImUserSessionMapper extends BaseMapper<ImUserSession> {
                              @Param("conversationId") Long conversationId,
                              @Param("count") Integer count);
 
+    /** 更新最后已读消息ID */
     int updateLastReadMessage(@Param("userId") Long userId,
                               @Param("conversationId") Long conversationId,
                               @Param("lastReadMessageId") Long lastReadMessageId);
 
+    /** 更新会话置顶状态 */
     int updatePinned(@Param("userId") Long userId,
                      @Param("conversationId") Long conversationId,
                      @Param("isPinned") Integer isPinned);

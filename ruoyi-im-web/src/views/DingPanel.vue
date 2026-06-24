@@ -113,7 +113,7 @@ onMounted(loadData)
     flex: 1; height: 88px; background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: 0 20px;
     display: flex; align-items: center; gap: 16px; border: 1px solid var(--dt-border-light);
     transition: var(--dt-transition-fast);
-    &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); transform: translateY(-1px); }
+    &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
     .stat-icon {
       width: 48px; height: 48px; border-radius: var(--dt-radius-lg); @include flex-center; font-size: 22px;
       &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
@@ -135,11 +135,11 @@ onMounted(loadData)
 .ding-card-v2 {
   background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: 20px; border: 1px solid var(--dt-border-light);
   display: flex; gap: 16px; transition: var(--dt-transition-fast);
-  &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); transform: translateY(-1px); }
+  &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
   &.urgent { border-left: 4px solid var(--dt-error-color); }
 
   .card-main { flex: 1; min-width: 0;
-    .row-top { display: flex; justify-content: space-between; margin-bottom: 10px; .sender { font-weight: 600; font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 11px; color: var(--dt-text-tertiary); } }
+    .row-top { display: flex; justify-content: space-between; margin-bottom: 12px; .sender { font-weight: 600; font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 11px; color: var(--dt-text-tertiary); } }
     .ding-body-text { font-size: 14px; color: var(--dt-text-primary); line-height: 1.6; margin-bottom: 16px; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--dt-border-light); padding-top: 12px;
       .footer-left { display: flex; align-items: center; gap: 12px; .receipt-info { font-size: 12px; color: var(--dt-text-tertiary); .el-icon { vertical-align: middle; } } }
@@ -148,7 +148,7 @@ onMounted(loadData)
 }
 
 .empty-view {
-  padding-top: 100px; text-align: center;
+  padding-top: 96px; text-align: center;
   .el-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
   p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
 }

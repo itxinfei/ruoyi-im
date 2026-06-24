@@ -167,7 +167,7 @@ onMounted(loadTodos)
 .todo-sidebar {
   width: var(--dt-contact-panel-width); background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .sidebar-header { padding: 20px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--dt-border-light); .sidebar-title { font-size: 16px; font-weight: 700; margin: 0; color: var(--dt-text-primary); } }
+  .sidebar-header { padding: 0 20px; height: var(--dt-header-height); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--dt-border-light); .sidebar-title { font-size: 16px; font-weight: 700; margin: 0; color: var(--dt-text-primary); } }
   .add-todo-icon-btn { width: 28px; height: 28px; border-radius: var(--dt-radius-sm); border: none; background: var(--dt-brand-color); color: var(--dt-text-white); cursor: pointer; @include flex-center; transition: var(--dt-transition-fast); &:hover { background: var(--dt-brand-hover); } }
   .sidebar-content {
     flex: 1; padding: 12px 8px;
@@ -192,7 +192,7 @@ onMounted(loadTodos)
 }
 
 .todo-search {
-  width: 200px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-lg); /* 钉钉规范：8px */
+  width: 200px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm);
   display: flex; align-items: center; padding: 0 12px; color: var(--dt-text-tertiary);
   input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; margin-left: 8px; }
 }

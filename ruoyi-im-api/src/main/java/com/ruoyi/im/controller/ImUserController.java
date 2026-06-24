@@ -2,6 +2,7 @@ package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUser;
+import com.ruoyi.im.dto.user.ImChangePasswordRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserStatusUpdateRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
@@ -211,6 +212,13 @@ public class ImUserController {
     
     @PutMapping("/changeStatus")
     public Result<Void> changeStatus(@Valid @RequestBody ImUserStatusUpdateRequest request) {
+        // 权限检查：只有管理员可以修改用户状态
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        String role = SecurityUtils.getLoginUserRole();
+        boolean isAdmin = ROLE_ADMIN.equals(role) || ROLE_SUPER_ADMIN.equals(role);
+        if (!isAdmin && !request.getId().equals(currentUserId)) {
+            throw new BusinessException(403, "无权修改其他用户状态");
+        }
         Integer status = STATUS_ENABLED.equals(request.getStatus()) ? 1 : 0;
         imUserService.updateStatus(request.getId(), status);
         return Result.success("状态修改成功");
@@ -255,8 +263,7 @@ public class ImUserController {
     @PutMapping("/{id}/password")
     public Result<Void> changePassword(
             @PathVariable Long id,
-            @RequestParam String oldPassword,
-            @RequestParam String newPassword) {
+            @Valid @RequestBody ImChangePasswordRequest request) {
         // 权限检查：只有当前用户本人可以修改密码，管理员除外
         Long currentUserId = SecurityUtils.getLoginUserId();
         String role = SecurityUtils.getLoginUserRole();
@@ -264,7 +271,7 @@ public class ImUserController {
         if (!isAdmin && !id.equals(currentUserId)) {
             throw new BusinessException(403, "只能修改自己的密码");
         }
-        boolean success = imUserService.changePassword(id, oldPassword, newPassword);
+        boolean success = imUserService.changePassword(id, request.getOldPassword(), request.getNewPassword());
         return success ? Result.success("密码修改成功") : Result.fail("旧密码错误");
     }
 

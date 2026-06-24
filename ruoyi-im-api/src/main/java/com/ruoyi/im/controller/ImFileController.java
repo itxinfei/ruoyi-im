@@ -278,7 +278,8 @@ public class ImFileController {
     
     @GetMapping("/{fileId}")
     public Result<ImFileVO> getFileById(@PathVariable Long fileId) {
-        ImFileVO fileVO = imFileService.getFileById(fileId);
+        Long userId = SecurityUtils.getLoginUserId();
+        ImFileVO fileVO = imFileService.getFileById(fileId, userId);
         return Result.success(fileVO);
     }
 

@@ -131,7 +131,7 @@ onMounted(loadData)
 .mail-list-panel {
   width: 340px; border-right: 1px solid var(--dt-border-light); display: flex; flex-direction: column;
   .list-header { height: var(--dt-header-height); padding: 0 16px; border-bottom: 1px solid var(--dt-border-light); @include flex-center;
-    .search-box { width: 100%; height: 32px; background: var(--dt-bg-hover); border-radius: 16px; display: flex; align-items: center; padding: 0 12px; 
+    .search-box { width: 100%; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); display: flex; align-items: center; padding: 0 12px; 
       input { border: none; background: transparent; outline: none; font-size: 12px; margin-left: 8px; flex: 1; }
     }
   }

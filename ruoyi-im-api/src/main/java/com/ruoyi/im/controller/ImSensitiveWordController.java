@@ -6,6 +6,7 @@ import com.ruoyi.im.service.ISensitiveWordService;
 import com.ruoyi.im.vo.sensitive.SensitiveWordDetectResultVO;
 import com.ruoyi.im.vo.sensitive.SensitiveWordFilterResultVO;
 import com.ruoyi.im.vo.sensitive.SensitiveWordRequest;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
@@ -84,6 +85,7 @@ public class ImSensitiveWordController {
      * @return 操作结果
      */
     
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
     @PostMapping("/reload")
     public Result<Void> reload() {
         sensitiveWordService.reload();

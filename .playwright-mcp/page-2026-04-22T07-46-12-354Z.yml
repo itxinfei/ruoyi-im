@@ -1,0 +1,29 @@
+- generic [ref=e4]:
+  - main [ref=e8]:
+    - generic [ref=e9]:
+      - img [ref=e12]
+      - heading "RuoYi-IM" [level=1] [ref=e14]
+      - paragraph [ref=e15]: 企业级数字化办公协同平台
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: 用户名 / 手机号
+        - textbox "请输入账号" [ref=e20]
+      - generic [ref=e21]:
+        - generic [ref=e22]: 登录密码
+        - generic [ref=e23]:
+          - textbox "请输入密码" [ref=e24]
+          - img [ref=e26] [cursor=pointer]
+      - generic [ref=e28]:
+        - generic [ref=e29] [cursor=pointer]:
+          - generic [ref=e30]:
+            - checkbox "自动登录"
+          - generic [ref=e32]: 自动登录
+        - button "忘记密码" [ref=e33] [cursor=pointer]
+      - button "登录" [ref=e34] [cursor=pointer]
+    - generic [ref=e35]:
+      - generic [ref=e36]: Version 8.2.0 Premium
+      - generic [ref=e37]:
+        - generic [ref=e38] [cursor=pointer]: 注册账号
+        - generic [ref=e39]: ·
+        - generic [ref=e40] [cursor=pointer]: 隐私协议
+  - generic [ref=e41]: Powered by RuoYi Fullstack Architecture © 2026

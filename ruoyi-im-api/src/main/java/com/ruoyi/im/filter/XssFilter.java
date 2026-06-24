@@ -22,7 +22,7 @@ public class XssFilter implements Filter {
 
     private static final Logger logger = LoggerFactory.getLogger(XssFilter.class);
 
-    // 定义安全的HTML标签白名单
+    /** 定义安全的HTML标签白名单 */
     private static final Safelist SAFE_LIST = Safelist.relaxed()
             .addTags("span", "div", "p", "br", "hr", "pre", "blockquote", "ol", "ul", "li", "dl", "dt", "dd")
             .addAttributes("a", "href", "title", "target")
