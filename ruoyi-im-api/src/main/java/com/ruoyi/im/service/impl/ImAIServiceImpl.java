@@ -147,6 +147,34 @@ public class ImAIServiceImpl implements ImAIService {
     private static final int MAX_RETRY_COUNT = 3;
     /** 重试基础间隔（毫秒） */
     private static final long RETRY_BASE_DELAY_MS = 500;
+    private static final double DEFAULT_TEMPERATURE = 0.7;
+    private static final int DEFAULT_MAX_TOKENS = 2048;
+    private static final int SUMMARY_PREVIEW_LENGTH = 200;
+    private static final int MAX_KEY_POINTS = 3;
+    private static final int MIN_KEY_POINT_LENGTH = 10;
+
+    /** 默认AI模型 */
+    private static final String DEFAULT_MODEL = "qwen";
+    /** 用户角色 */
+    private static final String ROLE_USER = "user";
+    /** 助手角色 */
+    private static final String ROLE_ASSISTANT = "assistant";
+    /** Bearer授权头前缀 */
+    private static final String BEARER_PREFIX = "Bearer ";
+    /** 超时时间转换因子（秒转毫秒） */
+    private static final int TIMEOUT_MULTIPLIER = 1000;
+    /** 用户消息前缀 */
+    private static final String USER_MSG_PREFIX = "user:";
+    /** 助手消息前缀 */
+    private static final String ASSISTANT_MSG_PREFIX = "assistant:";
+    /** 简短摘要类型 */
+    private static final String SUMMARY_TYPE_BRIEF = "brief";
+    /** 详细摘要类型 */
+    private static final String SUMMARY_TYPE_DETAILED = "detailed";
+    /** 消息分隔符 */
+    private static final String MESSAGE_SEPARATOR = ":";
+    /** Token估算除数 */
+    private static final int TOKEN_ESTIMATION_DIVISOR = 2;
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
@@ -184,7 +212,7 @@ public class ImAIServiceImpl implements ImAIService {
             }
 
             // 获取或设置模型
-            String model = StrUtil.isNotBlank(request.getModel()) ? request.getModel() : "qwen";
+            String model = StrUtil.isNotBlank(request.getModel()) ? request.getModel() : DEFAULT_MODEL;
 
             // 获取对话历史（用于上下文记忆）
             List<String> history = getConversationHistory(conversationId, request.getUserId());
@@ -193,8 +221,8 @@ public class ImAIServiceImpl implements ImAIService {
             String aiResponse = executeWithRetry(() -> generateChatResponse(request.getContent(), history, model));
 
             // 保存对话历史
-            saveMessage(conversationId, request.getUserId(), "user", request.getContent());
-            saveMessage(conversationId, request.getUserId(), "assistant", aiResponse);
+            saveMessage(conversationId, request.getUserId(), ROLE_USER, request.getContent());
+            saveMessage(conversationId, request.getUserId(), ROLE_ASSISTANT, aiResponse);
 
             // 构建响应
             ChatResponse response = new ChatResponse();
@@ -300,9 +328,9 @@ public class ImAIServiceImpl implements ImAIService {
 
         try {
             HttpResponse response = HttpRequest.post(apiUrl)
-                    .header("Authorization", "Bearer " + config.getApiKey())
+                    .header("Authorization", BEARER_PREFIX + config.getApiKey())
                     .header("Content-Type", "application/json")
-                    .timeout(config.getTimeout() * 1000)
+                    .timeout(config.getTimeout() * TIMEOUT_MULTIPLIER)
                     .body(requestBody.toString())
                     .execute();
 
@@ -336,10 +364,10 @@ public class ImAIServiceImpl implements ImAIService {
 
         try {
             HttpResponse response = HttpRequest.post(apiUrl)
-                    .header("Authorization", "Bearer " + config.getApiKey())
+                    .header("Authorization", BEARER_PREFIX + config.getApiKey())
                     .header("Content-Type", "application/json")
                     .header("X-DashScope-Async", "enable")
-                    .timeout(config.getTimeout() * 1000)
+                    .timeout(config.getTimeout() * TIMEOUT_MULTIPLIER)
                     .body(requestBody.toString())
                     .execute();
 
@@ -432,19 +460,19 @@ public class ImAIServiceImpl implements ImAIService {
     private JSONObject buildOpenAIRequestBody(String userMessage, List<String> history, String model, int timeout) {
         JSONObject body = new JSONObject();
         body.set("model", model);
-        body.set("temperature", 0.7);
-        body.set("max_tokens", 2048);
+        body.set("temperature", DEFAULT_TEMPERATURE);
+        body.set("max_tokens", DEFAULT_MAX_TOKENS);
 
         JSONArray messages = new JSONArray();
         // 添加历史对话
         if (history != null) {
             for (String msg : history) {
                 JSONObject historyMsg = new JSONObject();
-                if (msg.startsWith("user:")) {
-                    historyMsg.set("role", "user");
+                if (msg.startsWith(USER_MSG_PREFIX)) {
+                    historyMsg.set("role", ROLE_USER);
                     historyMsg.set("content", msg.substring(5));
-                } else if (msg.startsWith("assistant:")) {
-                    historyMsg.set("role", "assistant");
+                } else if (msg.startsWith(ASSISTANT_MSG_PREFIX)) {
+                    historyMsg.set("role", ROLE_ASSISTANT);
                     historyMsg.set("content", msg.substring(10));
                 }
                 if (historyMsg.containsKey("role")) {
@@ -454,7 +482,7 @@ public class ImAIServiceImpl implements ImAIService {
         }
         // 添加当前用户消息
         JSONObject userMsg = new JSONObject();
-        userMsg.set("role", "user");
+        userMsg.set("role", ROLE_USER);
         userMsg.set("content", userMessage);
         messages.add(userMsg);
 
@@ -563,13 +591,13 @@ public class ImAIServiceImpl implements ImAIService {
         int sentenceCount = content.split("[。！？.!?]+").length;
 
         // 提取前N个字符作为预览
-        int previewLen = Math.min(200, content.length());
+        int previewLen = Math.min(SUMMARY_PREVIEW_LENGTH, content.length());
         String preview = content.substring(0, previewLen);
 
         StringBuilder sb = new StringBuilder();
 
         switch (summaryType) {
-            case "brief":
+            case SUMMARY_TYPE_BRIEF:
                 sb.append("【简短摘要】\n\n");
                 sb.append("原文共").append(charCount).append("字符，");
                 sb.append(wordCount).append("个词语，");
@@ -581,7 +609,7 @@ public class ImAIServiceImpl implements ImAIService {
                 }
                 break;
 
-            case "detailed":
+            case SUMMARY_TYPE_DETAILED:
                 sb.append("【详细摘要】\n\n");
                 sb.append("📊 基本统计\n");
                 sb.append("• 字符数：").append(charCount).append("\n");
@@ -602,8 +630,8 @@ public class ImAIServiceImpl implements ImAIService {
                     int minLen = sentences[0].length();
                     int maxLen = sentences[0].length();
                     for (String s : sentences) {
-                        if (s.length() < minLen) minLen = s.length();
-                        if (s.length() > maxLen) maxLen = s.length();
+                        if (s.length() < minLen) { minLen = s.length(); }
+                        if (s.length() > maxLen) { maxLen = s.length(); }
                     }
                     sb.append("• 句子长度：").append(minLen).append("-").append(maxLen).append("字符\n");
                 }
@@ -630,8 +658,8 @@ public class ImAIServiceImpl implements ImAIService {
         List<String> keyPoints = new ArrayList<>();
         // 简单的关键点提取模拟
         String[] sentences = content.split("[。！？\\n]");
-        for (int i = 0; i < Math.min(3, sentences.length); i++) {
-            if (sentences[i].trim().length() > 10) {
+        for (int i = 0; i < Math.min(MAX_KEY_POINTS, sentences.length); i++) {
+            if (sentences[i].trim().length() > MIN_KEY_POINT_LENGTH) {
                 keyPoints.add(sentences[i].trim());
             }
         }
@@ -662,7 +690,7 @@ public class ImAIServiceImpl implements ImAIService {
      */
     private void saveMessage(String conversationId, Long userId, String role, String content) {
         String key = getConversationKey(conversationId, userId);
-        String message = role + ":" + content;
+        String message = role + MESSAGE_SEPARATOR + content;
         redisTemplate.opsForList().rightPush(key, message);
         redisTemplate.expire(key, CONVERSATION_TTL_HOURS, TimeUnit.HOURS);
 
@@ -688,7 +716,7 @@ public class ImAIServiceImpl implements ImAIService {
             return 0;
         }
         // 简单估算：字符数的一半
-        return (text.length() + 1) / 2;
+        return (text.length() + 1) / TOKEN_ESTIMATION_DIVISOR;
     }
 
     /**

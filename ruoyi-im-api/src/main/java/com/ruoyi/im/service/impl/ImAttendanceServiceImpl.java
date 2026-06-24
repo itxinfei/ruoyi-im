@@ -42,6 +42,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
      */
     private static final int LATE_TOLERANCE_MINUTES = 10;
 
+    private static final String STATUS_NORMAL = "NORMAL";
+    private static final String STATUS_LATE = "LATE";
+    private static final String STATUS_EARLY = "EARLY";
+    private static final String APPROVE_STATUS_PENDING = "PENDING";
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ImAttendance checkIn(Long userId, String location, String deviceInfo) {
@@ -65,9 +70,9 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
 
             // 判断是否迟到
             LocalTime checkInTime = now.toLocalTime();
-            String status = "NORMAL";
+            String status = STATUS_NORMAL;
             if (checkInTime.isAfter(CHECK_IN_TIME.plusMinutes(LATE_TOLERANCE_MINUTES))) {
-                status = "LATE";
+                status = STATUS_LATE;
             }
             attendance.setCheckInStatus(status);
             attendance.setAttendanceType("WORK");
@@ -81,9 +86,9 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
             attendance.setUpdateTime(now);
 
             LocalTime checkInTime = now.toLocalTime();
-            String status = "NORMAL";
+            String status = STATUS_NORMAL;
             if (checkInTime.isAfter(CHECK_IN_TIME.plusMinutes(LATE_TOLERANCE_MINUTES))) {
-                status = "LATE";
+                status = STATUS_LATE;
             }
             attendance.setCheckInStatus(status);
 
@@ -119,9 +124,9 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
 
         // 判断是否早退
         LocalTime checkOutTime = now.toLocalTime();
-        String status = "NORMAL";
+        String status = STATUS_NORMAL;
         if (checkOutTime.isBefore(CHECK_OUT_TIME.minusMinutes(30))) {
-            status = "EARLY";
+            status = STATUS_EARLY;
         }
         attendance.setCheckOutStatus(status);
 
@@ -178,11 +183,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
         if (!attendance.getUserId().equals(userId)) {
             BusinessExceptionHelper.throwNoPermission();
         }
-        if ("PENDING".equals(attendance.getApproveStatus())) {
+        if (APPROVE_STATUS_PENDING.equals(attendance.getApproveStatus())) {
             BusinessExceptionHelper.throwAlreadyExists("已有审批中的申请");
         }
 
-        attendance.setApproveStatus("PENDING");
+        attendance.setApproveStatus(APPROVE_STATUS_PENDING);
         attendance.setRemark(attendance.getRemark() != null ? attendance.getRemark() + ";补卡原因:" + reason : "补卡原因:" + reason);
         attendance.setUpdateTime(LocalDateTime.now());
 
@@ -197,7 +202,7 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
             BusinessExceptionHelper.throwAttendanceNotFound();
         }
 
-        if (!"PENDING".equals(attendance.getApproveStatus())) {
+        if (!APPROVE_STATUS_PENDING.equals(attendance.getApproveStatus())) {
             BusinessExceptionHelper.throwStatusError("该申请");
         }
 
@@ -211,11 +216,11 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
         if (approved) {
             if (attendance.getCheckInTime() == null) {
                 attendance.setCheckInTime(LocalDateTime.of(attendance.getAttendanceDate(), CHECK_IN_TIME));
-                attendance.setCheckInStatus("NORMAL");
+                attendance.setCheckInStatus(STATUS_NORMAL);
             }
             if (attendance.getCheckOutTime() == null) {
                 attendance.setCheckOutTime(LocalDateTime.of(attendance.getAttendanceDate(), CHECK_OUT_TIME));
-                attendance.setCheckOutStatus("NORMAL");
+                attendance.setCheckOutStatus(STATUS_NORMAL);
 
                 // 计算工作时长
                 if (attendance.getCheckInTime() != null) {

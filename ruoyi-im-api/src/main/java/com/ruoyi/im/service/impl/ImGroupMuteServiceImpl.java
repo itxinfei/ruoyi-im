@@ -22,6 +22,11 @@ import java.util.List;
 @Service
 public class ImGroupMuteServiceImpl implements ImGroupMuteService {
 
+    private static final String ROLE_OWNER = "OWNER";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final int ALL_MUTED_ON = 1;
+    private static final int ALL_MUTED_OFF = 0;
+
     @Autowired
     private ImGroupMapper groupMapper;
 
@@ -42,12 +47,12 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
             BusinessExceptionHelper.throwNotGroupMember();
         }
 
-        if (!"OWNER".equals(operator.getRole())) {
+        if (!ROLE_OWNER.equals(operator.getRole())) {
             BusinessExceptionHelper.throwOnlyOwnerCanMuteAll();
         }
 
         // 设置全员禁言
-        group.setAllMuted(allMuted ? 1 : 0);
+        group.setAllMuted(allMuted ? ALL_MUTED_ON : ALL_MUTED_OFF);
         groupMapper.updateImGroup(group);
     }
 
@@ -61,8 +66,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         }
 
         String operatorRole = operator.getRole();
-        boolean isOwner = "OWNER".equals(operatorRole);
-        boolean isAdmin = "ADMIN".equals(operatorRole);
+        boolean isOwner = ROLE_OWNER.equals(operatorRole);
+        boolean isAdmin = ROLE_ADMIN.equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
             BusinessExceptionHelper.throwOnlyAdminCanMute();
@@ -76,7 +81,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
 
         // 管理员不能禁言群主和其他管理员
         String memberRole = member.getRole();
-        if (isAdmin && ("OWNER".equals(memberRole) || "ADMIN".equals(memberRole))) {
+        if (isAdmin && (ROLE_OWNER.equals(memberRole) || ROLE_ADMIN.equals(memberRole))) {
             BusinessExceptionHelper.throwCannotMuteAdmin();
         }
 
@@ -96,8 +101,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         }
 
         String operatorRole = operator.getRole();
-        boolean isOwner = "OWNER".equals(operatorRole);
-        boolean isAdmin = "ADMIN".equals(operatorRole);
+        boolean isOwner = ROLE_OWNER.equals(operatorRole);
+        boolean isAdmin = ROLE_ADMIN.equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
             BusinessExceptionHelper.throwOnlyAdminCanUnmute();
@@ -124,7 +129,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
 
         // 管理员和群主不受禁言限制
         String role = member.getRole();
-        if ("OWNER".equals(role) || "ADMIN".equals(role)) {
+        if (ROLE_OWNER.equals(role) || ROLE_ADMIN.equals(role)) {
             return false;
         }
 
@@ -156,7 +161,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
     @Override
     public boolean isAllMuted(Long groupId) {
         ImGroup group = groupMapper.selectImGroupById(groupId);
-        return group != null && group.getAllMuted() != null && group.getAllMuted() == 1;
+        return group != null && group.getAllMuted() != null && group.getAllMuted() == ALL_MUTED_ON;
     }
 
     @Override
@@ -169,8 +174,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         }
 
         String operatorRole = operator.getRole();
-        boolean isOwner = "OWNER".equals(operatorRole);
-        boolean isAdmin = "ADMIN".equals(operatorRole);
+        boolean isOwner = ROLE_OWNER.equals(operatorRole);
+        boolean isAdmin = ROLE_ADMIN.equals(operatorRole);
 
         if (!isOwner && !isAdmin) {
             throw new BusinessException("只有群主和管理员可以禁言成员");
@@ -185,7 +190,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
             if (member != null) {
                 // 管理员不能禁言群主和其他管理员
                 String memberRole = member.getRole();
-                if (isAdmin && ("OWNER".equals(memberRole) || "ADMIN".equals(memberRole))) {
+                if (isAdmin && (ROLE_OWNER.equals(memberRole) || ROLE_ADMIN.equals(memberRole))) {
                     continue; // 跳过群主和管理员
                 }
                 member.setMuteEndTime(muteEndTime);

@@ -23,6 +23,10 @@ public class ImVideoCallController {
 
     private static final Logger log = LoggerFactory.getLogger(ImVideoCallController.class);
 
+    private static final String DEFAULT_CALL_TYPE = "VIDEO";
+    private static final String CALL_ID_PREFIX = "call-";
+    private static final int MAX_PARTICIPANTS = 9;
+
     private final ImVideoCallService videoCallService;
 
     /**
@@ -42,7 +46,7 @@ public class ImVideoCallController {
     public Result<Long> initiateCall(
             @RequestParam Long calleeId,
             @RequestParam(required = false) Long conversationId,
-            @RequestParam(defaultValue = "VIDEO") String callType) {
+            @RequestParam(defaultValue = DEFAULT_CALL_TYPE) String callType) {
         Long callerId = SecurityUtils.getLoginUserId();
 
         try {
@@ -127,8 +131,8 @@ public class ImVideoCallController {
                 return Long.parseLong(callId);
             }
             // 如果是前端临时生成的格式 (call-1776910478925)
-            else if (callId.startsWith("call-")) {
-                String numericPart = callId.substring(5);
+            else if (callId.startsWith(CALL_ID_PREFIX)) {
+                String numericPart = callId.substring(CALL_ID_PREFIX.length());
                 return Long.parseLong(numericPart);
             }
             throw new NumberFormatException("Invalid callId format");
@@ -221,15 +225,15 @@ public class ImVideoCallController {
     @PostMapping("/group/initiate")
     public Result<Map<String, Object>> initiateGroupCall(
             @RequestParam Long conversationId,
-            @RequestParam(defaultValue = "VIDEO") String callType,
-            @RequestParam(defaultValue = "9") Integer maxParticipants,
+            @RequestParam(defaultValue = DEFAULT_CALL_TYPE) String callType,
+            @RequestParam(defaultValue = MAX_PARTICIPANTS + "") Integer maxParticipants,
             @RequestBody List<Long> invitedUserIds) {
         Long callerId = SecurityUtils.getLoginUserId();
 
         try {
             // 验证最大参与者数
-            if (maxParticipants > 9) {
-                return Result.fail("最多支持9人同时通话");
+            if (maxParticipants > MAX_PARTICIPANTS) {
+                return Result.fail("最多支持" + MAX_PARTICIPANTS + "人同时通话");
             }
             if (invitedUserIds == null || invitedUserIds.isEmpty()) {
                 return Result.fail("请邀请至少一人参与通话");

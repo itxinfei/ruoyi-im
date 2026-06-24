@@ -32,6 +32,21 @@ import java.util.stream.Collectors;
 @Service
 public class ImScheduleEventServiceImpl implements ImScheduleEventService {
 
+    private static final String EVENT_STATUS_SCHEDULED = "SCHEDULED";
+    private static final String EVENT_STATUS_CANCELLED = "CANCELLED";
+    private static final String EVENT_STATUS_COMPLETED = "COMPLETED";
+    private static final String PARTICIPANT_STATUS_PENDING = "PENDING";
+    private static final String PARTICIPANT_STATUS_ACCEPTED = "ACCEPTED";
+    private static final String PARTICIPANT_STATUS_DECLINED = "DECLINED";
+    private static final String RECURRENCE_TYPE_NONE = "NONE";
+    private static final String RECURRENCE_TYPE_DAILY = "DAILY";
+    private static final String RECURRENCE_TYPE_WEEKLY = "WEEKLY";
+    private static final String RECURRENCE_TYPE_MONTHLY = "MONTHLY";
+    private static final String RECURRENCE_TYPE_CUSTOM = "CUSTOM";
+    private static final String VISIBILITY_PRIVATE = "PRIVATE";
+    private static final String VISIBILITY_DEPARTMENT = "DEPARTMENT";
+    private static final String VISIBILITY_PUBLIC = "PUBLIC";
+
     @Autowired
     private ImScheduleEventMapper eventMapper;
 
@@ -48,7 +63,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         BeanUtils.copyProperties(request, event);
         event.setUserId(userId);
         event.setIsAllDay(Boolean.TRUE.equals(request.getIsAllDay()) ? 1 : 0);
-        event.setStatus("SCHEDULED");
+        event.setStatus(EVENT_STATUS_SCHEDULED);
         eventMapper.insert(event);
 
         // 添加参与人
@@ -59,7 +74,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
                     ImScheduleParticipant participant = new ImScheduleParticipant();
                     participant.setEventId(event.getId());
                     participant.setUserId(participantId);
-                    participant.setStatus("PENDING");
+                    participant.setStatus(PARTICIPANT_STATUS_PENDING);
                     participant.setCreateTime(LocalDateTime.now());
                     participantMapper.insert(participant);
                 }
@@ -97,7 +112,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
                     ImScheduleParticipant participant = new ImScheduleParticipant();
                     participant.setEventId(eventId);
                     participant.setUserId(participantId);
-                    participant.setStatus("PENDING");
+                    participant.setStatus(PARTICIPANT_STATUS_PENDING);
                     participant.setCreateTime(LocalDateTime.now());
                     participantMapper.insert(participant);
                 }
@@ -146,7 +161,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
             ImScheduleParticipant myParticipation = participantMapper.selectByEventAndUser(eventId, userId);
             if (myParticipation != null) {
                 vo.setParticipantStatus(myParticipation.getStatus());
-                vo.setIsAccepted("ACCEPTED".equals(myParticipation.getStatus()));
+                vo.setIsAccepted(PARTICIPANT_STATUS_ACCEPTED.equals(myParticipation.getStatus()));
             }
         }
 
@@ -193,7 +208,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
             BusinessExceptionHelper.throwNoPermission();
         }
 
-        participant.setStatus(accepted ? "ACCEPTED" : "DECLINED");
+        participant.setStatus(accepted ? PARTICIPANT_STATUS_ACCEPTED : PARTICIPANT_STATUS_DECLINED);
         participant.setResponseTime(LocalDateTime.now());
         participantMapper.updateById(participant);
     }
@@ -215,7 +230,7 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
             BusinessExceptionHelper.throwNoPermission();
         }
 
-        event.setStatus("CANCELLED");
+        event.setStatus(EVENT_STATUS_CANCELLED);
         eventMapper.updateById(event);
     }
 
@@ -268,48 +283,48 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
     private String getRecurrenceTypeName(String type) {
         if (type == null) {
             return "不重复";
-        } else if ("NONE".equals(type)) {
+        } else if (RECURRENCE_TYPE_NONE.equals(type)) {
             return "不重复";
-        } else if ("DAILY".equals(type)) {
+        } else if (RECURRENCE_TYPE_DAILY.equals(type)) {
             return "每天";
-        } else if ("WEEKLY".equals(type)) {
+        } else if (RECURRENCE_TYPE_WEEKLY.equals(type)) {
             return "每周";
-        } else if ("MONTHLY".equals(type)) {
+        } else if (RECURRENCE_TYPE_MONTHLY.equals(type)) {
             return "每月";
-        } else if ("CUSTOM".equals(type)) {
+        } else if (RECURRENCE_TYPE_CUSTOM.equals(type)) {
             return "自定义";
         }
         return type;
     }
 
     private String getVisibilityName(String visibility) {
-        if ("PRIVATE".equals(visibility)) {
+        if (VISIBILITY_PRIVATE.equals(visibility)) {
             return "私有";
-        } else if ("DEPARTMENT".equals(visibility)) {
+        } else if (VISIBILITY_DEPARTMENT.equals(visibility)) {
             return "部门";
-        } else if ("PUBLIC".equals(visibility)) {
+        } else if (VISIBILITY_PUBLIC.equals(visibility)) {
             return "公开";
         }
         return visibility;
     }
 
     private String getStatusName(String status) {
-        if ("SCHEDULED".equals(status)) {
+        if (EVENT_STATUS_SCHEDULED.equals(status)) {
             return "已安排";
-        } else if ("CANCELLED".equals(status)) {
+        } else if (EVENT_STATUS_CANCELLED.equals(status)) {
             return "已取消";
-        } else if ("COMPLETED".equals(status)) {
+        } else if (EVENT_STATUS_COMPLETED.equals(status)) {
             return "已完成";
         }
         return status;
     }
 
     private String getParticipantStatusName(String status) {
-        if ("PENDING".equals(status)) {
+        if (PARTICIPANT_STATUS_PENDING.equals(status)) {
             return "待确认";
-        } else if ("ACCEPTED".equals(status)) {
+        } else if (PARTICIPANT_STATUS_ACCEPTED.equals(status)) {
             return "已接受";
-        } else if ("DECLINED".equals(status)) {
+        } else if (PARTICIPANT_STATUS_DECLINED.equals(status)) {
             return "已拒绝";
         }
         return status;

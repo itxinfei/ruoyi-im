@@ -57,12 +57,12 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastMessageToConversation(Long conversationId, Long messageId, Long senderId) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) return;
+            if (members == null || members.isEmpty()) { return; }
 
             ImMessage message = messageMapper.selectImMessageById(messageId);
-            if (message == null) return;
+            if (message == null) { return; }
 
-            Map<String, Object> wsMessage = new HashMap<>();
+            Map<String, Object> wsMessage = new HashMap<>(16);
             wsMessage.put("type", "message");
             wsMessage.put("data", createMessageData(message));
 
@@ -76,7 +76,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastReactionUpdate(Long conversationId, Long messageId, Long userId, String emoji, String action) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) return;
+            if (members == null || members.isEmpty()) { return; }
 
             Map<String, Object> msg = createReactionMessage(conversationId, messageId, userId, emoji, action);
             publishToMembers(members, msg, userId);
@@ -89,7 +89,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastReadReceipt(Long conversationId, Long lastReadMessageId, Long userId) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) return;
+            if (members == null || members.isEmpty()) { return; }
 
             Map<String, Object> msg = createReadReceiptMessage(conversationId, lastReadMessageId, userId);
             publishToMembers(members, msg, userId);
@@ -102,11 +102,11 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastRecallNotification(Long conversationId, Long messageId, Long userId) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) return;
+            if (members == null || members.isEmpty()) { return; }
 
-            Map<String, Object> recallMap = new HashMap<>();
+            Map<String, Object> recallMap = new HashMap<>(16);
             recallMap.put("type", "message_recall");
-            Map<String, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>(16);
             data.put("conversationId", conversationId);
             data.put("messageId", messageId);
             data.put("userId", userId);
@@ -123,14 +123,14 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastMessageUpdate(Long conversationId, Long messageId, Long userId) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) return;
+            if (members == null || members.isEmpty()) { return; }
 
             ImMessage message = messageMapper.selectImMessageById(messageId);
-            if (message == null) return;
+            if (message == null) { return; }
 
-            Map<String, Object> updateMap = new HashMap<>();
+            Map<String, Object> updateMap = new HashMap<>(16);
             updateMap.put("type", "message_update");
-            Map<String, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>(16);
             data.put("conversationId", conversationId);
             data.put("messageId", messageId);
             data.put("content", encryptionUtil.decryptMessage(message.getContent()));
@@ -148,11 +148,11 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     public void broadcastTypingStatus(Long conversationId, Long userId, boolean isTyping) {
         try {
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
-            if (members == null || members.isEmpty()) return;
+            if (members == null || members.isEmpty()) { return; }
 
-            Map<String, Object> statusMap = new HashMap<>();
+            Map<String, Object> statusMap = new HashMap<>(16);
             statusMap.put("type", "typing");
-            Map<String, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>(16);
             data.put("conversationId", conversationId);
             data.put("userId", userId);
             data.put("isTyping", isTyping);
@@ -168,9 +168,9 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     @Override
     public void broadcastOnlineStatus(Long userId, boolean online) {
         try {
-            Map<String, Object> statusMap = new HashMap<>();
+            Map<String, Object> statusMap = new HashMap<>(16);
             statusMap.put("type", online ? "online" : "offline");
-            Map<String, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>(16);
             data.put("userId", userId);
             data.put("online", online);
             data.put("timestamp", System.currentTimeMillis());
@@ -183,7 +183,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
             
             // 2. Redis 全量广播 (让其他节点也执行本地全量发送)
-            Map<String, Object> redisPayload = new HashMap<>();
+            Map<String, Object> redisPayload = new HashMap<>(16);
             redisPayload.put("broadcastAll", true);
             redisPayload.put("messageJson", messageJson);
             redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
@@ -195,9 +195,9 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     @Override
     public void broadcastUserStatusChange(Long userId, String presenceStatus) {
         try {
-            Map<String, Object> statusMap = new HashMap<>();
+            Map<String, Object> statusMap = new HashMap<>(16);
             statusMap.put("type", "user_status_change");
-            Map<String, Object> data = new HashMap<>();
+            Map<String, Object> data = new HashMap<>(16);
             data.put("userId", userId);
             data.put("status", presenceStatus);
             data.put("timestamp", System.currentTimeMillis());
@@ -209,7 +209,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
 
             // 2. Redis 全量广播 (让其他节点也执行本地全量发送)
-            Map<String, Object> redisPayload = new HashMap<>();
+            Map<String, Object> redisPayload = new HashMap<>(16);
             redisPayload.put("broadcastAll", true);
             redisPayload.put("messageJson", messageJson);
             redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
@@ -220,7 +220,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     @Override
     public void sendCallSignal(Long toUserId, Object signal) {
-        Map<String, Object> wsMessage = new HashMap<>();
+        Map<String, Object> wsMessage = new HashMap<>(16);
         wsMessage.put("type", "call");
         wsMessage.put("data", signal);
         wsMessage.put("timestamp", System.currentTimeMillis());
@@ -229,19 +229,19 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     @Override
     public void sendToUser(Long userId, Object message) {
-        if (userId == null) return;
+        if (userId == null) { return; }
         try {
             String messageJson = objectMapper.writeValueAsString(message);
             // 优先本地发送
             boolean localSent = sendToLocalUser(userId, messageJson);
             
             // 广播到 Redis 供分布式节点消费
-            Map<String, Object> redisPayload = new HashMap<>();
+            Map<String, Object> redisPayload = new HashMap<>(16);
             redisPayload.put("targetUserId", userId);
             redisPayload.put("messageJson", messageJson);
             redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
             
-            if (localSent) log.debug("消息已成功在本节点发送给用户: {}", userId);
+            if (localSent) { log.debug("消息已成功在本节点发送给用户: {}", userId); }
         } catch (Exception e) {
             log.error("分布式发送消息失败: userId={}", userId, e);
         }
@@ -249,8 +249,8 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
 
     @Override
     public void broadcastDingMessage(DingMessageVO dingVO, Set<Long> targetUserIds) {
-        if (targetUserIds == null || targetUserIds.isEmpty()) return;
-        Map<String, Object> wsMessage = new HashMap<>();
+        if (targetUserIds == null || targetUserIds.isEmpty()) { return; }
+        Map<String, Object> wsMessage = new HashMap<>(16);
         wsMessage.put("type", "ding");
         wsMessage.put("data", dingVO);
         
@@ -264,13 +264,13 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             String messageJson = objectMapper.writeValueAsString(message);
             for (ImConversationMember member : members) {
                 Long tid = member.getUserId();
-                if (tid == null || tid.equals(excludeUserId)) continue;
+                if (tid == null || tid.equals(excludeUserId)) { continue; }
                 
                 // 本地发送
                 sendToLocalUser(tid, messageJson);
                 
                 // 转发给 Redis 供其他节点消费
-                Map<String, Object> redisPayload = new HashMap<>();
+                Map<String, Object> redisPayload = new HashMap<>(16);
                 redisPayload.put("targetUserId", tid);
                 redisPayload.put("messageJson", messageJson);
                 redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
@@ -294,7 +294,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     }
 
     private Map<String, Object> createMessageData(ImMessage message) {
-        Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>(16);
         data.put("id", message.getId());
         data.put("conversationId", message.getConversationId());
         data.put("senderId", message.getSenderId());
@@ -319,7 +319,7 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
     }
 
     private Map<String, Object> createReactionMessage(Long conversationId, Long messageId, Long userId, String emoji, String action) {
-        Map<String, Object> m = new HashMap<>();
+        Map<String, Object> m = new HashMap<>(16);
         m.put("type", "reaction");
         m.put("action", action);
         m.put("conversationId", conversationId);

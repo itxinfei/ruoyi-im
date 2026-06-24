@@ -32,13 +32,22 @@ public class ImMonitorController {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /** 系统运行状态 */
+    private static final String STATUS_RUNNING = "RUNNING";
+    /** 健康状态 */
+    private static final String STATUS_HEALTHY = "HEALTHY";
+    /** 警告状态 */
+    private static final String STATUS_WARNING = "WARNING";
+    /** 内存使用率警告阈值 */
+    private static final double MEMORY_WARNING_THRESHOLD = 90;
+
     /**
      * 获取系统概览
      */
     @GetMapping("/overview")
     public Result<MonitorOverviewVO> getOverview() {
         MonitorOverviewVO overview = new MonitorOverviewVO();
-        overview.setStatus("RUNNING");
+        overview.setStatus(STATUS_RUNNING);
         overview.setTimestamp(LocalDateTime.now().format(FORMATTER));
         overview.setJvm(buildJvmInfo());
         overview.setThread(buildThreadInfo());
@@ -149,7 +158,7 @@ public class ImMonitorController {
         double memoryUsagePercent = calculateUsagePercent(heapUsage.getUsed(), heapUsage.getMax());
 
         HealthCheckVO health = new HealthCheckVO();
-        health.setStatus(memoryUsagePercent < 90 ? "HEALTHY" : "WARNING");
+        health.setStatus(memoryUsagePercent < MEMORY_WARNING_THRESHOLD ? STATUS_HEALTHY : STATUS_WARNING);
         health.setMemoryUsage(String.format("%.2f%%", memoryUsagePercent));
 
         return Result.success(health);
@@ -206,7 +215,9 @@ public class ImMonitorController {
      * 计算使用率百分比
      */
     private double calculateUsagePercent(long used, long max) {
-        if (max <= 0) return 0;
+        if (max <= 0) {
+            return 0;
+        }
         return (used * 100.0) / max;
     }
 

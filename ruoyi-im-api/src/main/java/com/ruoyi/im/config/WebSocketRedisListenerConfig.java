@@ -24,6 +24,11 @@ public class WebSocketRedisListenerConfig {
     private static final Logger log = LoggerFactory.getLogger(WebSocketRedisListenerConfig.class);
     private static final String IM_WS_CHANNEL = "im:ws:broadcast";
 
+    private static final String JSON_KEY_BROADCAST_ALL = "broadcastAll";
+    private static final String JSON_KEY_MESSAGE_JSON = "messageJson";
+    private static final String JSON_KEY_TARGET_USER_ID = "targetUserId";
+    private static final String JSON_OBJECT_PREFIX = "{";
+
     @Autowired
     private RedisMessageListenerContainer redisContainer;
 
@@ -54,25 +59,25 @@ public class WebSocketRedisListenerConfig {
                 // 2. 单用户发送: {"targetUserId": Long, "messageJson": "..."}
 
                 // 确保是有效的JSON对象格式
-                if (body == null || !body.trim().startsWith("{")) {
+                if (body == null || !body.trim().startsWith(JSON_OBJECT_PREFIX)) {
                     listenerLog.warn("非JSON对象格式消息，跳过处理: {}", body);
                     return;
                 }
 
                 com.alibaba.fastjson.JSONObject obj = com.alibaba.fastjson.JSON.parseObject(body);
 
-                if (obj.containsKey("broadcastAll")) {
+                if (obj.containsKey(JSON_KEY_BROADCAST_ALL)) {
                     // 全量广播消息
-                    String messageJson = obj.getString("messageJson");
-                    if (obj.getBoolean("broadcastAll")) {
+                    String messageJson = obj.getString(JSON_KEY_MESSAGE_JSON);
+                    if (obj.getBoolean(JSON_KEY_BROADCAST_ALL)) {
                         // 广播给所有在线用户
                         ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
                         listenerLog.debug("全量广播消息已分发到本地用户");
                     }
-                } else if (obj.containsKey("targetUserId")) {
+                } else if (obj.containsKey(JSON_KEY_TARGET_USER_ID)) {
                     // 单用户消息
-                    Long targetUserId = obj.getLong("targetUserId");
-                    String messageJson = obj.getString("messageJson");
+                    Long targetUserId = obj.getLong(JSON_KEY_TARGET_USER_ID);
+                    String messageJson = obj.getString(JSON_KEY_MESSAGE_JSON);
 
                     if (targetUserId != null) {
                         ImWebSocketEndpoint.sendToUser(targetUserId, messageJson);

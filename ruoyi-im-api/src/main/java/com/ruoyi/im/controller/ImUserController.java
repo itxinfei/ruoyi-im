@@ -48,6 +48,10 @@ public class ImUserController {
         this.imFriendService = imFriendService;
     }
 
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_SUPER_ADMIN = "SUPER_ADMIN";
+    private static final String STATUS_ENABLED = "ENABLED";
+
     /**
      * 创建用户
      * 管理员创建新用户
@@ -78,7 +82,7 @@ public class ImUserController {
     public Result<Void> delete(@PathVariable Long id) {
         // 权限检查：只有管理员可以删除用户
         String role = SecurityUtils.getLoginUserRole();
-        if (!"ADMIN".equals(role) && !"SUPER_ADMIN".equals(role)) {
+        if (!ROLE_ADMIN.equals(role) && !ROLE_SUPER_ADMIN.equals(role)) {
             throw new BusinessException(403, "只有管理员可以删除用户");
         }
         // 禁止删除管理员账户
@@ -207,7 +211,7 @@ public class ImUserController {
     
     @PutMapping("/changeStatus")
     public Result<Void> changeStatus(@Valid @RequestBody ImUserStatusUpdateRequest request) {
-        Integer status = "ENABLED".equals(request.getStatus()) ? 1 : 0;
+        Integer status = STATUS_ENABLED.equals(request.getStatus()) ? 1 : 0;
         imUserService.updateStatus(request.getId(), status);
         return Result.success("状态修改成功");
     }
@@ -228,7 +232,7 @@ public class ImUserController {
         // 权限检查：只有当前用户本人可以修改自己的信息，管理员除外
         Long currentUserId = SecurityUtils.getLoginUserId();
         String role = SecurityUtils.getLoginUserRole();
-        boolean isAdmin = "ADMIN".equals(role) || "SUPER_ADMIN".equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role) || ROLE_SUPER_ADMIN.equals(role);
         if (!isAdmin && !id.equals(currentUserId)) {
             throw new BusinessException(403, "只能修改自己的信息");
         }
@@ -256,7 +260,7 @@ public class ImUserController {
         // 权限检查：只有当前用户本人可以修改密码，管理员除外
         Long currentUserId = SecurityUtils.getLoginUserId();
         String role = SecurityUtils.getLoginUserRole();
-        boolean isAdmin = "ADMIN".equals(role) || "SUPER_ADMIN".equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role) || ROLE_SUPER_ADMIN.equals(role);
         if (!isAdmin && !id.equals(currentUserId)) {
             throw new BusinessException(403, "只能修改自己的密码");
         }

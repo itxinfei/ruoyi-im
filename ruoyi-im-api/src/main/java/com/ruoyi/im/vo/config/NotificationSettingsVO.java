@@ -28,7 +28,9 @@ public class NotificationSettingsVO {
 
     public static NotificationSettingsVO fromMap(Map<String, Object> map) {
         NotificationSettingsVO vo = new NotificationSettingsVO();
-        if (map == null) return vo;
+        if (map == null) {
+            return vo;
+        }
         vo.messageNotification = (Boolean) map.get("messageNotification");
         vo.groupNotification = (Boolean) map.get("groupNotification");
         vo.systemNotification = (Boolean) map.get("systemNotification");

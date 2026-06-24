@@ -31,6 +31,23 @@ public class ImHealthCheckController {
 
     private static final Logger log = LoggerFactory.getLogger(ImHealthCheckController.class);
 
+    private static final String HEALTH_CHECK_TEST_KEY = "health:check:test";
+    private static final String HEALTH_CHECK_KEY = "health:check";
+    private static final String REDIS_PING_VALUE = "ping";
+    private static final int HEALTH_CHECK_TTL_SECONDS = 5;
+    private static final int DB_CONNECTION_TIMEOUT_SECONDS = 1;
+
+    /** 健康状态：正常 */
+    private static final String STATUS_UP = "UP";
+    /** 健康状态：异常 */
+    private static final String STATUS_DOWN = "DOWN";
+    /** 就绪状态：就绪 */
+    private static final String STATUS_READY = "READY";
+    /** 就绪状态：未就绪 */
+    private static final String STATUS_NOT_READY = "NOT_READY";
+    /** 存活状态 */
+    private static final String STATUS_ALIVE = "ALIVE";
+
     private final DataSource dataSource;
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -58,7 +75,7 @@ public class ImHealthCheckController {
         Map<String, Object> health = new HashMap<>();
 
         // 系统状态
-        health.put("status", "UP");
+        health.put("status", STATUS_UP);
         health.put("timestamp", LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
 
         // 数据库健康检查
@@ -84,10 +101,10 @@ public class ImHealthCheckController {
         long startTime = System.currentTimeMillis();
 
         try (Connection conn = dataSource.getConnection()) {
-            boolean isValid = conn.isValid(1); // 1秒超时
+            boolean isValid = conn.isValid(DB_CONNECTION_TIMEOUT_SECONDS);
             long responseTime = System.currentTimeMillis() - startTime;
 
-            db.put("status", isValid ? "UP" : "DOWN");
+            db.put("status", isValid ? STATUS_UP : STATUS_DOWN);
             db.put("responseTime", responseTime + "ms");
 
             if (!isValid) {
@@ -110,16 +127,16 @@ public class ImHealthCheckController {
         long startTime = System.currentTimeMillis();
 
         try {
-            String testKey = "health:check:test";
-            redisTemplate.opsForValue().set(testKey, "ping", 5, java.util.concurrent.TimeUnit.SECONDS);
+            String testKey = HEALTH_CHECK_TEST_KEY;
+            redisTemplate.opsForValue().set(testKey, REDIS_PING_VALUE, HEALTH_CHECK_TTL_SECONDS, java.util.concurrent.TimeUnit.SECONDS);
             String result = redisTemplate.opsForValue().get(testKey).toString();
             redisTemplate.delete(testKey);
 
             long responseTime = System.currentTimeMillis() - startTime;
-            redis.put("status", "ping".equals(result) ? "UP" : "DOWN");
+            redis.put("status", REDIS_PING_VALUE.equals(result) ? STATUS_UP : STATUS_DOWN);
             redis.put("responseTime", responseTime + "ms");
         } catch (Exception e) {
-            redis.put("status", "DOWN");
+            redis.put("status", STATUS_DOWN);
             redis.put("error", e.getMessage());
             log.error("Redis健康检查失败", e);
         }
@@ -135,10 +152,10 @@ public class ImHealthCheckController {
 
         try {
             int onlineCount = ImWebSocketEndpoint.getOnlineUserCount();
-            ws.put("status", "UP");
+            ws.put("status", STATUS_UP);
             ws.put("onlineUsers", onlineCount);
         } catch (Exception e) {
-            ws.put("status", "DOWN");
+            ws.put("status", STATUS_DOWN);
             ws.put("error", e.getMessage());
             log.error("WebSocket健康检查失败", e);
         }
@@ -158,7 +175,7 @@ public class ImHealthCheckController {
         long usedMemory = totalMemory - freeMemory;
         long maxMemory = runtime.maxMemory();
 
-        jvm.put("status", "UP");
+        jvm.put("status", STATUS_UP);
         jvm.put("totalMemory", formatBytes(totalMemory));
         jvm.put("usedMemory", formatBytes(usedMemory));
         jvm.put("freeMemory", formatBytes(freeMemory));
@@ -194,25 +211,25 @@ public class ImHealthCheckController {
 
         // 检查数据库
         try (Connection conn = dataSource.getConnection()) {
-            readiness.put("database", conn.isValid(1) ? "UP" : "DOWN");
-            if (!conn.isValid(1)) {
+            readiness.put("database", conn.isValid(DB_CONNECTION_TIMEOUT_SECONDS) ? STATUS_UP : STATUS_DOWN);
+            if (!conn.isValid(DB_CONNECTION_TIMEOUT_SECONDS)) {
                 ready = false;
             }
         } catch (Exception e) {
-            readiness.put("database", "DOWN");
+            readiness.put("database", STATUS_DOWN);
             ready = false;
         }
 
         // 检查Redis
         try {
-            redisTemplate.opsForValue().get("health:check");
-            readiness.put("redis", "UP");
+            redisTemplate.opsForValue().get(HEALTH_CHECK_KEY);
+            readiness.put("redis", STATUS_UP);
         } catch (Exception e) {
-            readiness.put("redis", "DOWN");
+            readiness.put("redis", STATUS_DOWN);
             ready = false;
         }
 
-        readiness.put("status", ready ? "READY" : "NOT_READY");
+        readiness.put("status", ready ? STATUS_READY : STATUS_NOT_READY);
         return ready ? Result.success(readiness) : Result.error(503, "系统未就绪", readiness);
     }
 
@@ -222,7 +239,7 @@ public class ImHealthCheckController {
     @GetMapping("/liveness")
     public Result<Map<String, Object>> liveness() {
         Map<String, Object> liveness = new HashMap<>();
-        liveness.put("status", "ALIVE");
+        liveness.put("status", STATUS_ALIVE);
         liveness.put("timestamp", System.currentTimeMillis());
         return Result.success(liveness);
     }

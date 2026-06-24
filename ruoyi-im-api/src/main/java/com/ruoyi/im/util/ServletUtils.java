@@ -16,6 +16,21 @@ import javax.servlet.http.HttpSession;
  */
 public class ServletUtils {
 
+    /** X-Forwarded-For请求头 */
+    private static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+    /** Proxy-Client-IP请求头 */
+    private static final String HEADER_PROXY_CLIENT_IP = "Proxy-Client-IP";
+    /** WL-Proxy-Client-IP请求头 */
+    private static final String HEADER_WL_PROXY_CLIENT_IP = "WL-Proxy-Client-IP";
+    /** HTTP_CLIENT_IP请求头 */
+    private static final String HEADER_HTTP_CLIENT_IP = "HTTP_CLIENT_IP";
+    /** HTTP_X_FORWARDED_FOR请求头 */
+    private static final String HEADER_HTTP_X_FORWARDED_FOR = "HTTP_X_FORWARDED_FOR";
+    /** 未知IP标识 */
+    private static final String UNKNOWN_IP = "unknown";
+    /** IP地址分隔符 */
+    private static final String IP_SEPARATOR = ",";
+
     /**
      * 获取String参数
      */
@@ -92,26 +107,26 @@ public class ServletUtils {
      * @return 客户端IP地址
      */
     public static String getClientIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
+        String ip = request.getHeader(HEADER_X_FORWARDED_FOR);
+        if (ip == null || ip.length() == 0 || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_PROXY_CLIENT_IP);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
+        if (ip == null || ip.length() == 0 || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_WL_PROXY_CLIENT_IP);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
+        if (ip == null || ip.length() == 0 || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_HTTP_CLIENT_IP);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        if (ip == null || ip.length() == 0 || UNKNOWN_IP.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_HTTP_X_FORWARDED_FOR);
         }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+        if (ip == null || ip.length() == 0 || UNKNOWN_IP.equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         }
 
         // 如果是多IP情况，取第一个IP
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
+        if (ip != null && ip.contains(IP_SEPARATOR)) {
+            ip = ip.split(IP_SEPARATOR)[0].trim();
         }
 
         return ip;

@@ -33,6 +33,9 @@ public class MessageEncryptionUtil {
     private static final int GCM_TAG_LENGTH = 128;
     private static final int GCM_IV_LENGTH = 12;
 
+    private static final int MIN_CIPHERTEXT_LENGTH = 16;
+    private static final int MIN_ENCRYPTED_CONTENT_LENGTH = 20;
+
     @Autowired
     private ImConfig imConfig;
 
@@ -98,7 +101,7 @@ public class MessageEncryptionUtil {
             byte[] decoded = Base64.getDecoder().decode(encrypted);
 
             // 检查解码后的长度是否有效（至少包含IV + 最小密文长度）
-            if (decoded.length < GCM_IV_LENGTH + 16) {
+            if (decoded.length < GCM_IV_LENGTH + MIN_CIPHERTEXT_LENGTH) {
                 log.warn("Invalid encrypted message length: {}, treating as plaintext", decoded.length);
                 return encrypted;
             }
@@ -136,7 +139,7 @@ public class MessageEncryptionUtil {
      * Base64编码的加密内容通常较长且只包含Base64字符
      */
     private boolean isEncryptedFormat(String content) {
-        if (content == null || content.length() < 20) {
+        if (content == null || content.length() < MIN_ENCRYPTED_CONTENT_LENGTH) {
             // 加密后的内容至少20字符（IV 12字节 + 最小密文）
             return false;
         }

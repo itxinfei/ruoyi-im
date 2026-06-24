@@ -44,6 +44,10 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageReadServiceImpl.class);
 
+    private static final String READ_TYPE_MANUAL = "MANUAL";
+    private static final String DEVICE_TYPE_WEB = "WEB";
+    private static final String CONVERSATION_TYPE_GROUP = "GROUP";
+
     @Autowired
     private ImMessageReadMapper messageReadMapper;
 
@@ -97,8 +101,8 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         messageRead.setUserId(userId);
         messageRead.setConversationId(conversationId);
         messageRead.setReadTime(LocalDateTime.now());
-        messageRead.setReadType("MANUAL"); // 手动标记
-        messageRead.setDeviceType("WEB");
+        messageRead.setReadType(READ_TYPE_MANUAL); // 手动标记
+        messageRead.setDeviceType(DEVICE_TYPE_WEB);
         messageRead.setCreateTime(LocalDateTime.now());
 
         messageReadMapper.insertImMessageRead(messageRead);
@@ -166,8 +170,8 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
                 read.setUserId(userId);
                 read.setConversationId(conversationId);
                 read.setReadTime(now);
-                read.setReadType("MANUAL");
-                read.setDeviceType("WEB");
+                read.setReadType(READ_TYPE_MANUAL);
+                read.setDeviceType(DEVICE_TYPE_WEB);
                 read.setCreateTime(now);
                 return read;
             })
@@ -267,7 +271,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         }
 
         int totalCount;
-        if ("GROUP".equals(conversation.getType())) {
+        if (CONVERSATION_TYPE_GROUP.equals(conversation.getType())) {
             // 群聊：获取群组成员数
             List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversation.getId());
             totalCount = members.size();
@@ -299,10 +303,10 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
             StringBuilder sb = new StringBuilder();
             int count = 0;
             for (ImMessageRead read : readRecords) {
-                if (count >= 3) break;
+                if (count >= 3) { break; }
                 ImUser user = userMapper.selectImUserById(read.getUserId());
                 if (user != null) {
-                    if (count > 0) sb.append("、");
+                    if (count > 0) { sb.append("、"); }
                     sb.append(user.getNickname() != null ? user.getNickname() : user.getUsername());
                     count++;
                 }

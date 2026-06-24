@@ -11,11 +11,12 @@ import lombok.Data;
 
 public class PageRequest {
 
-    
-    private Integer pageNum = 1;
+    private static final int DEFAULT_PAGE_NUM = 1;
+    private static final int DEFAULT_PAGE_SIZE = 10;
 
-    
-    private Integer pageSize = 10;
+    private Integer pageNum = DEFAULT_PAGE_NUM;
+
+    private Integer pageSize = DEFAULT_PAGE_SIZE;
 
     
     private String orderBy;

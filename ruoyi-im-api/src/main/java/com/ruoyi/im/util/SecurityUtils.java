@@ -21,6 +21,7 @@ import java.util.Collection;
 public class SecurityUtils {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityUtils.class);
+    private static final String ANONYMOUS_USER = "anonymousUser";
 
     private static JwtUtils jwtUtils;
 
@@ -74,7 +75,7 @@ public class SecurityUtils {
                 Object principal = authentication.getPrincipal();
                 if (principal instanceof ImUser) {
                     return ((ImUser) principal).getId();
-                } else if (principal instanceof String && "anonymousUser".equals(principal)) {
+                } else if (principal instanceof String && ANONYMOUS_USER.equals(principal)) {
                     return null;
                 } else {
                     LOGGER.warn("未知的principal类型: {}", principal != null ? principal.getClass().getName() : "null");

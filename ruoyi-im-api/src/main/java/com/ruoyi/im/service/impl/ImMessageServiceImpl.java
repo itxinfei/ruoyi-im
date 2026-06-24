@@ -49,6 +49,17 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     private static final String CACHE_KEY_CONVERSATION_LIST = "conversation:list:";
     private static final int CACHE_EVICT_THRESHOLD = 20;
+    private static final String MESSAGE_TYPE_TEXT = MESSAGE_TYPE_TEXT;
+    private static final String MESSAGE_TYPE_IMAGE = MESSAGE_TYPE_IMAGE;
+    private static final String MESSAGE_TYPE_FILE = MESSAGE_TYPE_FILE;
+    private static final String MESSAGE_TYPE_VIDEO = MESSAGE_TYPE_VIDEO;
+    private static final String MESSAGE_TYPE_VOICE = MESSAGE_TYPE_VOICE;
+    private static final String MESSAGE_TYPE_COMBINE_FORWARD = MESSAGE_TYPE_COMBINE_FORWARD;
+    private static final String CONVERSATION_TYPE_GROUP = CONVERSATION_TYPE_GROUP;
+    private static final String URL_FETCH_STATUS_SUCCESS = URL_FETCH_STATUS_SUCCESS;
+    private static final long LOCK_EXPIRE_SECONDS = 10L;
+    private static final int ERROR_CODE_INTERNAL = 500;
+    private static final int QUOTED_CONTENT_MAX_LENGTH = 50;
 
     private final ImMessageMapper imMessageMapper;
     private final com.ruoyi.im.mapper.ImMessageReactionMapper reactionMapper;
@@ -186,7 +197,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         final String finalClientMsgId = clientMsgId;
         ImMessageVO messageVO = distributedLock.executeWithLock(
                 com.ruoyi.im.util.ImDistributedLock.LockKeys.sendMessageKey(finalConversationId),
-                10, // 10秒过期时间足够
+                LOCK_EXPIRE_SECONDS, // 10秒过期时间足够
                 () -> doSendMessage(request, userId, finalConversationId, sender, finalClientMsgId));
 
         return messageVO;
@@ -208,7 +219,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         String plainContent = request.getContent();
 
         // 敏感词过滤：仅对文本消息执行强制脱敏
-        if ("TEXT".equalsIgnoreCase(request.getType()) && plainContent != null) {
+        if (MESSAGE_TYPE_TEXT.equalsIgnoreCase(request.getType()) && plainContent != null) {
             plainContent = sensitiveWordService.filter(plainContent);
         }
 
@@ -232,7 +243,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             imMessageMapper.insertImMessage(message);
         } catch (Exception e) {
             log.error("插入消息失败: ", e);
-            throw new BusinessException(500, "消息存储失败");
+            throw new BusinessException(ERROR_CODE_INTERNAL, "消息存储失败");
         }
 
         if (clientMsgId != null && !clientMsgId.isEmpty()) {
@@ -293,11 +304,11 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         // 以下为可选增强逻辑，必须隔离异常
         try {
-            if ("TEXT".equalsIgnoreCase(request.getType()) && plainContent != null) {
+            if (MESSAGE_TYPE_TEXT.equalsIgnoreCase(request.getType()) && plainContent != null) {
                 String url = extractUrl(plainContent);
                 if (url != null) {
                     com.ruoyi.im.domain.ImUrlMetadata metadata = urlMetadataService.parseUrl(url);
-                    if (metadata != null && "SUCCESS".equals(metadata.getFetchStatus())) {
+                    if (metadata != null && URL_FETCH_STATUS_SUCCESS.equals(metadata.getFetchStatus())) {
                         ImMessageVO.UrlMetadataVO urlVO = new ImMessageVO.UrlMetadataVO();
                         BeanUtils.copyProperties(metadata, urlVO);
                         vo.setUrlMetadata(urlVO);
@@ -310,9 +321,9 @@ public class ImMessageServiceImpl implements ImMessageService {
 
         try {
             ImConversation conversation = imConversationMapper.selectById(conversationId);
-            if (conversation != null && "GROUP".equalsIgnoreCase(conversation.getType())) {
+            if (conversation != null && CONVERSATION_TYPE_GROUP.equalsIgnoreCase(conversation.getType())) {
                 Long groupId = conversation.getTargetId();
-                if (groupId != null && "TEXT".equalsIgnoreCase(message.getMessageType())) {
+                if (groupId != null && MESSAGE_TYPE_TEXT.equalsIgnoreCase(message.getMessageType())) {
                     eventPublisher.publishEvent(
                             new BotMessageListener.GroupMessageEvent(conversationId, groupId, userId, plainContent)
                     );
@@ -516,12 +527,12 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
 
             // 填充 URL 元数据预览 (保持现状，此方法内部带缓存且 JSoup 解析无法批量)
-            if ("TEXT".equalsIgnoreCase(message.getMessageType()) && decryptedContent != null) {
+            if (MESSAGE_TYPE_TEXT.equalsIgnoreCase(message.getMessageType()) && decryptedContent != null) {
                 String url = extractUrl(decryptedContent);
                 if (url != null) {
                     try {
                         com.ruoyi.im.domain.ImUrlMetadata metadata = urlMetadataService.getByUrl(url);
-                        if (metadata != null && "SUCCESS".equals(metadata.getFetchStatus())) {
+                        if (metadata != null && URL_FETCH_STATUS_SUCCESS.equals(metadata.getFetchStatus())) {
                             ImMessageVO.UrlMetadataVO urlVO = new ImMessageVO.UrlMetadataVO();
                             BeanUtils.copyProperties(metadata, urlVO);
                             vo.setUrlMetadata(urlVO);
@@ -585,15 +596,15 @@ public class ImMessageServiceImpl implements ImMessageService {
 
                     // 根据消息类型处理内容
                     String messageType = originalMessage.getMessageType();
-                    if ("IMAGE".equalsIgnoreCase(messageType) || "FILE".equalsIgnoreCase(messageType)
-                            || "VIDEO".equalsIgnoreCase(messageType) || "VOICE".equalsIgnoreCase(messageType)) {
+                    if (MESSAGE_TYPE_IMAGE.equalsIgnoreCase(messageType) || MESSAGE_TYPE_FILE.equalsIgnoreCase(messageType)
+                            || MESSAGE_TYPE_VIDEO.equalsIgnoreCase(messageType) || MESSAGE_TYPE_VOICE.equalsIgnoreCase(messageType)) {
                         quotedMessage.setIsFile(true);
                         // 文件类型消息显示文件名或类型标识
-                        if ("IMAGE".equalsIgnoreCase(messageType)) {
+                        if (MESSAGE_TYPE_IMAGE.equalsIgnoreCase(messageType)) {
                             quotedMessage.setContent("[图片]");
-                        } else if ("VIDEO".equalsIgnoreCase(messageType)) {
+                        } else if (MESSAGE_TYPE_VIDEO.equalsIgnoreCase(messageType)) {
                             quotedMessage.setContent("[视频]");
-                        } else if ("VOICE".equalsIgnoreCase(messageType)) {
+                        } else if (MESSAGE_TYPE_VOICE.equalsIgnoreCase(messageType)) {
                             quotedMessage.setContent("[语音]");
                         } else {
                             quotedMessage.setContent("[文件]");
@@ -601,8 +612,8 @@ public class ImMessageServiceImpl implements ImMessageService {
                     } else {
                         // 文本消息截取前50个字符
                         quotedMessage.setIsFile(false);
-                        if (content != null && content.length() > 50) {
-                            quotedMessage.setContent(content.substring(0, 50) + "...");
+                        if (content != null && content.length() > QUOTED_CONTENT_MAX_LENGTH) {
+                            quotedMessage.setContent(content.substring(0, QUOTED_CONTENT_MAX_LENGTH) + "...");
                         } else {
                             quotedMessage.setContent(content);
                         }
@@ -667,7 +678,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             BusinessExceptionHelper.throwNoPermission("无权编辑该消息");
         }
 
-        if (!"TEXT".equals(message.getMessageType())) {
+        if (!MESSAGE_TYPE_TEXT.equals(message.getMessageType())) {
             BusinessExceptionHelper.throwNotAllowed("只能编辑文本消息");
         }
 
@@ -858,7 +869,7 @@ public class ImMessageServiceImpl implements ImMessageService {
                 String senderName = sender != null ? sender.getNickname() : "用户" + msg.getSenderId();
                 String text = encryptionUtil.decryptMessage(msg.getContent());
                 // 简单处理：如果是图片/文件，显示占位符
-                if (!"TEXT".equalsIgnoreCase(msg.getMessageType())) {
+                if (!MESSAGE_TYPE_TEXT.equalsIgnoreCase(msg.getMessageType())) {
                     text = "[" + msg.getMessageType() + "]";
                 }
                 combinedContent.append(senderName).append(": ").append(text).append("\n");
@@ -867,7 +878,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             for (Long convId : toConversationIds) {
                 com.ruoyi.im.dto.message.ImMessageSendRequest sendReq = new com.ruoyi.im.dto.message.ImMessageSendRequest();
                 sendReq.setConversationId(convId);
-                sendReq.setType("COMBINE_FORWARD");
+                sendReq.setType(MESSAGE_TYPE_COMBINE_FORWARD);
                 sendReq.setContent(combinedContent.toString());
                 this.sendMessage(sendReq, userId);
             }
@@ -897,7 +908,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         replyMessage.setReceiverId(originalMessage.getSenderId());
         replyMessage.setSenderId(userId);
         replyMessage.setReplyToMessageId(messageId); // 设置回复消息ID
-        replyMessage.setMessageType("TEXT"); // 回复消息类型为TEXT
+        replyMessage.setMessageType(MESSAGE_TYPE_TEXT); // 回复消息类型为TEXT
         replyMessage.setContent(encryptionUtil.encryptMessage(content));
         replyMessage.setIsRevoked(0);
         replyMessage.setCreateTime(LocalDateTime.now());
@@ -1110,7 +1121,7 @@ public class ImMessageServiceImpl implements ImMessageService {
             return imUserSessionMapper.selectByUserIdAndConversationId(userId, conversationId);
         } catch (Exception e) {
             log.error("确保用户会话记录失败: userId={}, convId={}", userId, conversationId, e);
-            throw new BusinessException(500, "同步会话状态失败");
+            throw new BusinessException(ERROR_CODE_INTERNAL, "同步会话状态失败");
         }
     }
 

@@ -42,6 +42,17 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     private static final Logger log = LoggerFactory.getLogger(ImConversationServiceImpl.class);
 
+    private static final String CONVERSATION_TYPE_PRIVATE = CONVERSATION_TYPE_PRIVATE;
+    private static final String CONVERSATION_TYPE_SINGLE = CONVERSATION_TYPE_SINGLE;
+    private static final String CONVERSATION_TYPE_GROUP = CONVERSATION_TYPE_GROUP;
+    private static final String MARKER_TYPE_CONV_PIN = MARKER_TYPE_CONV_PIN;
+    private static final String DEFAULT_GROUP_AVATAR = DEFAULT_GROUP_AVATAR;
+    private static final String CACHE_KEY_PREFIX_CONVERSATION_LIST = CACHE_KEY_PREFIX_CONVERSATION_LIST;
+    private static final int CONVERSATION_LIST_CACHE_TTL_MINUTES = 5;
+    private static final String ROLE_OWNER = ROLE_OWNER;
+    private static final String ROLE_ADMIN = ROLE_ADMIN;
+    private static final String ROLE_MEMBER = ROLE_MEMBER;
+
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
     private final ImGroupMemberMapper imGroupMemberMapper;
@@ -114,7 +125,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                     match = Boolean.TRUE.equals(vo.getHasMention());
                     break;
                 case "group":
-                    match = "GROUP".equalsIgnoreCase(vo.getType());
+                    match = CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType());
                     break;
                 case "file":
                     // 文件筛选：最后消息类型包含文件、图片、视频、语音
@@ -162,12 +173,12 @@ public class ImConversationServiceImpl implements ImConversationService {
 
         for (ImConversationVO vo : conversations) {
             conversationIds.add(vo.getId());
-            if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
+            if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(vo.getType()) || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(vo.getType())) {
                 Long peerUserId = getPeerUserId(vo.getId(), userId);
                 if (peerUserId != null) {
                     userIds.add(peerUserId);
                 }
-            } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
+            } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())) {
                 if (vo.getTargetId() != null) {
                     groupIds.add(vo.getTargetId());
                 }
@@ -218,7 +229,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         // 批量查询：获取所有会话的置顶消息（PIN）标记
         java.util.List<ImMessageMarker> pinMarkers = imMessageMarkerMapper.selectList(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessageMarker>()
-                        .eq(ImMessageMarker::getMarkerType, "CONV_PIN")
+                        .eq(ImMessageMarker::getMarkerType, MARKER_TYPE_CONV_PIN)
                         .in(ImMessageMarker::getConversationId, conversationIds)
         );
         java.util.Map<Long, Long> convPinnedMsgIdMap = new java.util.HashMap<>();
@@ -290,7 +301,7 @@ public class ImConversationServiceImpl implements ImConversationService {
             }
 
             // 设置会话相关信息
-            if ("PRIVATE".equalsIgnoreCase(vo.getType()) || "SINGLE".equalsIgnoreCase(vo.getType())) {
+            if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(vo.getType()) || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(vo.getType())) {
                 // 私聊会话，从Map中获取对方用户信息（已批量查询）
                 Long peerUserId = getPeerUserId(vo.getId(), userId);
                 if (peerUserId != null) {
@@ -322,7 +333,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                         }
                     }
                 }
-            } else if ("GROUP".equalsIgnoreCase(vo.getType())) {
+            } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(vo.getType())) {
                 // 群聊会话，从Map中获取群组信息（已批量查询）
                 Long groupId = vo.getTargetId();
                 if (groupId != null) {
@@ -331,7 +342,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                         String groupName = group.getName();
                         String groupAvatar = group.getAvatar();
                         if (groupAvatar == null || groupAvatar.isEmpty()) {
-                            groupAvatar = "/avatar/group_default.png";
+                            groupAvatar = DEFAULT_GROUP_AVATAR;
                         }
                         vo.setPeerName(groupName);
                         vo.setPeerAvatar(groupAvatar);
@@ -344,9 +355,9 @@ public class ImConversationServiceImpl implements ImConversationService {
                             groupName = "群聊";
                         }
                         vo.setPeerName(groupName);
-                        vo.setPeerAvatar("/avatar/group_default.png");
+                        vo.setPeerAvatar(DEFAULT_GROUP_AVATAR);
                         vo.setName(groupName);
-                        vo.setAvatar("/avatar/group_default.png");
+                        vo.setAvatar(DEFAULT_GROUP_AVATAR);
                     }
                 }
                 // 群聊会话直接添加到结果列表
@@ -366,13 +377,13 @@ public class ImConversationServiceImpl implements ImConversationService {
         });
 
         // 存入缓存，过期时间5分钟
-        imRedisUtil.set(cacheKey, voList, 5, java.util.concurrent.TimeUnit.MINUTES);
+        imRedisUtil.set(cacheKey, voList, CONVERSATION_LIST_CACHE_TTL_MINUTES, java.util.concurrent.TimeUnit.MINUTES);
 
         return voList;
     }
 
     private void clearConversationListCache(Long userId) {
-        String cacheKey = "conversation:list:" + userId;
+        String cacheKey = CACHE_KEY_PREFIX_CONVERSATION_LIST + userId;
         imRedisUtil.delete(cacheKey);
     }
 
@@ -459,7 +470,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         imMessageMarkerMapper.delete(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessageMarker>()
                         .eq(ImMessageMarker::getConversationId, conversationId)
-                        .eq(ImMessageMarker::getMarkerType, "CONV_PIN")
+                        .eq(ImMessageMarker::getMarkerType, MARKER_TYPE_CONV_PIN)
         );
 
         // 插入新的置顶记录
@@ -467,7 +478,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         marker.setConversationId(conversationId);
         marker.setMessageId(messageId);
         marker.setUserId(userId);
-        marker.setMarkerType("CONV_PIN");
+        marker.setMarkerType(MARKER_TYPE_CONV_PIN);
         marker.setCreateTime(java.time.LocalDateTime.now());
         imMessageMarkerMapper.insert(marker);
 
@@ -483,7 +494,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         imMessageMarkerMapper.delete(
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImMessageMarker>()
                         .eq(ImMessageMarker::getConversationId, conversationId)
-                        .eq(ImMessageMarker::getMarkerType, "CONV_PIN")
+                        .eq(ImMessageMarker::getMarkerType, MARKER_TYPE_CONV_PIN)
         );
 
         clearConversationListCache(userId);
@@ -494,11 +505,13 @@ public class ImConversationServiceImpl implements ImConversationService {
      */
     private void assertConversationAdmin(Long conversationId, Long userId) {
         ImConversation conv = imConversationMapper.selectById(conversationId);
-        if (conv == null) return;
+        if (conv == null) {
+            return;
+        }
 
-        if ("GROUP".equalsIgnoreCase(conv.getType())) {
+        if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(conv.getType())) {
             com.ruoyi.im.domain.ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(conv.getTargetId(), userId);
-            if (member == null || (!"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole()))) {
+            if (member == null || (!ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole()))) {
                 throw new com.ruoyi.im.exception.BusinessException("只有群主或管理员可以置顶消息");
             }
         }
@@ -519,7 +532,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         applyConversationState(vo, conversationId, userId);
 
         // 设置会话相关信息
-        if ("PRIVATE".equalsIgnoreCase(conversation.getType()) || "SINGLE".equalsIgnoreCase(conversation.getType())) {
+        if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(conversation.getType()) || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(conversation.getType())) {
             // 私聊会话，获取对方用户信息
             Long peerUserId = getPeerUserId(conversationId, userId);
             if (peerUserId != null) {
@@ -536,10 +549,10 @@ public class ImConversationServiceImpl implements ImConversationService {
                     vo.setPeerOnline(imRedisUtil.isOnlineUser(peerUserId));
                 }
             }
-        } else if ("GROUP".equalsIgnoreCase(conversation.getType())) {
+        } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(conversation.getType())) {
             // 群聊会话，获取群组信息
             vo.setPeerName("群聊会话");
-            vo.setPeerAvatar("/avatar/group_default.png");
+            vo.setPeerAvatar(DEFAULT_GROUP_AVATAR);
         }
 
         return vo;
@@ -575,10 +588,10 @@ public class ImConversationServiceImpl implements ImConversationService {
         }
 
         // 检查是否已经存在私聊会话
-        ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget("PRIVATE",
+        ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget(CONVERSATION_TYPE_PRIVATE,
                 Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
         if (existingConversation == null) {
-            existingConversation = imConversationMapper.selectByTypeAndTarget("SINGLE",
+            existingConversation = imConversationMapper.selectByTypeAndTarget(CONVERSATION_TYPE_SINGLE,
                     Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
         }
 
@@ -590,7 +603,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         } else {
             // 创建会话
             ImConversation conversation = new ImConversation();
-            conversation.setType("PRIVATE");
+            conversation.setType(CONVERSATION_TYPE_PRIVATE);
             conversation.setTargetId(Math.min(userId, request.getPeerUserId()));
             conversation.setLastMessageId(null);
             conversation.setCreateTime(LocalDateTime.now());
@@ -620,7 +633,7 @@ public class ImConversationServiceImpl implements ImConversationService {
     public Long createGroupConversation(Long userId, ImGroupConversationCreateRequest request) {
         // 创建群聊会话
         ImConversation conversation = new ImConversation();
-        conversation.setType("GROUP");
+        conversation.setType(CONVERSATION_TYPE_GROUP);
         conversation.setTargetId(null);
         conversation.setLastMessageId(null);
         conversation.setCreateTime(LocalDateTime.now());
@@ -666,12 +679,12 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Transactional(rollbackFor = Exception.class)
     public Long createConversation(ImConversationCreateRequest request, Long userId) {
         // 兼容PRIVATE和SINGLE类型
-        if ("PRIVATE".equalsIgnoreCase(request.getType()) || "SINGLE".equalsIgnoreCase(request.getType())) {
+        if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(request.getType()) || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(request.getType())) {
             // 创建私聊会话
             ImPrivateConversationCreateRequest privateRequest = new ImPrivateConversationCreateRequest();
             privateRequest.setPeerUserId(request.getTargetId());
             return createPrivateConversation(userId, privateRequest);
-        } else if ("GROUP".equalsIgnoreCase(request.getType())) {
+        } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(request.getType())) {
             // 创建群聊会话
             ImGroupConversationCreateRequest groupRequest = new ImGroupConversationCreateRequest();
             groupRequest.setGroupName(request.getGroupName());
@@ -731,8 +744,8 @@ public class ImConversationServiceImpl implements ImConversationService {
 
                 // 设置会话相关信息
                 // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
-                if ("PRIVATE".equalsIgnoreCase(conversation.getType())
-                        || "SINGLE".equalsIgnoreCase(conversation.getType())) {
+                if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(conversation.getType())
+                        || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(conversation.getType())) {
                     // 私聊会话，获取对方用户信息
                     Long peerUserId = getPeerUserId(conversation.getId(), userId);
                     if (peerUserId != null) {
@@ -752,7 +765,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                             vo.setPeerUserId(peerUserId);
                         }
                     }
-                } else if ("GROUP".equalsIgnoreCase(conversation.getType())) {
+                } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(conversation.getType())) {
                     // 群聊会话，从群组表获取信息
                     ImGroup group = null;
                     if (conversation.getTargetId() != null) {
@@ -764,7 +777,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                         groupName = group.getName();
                         groupAvatar = group.getAvatar();
                         if (groupAvatar == null || groupAvatar.isEmpty()) {
-                            groupAvatar = "/avatar/group_default.png";
+                            groupAvatar = DEFAULT_GROUP_AVATAR;
                         }
                     } else {
                         groupName = conversation.getName();
@@ -773,7 +786,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                         }
                         groupAvatar = conversation.getAvatar();
                         if (groupAvatar == null || groupAvatar.isEmpty()) {
-                            groupAvatar = "/avatar/group_default.png";
+                            groupAvatar = DEFAULT_GROUP_AVATAR;
                         }
                     }
                     // 设置群组信息
@@ -801,7 +814,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         ImConversationMember member = new ImConversationMember();
         member.setConversationId(conversationId);
         member.setUserId(userId);
-        member.setRole("MEMBER"); // 设置默认角色
+        member.setRole(ROLE_MEMBER); // 设置默认角色
         member.setUnreadCount(0);
         member.setIsPinned(0);
         member.setIsMuted(0);

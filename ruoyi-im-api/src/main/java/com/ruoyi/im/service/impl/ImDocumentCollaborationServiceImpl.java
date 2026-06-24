@@ -41,6 +41,11 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
      */
     private static final int ONLINE_TIMEOUT_MINUTES = 5;
 
+    private static final String PERMISSION_EDIT = "EDIT";
+    private static final String PERMISSION_VIEW = "VIEW";
+    private static final String ONLINE_STATUS_ONLINE = "ONLINE";
+    private static final String ONLINE_STATUS_OFFLINE = "OFFLINE";
+
     @Autowired
     private ImDocumentCollaboratorMapper documentCollaboratorMapper;
 
@@ -66,7 +71,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
         if (!document.getOwnerId().equals(userId)) {
             ImDocumentCollaborator collaborator = documentCollaboratorMapper.selectByDocumentAndUser(
                     request.getDocumentId(), userId);
-            if (collaborator == null || !"EDIT".equals(collaborator.getPermission())) {
+            if (collaborator == null || !PERMISSION_EDIT.equals(collaborator.getPermission())) {
                 throw new BusinessException("无权限添加协作者");
             }
         }
@@ -100,7 +105,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
             collaborator.setInviterId(userId);
             collaborator.setJoinTime(LocalDateTime.now());
             collaborator.setLastActiveTime(LocalDateTime.now());
-            collaborator.setOnlineStatus("OFFLINE");
+            collaborator.setOnlineStatus(ONLINE_STATUS_OFFLINE);
             collaborator.setCreateTime(LocalDateTime.now());
             collaborator.setUpdateTime(LocalDateTime.now());
             collaborators.add(collaborator);
@@ -129,7 +134,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
         if (!canRemove) {
             ImDocumentCollaborator collaborator = documentCollaboratorMapper.selectByDocumentAndUser(
                     documentId, userId);
-            if (collaborator != null && "EDIT".equals(collaborator.getPermission())) {
+            if (collaborator != null && PERMISSION_EDIT.equals(collaborator.getPermission())) {
                 canRemove = true;
             }
         }
@@ -199,7 +204,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
 
         if (collaborator != null) {
             documentCollaboratorMapper.updateOnlineStatus(documentId, userId,
-                    "ONLINE", LocalDateTime.now());
+                    ONLINE_STATUS_ONLINE, LocalDateTime.now());
         } else {
             // 检查是否有访问权限
             ImDocument document = documentMapper.selectById(documentId);
@@ -214,8 +219,8 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
             collaborator.setUserId(userId);
             collaborator.setUserName(user != null ? user.getNickname() : "");
             collaborator.setUserAvatar(user != null ? user.getAvatar() : "");
-            collaborator.setPermission(document.getOwnerId().equals(userId) ? "EDIT" : "VIEW");
-            collaborator.setOnlineStatus("ONLINE");
+            collaborator.setPermission(document.getOwnerId().equals(userId) ? PERMISSION_EDIT : PERMISSION_VIEW);
+            collaborator.setOnlineStatus(ONLINE_STATUS_ONLINE);
             collaborator.setJoinTime(LocalDateTime.now());
             collaborator.setLastActiveTime(LocalDateTime.now());
             documentCollaboratorMapper.insert(collaborator);
@@ -228,7 +233,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
     @Transactional(rollbackFor = Exception.class)
     public void leaveDocument(Long documentId, Long userId) {
         documentCollaboratorMapper.updateOnlineStatus(documentId, userId,
-                "OFFLINE", LocalDateTime.now());
+                ONLINE_STATUS_OFFLINE, LocalDateTime.now());
 
         logger.info("用户离开文档编辑: documentId={}, userId={}", documentId, userId);
     }
@@ -255,7 +260,7 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
     @Transactional(rollbackFor = Exception.class)
     public void heartbeat(Long documentId, Long userId) {
         documentCollaboratorMapper.updateOnlineStatus(documentId, userId,
-                "ONLINE", LocalDateTime.now());
+                ONLINE_STATUS_ONLINE, LocalDateTime.now());
     }
 
     @Override

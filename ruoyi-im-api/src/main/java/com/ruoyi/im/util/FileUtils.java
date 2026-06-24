@@ -14,6 +14,13 @@ public class FileUtils {
     private static final String[] DOCUMENT_EXTENSIONS = {"doc", "docx", "pdf", "txt", "xls", "xlsx", "ppt", "pptx"};
     private static final String[] AUDIO_EXTENSIONS = {"mp3", "wav", "aac", "flac", "ogg"};
 
+    private static final String FILE_TYPE_IMAGE = "image";
+    private static final String FILE_TYPE_VIDEO = "video";
+    private static final String FILE_TYPE_AUDIO = "audio";
+    private static final String FILE_TYPE_DOCUMENT = "document";
+    private static final String FILE_TYPE_OTHER = "other";
+    private static final String SIZE_UNIT_BYTES = "B";
+
     /**
      * 获取文件扩展名
      *
@@ -39,36 +46,36 @@ public class FileUtils {
      */
     public static String getFileType(String extension) {
         if (!StringUtils.hasText(extension)) {
-            return "other";
+            return FILE_TYPE_OTHER;
         }
 
         String ext = extension.toLowerCase();
 
         for (String imageExt : IMAGE_EXTENSIONS) {
             if (ext.equals(imageExt)) {
-                return "image";
+                return FILE_TYPE_IMAGE;
             }
         }
 
         for (String videoExt : VIDEO_EXTENSIONS) {
             if (ext.equals(videoExt)) {
-                return "video";
+                return FILE_TYPE_VIDEO;
             }
         }
 
         for (String audioExt : AUDIO_EXTENSIONS) {
             if (ext.equals(audioExt)) {
-                return "audio";
+                return FILE_TYPE_AUDIO;
             }
         }
 
         for (String docExt : DOCUMENT_EXTENSIONS) {
             if (ext.equals(docExt)) {
-                return "document";
+                return FILE_TYPE_DOCUMENT;
             }
         }
 
-        return "other";
+        return FILE_TYPE_OTHER;
     }
 
     /**
@@ -79,7 +86,7 @@ public class FileUtils {
      */
     public static String formatFileSize(long size) {
         if (size < 1024) {
-            return size + " B";
+            return size + " " + SIZE_UNIT_BYTES;
         } else if (size < 1024 * 1024) {
             return String.format("%.2f KB", size / 1024.0);
         } else if (size < 1024 * 1024 * 1024) {
@@ -97,7 +104,7 @@ public class FileUtils {
      */
     public static boolean isImage(String filename) {
         String extension = getFileExtension(filename);
-        return "image".equals(getFileType(extension));
+        return FILE_TYPE_IMAGE.equals(getFileType(extension));
     }
 
     /**
@@ -108,7 +115,7 @@ public class FileUtils {
      */
     public static boolean isVideo(String filename) {
         String extension = getFileExtension(filename);
-        return "video".equals(getFileType(extension));
+        return FILE_TYPE_VIDEO.equals(getFileType(extension));
     }
 
     /**
@@ -119,6 +126,6 @@ public class FileUtils {
      */
     public static boolean isDocument(String filename) {
         String extension = getFileExtension(filename);
-        return "document".equals(getFileType(extension));
+        return FILE_TYPE_DOCUMENT.equals(getFileType(extension));
     }
 }

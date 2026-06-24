@@ -68,6 +68,14 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
      */
     private static final long COMPANY_QUOTA = 500L * 1024 * 1024 * 1024;
 
+    private static final String ACCESS_PERMISSION_PRIVATE = "PRIVATE";
+    private static final String STATUS_ACTIVE = "ACTIVE";
+    private static final String SHARE_TYPE_FILE = "FILE";
+    private static final String SHARE_STATUS_CANCELLED = "CANCELLED";
+    private static final String MESSAGE_TYPE_FILE = "FILE";
+    private static final String MESSAGE_TYPE_IMAGE = "IMAGE";
+    private static final String DEFAULT_FILE_NAME = "未命名文件";
+
     private final ImCloudFolderMapper cloudFolderMapper;
     private final ImCloudFileMapper cloudFileMapper;
     private final ImCloudFileShareMapper cloudFileShareMapper;
@@ -125,7 +133,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         folder.setOwnerId(userId);
         folder.setOwnerType(request.getOwnerType());
         folder.setDepartmentId(request.getDepartmentId());
-        folder.setAccessPermission(request.getAccessPermission() != null ? request.getAccessPermission() : "PRIVATE");
+        folder.setAccessPermission(request.getAccessPermission() != null ? request.getAccessPermission() : ACCESS_PERMISSION_PRIVATE);
         folder.setIsDeleted(false);
         folder.setCreateTime(LocalDateTime.now());
         folder.setUpdateTime(LocalDateTime.now());
@@ -417,7 +425,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         fileAsset.setFileExt(fileExtension);
         fileAsset.setUploaderId(userId);
         fileAsset.setDownloadCount(0);
-        fileAsset.setStatus("ACTIVE");
+        fileAsset.setStatus(STATUS_ACTIVE);
         fileAsset.setCreateTime(LocalDateTime.now());
         fileAssetMapper.insert(fileAsset);
 
@@ -433,7 +441,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         cloudFile.setUploaderId(userId);
         cloudFile.setDownloadCount(0);
         cloudFile.setPreviewCount(0);
-        cloudFile.setAccessPermission("PRIVATE");
+        cloudFile.setAccessPermission(ACCESS_PERMISSION_PRIVATE);
         cloudFile.setIsDeleted(false);
         cloudFile.setCreateTime(LocalDateTime.now());
         cloudFile.setUpdateTime(LocalDateTime.now());
@@ -626,7 +634,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         share.setAllowPreview(request.getAllowPreview() != null ? request.getAllowPreview() : true);
         share.setViewCount(0);
         share.setDownloadCount(0);
-        share.setStatus("ACTIVE");
+        share.setStatus(STATUS_ACTIVE);
         share.setCreateTime(LocalDateTime.now());
         share.setUpdateTime(LocalDateTime.now());
 
@@ -648,7 +656,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         }
 
         // 获取资源名称
-        if ("FILE".equals(request.getShareType())) {
+        if (SHARE_TYPE_FILE.equals(request.getShareType())) {
             ImCloudFile file = cloudFileMapper.selectById(request.getResourceId());
             if (file != null) {
                 vo.setResourceName(file.getFileName());
@@ -676,7 +684,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             BusinessExceptionHelper.throwNoPermission("无权限操作此分享");
         }
 
-        share.setStatus("CANCELLED");
+        share.setStatus(SHARE_STATUS_CANCELLED);
         share.setUpdateTime(LocalDateTime.now());
         cloudFileShareMapper.updateById(share);
 
@@ -694,7 +702,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             vo.setIsExpired(share.getExpireTime() != null && share.getExpireTime().isBefore(LocalDateTime.now()));
 
             // 获取资源名称
-            if ("FILE".equals(share.getShareType())) {
+            if (SHARE_TYPE_FILE.equals(share.getShareType())) {
                 ImCloudFile file = cloudFileMapper.selectById(share.getResourceId());
                 if (file != null) {
                     vo.setResourceName(file.getFileName());
@@ -718,7 +726,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
             BusinessExceptionHelper.throwShareNotFound();
         }
 
-        if ("CANCELLED".equals(share.getStatus())) {
+        if (SHARE_STATUS_CANCELLED.equals(share.getStatus())) {
             BusinessExceptionHelper.throwShareCancelled();
         }
 
@@ -866,14 +874,14 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
 
         // 2. 校验类型
         String type = message.getMessageType();
-        if (!"FILE".equalsIgnoreCase(type) && !"IMAGE".equalsIgnoreCase(type)) {
+        if (!MESSAGE_TYPE_FILE.equalsIgnoreCase(type) && !MESSAGE_TYPE_IMAGE.equalsIgnoreCase(type)) {
             throw new BusinessException("只能保存文件或图片消息");
         }
 
         // 3. 解析消息内容获取资产ID
         String decryptedContent = encryptionUtil.decryptMessage(message.getContent());
         Long fileAssetId = null;
-        String fileName = "未命名文件";
+        String fileName = DEFAULT_FILE_NAME;
         Long fileSize = 0L;
 
         try {
@@ -906,7 +914,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         cloudFile.setUploaderId(userId);
         cloudFile.setDownloadCount(0);
         cloudFile.setPreviewCount(0);
-        cloudFile.setAccessPermission("PRIVATE");
+        cloudFile.setAccessPermission(ACCESS_PERMISSION_PRIVATE);
         cloudFile.setIsDeleted(false);
         cloudFile.setCreateTime(LocalDateTime.now());
         cloudFile.setUpdateTime(LocalDateTime.now());

@@ -28,6 +28,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+/**
+ * 消息@提及服务实现
+ */
+@Service
+public class ImMessageMentionServiceImpl implements ImMessageMentionService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImMessageMentionServiceImpl.class);
+
+    /** 匹配@所有人/@all */
+    private static final Pattern MENTION_ALL_PATTERN = Pattern.compile("@所有人|@all");
+    /** 匹配@{userId:name}或@userId格式 */
+    private static final Pattern MENTION_USER_PATTERN = Pattern.compile("\\@\\{(\\d+):[^}]+\\}|@(\\d+)");
 import java.util.stream.Collectors;
 
 /**
@@ -212,16 +225,14 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
         }
 
         // 检测@所有人
-        Pattern mentionAllPattern = Pattern.compile("@所有人|@all");
-        Matcher mentionAllMatcher = mentionAllPattern.matcher(content);
+        Matcher mentionAllMatcher = MENTION_ALL_PATTERN.matcher(content);
         if (mentionAllMatcher.find()) {
             mentionInfo.setMentionAll(true);
             mentionInfo.setMentionAllType("ALL");
         }
 
         // 检测@用户（格式：@{userId:用户名} 或 @userId）
-        Pattern mentionUserPattern = Pattern.compile("\\@\\{(\\d+):[^}]+\\}|@(\\d+)");
-        Matcher mentionUserMatcher = mentionUserPattern.matcher(content);
+        Matcher mentionUserMatcher = MENTION_USER_PATTERN.matcher(content);
 
         while (mentionUserMatcher.find()) {
             String userIdStr = mentionUserMatcher.group(1) != null ? mentionUserMatcher.group(1) : mentionUserMatcher.group(2);

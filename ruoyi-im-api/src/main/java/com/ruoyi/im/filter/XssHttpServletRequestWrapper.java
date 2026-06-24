@@ -72,7 +72,7 @@ public class XssHttpServletRequestWrapper extends HttpServletRequestWrapper {
      * 判断是否为CORS相关header
      */
     private boolean isCorsHeader(String name) {
-        if (name == null) return false;
+        if (name == null) { return false; }
         String lowerName = name.toLowerCase();
         return lowerName.equals("origin")
                 || lowerName.equals("access-control-request-method")

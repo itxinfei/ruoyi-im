@@ -58,6 +58,14 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     /** 分片临时目录 */
     private static final String CHUNK_TEMP_DIR = "chunks/";
 
+    private static final int DEFAULT_CHUNK_SIZE = 5242880;
+    private static final String STATUS_UPLOADING = "UPLOADING";
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String STATUS_READY_TO_MERGE = "READY_TO_MERGE";
+    private static final String STATUS_CANCELLED = "CANCELLED";
+    private static final String STATUS_PAUSED = "PAUSED";
+    private static final String FILE_STATUS_ACTIVE = "ACTIVE";
+
     @Override
     @Transactional
     public ImFileChunkUploadInitVO initChunkUpload(ImFileChunkUploadInitRequest request, Long userId) {
@@ -79,7 +87,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         }
 
         // 计算分片信息
-        Integer chunkSize = request.getChunkSize() != null ? request.getChunkSize() : 5242880; // 默认5MB
+        Integer chunkSize = request.getChunkSize() != null ? request.getChunkSize() : DEFAULT_CHUNK_SIZE;
         int totalChunks = (int) Math.ceil((double) request.getFileSize() / chunkSize);
 
         // 生成上传ID
@@ -94,7 +102,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         chunkUpload.setChunkSize(chunkSize);
         chunkUpload.setTotalChunks(totalChunks);
         chunkUpload.setUploadedChunks(0);
-        chunkUpload.setStatus("UPLOADING");
+        chunkUpload.setStatus(STATUS_UPLOADING);
         chunkUpload.setUserId(userId);
         chunkUpload.setExpireTime(LocalDateTime.now().plusHours(EXPIRE_HOURS));
         chunkUpload.setCreateTime(LocalDateTime.now());
@@ -107,7 +115,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             detail.setUploadId(uploadId);
             detail.setChunkNumber(i);
             detail.setChunkSize(chunkSize);
-            detail.setStatus("PENDING");
+            detail.setStatus(STATUS_PENDING);
             detail.setRetryCount(0);
             chunkDetails.add(detail);
         }
@@ -120,7 +128,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         vo.setChunkSize(chunkSize);
         vo.setUploadedChunks(Collections.emptyList());
         vo.setNeedUpload(true);
-        vo.setStatus("UPLOADING");
+        vo.setStatus(STATUS_UPLOADING);
         vo.setExpireTime(chunkUpload.getExpireTime());
         return vo;
     }
@@ -136,7 +144,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         if (!chunkUpload.getUserId().equals(userId)) {
             throw new BusinessException("无权操作此上传任务");
         }
-        if (!"UPLOADING".equals(chunkUpload.getStatus())) {
+        if (!STATUS_UPLOADING.equals(chunkUpload.getStatus())) {
             throw new BusinessException("上传任务状态异常");
         }
 
@@ -172,7 +180,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
 
             // 检查是否全部上传完成
             if (completedChunks.size() >= chunkUpload.getTotalChunks()) {
-                chunkUploadMapper.updateStatus(uploadId, "READY_TO_MERGE", null, null);
+                chunkUploadMapper.updateStatus(uploadId, STATUS_READY_TO_MERGE, null, null);
             }
 
             return true;
@@ -253,7 +261,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             fileAsset.setFileType(getFileType(chunkUpload.getFileName()));
             fileAsset.setFileExt(getFileExtension(chunkUpload.getFileName()));
             fileAsset.setUploaderId(userId);
-            fileAsset.setStatus("ACTIVE");
+            fileAsset.setStatus(FILE_STATUS_ACTIVE);
             fileAsset.setDownloadCount(0);
             fileAsset.setCreateTime(LocalDateTime.now());
             fileAssetMapper.insert(fileAsset);
@@ -292,7 +300,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         }
 
         // 更新状态为已取消
-        chunkUploadMapper.updateStatus(uploadId, "CANCELLED", null, null);
+        chunkUploadMapper.updateStatus(uploadId, STATUS_CANCELLED, null, null);
 
         // 删除临时分片文件
         cleanupChunks(uploadId);
@@ -312,7 +320,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             throw new BusinessException("无权操作此上传任务");
         }
 
-        chunkUploadMapper.updateStatus(uploadId, "PAUSED", null, null);
+        chunkUploadMapper.updateStatus(uploadId, STATUS_PAUSED, null, null);
     }
 
     @Override
@@ -332,7 +340,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
                 .collect(Collectors.toList());
 
         // 更新状态为上传中
-        chunkUploadMapper.updateStatus(uploadId, "UPLOADING", null, null);
+        chunkUploadMapper.updateStatus(uploadId, STATUS_UPLOADING, null, null);
 
         // 返回初始化结果
         ImFileChunkUploadInitVO vo = new ImFileChunkUploadInitVO();
@@ -341,7 +349,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
         vo.setChunkSize(chunkUpload.getChunkSize());
         vo.setUploadedChunks(uploadedChunkNumbers);
         vo.setNeedUpload(uploadedChunkNumbers.size() < chunkUpload.getTotalChunks());
-        vo.setStatus("UPLOADING");
+        vo.setStatus(STATUS_UPLOADING);
         vo.setExpireTime(chunkUpload.getExpireTime());
         return vo;
     }

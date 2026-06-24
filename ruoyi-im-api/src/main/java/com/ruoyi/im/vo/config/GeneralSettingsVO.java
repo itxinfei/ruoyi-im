@@ -24,7 +24,9 @@ public class GeneralSettingsVO {
 
     public static GeneralSettingsVO fromMap(Map<String, Object> map) {
         GeneralSettingsVO vo = new GeneralSettingsVO();
-        if (map == null) return vo;
+        if (map == null) {
+            return vo;
+        }
         vo.language = (String) map.get("language");
         vo.theme = (String) map.get("theme");
         vo.fontSize = (Integer) map.get("fontSize");

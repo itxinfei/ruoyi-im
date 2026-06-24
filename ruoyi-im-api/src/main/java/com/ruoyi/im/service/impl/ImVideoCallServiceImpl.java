@@ -40,7 +40,18 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
 
     private static final String CALL_CACHE_KEY = "im:video_call:";
     private static final String USER_CALL_KEY = "im:user_call:";
-    private static final int CALL_TIMEOUT_SECONDS = 60; // 60秒超时
+    private static final int CALL_TIMEOUT_SECONDS = 60;
+    private static final String CALL_STATUS_CALLING = CALL_STATUS_CALLING;
+    private static final String CALL_STATUS_CONNECTED = CALL_STATUS_CONNECTED;
+    private static final String CALL_STATUS_REJECTED = CALL_STATUS_REJECTED;
+    private static final String CALL_STATUS_ENDED = CALL_STATUS_ENDED;
+    private static final String CALL_STATUS_TIMEOUT = CALL_STATUS_TIMEOUT;
+    private static final String CALL_MODE_GROUP = CALL_MODE_GROUP;
+    private static final String PARTICIPANT_STATUS_JOINED = PARTICIPANT_STATUS_JOINED;
+    private static final String PARTICIPANT_STATUS_INVITED = PARTICIPANT_STATUS_INVITED;
+    private static final String PARTICIPANT_STATUS_LEFT = PARTICIPANT_STATUS_LEFT;
+    private static final String ROOM_ID_PREFIX = "call_";
+    private static final long CALL_CONNECTED_TTL_SECONDS = 3600L;
 
     @Autowired
     private ImVideoCallMapper videoCallMapper;
@@ -77,7 +88,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setCalleeId(calleeId);
         call.setConversationId(conversationId);
         call.setCallType(callType);
-        call.setStatus("CALLING");
+        call.setStatus(CALL_STATUS_CALLING);
         call.setStartTime(LocalDateTime.now());
 
         videoCallMapper.insertImVideoCall(call);
@@ -109,27 +120,27 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             BusinessExceptionHelper.throwNoPermissionToAnswer();
         }
 
-        if (!"CALLING".equals(call.getStatus())) {
+        if (!CALL_STATUS_CALLING.equals(call.getStatus())) {
             BusinessExceptionHelper.throwVideoCallStatusError();
         }
 
         // 更新状态
-        call.setStatus("CONNECTED");
+        call.setStatus(CALL_STATUS_CONNECTED);
         call.setStartTime(LocalDateTime.now());
         videoCallMapper.updateImVideoCall(call);
 
         // 缓存通话信息（延长缓存时间到1小时）
         String callKey = CALL_CACHE_KEY + callId;
-        redisTemplate.opsForValue().set(callKey, call, 3600, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(callKey, call, CALL_CONNECTED_TTL_SECONDS, TimeUnit.SECONDS);
 
         // 设置双方用户通话状态
-        redisTemplate.opsForValue().set(USER_CALL_KEY + call.getCallerId(), callId, 3600, TimeUnit.SECONDS);
-        redisTemplate.opsForValue().set(USER_CALL_KEY + call.getCalleeId(), callId, 3600, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(USER_CALL_KEY + call.getCallerId(), callId, CALL_CONNECTED_TTL_SECONDS, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(USER_CALL_KEY + call.getCalleeId(), callId, CALL_CONNECTED_TTL_SECONDS, TimeUnit.SECONDS);
 
         log.info("接听通话: callId={}, user={}", callId, userId);
 
         // 通知对方已接听
-        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), "CONNECTED");
+        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), CALL_STATUS_CONNECTED);
     }
 
     @Override
@@ -144,18 +155,18 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             BusinessExceptionHelper.throwNoPermissionToReject();
         }
 
-        if (!"CALLING".equals(call.getStatus())) {
+        if (!CALL_STATUS_CALLING.equals(call.getStatus())) {
             BusinessExceptionHelper.throwVideoCallStatusError();
         }
 
         // 更新状态
-        call.setStatus("REJECTED");
+        call.setStatus(CALL_STATUS_REJECTED);
         call.setRejectReason(reason);
         call.setEndTime(LocalDateTime.now());
         videoCallMapper.updateImVideoCall(call);
 
         // 通知对方已拒绝
-        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), "REJECTED");
+        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), CALL_STATUS_REJECTED);
 
         // 清除通话状态
         clearCallState(callId);
@@ -175,7 +186,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             BusinessExceptionHelper.throwNoPermissionToEnd();
         }
 
-        if ("ENDED".equals(call.getStatus()) || "REJECTED".equals(call.getStatus()) || "TIMEOUT".equals(call.getStatus())) {
+        if (CALL_STATUS_ENDED.equals(call.getStatus()) || CALL_STATUS_REJECTED.equals(call.getStatus()) || CALL_STATUS_TIMEOUT.equals(call.getStatus())) {
             return; // 已经结束
         }
 
@@ -187,13 +198,13 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         }
 
         // 更新状态
-        call.setStatus("ENDED");
+        call.setStatus(CALL_STATUS_ENDED);
         call.setEndTime(endTime);
         call.setDuration(duration);
         videoCallMapper.updateImVideoCall(call);
 
         // 通知对方已结束
-        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), "ENDED");
+        ImWebSocketEndpoint.sendCallStatusUpdate(callId, call.getCallerId(), call.getCalleeId(), CALL_STATUS_ENDED);
 
         // 清除通话状态
         clearCallState(callId);
@@ -230,12 +241,12 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             return;
         }
 
-        if (!"CALLING".equals(call.getStatus())) {
+        if (!CALL_STATUS_CALLING.equals(call.getStatus())) {
             return;
         }
 
         // 更新状态
-        call.setStatus("TIMEOUT");
+        call.setStatus(CALL_STATUS_TIMEOUT);
         call.setEndTime(LocalDateTime.now());
         videoCallMapper.updateImVideoCall(call);
 
@@ -253,7 +264,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         ImVideoCall call = (ImVideoCall) redisTemplate.opsForValue().get(callKey);
         if (call == null) {
             call = videoCallMapper.selectImVideoCallById(callId);
-            if (call != null && "CALLING".equals(call.getStatus())) {
+            if (call != null && CALL_STATUS_CALLING.equals(call.getStatus())) {
                 // 如果数据库中还在呼叫中，说明可能缓存丢失了，恢复缓存
                 redisTemplate.opsForValue().set(callKey, call, CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             }
@@ -354,23 +365,23 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         call.setCallerId(callerId);
         call.setConversationId(conversationId);
         call.setCallType(callType);
-        call.setCallMode("GROUP");
-        call.setStatus("CALLING");
+        call.setCallMode(CALL_MODE_GROUP);
+        call.setStatus(CALL_STATUS_CALLING);
         call.setMaxParticipants(maxParticipants);
         call.setCurrentParticipants(1); // 发起者自动加入
         call.setStartTime(LocalDateTime.now());
-        call.setRoomId("call_" + System.currentTimeMillis());
+        call.setRoomId(ROOM_ID_PREFIX + System.currentTimeMillis());
 
         videoCallMapper.insertImVideoCall(call);
 
         Long callId = call.getId();
 
         // 添加发起者作为参与者
-        addParticipant(callId, callerId, "JOINED");
+        addParticipant(callId, callerId, PARTICIPANT_STATUS_JOINED);
 
         // 添加被邀请用户（状态为已邀请）
         for (Long userId : invitedUserIds) {
-            addParticipant(callId, userId, "INVITED");
+            addParticipant(callId, userId, PARTICIPANT_STATUS_INVITED);
         }
 
         // 缓存通话信息
@@ -394,17 +405,17 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
-        if (!"GROUP".equals(call.getCallMode())) {
+        if (!CALL_MODE_GROUP.equals(call.getCallMode())) {
             BusinessExceptionHelper.throwNotGroupCall();
         }
 
         // 检查是否已参与
         ImVideoCallParticipant existing = participantMapper.selectByCallIdAndUserId(callId, userId);
         if (existing != null) {
-            if ("JOINED".equals(existing.getStatus())) {
+            if (PARTICIPANT_STATUS_JOINED.equals(existing.getStatus())) {
                 BusinessExceptionHelper.throwAlreadyJoinedCall();
             }
-            if ("LEFT".equals(existing.getStatus())) {
+            if (PARTICIPANT_STATUS_LEFT.equals(existing.getStatus())) {
                 BusinessExceptionHelper.throwAlreadyLeftCall();
             }
         }
@@ -417,11 +428,11 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
 
         // 更新或创建参与者记录
         if (existing != null) {
-            existing.setStatus("JOINED");
+            existing.setStatus(PARTICIPANT_STATUS_JOINED);
             existing.setJoinTime(LocalDateTime.now());
             participantMapper.updateById(existing);
         } else {
-            addParticipant(callId, userId, "JOINED");
+            addParticipant(callId, userId, PARTICIPANT_STATUS_JOINED);
         }
 
         // 更新当前参与者数
@@ -429,7 +440,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         videoCallMapper.updateImVideoCall(call);
 
         // 设置用户通话状态
-        redisTemplate.opsForValue().set(USER_CALL_KEY + userId, callId, 3600, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(USER_CALL_KEY + userId, callId, CALL_CONNECTED_TTL_SECONDS, TimeUnit.SECONDS);
 
         log.info("加入群组通话: callId={}, userId={}", callId, userId);
     }
@@ -442,14 +453,14 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             BusinessExceptionHelper.throwVideoCallNotFound();
         }
 
-        if (!"GROUP".equals(call.getCallMode())) {
+        if (!CALL_MODE_GROUP.equals(call.getCallMode())) {
             BusinessExceptionHelper.throwNotGroupCall();
         }
 
         // 更新参与者状态
         ImVideoCallParticipant participant = participantMapper.selectByCallIdAndUserId(callId, userId);
-        if (participant != null && "JOINED".equals(participant.getStatus())) {
-            participant.setStatus("LEFT");
+        if (participant != null && PARTICIPANT_STATUS_JOINED.equals(participant.getStatus())) {
+            participant.setStatus(PARTICIPANT_STATUS_LEFT);
             participant.setLeaveTime(LocalDateTime.now());
             participantMapper.updateById(participant);
 
@@ -531,7 +542,7 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
         participant.setIsCameraOff(false);
         participant.setCreateTime(LocalDateTime.now());
 
-        if ("JOINED".equals(status)) {
+        if (PARTICIPANT_STATUS_JOINED.equals(status)) {
             participant.setJoinTime(LocalDateTime.now());
         }
 

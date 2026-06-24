@@ -43,6 +43,13 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class ImGroupServiceImpl implements ImGroupService {
 
+    private static final String ROLE_OWNER = "OWNER";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_MEMBER = "MEMBER";
+    private static final String GROUP_TYPE_PRIVATE = "PRIVATE";
+    private static final String GROUP_STATUS_NORMAL = "NORMAL";
+    private static final String CONVERSATION_TYPE_GROUP = "GROUP";
+
     private final ImGroupMapper imGroupMapper;
     private final ImGroupMemberMapper imGroupMemberMapper;
     private final ImUserMapper imUserMapper;
@@ -81,11 +88,11 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setAvatar(request.getAvatar());
         group.setDescription(request.getDescription());
         // 使用Optional优化参数默认值设置
-        group.setType(Optional.ofNullable(request.getType()).orElse("PRIVATE"));
+        group.setType(Optional.ofNullable(request.getType()).orElse(GROUP_TYPE_PRIVATE));
         group.setMaxMembers(Optional.ofNullable(request.getMemberLimit())
                 .orElse(SystemConstants.DEFAULT_GROUP_MEMBER_LIMIT));
         group.setMemberCount(1);
-        group.setStatus("NORMAL");
+        group.setStatus(GROUP_STATUS_NORMAL);
         group.setCreateTime(LocalDateTime.now());
         group.setUpdateTime(LocalDateTime.now());
 
@@ -93,7 +100,7 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         // 创建群组对应的会话（确保群组在会话列表中显示）
         ImConversation conversation = new ImConversation();
-        conversation.setType("GROUP");
+        conversation.setType(CONVERSATION_TYPE_GROUP);
         conversation.setTargetId(group.getId()); // 关联群组ID
         conversation.setName(group.getName());
         conversation.setAvatar(group.getAvatar());
@@ -105,7 +112,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         ImGroupMember ownerMember = new ImGroupMember();
         ownerMember.setGroupId(group.getId());
         ownerMember.setUserId(userId);
-        ownerMember.setRole("OWNER");
+        ownerMember.setRole(ROLE_OWNER);
         ownerMember.setJoinedTime(LocalDateTime.now());
         ownerMember.setCreateTime(LocalDateTime.now());
         ownerMember.setUpdateTime(LocalDateTime.now());
@@ -119,7 +126,7 @@ public class ImGroupServiceImpl implements ImGroupService {
                 ImGroupMember member = new ImGroupMember();
                 member.setGroupId(group.getId());
                 member.setUserId(memberId);
-                member.setRole("MEMBER");
+                member.setRole(ROLE_MEMBER);
                 member.setInviterId(userId);
                 member.setJoinedTime(LocalDateTime.now());
                 member.setCreateTime(LocalDateTime.now());
@@ -144,7 +151,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!ROLE_OWNER.equals(operator.getRole()) && !ROLE_ADMIN.equals(operator.getRole()))) {
             BusinessExceptionHelper.throwNoPermission("无权限修改群组信息");
         }
 
@@ -302,12 +309,12 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!ROLE_OWNER.equals(operator.getRole()) && !ROLE_ADMIN.equals(operator.getRole()))) {
             BusinessExceptionHelper.throwNoPermission("无权限添加成员");
         }
 
         // 查找群组对应的会话
-        ImConversation conversation = imConversationMapper.selectByTypeAndTarget("GROUP", groupId, null);
+        ImConversation conversation = imConversationMapper.selectByTypeAndTarget(CONVERSATION_TYPE_GROUP, groupId, null);
 
         int addedCount = 0;
         for (Long userId : userIds) {
@@ -325,7 +332,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             ImGroupMember member = new ImGroupMember();
             member.setGroupId(groupId);
             member.setUserId(userId);
-            member.setRole("MEMBER");
+            member.setRole(ROLE_MEMBER);
             member.setInviterId(operatorId);
             member.setJoinedTime(LocalDateTime.now());
             member.setCreateTime(LocalDateTime.now());
@@ -359,7 +366,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!ROLE_OWNER.equals(operator.getRole()) && !ROLE_ADMIN.equals(operator.getRole()))) {
             BusinessExceptionHelper.throwNoPermission("无权限移除成员");
         }
 
@@ -371,10 +378,10 @@ public class ImGroupServiceImpl implements ImGroupService {
 
             ImGroupMember member = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (member != null) {
-                if ("OWNER".equals(member.getRole())) {
+                if (ROLE_OWNER.equals(member.getRole())) {
                     BusinessExceptionHelper.throwCannotRemoveOwner();
                 }
-                if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
+                if (ROLE_ADMIN.equals(member.getRole()) && !ROLE_OWNER.equals(operator.getRole())) {
                             BusinessExceptionHelper.throwNotAllowed("管理员不能移除其他管理员");
                         }
                 imGroupMemberMapper.deleteImGroupMemberById(member.getId());
@@ -438,9 +445,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         if (isAdmin) {
-            member.setRole("ADMIN");
+            member.setRole(ROLE_ADMIN);
         } else {
-            member.setRole("MEMBER");
+            member.setRole(ROLE_MEMBER);
         }
         member.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(member);
@@ -458,7 +465,7 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember operator = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
-        if (operator == null || (!"OWNER".equals(operator.getRole()) && !"ADMIN".equals(operator.getRole()))) {
+        if (operator == null || (!ROLE_OWNER.equals(operator.getRole()) && !ROLE_ADMIN.equals(operator.getRole()))) {
             BusinessExceptionHelper.throwNoPermission("无权限禁言成员");
         }
 
@@ -467,11 +474,11 @@ public class ImGroupServiceImpl implements ImGroupService {
             BusinessExceptionHelper.throwNotInGroup();
         }
 
-        if ("OWNER".equals(member.getRole())) {
+        if (ROLE_OWNER.equals(member.getRole())) {
             BusinessExceptionHelper.throwNotAllowed("不能禁言群主");
         }
 
-        if ("ADMIN".equals(member.getRole()) && !"OWNER".equals(operator.getRole())) {
+        if (ROLE_ADMIN.equals(member.getRole()) && !ROLE_OWNER.equals(operator.getRole())) {
             BusinessExceptionHelper.throwNotAllowed("管理员不能禁言其他管理员");
         }
 
@@ -509,11 +516,11 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         ImGroupMember oldOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
 
-        oldOwner.setRole("ADMIN");
+        oldOwner.setRole(ROLE_ADMIN);
         oldOwner.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(oldOwner);
 
-        newOwner.setRole("OWNER");
+        newOwner.setRole(ROLE_OWNER);
         newOwner.setUpdateTime(LocalDateTime.now());
         imGroupMemberMapper.updateImGroupMember(newOwner);
 
@@ -595,9 +602,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         List<Map<String, Object>> members = imGroupMemberMapper.selectMembersByGroupId(groupId);
         for (Map<String, Object> member : members) {
             String role = (String) member.get("role");
-            if ("OWNER".equals(role)) {
+            if (ROLE_OWNER.equals(role)) {
                 member.put("roleDisplay", "群主");
-            } else if ("ADMIN".equals(role)) {
+            } else if (ROLE_ADMIN.equals(role)) {
                 member.put("roleDisplay", "管理员");
             } else {
                 member.put("roleDisplay", "成员");

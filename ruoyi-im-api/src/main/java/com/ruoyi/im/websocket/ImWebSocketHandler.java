@@ -67,6 +67,27 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     // 重试间隔（秒）
     private static final long RETRY_INTERVAL_SECONDS = 5;
 
+    // 认证类型
+    private static final String TYPE_AUTH = "AUTH";
+    // 心跳动作
+    private static final String ACTION_PING = "PING";
+    // 心跳响应动作
+    private static final String ACTION_PONG = "PONG";
+    // 消息类型
+    private static final String TYPE_MESSAGE = "MESSAGE";
+    // 确认动作
+    private static final String ACTION_ACK = "ACK";
+    // 错误类型
+    private static final String TYPE_ERROR = "ERROR";
+    // 无效格式错误码
+    private static final String ERROR_INVALID_FORMAT = "INVALID_FORMAT";
+    // 未授权关闭原因
+    private static final String CLOSE_REASON_UNAUTHORIZED = "UNAUTHORIZED";
+    // 并发登录关闭原因
+    private static final String CLOSE_REASON_CONCURRENT_LOGIN = "CONCURRENT_LOGIN";
+    // 关闭状态码
+    private static final int CLOSE_STATUS_CODE = 4000;
+
     @Resource
     private ImMessageService imMessageService;
 
@@ -74,7 +95,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         Long userId = getUserIdFromSession(session);
         if (Objects.isNull(userId)) {
-            closeSessionSilently(session, "UNAUTHORIZED");
+            closeSessionSilently(session, CLOSE_REASON_UNAUTHORIZED);
             return;
         }
 
@@ -82,7 +103,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         WebSocketSession oldSession = USER_SESSION_MAP.get(userId);
         if (Objects.nonNull(oldSession) && !oldSession.getId().equals(session.getId())) {
             log.warn("Detecting concurrent login for userId: {}, kicking out old session: {}", userId, oldSession.getId());
-            closeSessionSilently(oldSession, "CONCURRENT_LOGIN");
+            closeSessionSilently(oldSession, CLOSE_REASON_CONCURRENT_LOGIN);
         }
 
         USER_SESSION_MAP.put(userId, session);
@@ -103,18 +124,18 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
         String payload = message.getPayload();
         try {
             WsFrame frame = JSON.parseObject(payload, WsFrame.class);
-            if (Objects.isNull(frame) || Objects.isNull(frame.getType())) return;
+            if (Objects.isNull(frame) || Objects.isNull(frame.getType())) { return; }
 
             Long userId = getUserIdFromSession(session);
 
             // 2. 处理心跳 (P7 优化：增加心跳监测计时)
-            if ("AUTH".equals(frame.getType()) && "PING".equals(frame.getAction())) {
+            if (TYPE_AUTH.equals(frame.getType()) && ACTION_PING.equals(frame.getAction())) {
                 sendPong(session);
                 return;
             }
 
             // 3. 处理应用层 ACK (Doc-34 §5.2)
-            if ("MESSAGE".equals(frame.getType()) && "ACK".equals(frame.getAction())) {
+            if (TYPE_MESSAGE.equals(frame.getType()) && ACTION_ACK.equals(frame.getAction())) {
                 log.debug("Received MESSAGE_ACK from userId: {}, requestId: {}", userId, frame.getRequestId());
                 // 确认消息送达：requestId 为消息 ID
                 if (frame.getRequestId() != null && !frame.getRequestId().isEmpty()) {
@@ -133,7 +154,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
             
         } catch (Exception e) {
             log.error("WebSocket message parsing error", e);
-            sendErrorFrame(session, "INVALID_FORMAT", "消息协议不匹配");
+            sendErrorFrame(session, ERROR_INVALID_FORMAT, "消息协议不匹配");
         }
     }
 
@@ -179,8 +200,8 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
     private void sendPong(WebSocketSession session) throws IOException {
         WsFrame pong = new WsFrame();
-        pong.setType("AUTH");
-        pong.setAction("PONG");
+        pong.setType(TYPE_AUTH);
+        pong.setAction(ACTION_PONG);
         pong.setTimestamp(System.currentTimeMillis());
         session.sendMessage(new TextMessage(JSON.toJSONString(pong)));
     }
@@ -188,7 +209,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     private void sendErrorFrame(WebSocketSession session, String code, String msg) {
         try {
             WsFrame error = new WsFrame();
-            error.setType("ERROR");
+            error.setType(TYPE_ERROR);
             error.setAction(code);
             error.setData(msg);
             error.setTimestamp(System.currentTimeMillis());
@@ -200,7 +221,7 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
     private void closeSessionSilently(WebSocketSession session, String reason) {
         try {
-            if (session.isOpen()) session.close(new CloseStatus(4000, reason));
+            if (session.isOpen()) { session.close(new CloseStatus(CLOSE_STATUS_CODE, reason)); }
         } catch (IOException e) {
             log.warn("Failed to close session {}, reason: {}", session.getId(), reason, e);
         }
@@ -208,9 +229,9 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
 
     private Long getUserIdFromSession(WebSocketSession session) {
         Object userIdObj = session.getAttributes().get("userId");
-        if (userIdObj instanceof Long) return (Long) userIdObj;
-        if (userIdObj instanceof Integer) return ((Integer) userIdObj).longValue();
-        if (userIdObj instanceof String) return Long.parseLong((String) userIdObj);
+        if (userIdObj instanceof Long) { return (Long) userIdObj; }
+        if (userIdObj instanceof Integer) { return ((Integer) userIdObj).longValue(); }
+        if (userIdObj instanceof String) { return Long.parseLong((String) userIdObj); }
         return null;
     }
 

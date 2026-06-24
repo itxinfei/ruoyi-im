@@ -30,6 +30,8 @@ import java.util.Set;
 public class PermissionAspect {
     
     private static final Logger log = LoggerFactory.getLogger(PermissionAspect.class);
+    private static final String BEARER_PREFIX = "Bearer ";
+    private static final int BEARER_PREFIX_LENGTH = 7;
 
     @Autowired
     private ImUserService userService;
@@ -70,8 +72,8 @@ public class PermissionAspect {
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
             String authHeader = request.getHeader("Authorization");
             
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                String token = authHeader.substring(7);
+            if (authHeader != null && authHeader.startsWith(BEARER_PREFIX)) {
+                String token = authHeader.substring(BEARER_PREFIX_LENGTH);
                 String username = SecurityUtils.getUsernameFromToken(token);
                 if (username != null) {
                     return userService.findByUsername(username);

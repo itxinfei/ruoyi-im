@@ -43,6 +43,39 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     private static final String MEETING_CACHE_KEY = "im:meeting:";
     private static final String MEETING_USER_PREFIX = "im:meeting_user:";
 
+    /** 会议类型：普通会议 */
+    private static final String MEETING_TYPE_MEETING = "MEETING";
+    /** 会议状态：已计划 */
+    private static final String STATUS_SCHEDULED = "SCHEDULED";
+    /** 会议状态：进行中 */
+    private static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    /** 会议状态：已结束 */
+    private static final String STATUS_ENDED = "ENDED";
+    /** 会议状态：已取消 */
+    private static final String STATUS_CANCELLED = "CANCELLED";
+    /** 参与者角色：主持人 */
+    private static final String ROLE_HOST = "HOST";
+    /** 参与者角色：参与者 */
+    private static final String ROLE_ATTENDEE = "ATTENDEE";
+    /** 参与者状态：已加入 */
+    private static final String PARTICIPANT_STATUS_JOINED = "JOINED";
+    /** 参与者状态：已离开 */
+    private static final String PARTICIPANT_STATUS_LEFT = "LEFT";
+    /** 参与者状态：已邀请 */
+    private static final String PARTICIPANT_STATUS_INVITED = "INVITED";
+    /** 未删除状态 */
+    private static final int NOT_DELETED = 0;
+    /** 已删除状态 */
+    private static final int DELETED = 1;
+    /** 默认最大参与者数 */
+    private static final int DEFAULT_MAX_PARTICIPANTS = 9;
+    /** 房间ID前缀 */
+    private static final String ROOM_ID_PREFIX = "meeting_";
+    /** 缓存过期时间（秒） */
+    private static final long CACHE_EXPIRE_SECONDS = 3600;
+    /** 会议邀请消息类型 */
+    private static final String MESSAGE_TYPE_MEETING_INVITE = "meeting_invite";
+
     @Autowired
     private ImVideoMeetingMapper meetingMapper;
 
@@ -76,12 +109,12 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         meeting.setDescription(request.getDescription());
         meeting.setHostId(userId);
         meeting.setHostName(host.getNickname() != null ? host.getNickname() : host.getUsername());
-        meeting.setMeetingType(request.getMeetingType() != null ? request.getMeetingType() : "MEETING");
-        meeting.setStatus("SCHEDULED");
+        meeting.setMeetingType(request.getMeetingType() != null ? request.getMeetingType() : MEETING_TYPE_MEETING);
+        meeting.setStatus(STATUS_SCHEDULED);
         meeting.setScheduledStartTime(request.getScheduledStartTime());
         meeting.setScheduledEndTime(request.getScheduledEndTime());
         meeting.setDuration(request.getDuration());
-        meeting.setMaxParticipants(request.getMaxParticipants() != null ? request.getMaxParticipants() : 9);
+        meeting.setMaxParticipants(request.getMaxParticipants() != null ? request.getMaxParticipants() : DEFAULT_MAX_PARTICIPANTS);
         meeting.setCurrentParticipants(1); // 发起者自动加入
         meeting.setRequirePassword(request.getRequirePassword() != null ? request.getRequirePassword() : false);
         meeting.setMeetingPassword(request.getMeetingPassword());
@@ -92,7 +125,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         meeting.setCreateTime(LocalDateTime.now());
 
         // 生成房间ID和会议链接
-        String roomId = "meeting_" + System.currentTimeMillis();
+        String roomId = ROOM_ID_PREFIX + System.currentTimeMillis();
         meeting.setRoomId(roomId);
         meeting.setMeetingLink(generateMeetingLink(roomId));
 
@@ -106,8 +139,8 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         hostParticipant.setUserId(userId);
         hostParticipant.setUserName(host.getNickname() != null ? host.getNickname() : host.getUsername());
         hostParticipant.setUserAvatar(host.getAvatar());
-        hostParticipant.setRole("HOST");
-        hostParticipant.setStatus("JOINED");
+        hostParticipant.setRole(ROLE_HOST);
+        hostParticipant.setStatus(PARTICIPANT_STATUS_JOINED);
         hostParticipant.setJoinTime(LocalDateTime.now());
         hostParticipant.setIsMuted(false);
         hostParticipant.setIsVideoOff(false);
@@ -204,11 +237,11 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 只有预定状态的会议可以取消
-        if (!"SCHEDULED".equals(meeting.getStatus())) {
+        if (!STATUS_SCHEDULED.equals(meeting.getStatus())) {
             BusinessExceptionHelper.throwOnlyScheduledCanCancel();
         }
 
-        meeting.setStatus("CANCELLED");
+        meeting.setStatus(STATUS_CANCELLED);
         meeting.setUpdateTime(LocalDateTime.now());
         meetingMapper.updateById(meeting);
 
@@ -216,7 +249,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         clearMeetingCache(meetingId);
 
         // 广播会议取消通知给所有参与者
-        broadcastMeetingNotification(meetingId, "CANCELLED", "会议已被主持人取消", userId);
+        broadcastMeetingNotification(meetingId, STATUS_CANCELLED, "会议已被主持人取消", userId);
 
         log.info("取消视频会议: meetingId={}, title={}", meetingId, meeting.getTitle());
     }
@@ -235,7 +268,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 只有已结束或已取消的会议可以删除
-        if (!SystemConstants.MEETING_STATUS_ENDED.equals(meeting.getStatus()) && !"CANCELLED".equals(meeting.getStatus())) {
+        if (!SystemConstants.MEETING_STATUS_ENDED.equals(meeting.getStatus()) && !STATUS_CANCELLED.equals(meeting.getStatus())) {
             BusinessExceptionHelper.throwOnlyEndedOrCancelledCanDelete();
         }
 
@@ -257,7 +290,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             BusinessExceptionHelper.throwOnlyHostCanStart();
         }
 
-        if (!"SCHEDULED".equals(meeting.getStatus())) {
+        if (!STATUS_SCHEDULED.equals(meeting.getStatus())) {
             BusinessExceptionHelper.throwVideoMeetingStatusError();
         }
 
@@ -269,7 +302,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         cacheMeetingInfo(meeting);
 
         // 广播会议开始通知
-        broadcastMeetingNotification(meetingId, "STARTED", "会议已开始", userId);
+        broadcastMeetingNotification(meetingId, STATUS_IN_PROGRESS, "会议已开始", userId);
 
         log.info("开始视频会议: meetingId={}, title={}", meetingId, meeting.getTitle());
     }
@@ -316,7 +349,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 检查会议状态
-        if ("CANCELLED".equals(meeting.getStatus())) {
+        if (STATUS_CANCELLED.equals(meeting.getStatus())) {
             BusinessExceptionHelper.throwMeetingCancelled();
         }
 
@@ -348,8 +381,8 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             participant.setUserId(userId);
             participant.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
             participant.setUserAvatar(user.getAvatar());
-            participant.setRole("ATTENDEE");
-            participant.setStatus("JOINED");
+            participant.setRole(ROLE_ATTENDEE);
+            participant.setStatus(PARTICIPANT_STATUS_JOINED);
             participant.setJoinTime(LocalDateTime.now());
             participant.setIsMuted(meeting.getMuteOnJoin());
             participant.setIsVideoOff(false);
@@ -361,9 +394,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             // 更新当前参与人数
             meeting.setCurrentParticipants(currentCount + 1);
             meetingMapper.updateById(meeting);
-        } else if ("LEFT".equals(participant.getStatus())) {
+        } else if (PARTICIPANT_STATUS_LEFT.equals(participant.getStatus())) {
             // 重新加入
-            participant.setStatus("JOINED");
+            participant.setStatus(PARTICIPANT_STATUS_JOINED);
             participant.setLeaveTime(null);
             participantMapper.updateById(participant);
         }
@@ -381,7 +414,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             return; // 用户不在会议中
         }
 
-        participant.setStatus("LEFT");
+        participant.setStatus(PARTICIPANT_STATUS_LEFT);
         participant.setLeaveTime(LocalDateTime.now());
         participantMapper.updateById(participant);
 
@@ -406,7 +439,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     @Override
     public ImVideoMeetingDetailVO getMeetingDetail(Long meetingId) {
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
-        if (meeting == null || meeting.getDelFlag() == 1) {
+        if (meeting == null || meeting.getDelFlag() == DELETED) {
             return null;
         }
 
@@ -419,7 +452,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     @Override
     public List<ImVideoMeetingVO> getUserMeetings(Long userId, String status) {
         LambdaQueryWrapper<ImVideoMeeting> query = new LambdaQueryWrapper<>();
-        query.eq(ImVideoMeeting::getDelFlag, 0);
+        query.eq(ImVideoMeeting::getDelFlag, NOT_DELETED);
 
         // 查询用户参与的会议
         // 这里需要通过参与者表来查询，简化处理直接查询发起的会议
@@ -491,15 +524,15 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
                 participant.setUserId(userId);
                 participant.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
                 participant.setUserAvatar(user.getAvatar());
-                participant.setRole("ATTENDEE");
-                participant.setStatus("INVITED");
+                participant.setRole(ROLE_ATTENDEE);
+                participant.setStatus(PARTICIPANT_STATUS_INVITED);
                 participant.setCreateTime(LocalDateTime.now());
 
                 participantMapper.insert(participant);
 
                 // 发送邀请通知：通过 WebSocket 实时推送到目标用户
                 Map<String, Object> inviteMsg = new HashMap<>();
-                inviteMsg.put("type", "meeting_invite");
+                inviteMsg.put("type", MESSAGE_TYPE_MEETING_INVITE);
                 Map<String, Object> data = new HashMap<>();
                 data.put("meetingId", meetingId);
                 data.put("title", meeting.getTitle());
@@ -538,11 +571,11 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
 
         // 不能移除主持人
-        if ("HOST".equals(participant.getRole())) {
+        if (ROLE_HOST.equals(participant.getRole())) {
             BusinessExceptionHelper.throwCannotRemoveHost();
         }
 
-        participant.setStatus("LEFT");
+        participant.setStatus(PARTICIPANT_STATUS_LEFT);
         participant.setLeaveTime(LocalDateTime.now());
         participantMapper.updateById(participant);
 
@@ -640,12 +673,12 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         // 更新旧主持人角色
         ImVideoMeetingParticipant oldHost = participantMapper.selectByMeetingAndUser(meetingId, operatorId);
         if (oldHost != null) {
-            oldHost.setRole("ATTENDEE");
+            oldHost.setRole(ROLE_ATTENDEE);
             participantMapper.updateById(oldHost);
         }
 
         // 更新新主持人
-        participant.setRole("HOST");
+        participant.setRole(ROLE_HOST);
         participantMapper.updateById(participant);
 
         // 更新会议表
@@ -684,7 +717,7 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         }
         String cacheKey = MEETING_CACHE_KEY + meeting.getId();
         // 缓存1小时
-        redisTemplate.opsForValue().set(cacheKey, meeting, 3600, TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(cacheKey, meeting, CACHE_EXPIRE_SECONDS, TimeUnit.SECONDS);
     }
 
     /**

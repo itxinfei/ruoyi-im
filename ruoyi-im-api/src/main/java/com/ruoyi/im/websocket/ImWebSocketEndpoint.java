@@ -568,7 +568,9 @@ public class ImWebSocketEndpoint {
             });
 
             Object toUserIdObj = callData.get("toUserId");
-            if (toUserIdObj == null) return;
+            if (toUserIdObj == null) {
+                return;
+            }
 
             Long toUserId = Long.valueOf(toUserIdObj.toString());
             

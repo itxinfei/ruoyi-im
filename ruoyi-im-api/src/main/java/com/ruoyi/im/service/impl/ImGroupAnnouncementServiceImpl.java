@@ -22,6 +22,11 @@ import java.util.List;
 @Service
 public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementService {
 
+    private static final String ROLE_OWNER = "OWNER";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final int ANNOUNCEMENT_STATUS_ACTIVE = 1;
+    private static final int ANNOUNCEMENT_STATUS_RECALLED = 0;
+
     @Autowired
     private ImGroupAnnouncementMapper announcementMapper;
 
@@ -39,7 +44,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+        if (!ROLE_OWNER.equals(role) && !ROLE_ADMIN.equals(role)) {
             BusinessExceptionHelper.throwOnlyOwnerOrAdminCanPublishAnnouncement();
         }
 
@@ -51,7 +56,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         announcement.setType(type != null ? type : 1);
         announcement.setAttachmentUrl(attachmentUrl);
         announcement.setIsPinned(isPinned != null ? isPinned : 0);
-        announcement.setStatus(1);
+        announcement.setStatus(ANNOUNCEMENT_STATUS_ACTIVE);
         announcement.setExpireTime(expireTime);
         announcement.setCreateTime(LocalDateTime.now());
         announcement.setUpdateTime(LocalDateTime.now());
@@ -119,8 +124,8 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role);
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isSender) {
@@ -148,8 +153,8 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role);
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isSender) {
@@ -174,7 +179,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
         boolean isSender = announcement.getSenderId().equals(userId);
 
         if (!isOwner && !isSender) {
@@ -182,7 +187,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         // 撤回公告
-        announcement.setStatus(0);
+        announcement.setStatus(ANNOUNCEMENT_STATUS_RECALLED);
         announcement.setUpdateTime(LocalDateTime.now());
         announcementMapper.updateById(announcement);
     }
@@ -202,7 +207,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         }
 
         String role = member.getRole();
-        if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+        if (!ROLE_OWNER.equals(role) && !ROLE_ADMIN.equals(role)) {
             BusinessExceptionHelper.throwOnlyOwnerOrAdminCanPinAnnouncement();
         }
 
@@ -217,7 +222,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
         List<ImGroupAnnouncement> expiredAnnouncements = announcementMapper.selectExpiredAnnouncements(LocalDateTime.now());
         int count = 0;
         for (ImGroupAnnouncement announcement : expiredAnnouncements) {
-            announcement.setStatus(0); // 标记为已撤回
+            announcement.setStatus(ANNOUNCEMENT_STATUS_RECALLED); // 标记为已撤回
             announcement.setUpdateTime(LocalDateTime.now());
             announcementMapper.updateById(announcement);
             count++;

@@ -448,7 +448,9 @@ public class ImUserServiceImpl implements ImUserService {
     @Override
     public void updateUserPresenceStatus(Long userId, String presenceStatus) {
         ImUser user = imUserMapper.selectImUserById(userId);
-        if (user == null) return;
+        if (user == null) {
+            return;
+        }
 
         user.setUserStatus(presenceStatus);
         user.setStatusUpdateTime(LocalDateTime.now());

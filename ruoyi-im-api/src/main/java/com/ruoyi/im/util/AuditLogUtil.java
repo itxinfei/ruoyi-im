@@ -24,6 +24,13 @@ public class AuditLogUtil {
 
     private static final Logger log = LoggerFactory.getLogger(AuditLogUtil.class);
 
+    private static final String HEADER_X_FORWARDED_FOR = "X-Forwarded-For";
+    private static final String HEADER_PROXY_CLIENT_IP = "Proxy-Client-IP";
+    private static final String HEADER_WL_PROXY_CLIENT_IP = "WL-Proxy-Client-IP";
+    private static final String HEADER_HTTP_CLIENT_IP = "HTTP_CLIENT_IP";
+    private static final String HEADER_HTTP_X_FORWARDED_FOR = "HTTP_X_FORWARDED_FOR";
+    private static final String UNKNOWN_IP_VALUE = "unknown";
+
     private static IAuditLogService staticAuditLogService;
 
     @Autowired
@@ -218,18 +225,18 @@ public class AuditLogUtil {
      * @return IP地址
      */
     private static String getIpAddress(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
+        String ip = request.getHeader(HEADER_X_FORWARDED_FOR);
+        if (ip == null || ip.isEmpty() || UNKNOWN_IP_VALUE.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_PROXY_CLIENT_IP);
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
+        if (ip == null || ip.isEmpty() || UNKNOWN_IP_VALUE.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_WL_PROXY_CLIENT_IP);
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_CLIENT_IP");
+        if (ip == null || ip.isEmpty() || UNKNOWN_IP_VALUE.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_HTTP_CLIENT_IP);
         }
-        if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("HTTP_X_FORWARDED_FOR");
+        if (ip == null || ip.isEmpty() || UNKNOWN_IP_VALUE.equalsIgnoreCase(ip)) {
+            ip = request.getHeader(HEADER_HTTP_X_FORWARDED_FOR);
         }
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();

@@ -18,6 +18,7 @@ import java.util.Arrays;
 public class LogInterceptorConfig implements WebMvcConfigurer
 {
     private static final Logger ACCESS_LOG = LoggerFactory.getLogger("com.ruoyi.im.access");
+    private static final long SLOW_REQUEST_THRESHOLD_MS = 1000L;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry)
@@ -86,7 +87,7 @@ public class LogInterceptorConfig implements WebMvcConfigurer
 
             int status = response.getStatus();
 
-            if (duration > 1000)
+            if (duration > SLOW_REQUEST_THRESHOLD_MS)
             {
                 ACCESS_LOG.warn("[ACCESS-SLOW] method={} uri={} status={} duration={}ms ip={} traceId={}",
                         request.getMethod(),

@@ -39,7 +39,41 @@ import java.util.stream.Collectors;
 @Service
 public class ImAnnouncementServiceImpl implements ImAnnouncementService {
 
+    /** 一级评论的父ID（根评论） */
+    private static final Long ROOT_PARENT_ID = 0L;
+    /** 未删除状态 */
+    private static final int NOT_DELETED = 0;
+    /** 已删除状态 */
+    private static final int DELETED = 1;
+
     private static final Logger log = LoggerFactory.getLogger(ImAnnouncementServiceImpl.class);
+
+    /** 公告草稿状态 */
+    private static final String STATUS_DRAFT = "DRAFT";
+    /** 公告已发布状态 */
+    private static final String STATUS_PUBLISHED = "PUBLISHED";
+    /** 公告已过期状态 */
+    private static final String STATUS_EXPIRED = "EXPIRED";
+    /** 公告已撤回状态 */
+    private static final String STATUS_WITHDRAWN = "WITHDRAWN";
+    /** 系统公告类型 */
+    private static final String TYPE_SYSTEM = "SYSTEM";
+    /** 部门公告类型 */
+    private static final String TYPE_DEPARTMENT = "DEPARTMENT";
+    /** 项目公告类型 */
+    private static final String TYPE_PROJECT = "PROJECT";
+    /** 全部目标类型 */
+    private static final String TARGET_TYPE_ALL = "ALL";
+    /** 指定角色目标类型 */
+    private static final String TARGET_TYPE_ROLE = "ROLE";
+    /** 指定用户目标类型 */
+    private static final String TARGET_TYPE_USER = "USER";
+    /** 普通优先级 */
+    private static final int PRIORITY_NORMAL = 1;
+    /** 重要优先级 */
+    private static final int PRIORITY_IMPORTANT = 2;
+    /** 紧急优先级 */
+    private static final int PRIORITY_URGENT = 3;
 
     @Autowired
     private ImAnnouncementMapper announcementMapper;
@@ -59,7 +93,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         ImAnnouncement announcement = new ImAnnouncement();
         BeanUtils.copyProperties(request, announcement);
 
-        announcement.setStatus("DRAFT");
+        announcement.setStatus(STATUS_DRAFT);
         announcement.setViewCount(0);
         announcement.setLikeCount(0);
         announcement.setCommentCount(0);
@@ -94,7 +128,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         }
 
         // 只有草稿或已撤回的公告才能修改
-        if (!"DRAFT".equals(announcement.getStatus()) && !"WITHDRAWN".equals(announcement.getStatus())) {
+        if (!STATUS_DRAFT.equals(announcement.getStatus()) && !STATUS_WITHDRAWN.equals(announcement.getStatus())) {
             BusinessExceptionHelper.throwNotAllowed("只能修改草稿或已撤回的公告");
         }
 
@@ -209,11 +243,11 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
-        if (!"DRAFT".equals(announcement.getStatus())) {
+        if (!STATUS_DRAFT.equals(announcement.getStatus())) {
             BusinessExceptionHelper.throwNotAllowed("只能发布草稿状态的公告");
         }
 
-        announcement.setStatus("PUBLISHED");
+        announcement.setStatus(STATUS_PUBLISHED);
         announcement.setPublisherId(userId);
         announcement.setPublishTime(LocalDateTime.now());
         announcement.setUpdateTime(LocalDateTime.now());
@@ -235,7 +269,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             BusinessExceptionHelper.throwOnlyPublisherCanWithdraw();
         }
 
-        announcement.setStatus("WITHDRAWN");
+        announcement.setStatus(STATUS_WITHDRAWN);
         announcement.setUpdateTime(LocalDateTime.now());
         announcementMapper.updateById(announcement);
         log.info("撤回公告成功: announcementId={}, operator={}", announcementId, userId);
@@ -271,7 +305,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     public void markAllAsRead(Long userId) {
         // 查询所有已发布的公告
         LambdaQueryWrapper<ImAnnouncement> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(ImAnnouncement::getStatus, "PUBLISHED");
+        queryWrapper.eq(ImAnnouncement::getStatus, STATUS_PUBLISHED);
         List<ImAnnouncement> announcements = announcementMapper.selectList(queryWrapper);
 
         // 批量插入已读记录
@@ -341,9 +375,9 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         comment.setAnnouncementId(announcementId);
         comment.setUserId(userId);
         comment.setContent(content);
-        comment.setParentId(0L); // 一级评论
+        comment.setParentId(ROOT_PARENT_ID); // 一级评论
         comment.setCreateTime(LocalDateTime.now());
-        comment.setIsDeleted(0);
+        comment.setIsDeleted(NOT_DELETED);
         announcementCommentMapper.insert(comment);
 
         // 更新公告的评论数
@@ -374,7 +408,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         }
 
         // 软删除评论
-        comment.setIsDeleted(1);
+        comment.setIsDeleted(DELETED);
         announcementCommentMapper.updateById(comment);
 
         // 更新公告的评论数
@@ -396,7 +430,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         Long draftCount = announcementMapper.selectCount(
                 new LambdaQueryWrapper<ImAnnouncement>()
                         .eq(ImAnnouncement::getPublisherId, userId)
-                        .eq(ImAnnouncement::getStatus, "DRAFT")
+                        .eq(ImAnnouncement::getStatus, STATUS_DRAFT)
         );
         stats.put("draftCount", draftCount != null ? draftCount : 0);
 
@@ -404,7 +438,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         Long publishedCount = announcementMapper.selectCount(
                 new LambdaQueryWrapper<ImAnnouncement>()
                         .eq(ImAnnouncement::getPublisherId, userId)
-                        .eq(ImAnnouncement::getStatus, "PUBLISHED")
+                        .eq(ImAnnouncement::getStatus, STATUS_PUBLISHED)
         );
         stats.put("publishedCount", publishedCount != null ? publishedCount : 0);
 
@@ -583,43 +617,43 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     }
 
     private String getTypeDisplay(String type) {
-        if (type == null) return "系统公告";
+        if (type == null) { return "系统公告"; }
         switch (type) {
-            case "SYSTEM": return "系统公告";
-            case "DEPARTMENT": return "部门公告";
-            case "PROJECT": return "项目公告";
+            case TYPE_SYSTEM: return "系统公告";
+            case TYPE_DEPARTMENT: return "部门公告";
+            case TYPE_PROJECT: return "项目公告";
             default: return type;
         }
     }
 
     private String getPriorityDisplay(Integer priority) {
-        if (priority == null) return "普通";
+        if (priority == null) { return "普通"; }
         switch (priority) {
-            case 1: return "普通";
-            case 2: return "重要";
-            case 3: return "紧急";
+            case PRIORITY_NORMAL: return "普通";
+            case PRIORITY_IMPORTANT: return "重要";
+            case PRIORITY_URGENT: return "紧急";
             default: return "普通";
         }
     }
 
     private String getStatusDisplay(String status) {
-        if (status == null) return "草稿";
+        if (status == null) { return "草稿"; }
         switch (status) {
-            case "DRAFT": return "草稿";
-            case "PUBLISHED": return "已发布";
-            case "EXPIRED": return "已过期";
-            case "WITHDRAWN": return "已撤回";
+            case STATUS_DRAFT: return "草稿";
+            case STATUS_PUBLISHED: return "已发布";
+            case STATUS_EXPIRED: return "已过期";
+            case STATUS_WITHDRAWN: return "已撤回";
             default: return status;
         }
     }
 
     private String getTargetTypeDisplay(String targetType) {
-        if (targetType == null) return "全部";
+        if (targetType == null) { return "全部"; }
         switch (targetType) {
-            case "ALL": return "全部";
-            case "DEPARTMENT": return "指定部门";
-            case "ROLE": return "指定角色";
-            case "USER": return "指定用户";
+            case TARGET_TYPE_ALL: return "全部";
+            case TYPE_DEPARTMENT: return "指定部门";
+            case TARGET_TYPE_ROLE: return "指定角色";
+            case TARGET_TYPE_USER: return "指定用户";
             default: return targetType;
         }
     }

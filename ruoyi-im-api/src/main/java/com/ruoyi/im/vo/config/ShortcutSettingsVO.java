@@ -22,7 +22,9 @@ public class ShortcutSettingsVO {
 
     public static ShortcutSettingsVO fromMap(Map<String, Object> map) {
         ShortcutSettingsVO vo = new ShortcutSettingsVO();
-        if (map == null) return vo;
+        if (map == null) {
+            return vo;
+        }
         vo.sendMessage = (String) map.get("sendMessage");
         vo.globalSearch = (String) map.get("globalSearch");
         vo.newConversation = (String) map.get("newConversation");

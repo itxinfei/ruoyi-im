@@ -14,6 +14,8 @@ public class TraceIdUtil
     public static final String USER_NAME = "userName";
     public static final String IP_ADDR = "ipAddr";
 
+    private static final int SHUTDOWN_TIMEOUT_SECONDS = 3;
+
     private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(
             0, Runtime.getRuntime().availableProcessors() * 2,
             60L, TimeUnit.SECONDS,
@@ -27,7 +29,7 @@ public class TraceIdUtil
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             EXECUTOR.shutdown();
             try {
-                if (!EXECUTOR.awaitTermination(3, TimeUnit.SECONDS)) {
+                if (!EXECUTOR.awaitTermination(SHUTDOWN_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                     EXECUTOR.shutdownNow();
                 }
             } catch (InterruptedException e) {
@@ -150,11 +152,11 @@ public class TraceIdUtil
         {
             try
             {
-                if (traceId != null) MDC.put(TRACE_ID, traceId);
-                if (requestId != null) MDC.put(REQUEST_ID, requestId);
-                if (userId != null) MDC.put(USER_ID, userId);
-                if (userName != null) MDC.put(USER_NAME, userName);
-                if (ipAddr != null) MDC.put(IP_ADDR, ipAddr);
+                if (traceId != null) { MDC.put(TRACE_ID, traceId); }
+                if (requestId != null) { MDC.put(REQUEST_ID, requestId); }
+                if (userId != null) { MDC.put(USER_ID, userId); }
+                if (userName != null) { MDC.put(USER_NAME, userName); }
+                if (ipAddr != null) { MDC.put(IP_ADDR, ipAddr); }
                 return task.call();
             }
             finally
@@ -176,11 +178,11 @@ public class TraceIdUtil
         {
             try
             {
-                if (traceId != null) MDC.put(TRACE_ID, traceId);
-                if (requestId != null) MDC.put(REQUEST_ID, requestId);
-                if (userId != null) MDC.put(USER_ID, userId);
-                if (userName != null) MDC.put(USER_NAME, userName);
-                if (ipAddr != null) MDC.put(IP_ADDR, ipAddr);
+                if (traceId != null) { MDC.put(TRACE_ID, traceId); }
+                if (requestId != null) { MDC.put(REQUEST_ID, requestId); }
+                if (userId != null) { MDC.put(USER_ID, userId); }
+                if (userName != null) { MDC.put(USER_NAME, userName); }
+                if (ipAddr != null) { MDC.put(IP_ADDR, ipAddr); }
                 task.run();
             }
             finally

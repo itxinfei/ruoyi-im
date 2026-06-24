@@ -100,6 +100,12 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
      */
     private static final Integer DEFAULT_PASSWORD_COMPLEXITY_LEVEL = 2;
 
+    private static final int CONFIG_REDIS_TTL_MINUTES = 30;
+    private static final int CONFIG_MAX_UPLOAD_MB = 2048;
+    private static final int CONFIG_MAX_SESSION_EXPIRE_MINUTES = 43200;
+    private static final int CONFIG_MAX_LOGIN_FAILURE_THRESHOLD = 20;
+    private static final int CONFIG_MAX_PASSWORD_COMPLEXITY = 3;
+
     @Autowired
     private ImRedisUtil redisUtil;
 
@@ -129,7 +135,7 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
                 throw new IllegalArgumentException("撤回时间限制必须大于等于 0");
             }
             String key = SYSTEM_CONFIG_PREFIX + CONFIG_RECALL_TIME_LIMIT;
-            redisUtil.set(key, String.valueOf(minutes), 30, TimeUnit.MINUTES);
+            redisUtil.set(key, String.valueOf(minutes), CONFIG_REDIS_TTL_MINUTES, TimeUnit.MINUTES);
             log.info("更新消息撤回时间限制：{} 分钟", minutes);
         } catch (Exception e) {
             log.error("设置消息撤回时间限制失败", e);
@@ -170,7 +176,7 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
 
         // 保存到 Redis
         String key = SYSTEM_CONFIG_PREFIX + configKey;
-        redisUtil.set(key, String.valueOf(intValue), 30, TimeUnit.MINUTES);
+        redisUtil.set(key, String.valueOf(intValue), CONFIG_REDIS_TTL_MINUTES, TimeUnit.MINUTES);
         log.info("更新系统配置：key={}, value={}", configKey, intValue);
     }
 
@@ -218,20 +224,20 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
                 throw new IllegalArgumentException("最大消息长度必须在 100-10000 之间");
             }
         } else if (CONFIG_UPLOAD_MAX_FILE_MB.equals(configKey)) {
-            if (value < 1 || value > 2048) {
-                throw new IllegalArgumentException("单文件上限必须在 1-2048 MB 之间");
+            if (value < 1 || value > CONFIG_MAX_UPLOAD_MB) {
+                throw new IllegalArgumentException("单文件上限必须在 1-" + CONFIG_MAX_UPLOAD_MB + " MB 之间");
             }
         } else if (CONFIG_SESSION_EXPIRE_MINUTES.equals(configKey)) {
-            if (value < 10 || value > 43200) {
-                throw new IllegalArgumentException("会话过期时长必须在 10-43200 分钟之间");
+            if (value < 10 || value > CONFIG_MAX_SESSION_EXPIRE_MINUTES) {
+                throw new IllegalArgumentException("会话过期时长必须在 10-" + CONFIG_MAX_SESSION_EXPIRE_MINUTES + " 分钟之间");
             }
         } else if (CONFIG_LOGIN_FAILURE_THRESHOLD.equals(configKey)) {
-            if (value < 1 || value > 20) {
-                throw new IllegalArgumentException("登录失败阈值必须在 1-20 之间");
+            if (value < 1 || value > CONFIG_MAX_LOGIN_FAILURE_THRESHOLD) {
+                throw new IllegalArgumentException("登录失败阈值必须在 1-" + CONFIG_MAX_LOGIN_FAILURE_THRESHOLD + " 之间");
             }
         } else if (CONFIG_PASSWORD_COMPLEXITY_LEVEL.equals(configKey)) {
-            if (value < 1 || value > 3) {
-                throw new IllegalArgumentException("密码复杂度级别必须在 1-3 之间");
+            if (value < 1 || value > CONFIG_MAX_PASSWORD_COMPLEXITY) {
+                throw new IllegalArgumentException("密码复杂度级别必须在 1-" + CONFIG_MAX_PASSWORD_COMPLEXITY + " 之间");
             }
         }
     }

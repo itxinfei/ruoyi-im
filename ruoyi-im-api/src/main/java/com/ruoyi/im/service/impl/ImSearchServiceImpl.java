@@ -40,16 +40,29 @@ public class ImSearchServiceImpl implements ImSearchService {
 
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    /** 搜索全部类型 */
+    private static final String SEARCH_TYPE_ALL = "all";
+    /** 搜索联系人类型 */
+    private static final String SEARCH_TYPE_CONTACT = "contact";
+    /** 搜索群组类型 */
+    private static final String SEARCH_TYPE_GROUP = "group";
+    /** 搜索消息类型 */
+    private static final String SEARCH_TYPE_MESSAGE = "message";
+    /** 群组搜索分页大小 */
+    private static final int GROUP_SEARCH_PAGE_SIZE = 20;
+    /** 消息搜索分页大小 */
+    private static final int MESSAGE_SEARCH_PAGE_SIZE = 50;
+
     @Override
     public GlobalSearchResultVO search(GlobalSearchRequest request, Long userId) {
         GlobalSearchResultVO result = new GlobalSearchResultVO();
         result.setKeyword(request.getKeyword());
         
-        String type = request.getSearchType() == null ? "all" : request.getSearchType();
+        String type = request.getSearchType() == null ? SEARCH_TYPE_ALL : request.getSearchType();
         Map<String, Integer> counts = new HashMap<>();
 
         // 1. 搜索联系人
-        if ("all".equals(type) || "contact".equals(type)) {
+        if (SEARCH_TYPE_ALL.equals(type) || SEARCH_TYPE_CONTACT.equals(type)) {
             List<ImUser> users = userMapper.selectImUserByKeyword(request.getKeyword());
             List<GlobalSearchResultVO.ContactResult> contactResults = users.stream().map(user -> {
                 GlobalSearchResultVO.ContactResult cr = new GlobalSearchResultVO.ContactResult();
@@ -61,12 +74,12 @@ public class ImSearchServiceImpl implements ImSearchService {
                 return cr;
             }).collect(Collectors.toList());
             result.setContacts(contactResults);
-            counts.put("contact", contactResults.size());
+            counts.put(SEARCH_TYPE_CONTACT, contactResults.size());
         }
 
         // 2. 搜索群组
-        if ("all".equals(type) || "group".equals(type)) {
-            Page<ImGroup> page = new Page<>(1, 20);
+        if (SEARCH_TYPE_ALL.equals(type) || SEARCH_TYPE_GROUP.equals(type)) {
+            Page<ImGroup> page = new Page<>(1, GROUP_SEARCH_PAGE_SIZE);
             List<ImGroup> groups = groupMapper.selectGroupPage(page, request.getKeyword()).getRecords();
             List<GlobalSearchResultVO.GroupResult> groupResults = groups.stream().map(g -> {
                 GlobalSearchResultVO.GroupResult gr = new GlobalSearchResultVO.GroupResult();
@@ -82,7 +95,7 @@ public class ImSearchServiceImpl implements ImSearchService {
         }
 
         // 3. 搜索消息
-        if ("all".equals(type) || "message".equals(type)) {
+        if (SEARCH_TYPE_ALL.equals(type) || SEARCH_TYPE_MESSAGE.equals(type)) {
             List<ImMessage> messages = messageMapper.searchMessages(
                     null,
                     request.getKeyword(),
@@ -93,7 +106,7 @@ public class ImSearchServiceImpl implements ImSearchService {
                     false,
                     false,
                     0,
-                    50
+                    MESSAGE_SEARCH_PAGE_SIZE
             );
             
             List<GlobalSearchResultVO.MessageResult> messageResults = messages.stream().map(m -> {
@@ -107,10 +120,10 @@ public class ImSearchServiceImpl implements ImSearchService {
                 
                 // 补充会话名称和发送者名称（可以通过缓存或批量查询优化，此处简化处理）
                 ImConversation conv = conversationMapper.selectById(m.getConversationId());
-                if (conv != null) mr.setConversationName(conv.getName());
+                if (conv != null) { mr.setConversationName(conv.getName()); }
                 
                 ImUser sender = userMapper.selectImUserById(m.getSenderId());
-                if (sender != null) mr.setSenderName(sender.getNickname());
+                if (sender != null) { mr.setSenderName(sender.getNickname()); }
                 
                 return mr;
             }).collect(Collectors.toList());

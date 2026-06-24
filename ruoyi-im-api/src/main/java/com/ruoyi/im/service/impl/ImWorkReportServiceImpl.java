@@ -41,6 +41,18 @@ import java.util.stream.Collectors;
 @Transactional(rollbackFor = Exception.class)
 public class ImWorkReportServiceImpl implements ImWorkReportService {
 
+    private static final String STATUS_DRAFT = "DRAFT";
+    private static final String STATUS_SUBMITTED = "SUBMITTED";
+    private static final String STATUS_APPROVED = "APPROVED";
+    private static final String STATUS_REJECTED = "REJECTED";
+    private static final String REPORT_TYPE_DAILY = "DAILY";
+    private static final String REPORT_TYPE_WEEKLY = "WEEKLY";
+    private static final String REPORT_TYPE_MONTHLY = "MONTHLY";
+    private static final String COMPLETION_STATUS_PENDING = "PENDING";
+    private static final String VISIBILITY_PRIVATE = "PRIVATE";
+    private static final String VISIBILITY_DEPARTMENT = "DEPARTMENT";
+    private static final String VISIBILITY_PUBLIC = "PUBLIC";
+
     @Autowired
     private ImWorkReportMapper workReportMapper;
 
@@ -59,7 +71,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         ImWorkReport report = new ImWorkReport();
         BeanUtils.copyProperties(request, report);
         report.setUserId(userId);
-        report.setStatus(Boolean.TRUE.equals(request.getIsDraft()) ? "DRAFT" : "SUBMITTED");
+        report.setStatus(Boolean.TRUE.equals(request.getIsDraft()) ? STATUS_DRAFT : STATUS_SUBMITTED);
         report.setSubmitTime(LocalDateTime.now());
         workReportMapper.insert(report);
         return report.getId();
@@ -75,7 +87,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         if (!report.getUserId().equals(userId)) {
             BusinessExceptionHelper.throwNoPermission();
         }
-        if ("SUBMITTED".equals(report.getStatus())) {
+        if (STATUS_SUBMITTED.equals(report.getStatus())) {
             BusinessExceptionHelper.throwCannotModifySubmitted();
         }
 
@@ -93,7 +105,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         if (!report.getUserId().equals(userId)) {
             BusinessExceptionHelper.throwNoPermission();
         }
-        if ("SUBMITTED".equals(report.getStatus())) {
+        if (STATUS_SUBMITTED.equals(report.getStatus())) {
             BusinessExceptionHelper.throwCannotDeleteSubmitted();
         }
         workReportMapper.deleteById(reportId);
@@ -109,7 +121,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         if (!report.getUserId().equals(userId)) {
             BusinessExceptionHelper.throwNoPermission();
         }
-        report.setStatus("SUBMITTED");
+        report.setStatus(STATUS_SUBMITTED);
         report.setSubmitTime(LocalDateTime.now());
         workReportMapper.updateById(report);
     }
@@ -288,14 +300,14 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         if (report == null) {
             BusinessExceptionHelper.throwWorkReportNotFound();
         }
-        if (!"SUBMITTED".equals(report.getStatus())) {
+        if (!STATUS_SUBMITTED.equals(report.getStatus())) {
             BusinessExceptionHelper.throwOnlySubmittedCanApprove();
         }
 
         report.setApproverId(userId);
         report.setApproveTime(LocalDateTime.now());
         report.setApproveRemark(remark);
-        report.setStatus(approved ? "APPROVED" : "REJECTED");
+        report.setStatus(approved ? STATUS_APPROVED : STATUS_REJECTED);
         workReportMapper.updateById(report);
     }
 
@@ -304,12 +316,12 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         Integer totalCount = workReportMapper.countByUserId(userId);
         List<ImWorkReport> reports = workReportMapper.selectByUserId(userId);
 
-        int dailyCount = (int) reports.stream().filter(r -> "DAILY".equals(r.getReportType())).count();
-        int weeklyCount = (int) reports.stream().filter(r -> "WEEKLY".equals(r.getReportType())).count();
-        int monthlyCount = (int) reports.stream().filter(r -> "MONTHLY".equals(r.getReportType())).count();
-        int submittedCount = (int) reports.stream().filter(r -> "SUBMITTED".equals(r.getStatus())).count();
-        int draftCount = (int) reports.stream().filter(r -> "DRAFT".equals(r.getStatus())).count();
-        int approvedCount = (int) reports.stream().filter(r -> "APPROVED".equals(r.getStatus())).count();
+        int dailyCount = (int) reports.stream().filter(r -> REPORT_TYPE_DAILY.equals(r.getReportType())).count();
+        int weeklyCount = (int) reports.stream().filter(r -> REPORT_TYPE_WEEKLY.equals(r.getReportType())).count();
+        int monthlyCount = (int) reports.stream().filter(r -> REPORT_TYPE_MONTHLY.equals(r.getReportType())).count();
+        int submittedCount = (int) reports.stream().filter(r -> STATUS_SUBMITTED.equals(r.getStatus())).count();
+        int draftCount = (int) reports.stream().filter(r -> STATUS_DRAFT.equals(r.getStatus())).count();
+        int approvedCount = (int) reports.stream().filter(r -> STATUS_APPROVED.equals(r.getStatus())).count();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalCount", totalCount);
@@ -380,11 +392,11 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     }
 
     private String getReportTypeName(String type) {
-        if ("DAILY".equals(type)) {
+        if (REPORT_TYPE_DAILY.equals(type)) {
             return "日报";
-        } else if ("WEEKLY".equals(type)) {
+        } else if (REPORT_TYPE_WEEKLY.equals(type)) {
             return "周报";
-        } else if ("MONTHLY".equals(type)) {
+        } else if (REPORT_TYPE_MONTHLY.equals(type)) {
             return "月报";
         }
         return type;
@@ -395,31 +407,31 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
             return "已完成";
         } else if (SystemConstants.STATUS_IN_PROGRESS.equals(status)) {
             return "进行中";
-        } else if ("PENDING".equals(status)) {
+        } else if (COMPLETION_STATUS_PENDING.equals(status)) {
             return "待处理";
         }
         return status;
     }
 
     private String getVisibilityName(String visibility) {
-        if ("PRIVATE".equals(visibility)) {
+        if (VISIBILITY_PRIVATE.equals(visibility)) {
             return "私有";
-        } else if ("DEPARTMENT".equals(visibility)) {
+        } else if (VISIBILITY_DEPARTMENT.equals(visibility)) {
             return "部门";
-        } else if ("PUBLIC".equals(visibility)) {
+        } else if (VISIBILITY_PUBLIC.equals(visibility)) {
             return "公开";
         }
         return visibility;
     }
 
     private String getStatusName(String status) {
-        if ("DRAFT".equals(status)) {
+        if (STATUS_DRAFT.equals(status)) {
             return "草稿";
-        } else if ("SUBMITTED".equals(status)) {
+        } else if (STATUS_SUBMITTED.equals(status)) {
             return "已提交";
-        } else if ("APPROVED".equals(status)) {
+        } else if (STATUS_APPROVED.equals(status)) {
             return "已审批";
-        } else if ("REJECTED".equals(status)) {
+        } else if (STATUS_REJECTED.equals(status)) {
             return "已退回";
         }
         return status;

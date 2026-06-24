@@ -41,6 +41,18 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMeetingRoomServiceImpl.class);
 
+    private static final String ROOM_STATUS_AVAILABLE = "AVAILABLE";
+    private static final String ROOM_STATUS_MAINTENANCE = "MAINTENANCE";
+    private static final String ROOM_STATUS_DISABLED = "DISABLED";
+    private static final String BOOKING_STATUS_PENDING = "PENDING";
+    private static final String BOOKING_STATUS_CONFIRMED = "CONFIRMED";
+    private static final String BOOKING_STATUS_CANCELLED = "CANCELLED";
+    private static final String BOOKING_STATUS_COMPLETED = "COMPLETED";
+    private static final String MEETING_TYPE_REGULAR = "REGULAR";
+    private static final String MEETING_TYPE_TRAINING = "TRAINING";
+    private static final String MEETING_TYPE_INTERVIEW = "INTERVIEW";
+    private static final String MEETING_TYPE_CLIENT = "CLIENT";
+
     @Autowired
     private ImMeetingRoomMapper roomMapper;
 
@@ -64,7 +76,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         ImMeetingRoom room = new ImMeetingRoom();
         BeanUtils.copyProperties(request, room);
 
-        room.setStatus("AVAILABLE");
+        room.setStatus(ROOM_STATUS_AVAILABLE);
         room.setIsBookable(true);
         room.setCreateTime(LocalDateTime.now());
         room.setUpdateTime(LocalDateTime.now());
@@ -170,7 +182,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         Long bookingCount = bookingMapper.selectCount(
                 new LambdaQueryWrapper<ImMeetingBooking>()
                         .eq(ImMeetingBooking::getRoomId, roomId)
-                        .in(ImMeetingBooking::getStatus, Arrays.asList("PENDING", "CONFIRMED"))
+                        .in(ImMeetingBooking::getStatus, Arrays.asList(BOOKING_STATUS_PENDING, BOOKING_STATUS_CONFIRMED))
                         .gt(ImMeetingBooking::getEndTime, LocalDateTime.now())
         );
         if (bookingCount != null && bookingCount > 0) {
@@ -225,7 +237,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             BusinessExceptionHelper.throwMeetingRoomNotAvailable();
         }
 
-        if (!"AVAILABLE".equals(room.getStatus())) {
+        if (!ROOM_STATUS_AVAILABLE.equals(room.getStatus())) {
             BusinessExceptionHelper.throwMeetingRoomUnavailable();
         }
 
@@ -252,7 +264,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         ImMeetingBooking booking = new ImMeetingBooking();
         BeanUtils.copyProperties(request, booking);
         booking.setBookingUserId(userId);
-        booking.setStatus("CONFIRMED");
+        booking.setStatus(BOOKING_STATUS_CONFIRMED);
         booking.setReminderSent(false);
         booking.setCreateTime(LocalDateTime.now());
         booking.setUpdateTime(LocalDateTime.now());
@@ -287,11 +299,11 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             BusinessExceptionHelper.throwOnlyBookerCanCancel();
         }
 
-        if ("CANCELLED".equals(booking.getStatus()) || "COMPLETED".equals(booking.getStatus())) {
+        if (BOOKING_STATUS_CANCELLED.equals(booking.getStatus()) || BOOKING_STATUS_COMPLETED.equals(booking.getStatus())) {
             BusinessExceptionHelper.throwBookingCannotCancel();
         }
 
-        booking.setStatus("CANCELLED");
+        booking.setStatus(BOOKING_STATUS_CANCELLED);
         booking.setUpdateTime(LocalDateTime.now());
         bookingMapper.updateById(booking);
         log.info("取消预订成功: bookingId={}, userId={}", bookingId, userId);
@@ -305,11 +317,11 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             BusinessExceptionHelper.throwBookingNotFound();
         }
 
-        if (!"PENDING".equals(booking.getStatus())) {
+        if (!BOOKING_STATUS_PENDING.equals(booking.getStatus())) {
             BusinessExceptionHelper.throwBookingNoNeedConfirm();
         }
 
-        booking.setStatus("CONFIRMED");
+        booking.setStatus(BOOKING_STATUS_CONFIRMED);
         booking.setUpdateTime(LocalDateTime.now());
         bookingMapper.updateById(booking);
         log.info("确认预订成功: bookingId={}, userId={}", bookingId, userId);
@@ -327,7 +339,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             BusinessExceptionHelper.throwOnlyBookerCanCheckIn();
         }
 
-        if (!"CONFIRMED".equals(booking.getStatus())) {
+        if (!BOOKING_STATUS_CONFIRMED.equals(booking.getStatus())) {
             BusinessExceptionHelper.throwBookingStatusError();
         }
 
@@ -362,7 +374,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         }
 
         booking.setCheckOutTime(LocalDateTime.now());
-        booking.setStatus("COMPLETED");
+        booking.setStatus(BOOKING_STATUS_COMPLETED);
         booking.setUpdateTime(LocalDateTime.now());
         bookingMapper.updateById(booking);
         log.info("签退成功: bookingId={}, userId={}", bookingId, userId);
@@ -449,7 +461,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             BusinessExceptionHelper.throwOnlyBookerCanSubmitFeedback();
         }
 
-        if (!"COMPLETED".equals(booking.getStatus())) {
+        if (!BOOKING_STATUS_COMPLETED.equals(booking.getStatus())) {
             BusinessExceptionHelper.throwCanSubmitFeedbackAfterMeeting();
         }
 
@@ -472,7 +484,7 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         List<ImMeetingBooking> upcomingBookings = bookingMapper.selectList(
                 new LambdaQueryWrapper<ImMeetingBooking>()
                         .eq(ImMeetingBooking::getBookingUserId, userId)
-                        .eq(ImMeetingBooking::getStatus, "CONFIRMED")
+                        .eq(ImMeetingBooking::getStatus, BOOKING_STATUS_CONFIRMED)
                         .gt(ImMeetingBooking::getStartTime, LocalDateTime.now())
                         .orderByAsc(ImMeetingBooking::getStartTime)
                         .last("LIMIT 5")
@@ -557,26 +569,26 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     }
 
     private String getStatusDisplay(String status) {
-        if (status == null) return "未知";
+        if (status == null) { return "未知"; }
         switch (status) {
-            case "AVAILABLE": return "可用";
-            case "MAINTENANCE": return "维护中";
-            case "DISABLED": return "已停用";
-            case "PENDING": return "待确认";
-            case "CONFIRMED": return "已确认";
-            case "CANCELLED": return "已取消";
-            case "COMPLETED": return "已完成";
+            case ROOM_STATUS_AVAILABLE: return "可用";
+            case ROOM_STATUS_MAINTENANCE: return "维护中";
+            case ROOM_STATUS_DISABLED: return "已停用";
+            case BOOKING_STATUS_PENDING: return "待确认";
+            case BOOKING_STATUS_CONFIRMED: return "已确认";
+            case BOOKING_STATUS_CANCELLED: return "已取消";
+            case BOOKING_STATUS_COMPLETED: return "已完成";
             default: return status;
         }
     }
 
     private String getMeetingTypeDisplay(String type) {
-        if (type == null) return "常规会议";
+        if (type == null) { return "常规会议"; }
         switch (type) {
-            case "REGULAR": return "常规会议";
-            case "TRAINING": return "培训";
-            case "INTERVIEW": return "面试";
-            case "CLIENT": return "客户会议";
+            case MEETING_TYPE_REGULAR: return "常规会议";
+            case MEETING_TYPE_TRAINING: return "培训";
+            case MEETING_TYPE_INTERVIEW: return "面试";
+            case MEETING_TYPE_CLIENT: return "客户会议";
             default: return type;
         }
     }

@@ -35,6 +35,25 @@ import java.util.List;
 @Service
 public class ImGroupFileServiceImpl implements ImGroupFileService {
 
+    /** 文件已删除状态 */
+    private static final String STATUS_DELETED = "DELETED";
+    /** 文件正常状态 */
+    private static final int STATUS_NORMAL = 1;
+    /** 文件禁用状态 */
+    private static final int STATUS_DISABLED = 0;
+    /** 群主角色 */
+    private static final String ROLE_OWNER = "OWNER";
+    /** 管理员角色 */
+    private static final String ROLE_ADMIN = "ADMIN";
+    /** 所有人权限 */
+    private static final String PERMISSION_ALL = "ALL";
+    /** 文件大小单位：KB */
+    private static final long SIZE_KB = 1024;
+    /** 文件大小单位：MB */
+    private static final long SIZE_MB = 1024 * 1024;
+    /** 文件大小单位：GB */
+    private static final long SIZE_GB = 1024 * 1024 * 1024;
+
     @Autowired
     private ImGroupFileMapper groupFileMapper;
 
@@ -58,7 +77,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
 
         // 验证文件资产是否存在
         ImFileAsset fileAsset = fileAssetMapper.selectById(request.getFileId());
-        if (fileAsset == null || "DELETED".equals(fileAsset.getStatus())) {
+        if (fileAsset == null || STATUS_DELETED.equals(fileAsset.getStatus())) {
             BusinessExceptionHelper.throwFileNotFound();
         }
 
@@ -78,7 +97,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         groupFile.setPermission(request.getPermission());
         groupFile.setUploaderId(userId);
         groupFile.setDownloadCount(0);
-        groupFile.setStatus(1);
+        groupFile.setStatus(STATUS_NORMAL);
 
         // 获取用户名
         ImUser user = userMapper.selectImUserById(userId);
@@ -115,12 +134,12 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(gf.getGroupId(), userId);
             if (member != null) {
                 String role = member.getRole();
-                boolean isOwner = "OWNER".equals(role);
-                boolean isAdmin = "ADMIN".equals(role);
+                boolean isOwner = ROLE_OWNER.equals(role);
+                boolean isAdmin = ROLE_ADMIN.equals(role);
                 boolean isUploader = gf.getUploaderId().equals(userId);
 
                 vo.setCanDelete(isOwner || isAdmin || isUploader);
-                vo.setCanDownload("ALL".equals(gf.getPermission()) || isOwner || isAdmin || isUploader);
+                vo.setCanDownload(PERMISSION_ALL.equals(gf.getPermission()) || isOwner || isAdmin || isUploader);
             } else {
                 vo.setCanDelete(false);
                 vo.setCanDownload(false);
@@ -166,7 +185,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     @Transactional
     public void updateFile(Long groupFileId, ImGroupFileUpdateRequest request, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
-        if (groupFile == null || groupFile.getStatus() == 0) {
+        if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
             BusinessExceptionHelper.throwFileNotFound();
         }
 
@@ -177,8 +196,8 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role);
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isUploader) {
@@ -203,7 +222,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     @Transactional
     public void deleteFile(Long groupFileId, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
-        if (groupFile == null || groupFile.getStatus() == 0) {
+        if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
             BusinessExceptionHelper.throwFileNotFound();
         }
 
@@ -214,8 +233,8 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         }
 
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role);
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isUploader) {
@@ -223,7 +242,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         }
 
         // 软删除
-        groupFile.setStatus(0);
+        groupFile.setStatus(STATUS_DISABLED);
         groupFileMapper.updateById(groupFile);
     }
 
@@ -231,7 +250,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     @Transactional
     public String downloadFile(Long groupFileId, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
-        if (groupFile == null || groupFile.getStatus() == 0) {
+        if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
             BusinessExceptionHelper.throwFileNotFound();
         }
 
@@ -243,11 +262,11 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
 
         // 验证下载权限
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role);
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
-        if (!"ALL".equals(groupFile.getPermission()) && !isOwner && !isAdmin && !isUploader) {
+        if (!PERMISSION_ALL.equals(groupFile.getPermission()) && !isOwner && !isAdmin && !isUploader) {
             BusinessExceptionHelper.throwNoPermissionToDownload();
         }
 
@@ -281,7 +300,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     @Transactional
     public void moveFile(Long groupFileId, String category, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
-        if (groupFile == null || groupFile.getStatus() == 0) {
+        if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
             BusinessExceptionHelper.throwFileNotFound();
         }
 
@@ -293,8 +312,8 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
 
         // 验证权限：只有上传者、群主、管理员可以移动文件
         String role = member.getRole();
-        boolean isOwner = "OWNER".equals(role);
-        boolean isAdmin = "ADMIN".equals(role);
+        boolean isOwner = ROLE_OWNER.equals(role);
+        boolean isAdmin = ROLE_ADMIN.equals(role);
         boolean isUploader = groupFile.getUploaderId().equals(userId);
 
         if (!isOwner && !isAdmin && !isUploader) {
@@ -315,14 +334,14 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
         if (size == null) {
             return "0 B";
         }
-        if (size < 1024) {
+        if (size < SIZE_KB) {
             return size + " B";
-        } else if (size < 1024 * 1024) {
-            return String.format("%.2f KB", size / 1024.0);
-        } else if (size < 1024 * 1024 * 1024) {
-            return String.format("%.2f MB", size / (1024.0 * 1024));
+        } else if (size < SIZE_MB) {
+            return String.format("%.2f KB", size / (double) SIZE_KB);
+        } else if (size < SIZE_GB) {
+            return String.format("%.2f MB", size / (double) SIZE_MB);
         } else {
-            return String.format("%.2f GB", size / (1024.0 * 1024 * 1024));
+            return String.format("%.2f GB", size / (double) SIZE_GB);
         }
     }
 }

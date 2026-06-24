@@ -44,6 +44,13 @@ public class ImTaskServiceImpl implements ImTaskService {
     private static final Logger log = LoggerFactory.getLogger(ImTaskServiceImpl.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+    private static final String STATUS_PENDING = "PENDING";
+    private static final String TASK_NUMBER_PREFIX = "TASK-";
+    private static final String TASK_COPY_SUFFIX = " (副本)";
+    private static final int COMPLETION_PERCENT_COMPLETE = 100;
+    /** 未删除状态 */
+    private static final int NOT_DELETED = 0;
+
     @Autowired
     private ImTaskMapper taskMapper;
 
@@ -62,7 +69,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         // 生成任务编号
         task.setTaskNumber(generateTaskNumber());
         task.setCreatorId(userId);
-        task.setStatus("PENDING");
+        task.setStatus(STATUS_PENDING);
         task.setCompletionPercent(0);
         task.setHasSubtask(false);
         task.setCreateTime(LocalDateTime.now());
@@ -118,7 +125,7 @@ public class ImTaskServiceImpl implements ImTaskService {
             task.setStatus(request.getStatus());
             if (SystemConstants.STATUS_COMPLETED.equals(request.getStatus()) && task.getCompletedTime() == null) {
                 task.setCompletedTime(LocalDateTime.now());
-                task.setCompletionPercent(100);
+                task.setCompletionPercent(COMPLETION_PERCENT_COMPLETE);
             }
         }
         if (request.getStartDate() != null) {
@@ -277,7 +284,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         task.setUpdateTime(LocalDateTime.now());
         if (SystemConstants.STATUS_COMPLETED.equals(status)) {
             task.setCompletedTime(LocalDateTime.now());
-            task.setCompletionPercent(100);
+            task.setCompletionPercent(COMPLETION_PERCENT_COMPLETE);
         }
         taskMapper.updateById(task);
         log.info("更新任务状态成功: taskId={}, status={}, operator={}", taskId, status, userId);
@@ -344,7 +351,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         comment.setContent(content);
         comment.setReplyToUserId(replyToId);
         comment.setCreateTime(LocalDateTime.now());
-        comment.setIsDeleted(0);
+        comment.setIsDeleted(NOT_DELETED);
 
         taskCommentMapper.insert(comment);
         log.info("添加任务评论成功: commentId={}, taskId={}, userId={}", comment.getId(), taskId, userId);
@@ -430,7 +437,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         Map<String, Object> stats = new HashMap<>();
 
         // 待办任务数
-        int pendingCount = taskMapper.selectByAssigneeId(userId, "PENDING").size();
+        int pendingCount = taskMapper.selectByAssigneeId(userId, STATUS_PENDING).size();
         stats.put("pendingCount", pendingCount);
 
         // 进行中任务数
@@ -503,9 +510,9 @@ public class ImTaskServiceImpl implements ImTaskService {
         BeanUtils.copyProperties(sourceTask, newTask);
         newTask.setId(null);
         newTask.setTaskNumber(generateTaskNumber());
-        newTask.setTitle(sourceTask.getTitle() + " (副本)");
+        newTask.setTitle(sourceTask.getTitle() + TASK_COPY_SUFFIX);
         newTask.setCreatorId(userId);
-        newTask.setStatus("PENDING");
+        newTask.setStatus(STATUS_PENDING);
         newTask.setCompletionPercent(0);
         newTask.setCompletedTime(null);
         newTask.setCreateTime(LocalDateTime.now());
@@ -520,7 +527,7 @@ public class ImTaskServiceImpl implements ImTaskService {
      * 生成任务编号
      */
     private String generateTaskNumber() {
-        return "TASK-" + System.currentTimeMillis();
+        return TASK_NUMBER_PREFIX + System.currentTimeMillis();
     }
 
     /**
@@ -644,7 +651,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     }
 
     private String getPriorityDisplay(Integer priority) {
-        if (priority == null) return "中";
+        if (priority == null) { return "中"; }
         switch (priority) {
             case 1: return "低";
             case 2: return "中";
@@ -655,7 +662,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     }
 
     private String getStatusDisplay(String status) {
-        if (status == null) return "待办";
+        if (status == null) { return "待办"; }
         switch (status) {
             case "PENDING": return "待办";
             case "IN_PROGRESS": return "进行中";
@@ -667,7 +674,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     }
 
     private String getTaskTypeDisplay(String taskType) {
-        if (taskType == null) return "个人";
+        if (taskType == null) { return "个人"; }
         switch (taskType) {
             case "PERSONAL": return "个人";
             case "TEAM": return "团队";
@@ -677,7 +684,7 @@ public class ImTaskServiceImpl implements ImTaskService {
     }
 
     private String getRemindTypeDisplay(String remindType) {
-        if (remindType == null) return "无";
+        if (remindType == null) { return "无"; }
         switch (remindType) {
             case "NONE": return "无";
             case "EMAIL": return "邮件";

@@ -16,6 +16,9 @@ import java.io.File;
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
+    private static final String PROJECT_MODULE_NAME = "ruoyi-im-api";
+    private static final String FILE_PROTOCOL_PREFIX = "file:";
+
     @Value("${file.upload.path:src/main/resources/uploads/}")
     private String uploadPath;
 
@@ -26,12 +29,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 获取项目根目录的绝对路径
         String projectRoot = System.getProperty("user.dir");
-        String absoluteUploadPath = projectRoot + File.separator + "ruoyi-im-api" + File.separator + uploadPath;
+        String absoluteUploadPath = projectRoot + File.separator + PROJECT_MODULE_NAME + File.separator + uploadPath;
         // 确保路径格式正确（Windows使用\，Unix使用/）
         if (!uploadPath.startsWith("/") && !uploadPath.contains(":")) {
-            absoluteUploadPath = "file:" + absoluteUploadPath.replace("\\", "/");
+            absoluteUploadPath = FILE_PROTOCOL_PREFIX + absoluteUploadPath.replace("\\", "/");
         } else {
-            absoluteUploadPath = "file:" + uploadPath;
+            absoluteUploadPath = FILE_PROTOCOL_PREFIX + uploadPath;
         }
 
         // 配置头像资源映射

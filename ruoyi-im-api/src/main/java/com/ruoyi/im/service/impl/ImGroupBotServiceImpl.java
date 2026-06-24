@@ -61,6 +61,21 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
     private static final String REPLY_TYPE_IMAGE = "IMAGE";
     private static final String REPLY_TYPE_CARD = "CARD";
 
+    // 角色常量
+    private static final String ROLE_OWNER = "OWNER";
+    private static final String ROLE_ADMIN = "ADMIN";
+
+    // 限制常量
+    private static final int MAX_BOTS_PER_GROUP = 10;
+    private static final int WEBHOOK_SECRET_KEY_LENGTH = 32;
+    private static final long WEBHOOK_TIMESTAMP_TOLERANCE_MS = 300000L;
+
+    // 消息类型常量
+    private static final String MSG_TYPE_TEXT = "text";
+    private static final String MSG_TYPE_MARKDOWN = "markdown";
+    private static final String MSG_TYPE_LINK = "link";
+    private static final String TRIGGER_SOURCE_WEBHOOK_PUSH = "WEBHOOK_PUSH";
+
     // 正则表达式缓存（避免每条消息重复编译）
     private static final ConcurrentHashMap<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
 
@@ -108,13 +123,13 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 2. 验证用户是否是群主或管理员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
         // 3. 检查群组机器人数量限制
         int botCount = groupBotMapper.countByGroupId(request.getGroupId());
-        if (botCount >= 10) {
+        if (botCount >= MAX_BOTS_PER_GROUP) {
             throw new BusinessException(ImErrorCode.GROUP_BOT_LIMIT_EXCEEDED);
         }
 
@@ -129,7 +144,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 生成 Webhook 相关信息
         bot.setWebhookToken(cn.hutool.core.util.IdUtil.fastSimpleUUID());
-        bot.setSecretKey(cn.hutool.core.util.RandomUtil.randomString(32));
+        bot.setSecretKey(cn.hutool.core.util.RandomUtil.randomString(WEBHOOK_SECRET_KEY_LENGTH));
 
         groupBotMapper.insert(bot);
         log.info("群机器人已创建: botId={}", bot.getId());
@@ -156,7 +171,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -190,7 +205,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -248,7 +263,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -269,7 +284,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         ImGroupBot bot = groupBotMapper.selectById(rule.getBotId());
         if (bot != null) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-            if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+            if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
                 throw new BusinessException(ImErrorCode.NO_PERMISSION);
             }
         }
@@ -309,7 +324,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         ImGroupBot bot = groupBotMapper.selectById(rule.getBotId());
         if (bot != null) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-            if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+            if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
                 throw new BusinessException(ImErrorCode.NO_PERMISSION);
             }
         }
@@ -330,7 +345,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
         // 验证权限
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(bot.getGroupId(), userId);
-        if (member == null || !"OWNER".equals(member.getRole()) && !"ADMIN".equals(member.getRole())) {
+        if (member == null || !ROLE_OWNER.equals(member.getRole()) && !ROLE_ADMIN.equals(member.getRole())) {
             throw new BusinessException(ImErrorCode.NO_PERMISSION);
         }
 
@@ -358,7 +373,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
             // 校验时间戳 (5分钟内有效)
             long now = System.currentTimeMillis();
             long pushTime = Long.parseLong(timestamp);
-            if (Math.abs(now - pushTime) > 300000) {
+            if (Math.abs(now - pushTime) > WEBHOOK_TIMESTAMP_TOLERANCE_MS) {
                 throw new BusinessException("Webhook请求已过期");
             }
             // 计算签名
@@ -380,11 +395,11 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         // 3. 解析并发送消息
         String msgType = payload.getString("msgtype");
         String content = "";
-        if ("text".equals(msgType)) {
+        if (MSG_TYPE_TEXT.equals(msgType)) {
             content = payload.getJSONObject("text").getString("content");
-        } else if ("markdown".equals(msgType)) {
+        } else if (MSG_TYPE_MARKDOWN.equals(msgType)) {
             content = payload.getJSONObject("markdown").getString("text");
-        } else if ("link".equals(msgType)) {
+        } else if (MSG_TYPE_LINK.equals(msgType)) {
             content = payload.getJSONObject("link").getString("title") + "\n" + payload.getJSONObject("link").getString("messageUrl");
         } else {
             content = payload.toJSONString(); // 兜底：直接发 JSON 文本
@@ -394,7 +409,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
             // 发送消息到群组
             sendBotReply(bot.getGroupId(), bot, content);
             // 记录日志
-            logBotMessage(bot.getId(), bot.getGroupId(), 0L, "WEBHOOK_PUSH", content);
+            logBotMessage(bot.getId(), bot.getGroupId(), 0L, TRIGGER_SOURCE_WEBHOOK_PUSH, content);
         }
     }
 
@@ -564,7 +579,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
             com.ruoyi.im.dto.message.ImMessageSendRequest request =
                     new com.ruoyi.im.dto.message.ImMessageSendRequest();
             request.setConversationId(groupId); // 群组ID即为会话ID
-            request.setType("TEXT");
+            request.setType(REPLY_TYPE_TEXT);
             request.setContent(replyContent);
 
             // 使用机器人ID作为发送者（需要特殊处理）

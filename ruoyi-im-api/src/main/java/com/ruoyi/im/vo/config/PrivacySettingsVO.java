@@ -24,7 +24,9 @@ public class PrivacySettingsVO {
 
     public static PrivacySettingsVO fromMap(Map<String, Object> map) {
         PrivacySettingsVO vo = new PrivacySettingsVO();
-        if (map == null) return vo;
+        if (map == null) {
+            return vo;
+        }
         vo.showOnlineStatus = (Boolean) map.get("showOnlineStatus");
         vo.allowStrangerMessage = (Boolean) map.get("allowStrangerMessage");
         vo.allowVoiceCall = (Boolean) map.get("allowVoiceCall");

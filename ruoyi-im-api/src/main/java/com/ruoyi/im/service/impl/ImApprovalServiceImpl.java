@@ -38,6 +38,39 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
     private static final Logger log = LoggerFactory.getLogger(ImApprovalServiceImpl.class);
 
+    /** 模板激活状态 */
+    private static final String STATUS_ACTIVE = "ACTIVE";
+    /** 审批待处理状态 */
+    private static final String STATUS_PENDING = "PENDING";
+    /** 审批已通过状态 */
+    private static final String STATUS_APPROVED = "APPROVED";
+    /** 审批已拒绝状态 */
+    private static final String STATUS_REJECTED = "REJECTED";
+    /** 审批已取消状态 */
+    private static final String STATUS_CANCELLED = "CANCELLED";
+    /** 审批已跳过状态 */
+    private static final String STATUS_SKIPPED = "SKIPPED";
+    /** 审批操作：通过 */
+    private static final String ACTION_APPROVE = "APPROVE";
+    /** 审批操作：拒绝 */
+    private static final String ACTION_REJECT = "REJECT";
+    /** 审批操作：转交 */
+    private static final String ACTION_TRANSFER = "TRANSFER";
+    /** 审批操作：委托 */
+    private static final String ACTION_DELEGATE = "DELEGATE";
+    /** 审批类型：任意一人通过 */
+    private static final String APPROVE_TYPE_ANY = "ANY";
+    /** 审批类型：所有人通过 */
+    private static final String APPROVE_TYPE_ALL = "ALL";
+    /** 表单字段类型：文本 */
+    private static final String FIELD_TYPE_TEXT = "TEXT";
+    /** 默认审批人ID */
+    private static final String DEFAULT_APPROVER_ID = "1";
+    /** 默认审批节点名称 */
+    private static final String DEFAULT_NODE_NAME = "审批";
+    /** 进度百分比基数 */
+    private static final int PERCENT_BASE = 100;
+
     private final ImApprovalMapper approvalMapper;
     private final ImApprovalTemplateMapper templateMapper;
     private final ImApprovalNodeMapper nodeMapper;
@@ -70,7 +103,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         if (template == null) {
             BusinessExceptionHelper.throwTemplateNotFound();
         }
-        if (!"ACTIVE".equals(template.getStatus())) {
+        if (!STATUS_ACTIVE.equals(template.getStatus())) {
             throw new BusinessException("审批模板已停用");
         }
 
@@ -79,7 +112,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         approval.setTemplateId(templateId);
         approval.setTitle(title);
         approval.setApplicantId(applicantId);
-        approval.setStatus("PENDING");
+        approval.setStatus(STATUS_PENDING);
         approval.setCreateTime(LocalDateTime.now());
         approval.setUpdateTime(LocalDateTime.now());
         approvalMapper.insertImApproval(approval);
@@ -112,7 +145,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
             BusinessExceptionHelper.throwApprovalNotFound();
         }
 
-        if (!"PENDING".equals(approval.getStatus())) {
+        if (!STATUS_PENDING.equals(approval.getStatus())) {
             throw new BusinessException("审批已处理");
         }
 
@@ -135,11 +168,11 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         recordMapper.insertImApprovalRecord(record);
 
         // 4. 根据操作类型处理
-        if ("APPROVE".equals(action)) {
+        if (ACTION_APPROVE.equals(action)) {
             handleApprove(currentNode, approverId, approval);
-        } else if ("REJECT".equals(action)) {
+        } else if (ACTION_REJECT.equals(action)) {
             handleReject(currentNode, approverId, approval);
-        } else if ("TRANSFER".equals(action)) {
+        } else if (ACTION_TRANSFER.equals(action)) {
             handleTransfer(currentNode, approverId, approval);
         }
     }
@@ -203,11 +236,11 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         if (!approval.getApplicantId().equals(applicantId)) {
             BusinessExceptionHelper.throwNoPermission();
         }
-        if (!"PENDING".equals(approval.getStatus())) {
+        if (!STATUS_PENDING.equals(approval.getStatus())) {
             throw new BusinessException("审批已处理，无法撤回");
         }
 
-        approval.setStatus("CANCELLED");
+        approval.setStatus(STATUS_CANCELLED);
         approval.setUpdateTime(LocalDateTime.now());
         approvalMapper.updateImApproval(approval);
 
@@ -265,7 +298,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         record.setApprovalId(approvalId);
         record.setNodeId(currentNode.getId());
         record.setApproverId(fromUserId);
-        record.setAction("TRANSFER");
+        record.setAction(ACTION_TRANSFER);
         record.setComment("转交给用户ID: " + toUserId);
         record.setActionTime(LocalDateTime.now());
         recordMapper.insertImApprovalRecord(record);
@@ -305,7 +338,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         record.setApprovalId(approvalId);
         record.setNodeId(currentNode.getId());
         record.setApproverId(fromUserId);
-        record.setAction("DELEGATE");
+        record.setAction(ACTION_DELEGATE);
         record.setComment("委托给用户ID: " + toUserId);
         record.setActionTime(LocalDateTime.now());
         recordMapper.insertImApprovalRecord(record);
@@ -368,7 +401,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
             node.setApproveType(nodeConfig.getStr("approveType"));
             node.setSortOrder(i + 1);
-            node.setStatus("PENDING");
+            node.setStatus(STATUS_PENDING);
             nodeMapper.insertImApprovalNode(node);
         }
     }
@@ -409,7 +442,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
             node.setApproveType(nodeConfig.getStr("approveType"));
             node.setSortOrder(i + 1);
-            node.setStatus("PENDING");
+            node.setStatus(STATUS_PENDING);
 
             // 保存节点（如果是条件分支节点，初始状态为PENDING，后续可能被跳过）
             nodeMapper.insertImApprovalNode(node);
@@ -428,12 +461,12 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     private void createDefaultNode(Long approvalId) {
         ImApprovalNode node = new ImApprovalNode();
         node.setApprovalId(approvalId);
-        node.setNodeName("审批");
-        node.setNodeType("APPROVE");
-        node.setApproverIds("1");
-        node.setApproveType("ANY");
+        node.setNodeName(DEFAULT_NODE_NAME);
+        node.setNodeType(ACTION_APPROVE);
+        node.setApproverIds(DEFAULT_APPROVER_ID);
+        node.setApproveType(APPROVE_TYPE_ANY);
         node.setSortOrder(1);
-        node.setStatus("PENDING");
+        node.setStatus(STATUS_PENDING);
         nodeMapper.insertImApprovalNode(node);
     }
 
@@ -451,7 +484,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
             data.setApprovalId(approvalId);
             data.setFieldKey(entry.getKey());
             data.setFieldValue(JSONUtil.toJsonStr(entry.getValue()));
-            data.setFieldType("TEXT");
+            data.setFieldType(FIELD_TYPE_TEXT);
             data.setCreateTime(LocalDateTime.now());
             dataList.add(data);
         }
@@ -478,11 +511,11 @@ public class ImApprovalServiceImpl implements ImApprovalService {
      */
     private void handleApprove(ImApprovalNode currentNode, Long approverId, ImApproval approval) {
         // 判断是否需要所有人审批
-        if ("ALL".equals(currentNode.getApproveType())) {
+        if (APPROVE_TYPE_ALL.equals(currentNode.getApproveType())) {
             // 检查是否所有人都已审批
             boolean allApproved = checkAllApproved(currentNode);
             if (allApproved) {
-                currentNode.setStatus("APPROVED");
+                currentNode.setStatus(STATUS_APPROVED);
                 currentNode.setProcessTime(LocalDateTime.now());
                 currentNode.setProcessorId(approverId);
                 nodeMapper.updateImApprovalNode(currentNode);
@@ -491,7 +524,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
             }
         } else {
             // 任意一人通过即可
-            currentNode.setStatus("APPROVED");
+            currentNode.setStatus(STATUS_APPROVED);
             currentNode.setProcessTime(LocalDateTime.now());
             currentNode.setProcessorId(approverId);
             nodeMapper.updateImApprovalNode(currentNode);
@@ -505,7 +538,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
      */
     private void handleReject(ImApprovalNode currentNode, Long approverId, ImApproval approval) {
         // 驳回：直接结束流程
-        approval.setStatus("REJECTED");
+        approval.setStatus(STATUS_REJECTED);
         approval.setUpdateTime(LocalDateTime.now());
         approvalMapper.updateImApproval(approval);
         // 标记后续节点为已跳过
@@ -528,7 +561,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         String[] approverIds = node.getApproverIds().split(",");
         List<ImApprovalRecord> records = recordMapper.selectRecordsByApprovalId(node.getApprovalId());
         long approvedCount = records.stream()
-                .filter(r -> r.getNodeId().equals(node.getId()) && "APPROVE".equals(r.getAction()))
+                .filter(r -> r.getNodeId().equals(node.getId()) && ACTION_APPROVE.equals(r.getAction()))
                 .count();
         return approvedCount >= approverIds.length;
     }
@@ -558,7 +591,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         boolean hasPendingNode = false;
 
         for (ImApprovalNode node : nodes) {
-            if ("PENDING".equals(node.getStatus())) {
+            if (STATUS_PENDING.equals(node.getStatus())) {
                 hasPendingNode = true;
                 nextNode = node;
                 break;
@@ -567,7 +600,7 @@ public class ImApprovalServiceImpl implements ImApprovalService {
 
         if (!hasPendingNode) {
             // 所有节点已审批完成，更新审批状态
-            approval.setStatus("APPROVED");
+            approval.setStatus(STATUS_APPROVED);
             approval.setFinishTime(LocalDateTime.now());
             approval.setUpdateTime(LocalDateTime.now());
             approvalMapper.updateImApproval(approval);
@@ -585,8 +618,8 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     private void skipRemainingNodes(Long approvalId) {
         List<ImApprovalNode> nodes = nodeMapper.selectNodesByApprovalId(approvalId);
         for (ImApprovalNode node : nodes) {
-            if ("PENDING".equals(node.getStatus())) {
-                node.setStatus("SKIPPED");
+            if (STATUS_PENDING.equals(node.getStatus())) {
+                node.setStatus(STATUS_SKIPPED);
                 nodeMapper.updateImApprovalNode(node);
             }
         }
@@ -708,10 +741,10 @@ public class ImApprovalServiceImpl implements ImApprovalService {
             if (targetSortOrder != null) {
                 // 跳过同级其他节点
                 for (ImApprovalNode node : nodes) {
-                    if ("PENDING".equals(node.getStatus())
+                    if (STATUS_PENDING.equals(node.getStatus())
                             && node.getSortOrder().equals(targetSortOrder)
                             && !node.getId().equals(targetId)) {
-                        node.setStatus("SKIPPED");
+                        node.setStatus(STATUS_SKIPPED);
                         nodeMapper.updateImApprovalNode(node);
                         log.debug("跳过节点: nodeId={}, 原因: 条件分支路由", node.getId());
                     }
@@ -733,8 +766,8 @@ public class ImApprovalServiceImpl implements ImApprovalService {
         try {
             Long targetId = Long.parseLong(targetNodeId);
             for (ImApprovalNode node : nodes) {
-                if (node.getId().equals(targetId) && "PENDING".equals(node.getStatus())) {
-                    node.setStatus("SKIPPED");
+                if (node.getId().equals(targetId) && STATUS_PENDING.equals(node.getStatus())) {
+                    node.setStatus(STATUS_SKIPPED);
                     nodeMapper.updateImApprovalNode(node);
                     log.debug("跳过节点: nodeId={}, 原因: 条件不满足", node.getId());
                     break;
@@ -751,10 +784,10 @@ public class ImApprovalServiceImpl implements ImApprovalService {
     private Map<String, Object> buildProgressInfo(List<ImApprovalNode> nodes, List<ImApprovalRecord> records) {
         Map<String, Object> progress = new HashMap<>();
         int totalNodes = nodes.size();
-        int completedNodes = (int) nodes.stream().filter(n -> !"PENDING".equals(n.getStatus())).count();
+        int completedNodes = (int) nodes.stream().filter(n -> !STATUS_PENDING.equals(n.getStatus())).count();
         progress.put("totalNodes", totalNodes);
         progress.put("completedNodes", completedNodes);
-        progress.put("progressPercent", totalNodes > 0 ? (completedNodes * 100 / totalNodes) : 0);
+        progress.put("progressPercent", totalNodes > 0 ? (completedNodes * PERCENT_BASE / totalNodes) : 0);
 
         List<Map<String, Object>> nodeProgress = new ArrayList<>();
         for (ImApprovalNode node : nodes) {

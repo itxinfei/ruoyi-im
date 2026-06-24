@@ -18,6 +18,8 @@ import java.util.Map;
 public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
     private static final Logger log = LoggerFactory.getLogger(WebSocketHandshakeInterceptor.class);
+    private static final String TOKEN_PARAM_PREFIX = "token=";
+    private static final int TOKEN_PARAM_PREFIX_LENGTH = 6;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -84,8 +86,8 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
 
         String[] params = queryString.split("&");
         for (String param : params) {
-            if (param.startsWith("token=")) {
-                return param.substring(6);
+            if (param.startsWith(TOKEN_PARAM_PREFIX)) {
+                return param.substring(TOKEN_PARAM_PREFIX_LENGTH);
             }
         }
         return null;

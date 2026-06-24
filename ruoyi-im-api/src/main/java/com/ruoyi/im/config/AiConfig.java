@@ -106,7 +106,9 @@ public class AiConfig {
      * 检查指定模型是否已配置
      */
     public boolean isModelConfigured(String model) {
-        if (model == null) return false;
+        if (model == null) {
+            return false;
+        }
         switch (model.toLowerCase()) {
             case "gpt-3.5-turbo":
             case "gpt-4":
