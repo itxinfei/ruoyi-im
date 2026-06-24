@@ -15,11 +15,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 生产级 WebSocket 处理器 (Hardened Version)
@@ -34,10 +31,35 @@ public class ImWebSocketHandler extends TextWebSocketHandler {
     private static final Map<Long, WebSocketSession> USER_SESSION_MAP = new ConcurrentHashMap<>();
 
     // 异步发送线程池 (防止慢连接阻塞业务)
-    private static final ExecutorService SEND_EXECUTOR = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors() * 2);
+    private static final ExecutorService SEND_EXECUTOR = new ThreadPoolExecutor(
+            Runtime.getRuntime().availableProcessors(),
+            Runtime.getRuntime().availableProcessors() * 2,
+            60L, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<Runnable>(1000),
+            new ThreadPoolExecutor.CallerRunsPolicy());
 
     // 定时任务调度器 (用于消息重发)
     private static final ScheduledExecutorService RETRY_EXECUTOR = Executors.newScheduledThreadPool(2);
+
+    // 优雅关闭钩子
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            SEND_EXECUTOR.shutdown();
+            RETRY_EXECUTOR.shutdown();
+            try {
+                if (!SEND_EXECUTOR.awaitTermination(5, TimeUnit.SECONDS)) {
+                    SEND_EXECUTOR.shutdownNow();
+                }
+                if (!RETRY_EXECUTOR.awaitTermination(5, TimeUnit.SECONDS)) {
+                    RETRY_EXECUTOR.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                SEND_EXECUTOR.shutdownNow();
+                RETRY_EXECUTOR.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }));
+    }
 
     // 消息最大重试次数
     private static final int MAX_RETRY_COUNT = 3;

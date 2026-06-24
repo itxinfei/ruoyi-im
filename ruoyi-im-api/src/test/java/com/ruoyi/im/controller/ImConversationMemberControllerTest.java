@@ -1,7 +1,6 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.dto.conversation.ImConversationMemberUpdateRequest;
 import com.ruoyi.im.service.ImConversationMemberService;
 import com.ruoyi.im.util.SecurityUtils;
@@ -44,40 +43,42 @@ class ImConversationMemberControllerTest {
 
     @Test
     void list_Success() {
-        ImConversationMember member = new ImConversationMember();
-        member.setUserId(TEST_USER_ID);
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
-        ImConversationMemberVO vo1 = new ImConversationMemberVO();
-        vo1.setConversationId(1L);
-        vo1.setUserId(TEST_USER_ID);
-        ImConversationMemberVO vo2 = new ImConversationMemberVO();
-        vo2.setConversationId(2L);
-        vo2.setUserId(TEST_USER_ID);
+            ImConversationMemberVO vo1 = new ImConversationMemberVO();
+            vo1.setConversationId(1L);
+            vo1.setUserId(TEST_USER_ID);
+            ImConversationMemberVO vo2 = new ImConversationMemberVO();
+            vo2.setConversationId(2L);
+            vo2.setUserId(TEST_USER_ID);
 
-        when(conversationMemberService.getConversationMemberList(TEST_USER_ID))
-                .thenReturn(Arrays.asList(vo1, vo2));
+            when(conversationMemberService.getConversationMemberList(TEST_USER_ID))
+                    .thenReturn(Arrays.asList(vo1, vo2));
 
-        Result<List<ImConversationMemberVO>> result = controller.list(member);
+            Result<List<ImConversationMemberVO>> result = controller.list();
 
-        assertNotNull(result);
-        assertTrue(result.isSuccess());
-        assertEquals(2, result.getData().size());
-        verify(conversationMemberService).getConversationMemberList(TEST_USER_ID);
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals(2, result.getData().size());
+            verify(conversationMemberService).getConversationMemberList(TEST_USER_ID);
+        }
     }
 
     @Test
     void list_EmptyList() {
-        ImConversationMember member = new ImConversationMember();
-        member.setUserId(TEST_USER_ID);
+        try (MockedStatic<SecurityUtils> securityUtilsMockedStatic = mockStatic(SecurityUtils.class)) {
+            securityUtilsMockedStatic.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
-        when(conversationMemberService.getConversationMemberList(TEST_USER_ID))
-                .thenReturn(Collections.emptyList());
+            when(conversationMemberService.getConversationMemberList(TEST_USER_ID))
+                    .thenReturn(Collections.emptyList());
 
-        Result<List<ImConversationMemberVO>> result = controller.list(member);
+            Result<List<ImConversationMemberVO>> result = controller.list();
 
-        assertNotNull(result);
-        assertTrue(result.isSuccess());
-        assertTrue(result.getData().isEmpty());
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertTrue(result.getData().isEmpty());
+        }
     }
 
     @Test

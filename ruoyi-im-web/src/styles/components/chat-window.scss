@@ -1,0 +1,134 @@
+// ============================================================================
+// 聊天窗口布局样式 - 独立SCSS文件
+// 规范: .claude/rules/dingtalk-ui-prompt.md
+// ============================================================================
+
+// 聊天窗口主布局
+.chat-main-v4 {
+  flex: 1;
+  display: flex;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--dt-bg-card);
+}
+
+// 消息区域容器
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: var(--dt-chat-min-width);
+  height: 100%;
+  position: relative;
+}
+
+// 消息列表滚动区
+.message-area-scroller {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: var(--dt-spacing-md) 0;
+}
+
+// 右侧侧边栏 (钉钉 Push 布局)
+.chat-right-sidebar {
+  width: var(--dt-drawer-width);
+  background-color: var(--dt-bg-card);
+  border-left: 1px solid var(--dt-border-light);
+  height: 100%;
+  flex-shrink: 0;
+  z-index: 50;
+}
+
+// 侧边栏滑出动效 (挤压感)
+.push-sidebar-enter-active,
+.push-sidebar-leave-active {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.push-sidebar-enter-from,
+.push-sidebar-leave-to {
+  width: 0;
+}
+
+// ============================================================================
+// 表情选择器
+// ============================================================================
+
+.emoji-picker-popover {
+  position: absolute;
+  bottom: 140px;
+  left: 20px;
+  width: 320px;
+  max-height: 200px;
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-lg);
+  box-shadow: var(--dt-shadow-float);
+  border: 1px solid var(--dt-border-light);
+  padding: var(--dt-spacing-sm);
+  z-index: var(--dt-z-popover);
+  overflow-y: auto;
+
+  .emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+
+    .emoji-item {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      border-radius: var(--dt-radius-sm);
+      transition: background-color var(--dt-transition-fast);
+
+      &:hover {
+        background: var(--dt-bg-hover);
+      }
+    }
+  }
+}
+
+// ============================================================================
+// 输入中指示器
+// ============================================================================
+
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-xs) var(--dt-spacing-md);
+  color: var(--dt-text-tertiary);
+  font-size: var(--dt-font-size-xs);
+}
+
+.typing-dots {
+  display: flex;
+  gap: 3px;
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--dt-text-quaternary);
+    animation: typingBounce 1.4s infinite ease-in-out;
+
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.typing-text {
+  white-space: nowrap;
+}

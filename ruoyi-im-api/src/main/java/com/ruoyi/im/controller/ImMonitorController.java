@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.vo.monitor.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,8 +14,6 @@ import java.lang.management.MemoryUsage;
 import java.lang.management.ThreadMXBean;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 系统监控控制器
@@ -36,86 +35,50 @@ public class ImMonitorController {
     /**
      * 获取系统概览
      */
-    
     @GetMapping("/overview")
-    public Result<Map<String, Object>> getOverview() {
-        Map<String, Object> overview = new HashMap<>();
-
-        // 系统状态
-        overview.put("status", "RUNNING");
-        overview.put("timestamp", LocalDateTime.now().format(FORMATTER));
-
-        // JVM信息
-        overview.put("jvm", getJvmInfo());
-
-        // 线程信息
-        overview.put("thread", getThreadInfo());
-
-        // 内存信息
-        overview.put("memory", getMemoryInfo());
-
+    public Result<MonitorOverviewVO> getOverview() {
+        MonitorOverviewVO overview = new MonitorOverviewVO();
+        overview.setStatus("RUNNING");
+        overview.setTimestamp(LocalDateTime.now().format(FORMATTER));
+        overview.setJvm(buildJvmInfo());
+        overview.setThread(buildThreadInfo());
+        overview.setMemory(buildOverviewMemory());
         return Result.success(overview);
     }
 
     /**
      * 获取JVM信息
      */
-    
     @GetMapping("/jvm")
-    public Result<Map<String, Object>> getJvmMetrics() {
-        Map<String, Object> jvm = new HashMap<>();
-
-        Runtime runtime = Runtime.getRuntime();
-
-        // JVM基本参数
-        jvm.put("javaVersion", System.getProperty("java.version"));
-        jvm.put("javaVendor", System.getProperty("java.vendor"));
-        jvm.put("javaHome", System.getProperty("java.home"));
-        jvm.put("osName", System.getProperty("os.name"));
-        jvm.put("osVersion", System.getProperty("os.version"));
-        jvm.put("osArch", System.getProperty("os.arch"));
-        jvm.put("processors", runtime.availableProcessors());
-
-        // JVM启动时间
-        long uptime = ManagementFactory.getRuntimeMXBean().getUptime();
-        jvm.put("uptime", formatUptime(uptime));
-
-        // JVM参数
-        jvm.put("inputArguments", ManagementFactory.getRuntimeMXBean().getInputArguments());
-
-        return Result.success(jvm);
+    public Result<JvmInfoVO> getJvmMetrics() {
+        return Result.success(buildJvmInfo());
     }
 
     /**
      * 获取内存信息
      */
-    
     @GetMapping("/memory")
-    public Result<Map<String, Object>> getMemoryMetrics() {
-        Map<String, Object> memory = new HashMap<>();
+    public Result<MemoryMetricsVO> getMemoryMetrics() {
+        MemoryMetricsVO memory = new MemoryMetricsVO();
 
         MemoryMXBean memoryMxBean = ManagementFactory.getMemoryMXBean();
 
-        // 堆内存
         MemoryUsage heapUsage = memoryMxBean.getHeapMemoryUsage();
-        Map<String, Object> heap = new HashMap<>();
-        heap.put("init", formatBytes(heapUsage.getInit()));
-        heap.put("used", formatBytes(heapUsage.getUsed()));
-        heap.put("committed", formatBytes(heapUsage.getCommitted()));
-        heap.put("max", formatBytes(heapUsage.getMax()));
-        heap.put("usagePercent", calculateUsagePercent(heapUsage.getUsed(), heapUsage.getMax()));
+        MemoryDetailVO heap = new MemoryDetailVO();
+        heap.setInit(formatBytes(heapUsage.getInit()));
+        heap.setUsed(formatBytes(heapUsage.getUsed()));
+        heap.setCommitted(formatBytes(heapUsage.getCommitted()));
+        heap.setMax(formatBytes(heapUsage.getMax()));
+        heap.setUsagePercent(calculateUsagePercent(heapUsage.getUsed(), heapUsage.getMax()));
+        memory.setHeap(heap);
 
-        memory.put("heap", heap);
-
-        // 非堆内存
         MemoryUsage nonHeapUsage = memoryMxBean.getNonHeapMemoryUsage();
-        Map<String, Object> nonHeap = new HashMap<>();
-        nonHeap.put("init", formatBytes(nonHeapUsage.getInit()));
-        nonHeap.put("used", formatBytes(nonHeapUsage.getUsed()));
-        nonHeap.put("committed", formatBytes(nonHeapUsage.getCommitted()));
-        nonHeap.put("max", formatBytes(nonHeapUsage.getMax()));
-
-        memory.put("nonHeap", nonHeap);
+        MemoryDetailVO nonHeap = new MemoryDetailVO();
+        nonHeap.setInit(formatBytes(nonHeapUsage.getInit()));
+        nonHeap.setUsed(formatBytes(nonHeapUsage.getUsed()));
+        nonHeap.setCommitted(formatBytes(nonHeapUsage.getCommitted()));
+        nonHeap.setMax(formatBytes(nonHeapUsage.getMax()));
+        memory.setNonHeap(nonHeap);
 
         return Result.success(memory);
     }
@@ -123,17 +86,15 @@ public class ImMonitorController {
     /**
      * 获取线程信息
      */
-    
     @GetMapping("/thread")
-    public Result<Map<String, Object>> getThreadMetrics() {
-        Map<String, Object> thread = new HashMap<>();
-
+    public Result<ThreadMetricsVO> getThreadMetrics() {
         ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
 
-        thread.put("count", threadMxBean.getThreadCount());
-        thread.put("peak", threadMxBean.getPeakThreadCount());
-        thread.put("daemonCount", threadMxBean.getDaemonThreadCount());
-        thread.put("totalStarted", threadMxBean.getTotalStartedThreadCount());
+        ThreadMetricsVO thread = new ThreadMetricsVO();
+        thread.setCount(threadMxBean.getThreadCount());
+        thread.setPeak(threadMxBean.getPeakThreadCount());
+        thread.setDaemonCount(threadMxBean.getDaemonThreadCount());
+        thread.setTotalStarted(threadMxBean.getTotalStartedThreadCount());
 
         return Result.success(thread);
     }
@@ -141,14 +102,12 @@ public class ImMonitorController {
     /**
      * 获取类加载信息
      */
-    
     @GetMapping("/classloading")
-    public Result<Map<String, Object>> getClassLoadingMetrics() {
-        Map<String, Object> classLoading = new HashMap<>();
-
-        classLoading.put("loadedClassCount", ManagementFactory.getClassLoadingMXBean().getLoadedClassCount());
-        classLoading.put("totalLoadedClassCount", ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
-        classLoading.put("unloadedClassCount", ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
+    public Result<ClassLoadingMetricsVO> getClassLoadingMetrics() {
+        ClassLoadingMetricsVO classLoading = new ClassLoadingMetricsVO();
+        classLoading.setLoadedClassCount(ManagementFactory.getClassLoadingMXBean().getLoadedClassCount());
+        classLoading.setTotalLoadedClassCount(ManagementFactory.getClassLoadingMXBean().getTotalLoadedClassCount());
+        classLoading.setUnloadedClassCount(ManagementFactory.getClassLoadingMXBean().getUnloadedClassCount());
 
         return Result.success(classLoading);
     }
@@ -156,13 +115,11 @@ public class ImMonitorController {
     /**
      * 获取编译信息
      */
-    
     @GetMapping("/compilation")
-    public Result<Map<String, Object>> getCompilationMetrics() {
-        Map<String, Object> compilation = new HashMap<>();
-
-        compilation.put("name", ManagementFactory.getCompilationMXBean().getName());
-        compilation.put("totalCompilationTime", ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
+    public Result<CompilationMetricsVO> getCompilationMetrics() {
+        CompilationMetricsVO compilation = new CompilationMetricsVO();
+        compilation.setName(ManagementFactory.getCompilationMXBean().getName());
+        compilation.setTotalCompilationTime(ManagementFactory.getCompilationMXBean().getTotalCompilationTime());
 
         return Result.success(compilation);
     }
@@ -170,17 +127,14 @@ public class ImMonitorController {
     /**
      * 获取运行时信息
      */
-    
     @GetMapping("/runtime")
-    public Result<Map<String, Object>> getRuntimeMetrics() {
-        Map<String, Object> runtime = new HashMap<>();
-
-        runtime.put("startTime", FORMATTER.format(java.time.LocalDateTime.ofInstant(
+    public Result<RuntimeMetricsVO> getRuntimeMetrics() {
+        RuntimeMetricsVO runtime = new RuntimeMetricsVO();
+        runtime.setStartTime(FORMATTER.format(java.time.LocalDateTime.ofInstant(
             java.time.Instant.ofEpochMilli(ManagementFactory.getRuntimeMXBean().getStartTime()),
             java.time.ZoneId.systemDefault())));
-
-        runtime.put("uptime", formatUptime(ManagementFactory.getRuntimeMXBean().getUptime()));
-        runtime.put("bootClassPath", ManagementFactory.getRuntimeMXBean().getBootClassPath());
+        runtime.setUptime(formatUptime(ManagementFactory.getRuntimeMXBean().getUptime()));
+        runtime.setBootClassPath(ManagementFactory.getRuntimeMXBean().getBootClassPath());
 
         return Result.success(runtime);
     }
@@ -188,48 +142,49 @@ public class ImMonitorController {
     /**
      * 健康状态检查
      */
-    
     @GetMapping("/health")
-    public Result<Map<String, Object>> healthCheck() {
-        Map<String, Object> health = new HashMap<>();
-
-        // 检查内存使用率
+    public Result<HealthCheckVO> healthCheck() {
         MemoryMXBean memoryMxBean = ManagementFactory.getMemoryMXBean();
         MemoryUsage heapUsage = memoryMxBean.getHeapMemoryUsage();
         double memoryUsagePercent = calculateUsagePercent(heapUsage.getUsed(), heapUsage.getMax());
 
-        boolean healthy = memoryUsagePercent < 90;
-        health.put("status", healthy ? "HEALTHY" : "WARNING");
-        health.put("memoryUsage", String.format("%.2f%%", memoryUsagePercent));
+        HealthCheckVO health = new HealthCheckVO();
+        health.setStatus(memoryUsagePercent < 90 ? "HEALTHY" : "WARNING");
+        health.setMemoryUsage(String.format("%.2f%%", memoryUsagePercent));
 
         return Result.success(health);
     }
 
     // ==================== 私有方法 ====================
 
-    private Map<String, Object> getJvmInfo() {
-        Map<String, Object> jvm = new HashMap<>();
+    private JvmInfoVO buildJvmInfo() {
+        JvmInfoVO jvm = new JvmInfoVO();
         Runtime runtime = Runtime.getRuntime();
 
-        jvm.put("javaVersion", System.getProperty("java.version"));
-        jvm.put("processors", runtime.availableProcessors());
-        jvm.put("uptime", formatUptime(ManagementFactory.getRuntimeMXBean().getUptime()));
+        jvm.setJavaVersion(System.getProperty("java.version"));
+        jvm.setJavaVendor(System.getProperty("java.vendor"));
+        jvm.setJavaHome(System.getProperty("java.home"));
+        jvm.setOsName(System.getProperty("os.name"));
+        jvm.setOsVersion(System.getProperty("os.version"));
+        jvm.setOsArch(System.getProperty("os.arch"));
+        jvm.setProcessors(runtime.availableProcessors());
+        jvm.setUptime(formatUptime(ManagementFactory.getRuntimeMXBean().getUptime()));
+        jvm.setInputArguments(ManagementFactory.getRuntimeMXBean().getInputArguments());
 
         return jvm;
     }
 
-    private Map<String, Object> getThreadInfo() {
-        Map<String, Object> thread = new HashMap<>();
+    private ThreadMetricsVO buildThreadInfo() {
         ThreadMXBean threadMxBean = ManagementFactory.getThreadMXBean();
 
-        thread.put("count", threadMxBean.getThreadCount());
-        thread.put("peak", threadMxBean.getPeakThreadCount());
+        ThreadMetricsVO thread = new ThreadMetricsVO();
+        thread.setCount(threadMxBean.getThreadCount());
+        thread.setPeak(threadMxBean.getPeakThreadCount());
 
         return thread;
     }
 
-    private Map<String, Object> getMemoryInfo() {
-        Map<String, Object> memory = new HashMap<>();
+    private OverviewMemoryVO buildOverviewMemory() {
         Runtime runtime = Runtime.getRuntime();
 
         long totalMemory = runtime.totalMemory();
@@ -237,11 +192,12 @@ public class ImMonitorController {
         long usedMemory = totalMemory - freeMemory;
         long maxMemory = runtime.maxMemory();
 
-        memory.put("total", formatBytes(totalMemory));
-        memory.put("used", formatBytes(usedMemory));
-        memory.put("free", formatBytes(freeMemory));
-        memory.put("max", formatBytes(maxMemory));
-        memory.put("usagePercent", calculateUsagePercent(usedMemory, maxMemory));
+        OverviewMemoryVO memory = new OverviewMemoryVO();
+        memory.setTotal(formatBytes(totalMemory));
+        memory.setUsed(formatBytes(usedMemory));
+        memory.setFree(formatBytes(freeMemory));
+        memory.setMax(formatBytes(maxMemory));
+        memory.setUsagePercent(calculateUsagePercent(usedMemory, maxMemory));
 
         return memory;
     }
@@ -289,4 +245,3 @@ public class ImMonitorController {
         }
     }
 }
-

@@ -148,18 +148,14 @@ public class ImAttendanceController {
      * @param id 打卡ID
      * @param approved 是否通过
      * @param comment 审批意见
-     * @param approverId 审批人ID
      * @return 操作结果
      */
     
     @PostMapping("/{id}/approve")
     public Result<Void> approveSupplement(@PathVariable Long id,
                                           @RequestParam boolean approved,
-                                          @RequestParam(required = false) String comment,
-                                          @RequestHeader(value = "approverId", required = false) Long approverId) {
-        if (approverId == null) {
-            approverId = SecurityUtils.getLoginUserId();
-        }
+                                          @RequestParam(required = false) String comment) {
+        Long approverId = SecurityUtils.getLoginUserId();
         attendanceService.approveSupplement(id, approverId, approved, comment);
         return Result.success(approved ? "已通过" : "已拒绝");
     }

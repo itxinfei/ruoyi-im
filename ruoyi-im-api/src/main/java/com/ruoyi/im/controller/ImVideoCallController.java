@@ -53,8 +53,8 @@ public class ImVideoCallController {
 
             return Result.success("发起成功", callId);
         } catch (Exception e) {
-            log.error("发起通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("发起通话失败", e);
+            return Result.fail("发起通话失败");
         }
     }
 
@@ -72,8 +72,8 @@ public class ImVideoCallController {
             videoCallService.acceptCall(parsedCallId, userId);
             return Result.success("接听成功");
         } catch (Exception e) {
-            log.error("接听通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("接听通话失败", e);
+            return Result.fail("接听通话失败");
         }
     }
 
@@ -92,8 +92,8 @@ public class ImVideoCallController {
             videoCallService.rejectCall(parsedCallId, userId, reason);
             return Result.success("已拒绝");
         } catch (Exception e) {
-            log.error("拒绝通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("拒绝通话失败", e);
+            return Result.fail("拒绝通话失败");
         }
     }
 
@@ -112,8 +112,8 @@ public class ImVideoCallController {
             videoCallService.endCall(parsedCallId, userId);
             return Result.success("通话已结束");
         } catch (Exception e) {
-            log.error("结束通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("结束通话失败", e);
+            return Result.fail("结束通话失败");
         }
     }
     
@@ -151,8 +151,8 @@ public class ImVideoCallController {
             }
             return Result.success(callInfo);
         } catch (Exception e) {
-            log.error("获取通话信息失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("获取通话信息失败", e);
+            return Result.fail("获取通话信息失败");
         }
     }
 
@@ -168,8 +168,8 @@ public class ImVideoCallController {
             Object callInfo = videoCallService.getUserActiveCall(userId);
             return Result.success(callInfo);
         } catch (Exception e) {
-            log.error("获取用户通话状态失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("获取用户通话状态失败", e);
+            return Result.fail("获取用户通话状态失败");
         }
     }
 
@@ -190,8 +190,8 @@ public class ImVideoCallController {
             ImWebSocketEndpoint.sendWebRTCSignal(callId, fromUserId, signalType, signalData);
             return Result.success("发送成功");
         } catch (Exception e) {
-            log.error("发送信令失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("发送信令失败", e);
+            return Result.fail("发送信令失败");
         }
     }
 
@@ -207,8 +207,8 @@ public class ImVideoCallController {
         try {
             return Result.success(videoCallService.getCallHistory(userId, limit));
         } catch (Exception e) {
-            log.error("获取通话历史失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("获取通话历史失败", e);
+            return Result.fail("获取通话历史失败");
         }
     }
 
@@ -255,8 +255,8 @@ public class ImVideoCallController {
 
             return Result.success("发起成功", roomInfo);
         } catch (Exception e) {
-            log.error("发起群组通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("发起群组通话失败", e);
+            return Result.fail("发起群组通话失败");
         }
     }
 
@@ -274,8 +274,8 @@ public class ImVideoCallController {
             videoCallService.joinGroupCall(parsedCallId, userId);
             return Result.success("加入成功");
         } catch (Exception e) {
-            log.error("加入群组通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("加入群组通话失败", e);
+            return Result.fail("加入群组通话失败");
         }
     }
 
@@ -293,8 +293,8 @@ public class ImVideoCallController {
             videoCallService.leaveGroupCall(parsedCallId, userId);
             return Result.success("已离开");
         } catch (Exception e) {
-            log.error("离开群组通话失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("离开群组通话失败", e);
+            return Result.fail("离开群组通话失败");
         }
     }
 
@@ -310,8 +310,8 @@ public class ImVideoCallController {
             List<?> participants = videoCallService.getCallParticipants(parsedCallId);
             return Result.success(participants);
         } catch (Exception e) {
-            log.error("获取参与者列表失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("获取参与者列表失败", e);
+            return Result.fail("获取参与者列表失败");
         }
     }
 
@@ -330,8 +330,8 @@ public class ImVideoCallController {
             videoCallService.toggleMute(parsedCallId, userId, muted);
             return Result.success(muted ? "已静音" : "已取消静音");
         } catch (Exception e) {
-            log.error("切换麦克风状态失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("切换麦克风状态失败", e);
+            return Result.fail("切换麦克风状态失败");
         }
     }
 
@@ -350,8 +350,8 @@ public class ImVideoCallController {
             videoCallService.toggleCamera(parsedCallId, userId, cameraOff);
             return Result.success(cameraOff ? "已关闭摄像头" : "已开启摄像头");
         } catch (Exception e) {
-            log.error("切换摄像头状态失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("切换摄像头状态失败", e);
+            return Result.fail("切换摄像头状态失败");
         }
     }
 }

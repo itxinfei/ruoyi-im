@@ -169,3 +169,34 @@ logging:
     com.ruoyi.im: debug
     org.springframework.security: info
     org.springframework.web: info
+
+# AI大模型配置
+ai:
+  default-model: qwen
+  default-timeout: 30
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+    api-url: ${OPENAI_API_URL:https://api.openai.com/v1}
+    model: gpt-3.5-turbo
+    timeout: 30
+  qwen:
+    api-key: ${QWEN_API_KEY:}
+    api-url: ${QWEN_API_URL:https://dashscope.aliyuncs.com/compatible-mode/v1}
+    model: qwen-turbo
+    timeout: 30
+  wenxin:
+    api-key: ${WENXIN_API_KEY:}
+    secret-key: ${WENXIN_SECRET_KEY:}
+    model: ERNIE-Bot-turbo
+    timeout: 30
+  hunyuan:
+    secret-id: ${HUNYUAN_SECRET_ID:}
+    secret-key: ${HUNYUAN_SECRET_KEY:}
+    region: ap-guangzhou
+    timeout: 30
+  spark:
+    app-id: ${SPARK_APP_ID:}
+    api-secret: ${SPARK_API_SECRET:}
+    api-key: ${SPARK_API_KEY:}
+    version: v3.5
+    timeout: 30

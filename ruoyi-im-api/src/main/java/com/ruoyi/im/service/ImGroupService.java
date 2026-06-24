@@ -133,4 +133,49 @@ public interface ImGroupService {
      * @return 群组分页列表
      */
     IPage<ImGroup> getGroupPage(Page<ImGroup> page, String keyword);
+
+    /**
+     * 根据ID获取群组（管理员用，无需用户上下文）
+     *
+     * @param groupId 群组ID
+     * @return 群组信息
+     */
+    ImGroup getGroupByIdForAdmin(Long groupId);
+
+    /**
+     * 解散群组（管理员用）
+     *
+     * @param groupId 群组ID
+     */
+    void dissolveGroupForAdmin(Long groupId);
+
+    /**
+     * 更新群组信息（管理员用）
+     *
+     * @param group 群组实体
+     */
+    void updateGroupForAdmin(ImGroup group);
+
+    /**
+     * 统计有效群组数量（管理员用）
+     *
+     * @return 群组数量
+     */
+    long countActiveGroups();
+
+    /**
+     * 获取群组成员列表（管理员用，包含角色显示名）
+     *
+     * @param groupId 群组ID
+     * @return 成员列表
+     */
+    java.util.List<java.util.Map<String, Object>> getGroupMembersForAdmin(Long groupId);
+
+    /**
+     * 移除单个群组成员（管理员用）
+     *
+     * @param groupId 群组ID
+     * @param userId 用户ID
+     */
+    void removeGroupMemberForAdmin(Long groupId, Long userId);
 }

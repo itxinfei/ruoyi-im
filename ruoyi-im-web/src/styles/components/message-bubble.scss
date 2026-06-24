@@ -200,7 +200,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--dt-bubble-video-overlay);
     border-radius: var(--dt-bubble-radius);
 
     .play-icon {
@@ -211,7 +211,7 @@
   }
 
   &:hover .video-overlay {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--dt-bubble-video-overlay-hover);
   }
 }
 
@@ -276,7 +276,7 @@
 // 发送方文件消息
 .message-row.is-sent .bubble-file {
   .file-icon-wrapper {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--dt-bubble-sent-icon-bg);
 
     .file-icon {
       color: var(--dt-text-white);
@@ -288,11 +288,11 @@
   }
 
   .file-info .file-size {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-bubble-sent-text);
   }
 
   .download-icon {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-bubble-sent-text);
   }
 }
 
@@ -339,7 +339,7 @@
   }
 
   .card-info .card-dept {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-bubble-sent-text);
   }
 }
 
@@ -399,7 +399,7 @@
   }
 
   .location-info .location-address {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-bubble-sent-text);
   }
 }
 
@@ -451,7 +451,7 @@
     left: 32px;
     right: 36px;
     height: 2px;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--dt-bubble-voice-progress-bg);
     border-radius: 1px;
     overflow: hidden;
 
@@ -485,15 +485,15 @@
   }
 
   .voice-wave span {
-    background: rgba(255, 255, 255, 0.8);
+    background: var(--dt-bubble-sent-text);
   }
 
   .voice-duration {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--dt-bubble-sent-text);
   }
 
   .voice-progress {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--dt-bubble-sent-icon-bg);
 
     .voice-progress-bar {
       background: var(--dt-text-white);

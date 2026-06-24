@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -58,6 +60,9 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
     private static final String REPLY_TYPE_TEXT = "TEXT";
     private static final String REPLY_TYPE_IMAGE = "IMAGE";
     private static final String REPLY_TYPE_CARD = "CARD";
+
+    // 正则表达式缓存（避免每条消息重复编译）
+    private static final ConcurrentHashMap<String, Pattern> PATTERN_CACHE = new ConcurrentHashMap<>();
 
     private final ImGroupBotMapper groupBotMapper;
     private final ImGroupBotRuleMapper groupBotRuleMapper;
@@ -475,7 +480,17 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
                 return content.contains(pattern);
             case MATCH_MODE_REGEX:
                 try {
-                    Pattern regex = Pattern.compile(pattern);
+                    Pattern regex = PATTERN_CACHE.computeIfAbsent(pattern, p -> {
+                        try {
+                            return Pattern.compile(p);
+                        } catch (Exception e) {
+                            log.warn("正则表达式编译失败: pattern={}", p, e);
+                            return null;
+                        }
+                    });
+                    if (regex == null) {
+                        return false;
+                    }
                     Matcher matcher = regex.matcher(content);
                     return matcher.find();
                 } catch (Exception e) {

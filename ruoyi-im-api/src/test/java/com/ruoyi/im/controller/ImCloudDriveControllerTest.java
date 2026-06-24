@@ -87,7 +87,7 @@ class ImCloudDriveControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("文件夹名称重复"));
+            assertTrue(result.getMsg().contains("创建失败"));
         }
     }
 
@@ -119,7 +119,7 @@ class ImCloudDriveControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("文件夹不存在"));
+            assertTrue(result.getMsg().contains("重命名失败"));
         }
     }
 
@@ -284,7 +284,7 @@ class ImCloudDriveControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("存储空间不足"));
+            assertTrue(result.getMsg().contains("上传失败"));
         }
     }
 
@@ -391,7 +391,7 @@ class ImCloudDriveControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("文件不在回收站中"));
+            assertTrue(result.getMsg().contains("恢复失败"));
         }
     }
 
@@ -617,7 +617,7 @@ class ImCloudDriveControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("文件不存在"));
+            assertTrue(result.getMsg().contains("创建失败"));
         }
     }
 
@@ -648,7 +648,7 @@ class ImCloudDriveControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("分享不存在"));
+            assertTrue(result.getMsg().contains("取消失败"));
         }
     }
 
@@ -736,7 +736,7 @@ class ImCloudDriveControllerTest {
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertTrue(result.getMsg().contains("分享已过期"));
+            assertTrue(result.getMsg().contains("访问失败"));
     }
 
     // ==================== 存储配额测试 ====================

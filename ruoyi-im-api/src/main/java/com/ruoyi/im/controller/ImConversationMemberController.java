@@ -33,12 +33,12 @@ public class ImConversationMemberController {
     }
 
     /**
-     * 查询会话成员列表
+     * 查询当前用户的会话成员列表
      */
     @GetMapping("/list")
-    public Result<List<ImConversationMemberVO>> list(ImConversationMember conversationMember) {
-        List<ImConversationMemberVO> list = conversationMemberService
-                .getConversationMemberList(conversationMember.getUserId());
+    public Result<List<ImConversationMemberVO>> list() {
+        Long userId = SecurityUtils.getLoginUserId();
+        List<ImConversationMemberVO> list = conversationMemberService.getConversationMemberList(userId);
         return Result.success(list);
     }
 

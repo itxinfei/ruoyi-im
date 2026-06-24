@@ -3,8 +3,11 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImConfigService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.config.*;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,26 +34,22 @@ public class ImConfigController {
 
     /**
      * 获取通知设置
-     * 获取当前用户的通知配置
      *
      * @return 通知设置
-     * @apiNote 包含消息通知、群组通知、系统通知等设置
      */
     
     @GetMapping("/notification")
-    public Result<Map<String, Object>> getNotificationSettings() {
+    public Result<NotificationSettingsVO> getNotificationSettings() {
         Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> settings = imConfigService.getNotificationSettings(userId);
-        return Result.success(settings);
+        return Result.success(NotificationSettingsVO.fromMap(settings));
     }
 
     /**
      * 更新通知设置
-     * 更新当前用户的通知配置
      *
      * @param settings 设置项
      * @return 更新结果
-     * @apiNote 支持部分更新，只修改传入的设置项
      */
     
     @PutMapping("/notification")
@@ -63,26 +62,22 @@ public class ImConfigController {
 
     /**
      * 获取隐私设置
-     * 获取当前用户的隐私配置
      *
      * @return 隐私设置
-     * @apiNote 包含在线状态显示、陌生人消息、语音/视频通话等设置
      */
     
     @GetMapping("/privacy")
-    public Result<Map<String, Object>> getPrivacySettings() {
+    public Result<PrivacySettingsVO> getPrivacySettings() {
         Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> settings = imConfigService.getPrivacySettings(userId);
-        return Result.success(settings);
+        return Result.success(PrivacySettingsVO.fromMap(settings));
     }
 
     /**
      * 更新隐私设置
-     * 更新当前用户的隐私配置
      *
      * @param settings 设置项
      * @return 更新结果
-     * @apiNote 支持部分更新，只修改传入的设置项
      */
     
     @PutMapping("/privacy")
@@ -95,26 +90,22 @@ public class ImConfigController {
 
     /**
      * 获取通用设置
-     * 获取当前用户的通用配置
      *
      * @return 通用设置
-     * @apiNote 包含语言、主题、字体大小等设置
      */
     
     @GetMapping
-    public Result<Map<String, Object>> getGeneralSettings() {
+    public Result<GeneralSettingsVO> getGeneralSettings() {
         Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> settings = imConfigService.getGeneralSettings(userId);
-        return Result.success(settings);
+        return Result.success(GeneralSettingsVO.fromMap(settings));
     }
 
     /**
      * 更新通用设置
-     * 更新当前用户的通用配置
      *
      * @param settings 设置项
      * @return 更新结果
-     * @apiNote 支持部分更新，只修改传入的设置项
      */
     
     @PutMapping
@@ -127,26 +118,33 @@ public class ImConfigController {
 
     /**
      * 获取黑名单
-     * 获取当前用户的黑名单列表
      *
      * @return 黑名单用户列表
-     * @apiNote 返回被拉黑的用户信息
      */
     
     @GetMapping("/blocked")
-    public Result<java.util.List<Map<String, Object>>> getBlockedUsers() {
+    public Result<List<BlockedUserVO>> getBlockedUsers() {
         Long userId = SecurityUtils.getLoginUserId();
-        java.util.List<Map<String, Object>> blockedUsers = imConfigService.getBlockedUsers(userId);
-        return Result.success(blockedUsers);
+        List<Map<String, Object>> blockedUsers = imConfigService.getBlockedUsers(userId);
+        List<BlockedUserVO> result = new ArrayList<>();
+        if (blockedUsers != null) {
+            for (Map<String, Object> user : blockedUsers) {
+                BlockedUserVO vo = new BlockedUserVO();
+                vo.setUserId(toLong(user.get("userId")));
+                vo.setNickname((String) user.get("nickname"));
+                vo.setAvatar((String) user.get("avatar"));
+                vo.setBlockTime((String) user.get("blockTime"));
+                result.add(vo);
+            }
+        }
+        return Result.success(result);
     }
 
     /**
      * 拉黑用户
-     * 将指定用户加入黑名单
      *
      * @param targetUserId 目标用户ID
      * @return 操作结果
-     * @apiNote 拉黑后将无法接收该用户的消息
      */
     
     @PostMapping("/blocked/{targetUserId}")
@@ -159,13 +157,11 @@ public class ImConfigController {
 
     /**
      * 解除拉黑
-     * 将指定用户从黑名单移除
      *
      * @param targetUserId 目标用户ID
      * @return 操作结果
-     * @apiNote 解除拉黑后可以正常接收该用户的消息
      */
-
+    
     @DeleteMapping("/blocked/{targetUserId}")
     public Result<Void> unblockUser(
             @PathVariable Long targetUserId) {
@@ -176,26 +172,22 @@ public class ImConfigController {
 
     /**
      * 获取快捷键设置
-     * 获取当前用户的快捷键配置
      *
      * @return 快捷键设置
-     * @apiNote 包含发送消息、全局搜索、新建会话等快捷键配置
      */
 
     @GetMapping("/shortcut")
-    public Result<Map<String, Object>> getShortcutSettings() {
+    public Result<ShortcutSettingsVO> getShortcutSettings() {
         Long userId = SecurityUtils.getLoginUserId();
         Map<String, Object> settings = imConfigService.getShortcutSettings(userId);
-        return Result.success(settings);
+        return Result.success(ShortcutSettingsVO.fromMap(settings));
     }
 
     /**
      * 更新快捷键设置
-     * 更新当前用户的快捷键配置
      *
      * @param settings 设置项
      * @return 更新结果
-     * @apiNote 支持部分更新，只修改传入的设置项
      */
 
     @PutMapping("/shortcut")
@@ -205,5 +197,11 @@ public class ImConfigController {
         imConfigService.updateShortcutSettings(userId, settings);
         return Result.success("更新成功");
     }
-}
 
+    private Long toLong(Object value) {
+        if (value instanceof Number) {
+            return ((Number) value).longValue();
+        }
+        return null;
+    }
+}

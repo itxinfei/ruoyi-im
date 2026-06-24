@@ -3,14 +3,13 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUrlMetadata;
 import com.ruoyi.im.service.ImUrlMetadataService;
+import com.ruoyi.im.vo.url.UrlMetadataVO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -49,20 +48,20 @@ class ImUrlMetadataControllerTest {
 
         when(urlMetadataService.parseUrl(url)).thenReturn(metadata);
 
-        Result<Map<String, Object>> result = controller.parseUrl(url);
+        Result<UrlMetadataVO> result = controller.parseUrl(url);
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals(url, result.getData().get("url"));
-        assertEquals("Example Article", result.getData().get("title"));
-        assertEquals("This is an example article", result.getData().get("description"));
-        assertEquals("SUCCESS", result.getData().get("fetchStatus"));
+        assertEquals(url, result.getData().getUrl());
+        assertEquals("Example Article", result.getData().getTitle());
+        assertEquals("This is an example article", result.getData().getDescription());
+        assertEquals("SUCCESS", result.getData().getFetchStatus());
         verify(urlMetadataService).parseUrl(url);
     }
 
     @Test
     void parseUrl_InvalidUrl_Null() {
-        Result<Map<String, Object>> result = controller.parseUrl(null);
+        Result<UrlMetadataVO> result = controller.parseUrl(null);
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -71,7 +70,7 @@ class ImUrlMetadataControllerTest {
 
     @Test
     void parseUrl_InvalidUrl_Empty() {
-        Result<Map<String, Object>> result = controller.parseUrl("");
+        Result<UrlMetadataVO> result = controller.parseUrl("");
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -80,7 +79,7 @@ class ImUrlMetadataControllerTest {
 
     @Test
     void parseUrl_InvalidUrl_NoProtocol() {
-        Result<Map<String, Object>> result = controller.parseUrl("not-a-url");
+        Result<UrlMetadataVO> result = controller.parseUrl("not-a-url");
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -89,7 +88,7 @@ class ImUrlMetadataControllerTest {
 
     @Test
     void parseUrl_InvalidUrl_FtpProtocol() {
-        Result<Map<String, Object>> result = controller.parseUrl("ftp://example.com");
+        Result<UrlMetadataVO> result = controller.parseUrl("ftp://example.com");
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -107,12 +106,12 @@ class ImUrlMetadataControllerTest {
 
         when(urlMetadataService.parseUrl(url)).thenReturn(metadata);
 
-        Result<Map<String, Object>> result = controller.parseUrl(url);
+        Result<UrlMetadataVO> result = controller.parseUrl(url);
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals("FAILED", result.getData().get("fetchStatus"));
-        assertEquals("Connection timeout", result.getData().get("errorMessage"));
+        assertEquals("FAILED", result.getData().getFetchStatus());
+        assertEquals("Connection timeout", result.getData().getErrorMessage());
     }
 
     @Test
@@ -122,7 +121,7 @@ class ImUrlMetadataControllerTest {
         when(urlMetadataService.parseUrl(url))
                 .thenThrow(new RuntimeException("Network error"));
 
-        Result<Map<String, Object>> result = controller.parseUrl(url);
+        Result<UrlMetadataVO> result = controller.parseUrl(url);
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -140,18 +139,18 @@ class ImUrlMetadataControllerTest {
 
         when(urlMetadataService.refreshUrl(url)).thenReturn(metadata);
 
-        Result<Map<String, Object>> result = controller.refreshUrl(url);
+        Result<UrlMetadataVO> result = controller.refreshUrl(url);
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
-        assertEquals(url, result.getData().get("url"));
-        assertEquals("Refreshed Article", result.getData().get("title"));
+        assertEquals(url, result.getData().getUrl());
+        assertEquals("Refreshed Article", result.getData().getTitle());
         verify(urlMetadataService).refreshUrl(url);
     }
 
     @Test
     void refreshUrl_InvalidUrl() {
-        Result<Map<String, Object>> result = controller.refreshUrl("invalid-url");
+        Result<UrlMetadataVO> result = controller.refreshUrl("invalid-url");
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -165,7 +164,7 @@ class ImUrlMetadataControllerTest {
         when(urlMetadataService.refreshUrl(url))
                 .thenThrow(new RuntimeException("Refresh failed"));
 
-        Result<Map<String, Object>> result = controller.refreshUrl(url);
+        Result<UrlMetadataVO> result = controller.refreshUrl(url);
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
@@ -174,7 +173,6 @@ class ImUrlMetadataControllerTest {
 
     @Test
     void isValidUrl_ValidHttps() {
-        // Test via the controller by checking success case
         String url = "https://example.com";
         ImUrlMetadata metadata = new ImUrlMetadata();
         metadata.setUrl(url);
@@ -183,7 +181,7 @@ class ImUrlMetadataControllerTest {
 
         when(urlMetadataService.parseUrl(url)).thenReturn(metadata);
 
-        Result<Map<String, Object>> result = controller.parseUrl(url);
+        Result<UrlMetadataVO> result = controller.parseUrl(url);
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
@@ -199,7 +197,7 @@ class ImUrlMetadataControllerTest {
 
         when(urlMetadataService.parseUrl(url)).thenReturn(metadata);
 
-        Result<Map<String, Object>> result = controller.parseUrl(url);
+        Result<UrlMetadataVO> result = controller.parseUrl(url);
 
         assertNotNull(result);
         assertTrue(result.isSuccess());

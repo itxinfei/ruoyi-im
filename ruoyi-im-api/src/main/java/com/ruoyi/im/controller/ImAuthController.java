@@ -182,7 +182,7 @@ public class ImAuthController {
 
             return Result.success(loginVO);
         } catch (Exception e) {
-            throw new BusinessException("刷新Token失败: " + e.getMessage());
+            throw new BusinessException("刷新Token失败");
         }
     }
 
@@ -223,7 +223,7 @@ public class ImAuthController {
             boolean valid = jwtUtils.validateToken(token);
             return Result.success(valid);
         } catch (Exception e) {
-            logger.error("validateToken 异常: {}", e.getMessage());
+            logger.error("validateToken 异常", e);
             return Result.success(false);
         }
     }

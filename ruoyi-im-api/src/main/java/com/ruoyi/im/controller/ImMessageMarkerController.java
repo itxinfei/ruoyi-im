@@ -51,7 +51,7 @@ public class ImMessageMarkerController {
             return Result.success("标记成功", markerId);
         } catch (Exception e) {
             log.error("标记消息失败: messageId={}, userId={}", messageId, userId, e);
-            return Result.fail("标记失败: " + e.getMessage());
+            return Result.fail("标记失败");
         }
     }
 
@@ -70,7 +70,7 @@ public class ImMessageMarkerController {
             return Result.success("取消成功");
         } catch (Exception e) {
             log.error("取消标记失败: messageId={}, userId={}", messageId, userId, e);
-            return Result.fail("取消失败: " + e.getMessage());
+            return Result.fail("取消失败");
         }
     }
 
@@ -90,7 +90,7 @@ public class ImMessageMarkerController {
             return Result.success("设置成功", markerId);
         } catch (Exception e) {
             log.error("设置待办失败: messageId={}, userId={}", messageId, userId, e);
-            return Result.fail("设置失败: " + e.getMessage());
+            return Result.fail("设置失败");
         }
     }
 
@@ -108,7 +108,7 @@ public class ImMessageMarkerController {
             return Result.success("已完成");
         } catch (Exception e) {
             log.error("完成待办失败: markerId={}, userId={}", markerId, userId, e);
-            return Result.fail("操作失败: " + e.getMessage());
+            return Result.fail("操作失败");
         }
     }
 
@@ -126,7 +126,7 @@ public class ImMessageMarkerController {
             return Result.success("已重启");
         } catch (Exception e) {
             log.error("重启待办失败: markerId={}, userId={}", markerId, userId, e);
-            return Result.fail("操作失败: " + e.getMessage());
+            return Result.fail("操作失败");
         }
     }
 
@@ -144,7 +144,7 @@ public class ImMessageMarkerController {
             return Result.success(markers);
         } catch (Exception e) {
             log.error("获取标记列表失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -160,7 +160,7 @@ public class ImMessageMarkerController {
             return Result.success(markers);
         } catch (Exception e) {
             log.error("获取消息标记失败: messageId={}", messageId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -177,7 +177,7 @@ public class ImMessageMarkerController {
             return Result.success(count);
         } catch (Exception e) {
             log.error("获取待办数量失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 }

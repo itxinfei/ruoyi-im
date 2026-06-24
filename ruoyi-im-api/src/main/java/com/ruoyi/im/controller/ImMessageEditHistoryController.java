@@ -50,7 +50,7 @@ public class ImMessageEditHistoryController {
             return Result.success(historyList);
         } catch (Exception e) {
             log.error("获取消息编辑历史失败：messageId={}", messageId, e);
-            return Result.error("查询编辑历史失败：" + e.getMessage());
+            return Result.error("查询编辑历史失败");
         }
     }
 
@@ -74,7 +74,7 @@ public class ImMessageEditHistoryController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("获取消息编辑统计失败：messageId={}", messageId, e);
-            return Result.error("查询编辑统计失败：" + e.getMessage());
+            return Result.error("查询编辑统计失败");
         }
     }
 }

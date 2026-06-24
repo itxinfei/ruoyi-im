@@ -54,7 +54,7 @@ public class ImAttendanceGroupController {
             return Result.success("创建成功", groupId);
         } catch (Exception e) {
             log.error("创建考勤组失败: userId={}", userId, e);
-            return Result.fail("创建失败: " + e.getMessage());
+            return Result.fail("创建失败");
         }
     }
 
@@ -73,7 +73,7 @@ public class ImAttendanceGroupController {
             return Result.success("更新成功");
         } catch (Exception e) {
             log.error("更新考勤组失败: groupId={}, userId={}", groupId, userId, e);
-            return Result.fail("更新失败: " + e.getMessage());
+            return Result.fail("更新失败");
         }
     }
 
@@ -91,7 +91,7 @@ public class ImAttendanceGroupController {
             return Result.success("删除成功");
         } catch (Exception e) {
             log.error("删除考勤组失败: groupId={}, userId={}", groupId, userId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -107,7 +107,7 @@ public class ImAttendanceGroupController {
             return Result.success(group);
         } catch (Exception e) {
             log.error("获取考勤组详情失败: groupId={}", groupId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -124,7 +124,7 @@ public class ImAttendanceGroupController {
             return Result.success(groups);
         } catch (Exception e) {
             log.error("获取考勤组列表失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -141,7 +141,7 @@ public class ImAttendanceGroupController {
             return Result.success(group);
         } catch (Exception e) {
             log.error("获取用户考勤组失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -162,7 +162,7 @@ public class ImAttendanceGroupController {
             return Result.success("添加成功");
         } catch (Exception e) {
             log.error("添加成员失败: groupId={}, userId={}", groupId, userId, e);
-            return Result.fail("添加失败: " + e.getMessage());
+            return Result.fail("添加失败");
         }
     }
 
@@ -181,7 +181,7 @@ public class ImAttendanceGroupController {
             return Result.success("移除成功");
         } catch (Exception e) {
             log.error("移除成员失败: groupId={}, userId={}", groupId, userId, e);
-            return Result.fail("移除失败: " + e.getMessage());
+            return Result.fail("移除失败");
         }
     }
 
@@ -197,7 +197,7 @@ public class ImAttendanceGroupController {
             return Result.success(members);
         } catch (Exception e) {
             log.error("获取成员列表失败: groupId={}", groupId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -220,7 +220,7 @@ public class ImAttendanceGroupController {
             return Result.success("创建成功", shiftId);
         } catch (Exception e) {
             log.error("创建班次失败: groupId={}", groupId, e);
-            return Result.fail("创建失败: " + e.getMessage());
+            return Result.fail("创建失败");
         }
     }
 
@@ -238,7 +238,7 @@ public class ImAttendanceGroupController {
             return Result.success("删除成功");
         } catch (Exception e) {
             log.error("删除班次失败: shiftId={}", shiftId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -254,7 +254,7 @@ public class ImAttendanceGroupController {
             return Result.success(shifts);
         } catch (Exception e) {
             log.error("获取班次列表失败: groupId={}", groupId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -279,7 +279,7 @@ public class ImAttendanceGroupController {
             return Result.success("排班成功");
         } catch (Exception e) {
             log.error("批量排班失败: groupId={}", groupId, e);
-            return Result.fail("排班失败: " + e.getMessage());
+            return Result.fail("排班失败");
         }
     }
 
@@ -298,7 +298,7 @@ public class ImAttendanceGroupController {
             return Result.success(schedule);
         } catch (Exception e) {
             log.error("获取用户排班失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 }

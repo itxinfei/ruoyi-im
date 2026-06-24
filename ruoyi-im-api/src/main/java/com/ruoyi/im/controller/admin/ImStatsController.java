@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -66,32 +65,32 @@ public class ImStatsController {
     public Result<Map<String, Object>> getOverview() {
         Map<String, Object> overview = new HashMap<>();
 
-        // 用户统计
+        // 用户统计（使用SQL COUNT）
         int totalUsers = imUserMapper.countImUsers();
         overview.put("totalUsers", totalUsers);
 
-        // 群组统计
-        List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
-        overview.put("totalGroups", allGroups.size());
+        // 群组统计（使用SQL COUNT）
+        long totalGroups = imGroupMapper.selectCount(
+                new LambdaQueryWrapper<ImGroup>().eq(ImGroup::getIsDeleted, 0));
+        overview.put("totalGroups", totalGroups);
 
-        // 消息统计
-        List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
-        overview.put("totalMessages", allMessages.size());
+        // 消息统计（使用SQL COUNT）
+        int totalMessages = imMessageMapper.countSearchResults(
+                null, null, null, null, null, null, false, false);
+        overview.put("totalMessages", totalMessages);
 
-        // 今日消息数
+        // 今日消息数（使用SQL WHERE条件）
         LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        List<ImMessage> todayMessages = imMessageMapper.selectImMessageList(new ImMessage());
-        long todayCount = todayMessages.stream()
-                .filter(m -> m.getCreateTime() != null && !m.getCreateTime().isBefore(todayStart))
-                .count();
-        overview.put("todayMessages", todayCount);
+        LocalDateTime todayEnd = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
+        int todayMessages = imMessageMapper.countSearchResults(
+                null, null, null, null, todayStart, todayEnd, false, false);
+        overview.put("todayMessages", todayMessages);
 
-        // 活跃用户（最近7天登录）
+        // 活跃用户（最近7天登录，使用SQL COUNT）
         LocalDateTime weekStart = LocalDateTime.now().minusDays(7);
-        List<ImUser> allUsers = imUserMapper.selectImUserList(new ImUser());
-        long activeUsers = allUsers.stream()
-                .filter(u -> u.getLastOnlineTime() != null && !u.getLastOnlineTime().isBefore(weekStart))
-                .count();
+        ImUser queryUser = new ImUser();
+        queryUser.setLastOnlineTime(weekStart);
+        int activeUsers = imUserMapper.selectImUserCount(queryUser);
         overview.put("activeUsers", activeUsers);
 
         return Result.success(overview);
@@ -110,16 +109,15 @@ public class ImStatsController {
 
         LocalDateTime since = LocalDateTime.now().minusDays(days);
 
-        // 活跃用户数（有登录记录）
-        List<ImUser> allUsers = imUserMapper.selectImUserList(new ImUser());
-        long activeUsers = allUsers.stream()
-                .filter(u -> u.getLastOnlineTime() != null && !u.getLastOnlineTime().isBefore(since))
-                .count();
+        // 活跃用户数（使用SQL COUNT）
+        ImUser activeQuery = new ImUser();
+        activeQuery.setLastOnlineTime(since);
+        long activeUsers = imUserMapper.selectImUserCount(activeQuery);
 
-        // 新增用户数
-        long newUsers = allUsers.stream()
-                .filter(u -> u.getCreateTime() != null && !u.getCreateTime().isBefore(since))
-                .count();
+        // 新增用户数（使用SQL COUNT）
+        ImUser newQuery = new ImUser();
+        newQuery.setCreateTime(since);
+        long newUsers = imUserMapper.selectImUserCount(newQuery);
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("activeUsers", activeUsers);
@@ -142,18 +140,18 @@ public class ImStatsController {
 
         LocalDateTime since = LocalDateTime.now().minusDays(days);
 
-        // 活跃群组数（通过会话表查询群组类型的会话，且有最近消息的）
-        List<ImConversation> allConversations = imConversationMapper.selectImConversationList(new ImConversation());
-        long activeGroups = allConversations.stream()
-                .filter(c -> "GROUP".equals(c.getType()))
-                .filter(c -> c.getLastMessageTime() != null && !c.getLastMessageTime().isBefore(since))
-                .count();
+        // 活跃群组数（使用SQL COUNT）
+        long activeGroups = imConversationMapper.selectCount(
+                new LambdaQueryWrapper<ImConversation>()
+                        .eq(ImConversation::getType, "GROUP")
+                        .isNotNull(ImConversation::getLastMessageTime)
+                        .ge(ImConversation::getLastMessageTime, since));
 
-        // 新建群组数
-        List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
-        long newGroups = allGroups.stream()
-                .filter(g -> g.getCreateTime() != null && !g.getCreateTime().isBefore(since))
-                .count();
+        // 新建群组数（使用SQL COUNT）
+        long newGroups = imGroupMapper.selectCount(
+                new LambdaQueryWrapper<ImGroup>()
+                        .isNotNull(ImGroup::getCreateTime)
+                        .ge(ImGroup::getCreateTime, since));
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("activeGroups", activeGroups);
@@ -186,12 +184,9 @@ public class ImStatsController {
         LocalDateTime start = LocalDateTime.of(startDate, LocalTime.MIN);
         LocalDateTime end = LocalDateTime.of(endDate, LocalTime.MAX);
 
-        // 日期范围内的消息总数
-        List<ImMessage> allMessages = imMessageMapper.selectImMessageList(new ImMessage());
-        long messageCount = allMessages.stream()
-                .filter(m -> m.getCreateTime() != null)
-                .filter(m -> !m.getCreateTime().isBefore(start) && !m.getCreateTime().isAfter(end))
-                .count();
+        // 日期范围内的消息总数（使用SQL COUNT）
+        int messageCount = imMessageMapper.countSearchResults(
+                null, null, null, null, start, end, false, false);
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("messageCount", messageCount);
@@ -202,4 +197,3 @@ public class ImStatsController {
         return Result.success(stats);
     }
 }
-

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.concurrent.*;
@@ -30,6 +31,22 @@ public class ImUrlMetadataServiceImpl implements ImUrlMetadataService {
 
     // 线程池用于异步抓取网页
     private final ExecutorService executorService = Executors.newFixedThreadPool(5);
+
+    /**
+     * 优雅关闭线程池
+     */
+    @PreDestroy
+    public void destroy() {
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+    }
 
     // 缓存过期时间（7 天）
     private static final long CACHE_EXPIRE_DAYS = 7;

@@ -100,6 +100,13 @@
   --dt-shadow-brand-strong: 0 2px 6px rgba(0, 102, 204, 0.3);
   --dt-shadow-modal: 0 12px 48px rgba(0, 0, 0, 0.2);
 
+  // 消息气泡组件 Token
+  --dt-bubble-video-overlay: rgba(0, 0, 0, 0.3);
+  --dt-bubble-video-overlay-hover: rgba(0, 0, 0, 0.4);
+  --dt-bubble-sent-icon-bg: rgba(255, 255, 255, 0.2);
+  --dt-bubble-sent-text: rgba(255, 255, 255, 0.8);
+  --dt-bubble-voice-progress-bg: rgba(0, 0, 0, 0.1);
+
   // === Typography (文本层级 - 钉钉风格) ===
   --dt-text-primary: #171a1d;
   --dt-text-secondary: #5f6670;
@@ -385,6 +392,13 @@ html.dark {
   --dt-avatar-ring-bg-dark-hover: rgba(255, 255, 255, 0.25);  /* 暗色模式头像ring hover背景 */
   --dt-avatar-ring-border-dark-hover: rgba(255, 255, 255, 0.3);  /* 暗色模式头像ring hover边框 */
   --dt-avatar-ring-shadow-dark-hover: rgba(255, 255, 255, 0.15);  /* 暗色模式头像ring hover阴影 */
+
+  // 消息气泡组件 Token (暗色模式)
+  --dt-bubble-video-overlay: rgba(255, 255, 255, 0.15);
+  --dt-bubble-video-overlay-hover: rgba(255, 255, 255, 0.25);
+  --dt-bubble-sent-icon-bg: rgba(255, 255, 255, 0.15);
+  --dt-bubble-sent-text: rgba(255, 255, 255, 0.7);
+  --dt-bubble-voice-progress-bg: rgba(255, 255, 255, 0.15);
 }
 
 // SCSS 辅助 Mixins

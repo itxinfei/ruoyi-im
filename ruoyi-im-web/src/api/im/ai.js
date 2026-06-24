@@ -12,12 +12,14 @@ import request from '../request'
  * @param {string} data.model AI模型（可选）
  * @param {number} data.maxTokens 最大token数（可选）
  * @param {number} data.temperature 温度参数（可选）
+ * @param {Object} config 请求配置（可选，支持signal用于取消请求）
  */
-export function chat(data) {
+export function chat(data, config = {}) {
   return request({
     url: '/api/im/ai/chat',
     method: 'post',
-    data
+    data,
+    signal: config.signal
   })
 }
 
@@ -39,13 +41,11 @@ export function summarize(data) {
 /**
  * 清除对话上下文
  * @param {string} conversationId 会话ID
- * @param {number} userId 用户ID
  */
-export function clearConversation(conversationId, userId) {
+export function clearConversation(conversationId) {
   return request({
     url: `/api/im/ai/conversation/${conversationId}`,
-    method: 'delete',
-    params: { userId }
+    method: 'delete'
   })
 }
 

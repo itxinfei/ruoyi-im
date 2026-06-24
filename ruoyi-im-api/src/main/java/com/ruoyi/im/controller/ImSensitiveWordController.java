@@ -3,10 +3,11 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImSensitiveWord;
 import com.ruoyi.im.service.ISensitiveWordService;
+import com.ruoyi.im.vo.sensitive.SensitiveWordDetectResultVO;
+import com.ruoyi.im.vo.sensitive.SensitiveWordFilterResultVO;
+import com.ruoyi.im.vo.sensitive.SensitiveWordRequest;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -34,13 +35,14 @@ public class ImSensitiveWordController {
      */
     
     @PostMapping("/detect")
-    public Result<Map<String, Object>> detect(@RequestBody Map<String, String> request) {
-        String text = request.get("text");
+    public Result<SensitiveWordDetectResultVO> detect(@RequestBody SensitiveWordRequest request) {
+        String text = request.getText();
         Set<String> sensitiveWords = sensitiveWordService.detectSensitiveWords(text);
-        Map<String, Object> result = new HashMap<>();
-        result.put("contains", !sensitiveWords.isEmpty());
-        result.put("sensitiveWords", sensitiveWords);
-        result.put("count", sensitiveWords.size());
+        SensitiveWordDetectResultVO result = new SensitiveWordDetectResultVO();
+        result.setOriginalText(text);
+        result.setContains(!sensitiveWords.isEmpty());
+        result.setSensitiveWords(sensitiveWords);
+        result.setCount(sensitiveWords.size());
         return Result.success(result);
     }
 
@@ -52,15 +54,15 @@ public class ImSensitiveWordController {
      */
     
     @PostMapping("/filter")
-    public Result<Map<String, Object>> filter(@RequestBody Map<String, String> request) {
-        String text = request.get("text");
-        String replacement = request.getOrDefault("replacement", "***");
+    public Result<SensitiveWordFilterResultVO> filter(@RequestBody SensitiveWordRequest request) {
+        String text = request.getText();
+        String replacement = request.getReplacement() != null ? request.getReplacement() : "***";
 
         String filteredText = sensitiveWordService.filter(text, replacement);
-        Map<String, Object> result = new HashMap<>();
-        result.put("originalText", text);
-        result.put("filteredText", filteredText);
-        result.put("filtered", !text.equals(filteredText));
+        SensitiveWordFilterResultVO result = new SensitiveWordFilterResultVO();
+        result.setOriginalText(text);
+        result.setFilteredText(filteredText);
+        result.setFiltered(!text.equals(filteredText));
         return Result.success(result);
     }
 

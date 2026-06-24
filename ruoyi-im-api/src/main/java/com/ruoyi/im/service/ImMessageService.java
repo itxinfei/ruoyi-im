@@ -192,4 +192,45 @@ public interface ImMessageService {
      * @return 未送达消息帧列表
      */
     List<WsFrame> getUndeliveredMessages(Long userId);
+
+    /**
+     * 管理员搜索消息（支持全量搜索）
+     *
+     * @param keyword 搜索关键词
+     * @param messageType 消息类型
+     * @param senderId 发送者ID
+     * @param conversationId 会话ID
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @param offset 偏移量
+     * @param limit 每页数量
+     * @return 消息列表
+     */
+    List<com.ruoyi.im.domain.ImMessage> adminSearchMessages(String keyword, String messageType,
+            Long senderId, Long conversationId,
+            java.time.LocalDateTime startTime, java.time.LocalDateTime endTime,
+            int offset, int limit);
+
+    /**
+     * 管理员统计搜索结果数量
+     */
+    int adminCountSearchResults(String keyword, String messageType,
+            Long senderId, Long conversationId,
+            java.time.LocalDateTime startTime, java.time.LocalDateTime endTime);
+
+    /**
+     * 管理员获取消息详情
+     */
+    com.ruoyi.im.domain.ImMessage adminGetMessageById(Long messageId);
+
+    /**
+     * 管理员删除消息
+     */
+    void adminDeleteMessage(Long messageId);
+
+    /**
+     * 管理员统计消息数量（按时间范围）
+     */
+    int adminCountMessagesByTimeRange(java.time.LocalDateTime startTime, java.time.LocalDateTime endTime,
+            String messageType, boolean includeRevoked);
 }

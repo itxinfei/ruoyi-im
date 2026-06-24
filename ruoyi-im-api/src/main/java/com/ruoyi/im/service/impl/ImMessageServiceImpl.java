@@ -1195,4 +1195,38 @@ public class ImMessageServiceImpl implements ImMessageService {
         }
         return frames;
     }
+
+    @Override
+    public List<ImMessage> adminSearchMessages(String keyword, String messageType,
+            Long senderId, Long conversationId,
+            LocalDateTime startTime, LocalDateTime endTime,
+            int offset, int limit) {
+        return imMessageMapper.searchMessages(conversationId, keyword, messageType, senderId,
+                startTime, endTime, false, false, offset, limit);
+    }
+
+    @Override
+    public int adminCountSearchResults(String keyword, String messageType,
+            Long senderId, Long conversationId,
+            LocalDateTime startTime, LocalDateTime endTime) {
+        return imMessageMapper.countSearchResults(conversationId, keyword, messageType, senderId,
+                startTime, endTime, false, false);
+    }
+
+    @Override
+    public ImMessage adminGetMessageById(Long messageId) {
+        return imMessageMapper.selectImMessageById(messageId);
+    }
+
+    @Override
+    public void adminDeleteMessage(Long messageId) {
+        imMessageMapper.deleteImMessageById(messageId);
+    }
+
+    @Override
+    public int adminCountMessagesByTimeRange(LocalDateTime startTime, LocalDateTime endTime,
+            String messageType, boolean includeRevoked) {
+        return imMessageMapper.countSearchResults(null, null, messageType, null,
+                startTime, endTime, includeRevoked, false);
+    }
 }

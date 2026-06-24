@@ -57,7 +57,7 @@ public class ImGlobalSearchController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("全局搜索失败: keyword={}", request.getKeyword(), e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 
@@ -78,7 +78,7 @@ public class ImGlobalSearchController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("搜索消息失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 
@@ -99,7 +99,7 @@ public class ImGlobalSearchController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("搜索联系人失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 
@@ -120,7 +120,7 @@ public class ImGlobalSearchController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("搜索群组失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 
@@ -141,7 +141,7 @@ public class ImGlobalSearchController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("搜索文件失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 
@@ -162,7 +162,7 @@ public class ImGlobalSearchController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("搜索工作台内容失败: keyword={}", keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 

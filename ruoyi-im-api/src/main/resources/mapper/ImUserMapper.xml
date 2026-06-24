@@ -251,4 +251,23 @@
     <select id="countImUsers" resultType="java.lang.Integer">
         select count(*) from im_user
     </select>
+
+    <!-- Count users by query condition -->
+    <select id="selectImUserCount" parameterType="com.ruoyi.im.domain.ImUser" resultType="java.lang.Integer">
+        select count(*) from im_user
+        <where>
+            <if test="userStatus != null and userStatus != ''">
+                and user_status = #{userStatus}
+            </if>
+            <if test="lastOnlineTime != null">
+                and last_online_time &gt;= #{lastOnlineTime}
+            </if>
+            <if test="createTime != null">
+                and create_time &gt;= #{createTime}
+            </if>
+            <if test="status != null and status != ''">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
 </mapper>

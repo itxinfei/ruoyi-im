@@ -148,6 +148,7 @@ const messages = ref([])
 const chatHistory = ref([])
 const summaryVisible = ref(false)
 const summaryContent = ref('')
+const abortController = ref(null)
 
 const currentChatTitle = computed(() => {
   if (messages.value.length === 0) return '新建对话'
@@ -191,6 +192,9 @@ const sendMessage = async () => {
   inputMessage.value = ''
   isTyping.value = true
   
+  // 创建AbortController用于支持停止生成
+  abortController.value = new AbortController()
+
   // 预插一条 AI 消息用于流式显示
   const aiMsgIdx = messages.value.push({ 
     role: 'assistant', 
@@ -206,7 +210,7 @@ const sendMessage = async () => {
       content,
       conversationId: conversationId.value,
       model: selectedModel.value
-    })
+    }, { signal: abortController.value.signal })
 
     if (res.code === 200) {
       simulateStreaming(aiMsgIdx, res.data.content)
@@ -215,10 +219,15 @@ const sendMessage = async () => {
       messages.value[aiMsgIdx].isStreaming = false
     }
   } catch (e) {
+    if (e.name === 'AbortError') {
+      // 用户主动停止，不显示错误
+      return
+    }
     messages.value[aiMsgIdx].content = '网络连接失败。'
     messages.value[aiMsgIdx].isStreaming = false
   } finally {
     isTyping.value = false
+    abortController.value = null
   }
 }
 
@@ -239,6 +248,23 @@ const simulateStreaming = (idx, fullText) => {
 
 const handleQuickAction = (chip) => {
   inputMessage.value = chip.prompt
+}
+
+// 停止生成
+const stopGeneration = () => {
+  if (abortController.value) {
+    abortController.value.abort()
+    abortController.value = null
+  }
+  // 找到最后一条正在流式输出的AI消息并终止
+  const streamingIdx = messages.value.findIndex(m => m.isStreaming)
+  if (streamingIdx !== -1) {
+    messages.value[streamingIdx].isStreaming = false
+    if (!messages.value[streamingIdx].content) {
+      messages.value[streamingIdx].content = '（已停止生成）'
+    }
+  }
+  isTyping.value = false
 }
 
 const loadChat = (item) => {

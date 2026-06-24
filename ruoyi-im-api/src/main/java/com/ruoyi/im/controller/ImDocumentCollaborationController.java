@@ -53,7 +53,7 @@ public class ImDocumentCollaborationController {
             return Result.success("添加成功");
         } catch (Exception e) {
             log.error("添加协作者失败: documentId={}, userId={}", request.getDocumentId(), userId, e);
-            return Result.fail("添加失败: " + e.getMessage());
+            return Result.fail("添加失败");
         }
     }
 
@@ -72,7 +72,7 @@ public class ImDocumentCollaborationController {
             return Result.success("移除成功");
         } catch (Exception e) {
             log.error("移除协作者失败: documentId={}, userId={}", documentId, userId, e);
-            return Result.fail("移除失败: " + e.getMessage());
+            return Result.fail("移除失败");
         }
     }
 
@@ -92,7 +92,7 @@ public class ImDocumentCollaborationController {
             return Result.success("更新成功");
         } catch (Exception e) {
             log.error("更新协作者权限失败: documentId={}, userId={}", documentId, userId, e);
-            return Result.fail("更新失败: " + e.getMessage());
+            return Result.fail("更新失败");
         }
     }
 
@@ -108,7 +108,7 @@ public class ImDocumentCollaborationController {
             return Result.success(collaborators);
         } catch (Exception e) {
             log.error("获取协作者列表失败: documentId={}", documentId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -128,7 +128,7 @@ public class ImDocumentCollaborationController {
             return Result.success("已加入");
         } catch (Exception e) {
             log.error("加入文档编辑失败: documentId={}, userId={}", documentId, userId, e);
-            return Result.fail("加入失败: " + e.getMessage());
+            return Result.fail("加入失败");
         }
     }
 
@@ -146,7 +146,7 @@ public class ImDocumentCollaborationController {
             return Result.success("已离开");
         } catch (Exception e) {
             log.error("离开文档编辑失败: documentId={}, userId={}", documentId, userId, e);
-            return Result.fail("离开失败: " + e.getMessage());
+            return Result.fail("离开失败");
         }
     }
 
@@ -166,7 +166,7 @@ public class ImDocumentCollaborationController {
             return Result.success("更新成功");
         } catch (Exception e) {
             log.error("更新光标位置失败: documentId={}, userId={}", documentId, userId, e);
-            return Result.fail("更新失败: " + e.getMessage());
+            return Result.fail("更新失败");
         }
     }
 
@@ -182,7 +182,7 @@ public class ImDocumentCollaborationController {
             return Result.success(editors);
         } catch (Exception e) {
             log.error("获取在线编辑者失败: documentId={}", documentId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -200,7 +200,7 @@ public class ImDocumentCollaborationController {
             return Result.success();
         } catch (Exception e) {
             log.error("心跳失败: documentId={}, userId={}", documentId, userId, e);
-            return Result.fail("心跳失败: " + e.getMessage());
+            return Result.fail("心跳失败");
         }
     }
 
@@ -219,7 +219,7 @@ public class ImDocumentCollaborationController {
             return Result.success(logs);
         } catch (Exception e) {
             log.error("获取操作日志失败: documentId={}", documentId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 }

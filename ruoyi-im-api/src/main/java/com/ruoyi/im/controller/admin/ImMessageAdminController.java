@@ -2,7 +2,7 @@ package com.ruoyi.im.controller.admin;
 
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImMessage;
-import com.ruoyi.im.mapper.ImMessageMapper;
+import com.ruoyi.im.service.ImMessageService;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -25,15 +25,15 @@ import java.util.Map;
 @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_SUPER_ADMIN')")
 public class ImMessageAdminController {
 
-    private final ImMessageMapper imMessageMapper;
+    private final ImMessageService imMessageService;
 
     /**
      * 构造器注入依赖
      *
-     * @param imMessageMapper 消息 Mapper
+     * @param imMessageService 消息服务
      */
-    public ImMessageAdminController(ImMessageMapper imMessageMapper) {
-        this.imMessageMapper = imMessageMapper;
+    public ImMessageAdminController(ImMessageService imMessageService) {
+        this.imMessageService = imMessageService;
     }
 
     /**
@@ -61,36 +61,14 @@ public class ImMessageAdminController {
             @RequestParam(required = false, defaultValue = "1") Integer pageNum,
             @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
 
-        // 计算偏移量
         int offset = (pageNum - 1) * pageSize;
 
-        // 搜索消息
-        List<ImMessage> messages = imMessageMapper.searchMessages(
-                conversationId,
-                keyword,
-                messageType,
-                senderId,
-                startTime,
-                endTime,
-                false,
-                false,
-                offset,
-                pageSize
-        );
+        List<ImMessage> messages = imMessageService.adminSearchMessages(
+                keyword, messageType, senderId, conversationId, startTime, endTime, offset, pageSize);
 
-        // 统计总数
-        int total = imMessageMapper.countSearchResults(
-                conversationId,
-                keyword,
-                messageType,
-                senderId,
-                startTime,
-                endTime,
-                false,
-                false
-        );
+        int total = imMessageService.adminCountSearchResults(
+                keyword, messageType, senderId, conversationId, startTime, endTime);
 
-        // 返回结果
         Map<String, Object> data = new HashMap<>();
         data.put("list", messages);
         data.put("total", total);
@@ -110,7 +88,7 @@ public class ImMessageAdminController {
     
     @GetMapping("/{id}")
     public Result<ImMessage> getById(@PathVariable Long id) {
-        ImMessage message = imMessageMapper.selectImMessageById(id);
+        ImMessage message = imMessageService.adminGetMessageById(id);
         if (message == null) {
             return Result.fail("消息不存在");
         }
@@ -126,12 +104,11 @@ public class ImMessageAdminController {
     
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
-        ImMessage message = imMessageMapper.selectImMessageById(id);
+        ImMessage message = imMessageService.adminGetMessageById(id);
         if (message == null) {
             return Result.fail("消息不存在");
         }
-
-        imMessageMapper.deleteImMessageById(id);
+        imMessageService.adminDeleteMessage(id);
         return Result.success("删除成功");
     }
 
@@ -147,11 +124,11 @@ public class ImMessageAdminController {
         BatchOperationResult result = new BatchOperationResult();
 
         for (Long id : ids) {
-            ImMessage message = imMessageMapper.selectImMessageById(id);
+            ImMessage message = imMessageService.adminGetMessageById(id);
             if (message == null) {
                 result.addFailedItem(id, "消息不存在");
             } else {
-                imMessageMapper.deleteImMessageById(id);
+                imMessageService.adminDeleteMessage(id);
                 result.setSuccessCount(result.getSuccessCount() + 1);
             }
         }
@@ -172,7 +149,6 @@ public class ImMessageAdminController {
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime endTime) {
 
-        // 默认统计最近 7 天
         if (endTime == null) {
             endTime = LocalDateTime.now();
         }
@@ -180,29 +156,23 @@ public class ImMessageAdminController {
             startTime = endTime.minusDays(7);
         }
 
-        // 统计各类型消息数量
         Map<String, Object> stats = new HashMap<>();
 
-        int totalMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, false, false);
+        int totalMessages = imMessageService.adminCountMessagesByTimeRange(startTime, endTime, null, false);
         stats.put("totalMessages", totalMessages);
 
-        // 统计文本消息
-        int textMessages = imMessageMapper.countSearchResults(null, null, "TEXT", null, startTime, endTime, false, false);
+        int textMessages = imMessageService.adminCountMessagesByTimeRange(startTime, endTime, "TEXT", false);
         stats.put("textMessages", textMessages);
 
-        // 统计图片消息
-        int imageMessages = imMessageMapper.countSearchResults(null, null, "IMAGE", null, startTime, endTime, false, false);
+        int imageMessages = imMessageService.adminCountMessagesByTimeRange(startTime, endTime, "IMAGE", false);
         stats.put("imageMessages", imageMessages);
 
-        // 统计文件消息
-        int fileMessages = imMessageMapper.countSearchResults(null, null, "FILE", null, startTime, endTime, false, false);
+        int fileMessages = imMessageService.adminCountMessagesByTimeRange(startTime, endTime, "FILE", false);
         stats.put("fileMessages", fileMessages);
 
-        // 统计已撤回消息
-        int revokedMessages = imMessageMapper.countSearchResults(null, null, null, null, startTime, endTime, true, false);
+        int revokedMessages = imMessageService.adminCountMessagesByTimeRange(startTime, endTime, null, true);
         stats.put("revokedMessages", revokedMessages);
 
         return Result.success(stats);
     }
 }
-

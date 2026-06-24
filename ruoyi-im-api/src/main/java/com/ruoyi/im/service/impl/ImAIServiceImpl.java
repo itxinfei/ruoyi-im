@@ -2,6 +2,13 @@ package com.ruoyi.im.service.impl;
 
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+import com.ruoyi.im.config.AiConfig;
 import com.ruoyi.im.dto.ai.ChatRequest;
 import com.ruoyi.im.dto.ai.ChatResponse;
 import com.ruoyi.im.dto.ai.SummaryRequest;
@@ -134,9 +141,18 @@ public class ImAIServiceImpl implements ImAIService {
 
     private static final String CONVERSATION_KEY_PREFIX = "ai:conversation:";
     private static final int CONVERSATION_TTL_HOURS = 24;
+    /** 对话历史上限（最近N条消息） */
+    private static final int MAX_HISTORY_SIZE = 100;
+    /** AI调用最大重试次数 */
+    private static final int MAX_RETRY_COUNT = 3;
+    /** 重试基础间隔（毫秒） */
+    private static final long RETRY_BASE_DELAY_MS = 500;
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+
+    @Resource
+    private AiConfig aiConfig;
 
     // 支持的AI模型
     private static final String[] SUPPORTED_MODELS = {
@@ -173,8 +189,8 @@ public class ImAIServiceImpl implements ImAIService {
             // 获取对话历史（用于上下文记忆）
             List<String> history = getConversationHistory(conversationId, request.getUserId());
 
-            // 调用AI生成回复
-            String aiResponse = generateChatResponse(request.getContent(), history, model);
+            // 调用AI生成回复（带重试）
+            String aiResponse = executeWithRetry(() -> generateChatResponse(request.getContent(), history, model));
 
             // 保存对话历史
             saveMessage(conversationId, request.getUserId(), "user", request.getContent());
@@ -190,8 +206,8 @@ public class ImAIServiceImpl implements ImAIService {
 
             return response;
         } catch (Exception e) {
-            log.error("AI聊天失败: userId={}, content={}", request.getUserId(), request.getContent(), e);
-            throw new BusinessException("AI聊天失败: " + e.getMessage());
+            log.error("AI聊天失败: userId={}", request.getUserId(), e);
+            throw new BusinessException("AI聊天失败，请稍后重试");
         }
     }
 
@@ -216,7 +232,7 @@ public class ImAIServiceImpl implements ImAIService {
             return response;
         } catch (Exception e) {
             log.error("生成摘要失败", e);
-            throw new BusinessException("生成摘要失败: " + e.getMessage());
+            throw new BusinessException("生成摘要失败，请稍后重试");
         }
     }
 
@@ -226,7 +242,12 @@ public class ImAIServiceImpl implements ImAIService {
             throw new BusinessException("参数错误");
         }
         String key = getConversationKey(conversationId, userId);
-        redisTemplate.delete(key);
+        try {
+            redisTemplate.delete(key);
+        } catch (Exception e) {
+            log.error("清除AI对话上下文失败: conversationId={}, userId={}", conversationId, userId, e);
+            throw new BusinessException("清除对话失败");
+        }
         log.info("清除AI对话上下文: conversationId={}, userId={}", conversationId, userId);
     }
 
@@ -265,55 +286,75 @@ public class ImAIServiceImpl implements ImAIService {
 
     /**
      * 使用OpenAI API生成回复
-     *
-     * 实现步骤：
-     * 1. 从配置中读取 api-key 和 api-url
-     * 2. 构造符合OpenAI格式的请求体：
-     *    {
-     *      "model": "gpt-3.5-turbo",
-     *      "messages": [{"role": "user", "content": "你好"}],
-     *      "temperature": 0.7
-     *    }
-     * 3. 设置请求头：Authorization: Bearer sk-xxx, Content-Type: application/json
-     * 4. 发送POST请求到 /chat/completions 接口
-     * 5. 解析响应获取 choices[0].message.content
-     *
-     * HTTP客户端建议：使用 RestTemplate 或 OkHttp
-     *
-     * @param message 用户消息
-     * @param history 对话历史
-     * @param model 具体模型（gpt-3.5-turbo 或 gpt-4）
-     * @return AI回复文本
+     * OpenAI Chat Completions API: POST {apiUrl}/chat/completions
      */
     private String chatWithOpenAI(String message, List<String> history, String model) {
-        // OpenAI API调用入口，参考：https://platform.openai.com/docs/api-reference/chat
-        log.warn("OpenAI API暂未实现，使用模拟回复");
-        return chatWithMock(message, history);
+        AiConfig.OpenAiConfig config = aiConfig.getOpenai();
+        if (StrUtil.isBlank(config.getApiKey())) {
+            log.warn("OpenAI API密钥未配置，使用模拟回复");
+            return chatWithMock(message, history);
+        }
+
+        String apiUrl = config.getApiUrl() + "/chat/completions";
+        JSONObject requestBody = buildOpenAIRequestBody(message, history, config.getModel(), config.getTimeout());
+
+        try {
+            HttpResponse response = HttpRequest.post(apiUrl)
+                    .header("Authorization", "Bearer " + config.getApiKey())
+                    .header("Content-Type", "application/json")
+                    .timeout(config.getTimeout() * 1000)
+                    .body(requestBody.toString())
+                    .execute();
+
+            if (response.isOk()) {
+                return parseOpenAIResponse(response.body());
+            } else {
+                log.error("OpenAI API调用失败: status={}, body={}", response.getStatus(), response.body());
+                throw new BusinessException("AI服务调用失败");
+            }
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("OpenAI API调用异常", e);
+            throw new BusinessException("AI服务调用异常");
+        }
     }
 
     /**
      * 使用通义千问API生成回复
-     *
-     * 实现步骤：
-     * 1. 从配置中读取 api-key
-     * 2. 使用 DashScope SDK 或 HTTP 调用
-     * 3. API端点：https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation
-     * 4. 请求体格式与OpenAI兼容，也可使用DashScope原生格式
-     *
-     * Maven依赖（可选）：
-     * <dependency>
-     *   <groupId>com.alibaba.cloud.ai</groupId>
-     *   <artifactId>spring-cloud-starter-alibaba-ai</artifactId>
-     * </dependency>
-     *
-     * @param message 用户消息
-     * @param history 对话历史
-     * @return AI回复文本
+     * DashScope OpenAI兼容模式: POST {apiUrl}/chat/completions
      */
     private String chatWithQwen(String message, List<String> history) {
-        // 通义千问API调用入口，SDK参考：https://help.aliyun.com/zh/dashscope/developer-reference/quick-start
-        log.warn("通义千问API暂未实现，使用模拟回复");
-        return chatWithMock(message, history);
+        AiConfig.QwenConfig config = aiConfig.getQwen();
+        if (StrUtil.isBlank(config.getApiKey())) {
+            log.warn("通义千问API密钥未配置，使用模拟回复");
+            return chatWithMock(message, history);
+        }
+
+        String apiUrl = config.getApiUrl() + "/chat/completions";
+        JSONObject requestBody = buildOpenAIRequestBody(message, history, config.getModel(), config.getTimeout());
+
+        try {
+            HttpResponse response = HttpRequest.post(apiUrl)
+                    .header("Authorization", "Bearer " + config.getApiKey())
+                    .header("Content-Type", "application/json")
+                    .header("X-DashScope-Async", "enable")
+                    .timeout(config.getTimeout() * 1000)
+                    .body(requestBody.toString())
+                    .execute();
+
+            if (response.isOk()) {
+                return parseOpenAIResponse(response.body());
+            } else {
+                log.error("通义千问API调用失败: status={}, body={}", response.getStatus(), response.body());
+                throw new BusinessException("AI服务调用失败");
+            }
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("通义千问API调用异常", e);
+            throw new BusinessException("AI服务调用异常");
+        }
     }
 
     /**
@@ -383,6 +424,66 @@ public class ImAIServiceImpl implements ImAIService {
         // 讯飞星火API调用入口，参考文档：https://www.xfyun.cn/doc/spark/Web.html
         log.warn("讯飞星火API暂未实现，使用模拟回复");
         return chatWithMock(message, history);
+    }
+
+    /**
+     * 构建OpenAI兼容格式的请求体
+     */
+    private JSONObject buildOpenAIRequestBody(String userMessage, List<String> history, String model, int timeout) {
+        JSONObject body = new JSONObject();
+        body.set("model", model);
+        body.set("temperature", 0.7);
+        body.set("max_tokens", 2048);
+
+        JSONArray messages = new JSONArray();
+        // 添加历史对话
+        if (history != null) {
+            for (String msg : history) {
+                JSONObject historyMsg = new JSONObject();
+                if (msg.startsWith("user:")) {
+                    historyMsg.set("role", "user");
+                    historyMsg.set("content", msg.substring(5));
+                } else if (msg.startsWith("assistant:")) {
+                    historyMsg.set("role", "assistant");
+                    historyMsg.set("content", msg.substring(10));
+                }
+                if (historyMsg.containsKey("role")) {
+                    messages.add(historyMsg);
+                }
+            }
+        }
+        // 添加当前用户消息
+        JSONObject userMsg = new JSONObject();
+        userMsg.set("role", "user");
+        userMsg.set("content", userMessage);
+        messages.add(userMsg);
+
+        body.set("messages", messages);
+        return body;
+    }
+
+    /**
+     * 解析OpenAI兼容格式的响应
+     */
+    private String parseOpenAIResponse(String responseBody) {
+        try {
+            JSONObject json = JSONUtil.parseObj(responseBody);
+            JSONArray choices = json.getJSONArray("choices");
+            if (choices != null && !choices.isEmpty()) {
+                JSONObject firstChoice = choices.getJSONObject(0);
+                JSONObject message = firstChoice.getJSONObject("message");
+                if (message != null) {
+                    return message.getStr("content", "");
+                }
+            }
+            log.error("AI响应格式异常: {}", responseBody);
+            throw new BusinessException("AI响应格式异常");
+        } catch (BusinessException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("解析AI响应失败: {}", responseBody, e);
+            throw new BusinessException("解析AI响应失败");
+        }
     }
 
     /**
@@ -538,25 +639,38 @@ public class ImAIServiceImpl implements ImAIService {
     }
 
     /**
-     * 获取对话历史
+     * 获取对话历史（使用Redis LIST，原子操作）
      */
     private List<String> getConversationHistory(String conversationId, Long userId) {
         String key = getConversationKey(conversationId, userId);
-        Object history = redisTemplate.opsForValue().get(key);
-        if (history instanceof List) {
-            return (List<String>) history;
+        List<Object> rawList = redisTemplate.opsForList().range(key, 0, -1);
+        List<String> history = new ArrayList<>();
+        if (rawList != null) {
+            for (Object item : rawList) {
+                if (item instanceof String) {
+                    history.add((String) item);
+                } else if (item != null) {
+                    history.add(item.toString());
+                }
+            }
         }
-        return new ArrayList<>();
+        return history;
     }
 
     /**
-     * 保存消息到对话历史
+     * 保存消息到对话历史（使用Redis LIST的rightPush原子操作，避免竞态条件）
      */
     private void saveMessage(String conversationId, Long userId, String role, String content) {
         String key = getConversationKey(conversationId, userId);
-        List<String> history = getConversationHistory(conversationId, userId);
-        history.add(role + ":" + content);
-        redisTemplate.opsForValue().set(key, history, CONVERSATION_TTL_HOURS, TimeUnit.HOURS);
+        String message = role + ":" + content;
+        redisTemplate.opsForList().rightPush(key, message);
+        redisTemplate.expire(key, CONVERSATION_TTL_HOURS, TimeUnit.HOURS);
+
+        // 裁剪到最大长度，保留最近的消息
+        Long size = redisTemplate.opsForList().size(key);
+        if (size != null && size > MAX_HISTORY_SIZE) {
+            redisTemplate.opsForList().trim(key, size - MAX_HISTORY_SIZE, -1);
+        }
     }
 
     /**
@@ -575,5 +689,34 @@ public class ImAIServiceImpl implements ImAIService {
         }
         // 简单估算：字符数的一半
         return (text.length() + 1) / 2;
+    }
+
+    /**
+     * 带重试的执行器（指数退避）
+     *
+     * @param task 要执行的任务
+     * @return 执行结果
+     */
+    private String executeWithRetry(java.util.concurrent.Callable<String> task) {
+        Exception lastException = null;
+        for (int attempt = 1; attempt <= MAX_RETRY_COUNT; attempt++) {
+            try {
+                return task.call();
+            } catch (Exception e) {
+                lastException = e;
+                if (attempt < MAX_RETRY_COUNT) {
+                    long delay = RETRY_BASE_DELAY_MS * (1L << (attempt - 1));
+                    log.warn("AI调用失败，第{}次重试，等待{}ms: {}", attempt, delay, e.getMessage());
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new BusinessException("AI调用被中断");
+                    }
+                }
+            }
+        }
+        log.error("AI调用失败，已重试{}次", MAX_RETRY_COUNT, lastException);
+        throw new BusinessException("AI服务暂时不可用，请稍后重试");
     }
 }

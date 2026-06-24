@@ -75,7 +75,7 @@ class ImGroupBotWebhookControllerTest {
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertEquals("Invalid token", result.getMsg());
+        assertEquals("推送失败", result.getMsg());
         verify(groupBotService).handleWebhook(TEST_TOKEN, TEST_TIMESTAMP, TEST_SIGN, payload);
     }
 
@@ -92,7 +92,7 @@ class ImGroupBotWebhookControllerTest {
 
         assertNotNull(result);
         assertFalse(result.isSuccess());
-        assertEquals("Webhook URL invalid", result.getMsg());
+        assertEquals("推送失败", result.getMsg());
     }
 
     @Test

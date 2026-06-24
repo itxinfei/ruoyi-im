@@ -62,7 +62,7 @@ public class ImVideoMeetingController {
             return Result.success("创建成功", result);
         } catch (Exception e) {
             log.error("创建会议失败: userId={}", userId, e);
-            return Result.fail("创建失败: " + e.getMessage());
+            return Result.fail("创建失败");
         }
     }
 
@@ -81,7 +81,7 @@ public class ImVideoMeetingController {
             return Result.success("更新成功");
         } catch (Exception e) {
             log.error("更新会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("更新失败: " + e.getMessage());
+            return Result.fail("更新失败");
         }
     }
 
@@ -99,7 +99,7 @@ public class ImVideoMeetingController {
             return Result.success("会议已取消");
         } catch (Exception e) {
             log.error("取消会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("取消失败: " + e.getMessage());
+            return Result.fail("取消失败");
         }
     }
 
@@ -117,7 +117,7 @@ public class ImVideoMeetingController {
             return Result.success("删除成功");
         } catch (Exception e) {
             log.error("删除会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -141,7 +141,7 @@ public class ImVideoMeetingController {
             return Result.success("会议已开始", result);
         } catch (Exception e) {
             log.error("开始会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("开始失败: " + e.getMessage());
+            return Result.fail("开始失败");
         }
     }
 
@@ -159,7 +159,7 @@ public class ImVideoMeetingController {
             return Result.success("会议已结束");
         } catch (Exception e) {
             log.error("结束会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("结束失败: " + e.getMessage());
+            return Result.fail("结束失败");
         }
     }
 
@@ -178,7 +178,7 @@ public class ImVideoMeetingController {
             return Result.success("加入成功", meeting);
         } catch (Exception e) {
             log.error("加入会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("加入失败: " + e.getMessage());
+            return Result.fail("加入失败");
         }
     }
 
@@ -196,7 +196,7 @@ public class ImVideoMeetingController {
             return Result.success("已离开会议");
         } catch (Exception e) {
             log.error("离开会议失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("离开失败: " + e.getMessage());
+            return Result.fail("离开失败");
         }
     }
 
@@ -215,7 +215,7 @@ public class ImVideoMeetingController {
             return Result.success(meeting);
         } catch (Exception e) {
             log.error("获取会议详情失败: meetingId={}", meetingId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -233,7 +233,7 @@ public class ImVideoMeetingController {
             return Result.success(meetings);
         } catch (Exception e) {
             log.error("获取会议列表失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -249,7 +249,7 @@ public class ImVideoMeetingController {
             return Result.success(participants);
         } catch (Exception e) {
             log.error("获取参与者列表失败: meetingId={}", meetingId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -268,7 +268,7 @@ public class ImVideoMeetingController {
             return Result.success("邀请成功");
         } catch (Exception e) {
             log.error("邀请用户失败: meetingId={}", meetingId, e);
-            return Result.fail("邀请失败: " + e.getMessage());
+            return Result.fail("邀请失败");
         }
     }
 
@@ -287,7 +287,7 @@ public class ImVideoMeetingController {
             return Result.success("已移除");
         } catch (Exception e) {
             log.error("移除参与者失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("移除失败: " + e.getMessage());
+            return Result.fail("移除失败");
         }
     }
 
@@ -305,7 +305,7 @@ public class ImVideoMeetingController {
             return Result.success(muted ? "已静音" : "已取消静音");
         } catch (Exception e) {
             log.error("设置静音状态失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("操作失败: " + e.getMessage());
+            return Result.fail("操作失败");
         }
     }
 
@@ -323,7 +323,7 @@ public class ImVideoMeetingController {
             return Result.success("已开始屏幕共享");
         } catch (Exception e) {
             log.error("开始屏幕共享失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("操作失败: " + e.getMessage());
+            return Result.fail("操作失败");
         }
     }
 
@@ -341,7 +341,7 @@ public class ImVideoMeetingController {
             return Result.success("已停止屏幕共享");
         } catch (Exception e) {
             log.error("停止屏幕共享失败: meetingId={}, userId={}", meetingId, userId, e);
-            return Result.fail("操作失败: " + e.getMessage());
+            return Result.fail("操作失败");
         }
     }
 
@@ -360,7 +360,7 @@ public class ImVideoMeetingController {
             return Result.success("主持人已转移");
         } catch (Exception e) {
             log.error("转移主持人失败: meetingId={}, newHostId={}", meetingId, newHostId, e);
-            return Result.fail("转移失败: " + e.getMessage());
+            return Result.fail("转移失败");
         }
     }
 }

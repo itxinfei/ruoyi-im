@@ -3,13 +3,14 @@ package com.ruoyi.im.service.impl;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.mapper.ImAuditLogMapper;
 import com.ruoyi.im.service.ImAuditService;
+import com.ruoyi.im.vo.audit.AuditLogListVO;
+import com.ruoyi.im.vo.audit.AuditStatisticsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 审计日志服务实现
@@ -23,9 +24,9 @@ public class ImAuditServiceImpl implements ImAuditService {
     private ImAuditLogMapper imAuditLogMapper;
 
     @Override
-    public Map<String, Object> getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
-                                                 String operationType, String operationResult,
-                                                 LocalDateTime startTime, LocalDateTime endTime) {
+    public AuditLogListVO getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
+                                          String operationType, String operationResult,
+                                          LocalDateTime startTime, LocalDateTime endTime) {
         ImAuditLog query = new ImAuditLog();
         query.setUserId(userId);
         query.setOperationType(operationType);
@@ -38,16 +39,16 @@ public class ImAuditServiceImpl implements ImAuditService {
         int fromIndex = (pageNum - 1) * pageSize;
         int toIndex = Math.min(fromIndex + pageSize, total);
         if (fromIndex >= total) {
-            list = java.util.Collections.emptyList();
+            list = Collections.emptyList();
         } else if (fromIndex > 0 || toIndex < total) {
             list = list.subList(fromIndex, toIndex);
         }
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("list", list);
-        result.put("total", total);
-        result.put("pageNum", pageNum);
-        result.put("pageSize", pageSize);
+        AuditLogListVO result = new AuditLogListVO();
+        result.setList(list);
+        result.setTotal(total);
+        result.setPageNum(pageNum);
+        result.setPageSize(pageSize);
         return result;
     }
 
@@ -59,7 +60,7 @@ public class ImAuditServiceImpl implements ImAuditService {
     @Override
     public List<ImAuditLog> getUserLogs(Long userId, LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null) {
-            startTime = LocalDateTime.now().minusDays(7); // 默认查询最近7天
+            startTime = LocalDateTime.now().minusDays(7);
         }
         if (endTime == null) {
             endTime = LocalDateTime.now();
@@ -68,7 +69,7 @@ public class ImAuditServiceImpl implements ImAuditService {
     }
 
     @Override
-    public Map<String, Object> getStatistics(LocalDateTime startTime, LocalDateTime endTime) {
+    public AuditStatisticsVO getStatistics(LocalDateTime startTime, LocalDateTime endTime) {
         if (startTime == null) {
             startTime = LocalDateTime.now().minusDays(7);
         }
@@ -78,12 +79,12 @@ public class ImAuditServiceImpl implements ImAuditService {
 
         List<ImAuditLog> allLogs = imAuditLogMapper.selectImAuditLogList(new ImAuditLog());
 
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalOperations", allLogs.size());
-        stats.put("successCount", allLogs.stream().filter(log -> "SUCCESS".equals(log.getOperationResult())).count());
-        stats.put("failCount", allLogs.stream().filter(log -> "FAILED".equals(log.getOperationResult())).count());
-        stats.put("startTime", startTime);
-        stats.put("endTime", endTime);
+        AuditStatisticsVO stats = new AuditStatisticsVO();
+        stats.setTotalOperations(allLogs.size());
+        stats.setSuccessCount(allLogs.stream().filter(log -> "SUCCESS".equals(log.getOperationResult())).count());
+        stats.setFailCount(allLogs.stream().filter(log -> "FAILED".equals(log.getOperationResult())).count());
+        stats.setStartTime(startTime);
+        stats.setEndTime(endTime);
         return stats;
     }
 

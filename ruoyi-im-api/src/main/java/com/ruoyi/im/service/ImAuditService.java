@@ -1,10 +1,11 @@
 package com.ruoyi.im.service;
 
 import com.ruoyi.im.domain.ImAuditLog;
+import com.ruoyi.im.vo.audit.AuditLogListVO;
+import com.ruoyi.im.vo.audit.AuditStatisticsVO;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 审计日志服务接口
@@ -25,9 +26,9 @@ public interface ImAuditService {
      * @param endTime 结束时间（可选）
      * @return 分页结果
      */
-    Map<String, Object> getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
-                                         String operationType, String operationResult,
-                                         LocalDateTime startTime, LocalDateTime endTime);
+    AuditLogListVO getAuditLogList(Integer pageNum, Integer pageSize, Long userId,
+                                   String operationType, String operationResult,
+                                   LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * 根据ID获取审计日志详情
@@ -54,7 +55,7 @@ public interface ImAuditService {
      * @param endTime 结束时间
      * @return 统计信息
      */
-    Map<String, Object> getStatistics(LocalDateTime startTime, LocalDateTime endTime);
+    AuditStatisticsVO getStatistics(LocalDateTime startTime, LocalDateTime endTime);
 
     /**
      * 删除过期日志

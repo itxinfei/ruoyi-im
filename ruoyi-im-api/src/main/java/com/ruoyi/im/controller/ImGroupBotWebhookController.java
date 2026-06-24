@@ -48,8 +48,8 @@ public class ImGroupBotWebhookController {
             groupBotService.handleWebhook(token, timestamp, sign, payload);
             return Result.success("推送成功");
         } catch (Exception e) {
-            log.error("Webhook 推送处理失败: {}", e.getMessage());
-            return Result.fail(e.getMessage());
+            log.error("Webhook 推送处理失败", e);
+            return Result.fail("推送失败");
         }
     }
 }

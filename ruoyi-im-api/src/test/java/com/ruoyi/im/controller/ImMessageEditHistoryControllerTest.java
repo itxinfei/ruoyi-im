@@ -212,7 +212,7 @@ public class ImMessageEditHistoryControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("未登录"));
+            assertEquals("查询编辑历史失败", result.getMsg());
         }
     }
 
@@ -230,7 +230,7 @@ public class ImMessageEditHistoryControllerTest {
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
-            assertTrue(result.getMsg().contains("未登录"));
+            assertEquals("查询编辑统计失败", result.getMsg());
         }
     }
 

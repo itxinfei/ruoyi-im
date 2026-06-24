@@ -1,10 +1,9 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.vo.monitor.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,145 +22,138 @@ class ImMonitorControllerTest {
 
     @Test
     void getOverview_Success() {
-        Result<Map<String, Object>> result = controller.getOverview();
+        Result<MonitorOverviewVO> result = controller.getOverview();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        MonitorOverviewVO data = result.getData();
         assertNotNull(data);
-        assertEquals("RUNNING", data.get("status"));
-        assertNotNull(data.get("timestamp"));
-        assertNotNull(data.get("jvm"));
-        assertNotNull(data.get("thread"));
-        assertNotNull(data.get("memory"));
+        assertEquals("RUNNING", data.getStatus());
+        assertNotNull(data.getTimestamp());
+        assertNotNull(data.getJvm());
+        assertNotNull(data.getThread());
+        assertNotNull(data.getMemory());
     }
 
     @Test
     void getJvmMetrics_Success() {
-        Result<Map<String, Object>> result = controller.getJvmMetrics();
+        Result<JvmInfoVO> result = controller.getJvmMetrics();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        JvmInfoVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("javaVersion"));
-        assertNotNull(data.get("javaVendor"));
-        assertNotNull(data.get("javaHome"));
-        assertNotNull(data.get("osName"));
-        assertNotNull(data.get("osVersion"));
-        assertNotNull(data.get("osArch"));
-        assertNotNull(data.get("processors"));
-        assertTrue((Integer) data.get("processors") > 0);
-        assertNotNull(data.get("uptime"));
+        assertNotNull(data.getJavaVersion());
+        assertNotNull(data.getJavaVendor());
+        assertNotNull(data.getJavaHome());
+        assertNotNull(data.getOsName());
+        assertNotNull(data.getOsVersion());
+        assertNotNull(data.getOsArch());
+        assertTrue(data.getProcessors() > 0);
+        assertNotNull(data.getUptime());
     }
 
     @Test
     void getMemoryMetrics_Success() {
-        Result<Map<String, Object>> result = controller.getMemoryMetrics();
+        Result<MemoryMetricsVO> result = controller.getMemoryMetrics();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        MemoryMetricsVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("heap"));
-        assertNotNull(data.get("nonHeap"));
+        assertNotNull(data.getHeap());
+        assertNotNull(data.getNonHeap());
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> heap = (Map<String, Object>) data.get("heap");
-        assertNotNull(heap.get("init"));
-        assertNotNull(heap.get("used"));
-        assertNotNull(heap.get("committed"));
-        assertNotNull(heap.get("max"));
-        assertNotNull(heap.get("usagePercent"));
+        MemoryDetailVO heap = data.getHeap();
+        assertNotNull(heap.getInit());
+        assertNotNull(heap.getUsed());
+        assertNotNull(heap.getCommitted());
+        assertNotNull(heap.getMax());
+        assertNotNull(heap.getUsagePercent());
     }
 
     @Test
     void getThreadMetrics_Success() {
-        Result<Map<String, Object>> result = controller.getThreadMetrics();
+        Result<ThreadMetricsVO> result = controller.getThreadMetrics();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        ThreadMetricsVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("count"));
-        assertTrue((Integer) data.get("count") > 0);
-        assertNotNull(data.get("peak"));
-        assertTrue((Integer) data.get("peak") >= (Integer) data.get("count"));
-        assertNotNull(data.get("daemonCount"));
-        assertNotNull(data.get("totalStarted"));
+        assertTrue(data.getCount() > 0);
+        assertTrue(data.getPeak() >= data.getCount());
+        assertTrue(data.getDaemonCount() >= 0);
+        assertTrue(data.getTotalStarted() > 0);
     }
 
     @Test
     void getClassLoadingMetrics_Success() {
-        Result<Map<String, Object>> result = controller.getClassLoadingMetrics();
+        Result<ClassLoadingMetricsVO> result = controller.getClassLoadingMetrics();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        ClassLoadingMetricsVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("loadedClassCount"));
-        assertTrue((Integer) data.get("loadedClassCount") >= 0);
-        assertNotNull(data.get("totalLoadedClassCount"));
-        assertTrue((Long) data.get("totalLoadedClassCount") >= 0);
-        assertNotNull(data.get("unloadedClassCount"));
-        assertTrue((Long) data.get("unloadedClassCount") >= 0);
+        assertTrue(data.getLoadedClassCount() >= 0);
+        assertTrue(data.getTotalLoadedClassCount() >= 0);
+        assertTrue(data.getUnloadedClassCount() >= 0);
     }
 
     @Test
     void getCompilationMetrics_Success() {
-        Result<Map<String, Object>> result = controller.getCompilationMetrics();
+        Result<CompilationMetricsVO> result = controller.getCompilationMetrics();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        CompilationMetricsVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("name"));
-        assertNotNull(data.get("totalCompilationTime"));
+        assertNotNull(data.getName());
+        assertTrue(data.getTotalCompilationTime() >= 0);
     }
 
     @Test
     void getRuntimeMetrics_Success() {
-        Result<Map<String, Object>> result = controller.getRuntimeMetrics();
+        Result<RuntimeMetricsVO> result = controller.getRuntimeMetrics();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        RuntimeMetricsVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("startTime"));
-        assertNotNull(data.get("uptime"));
+        assertNotNull(data.getStartTime());
+        assertNotNull(data.getUptime());
     }
 
     @Test
     void healthCheck_Success() {
-        Result<Map<String, Object>> result = controller.healthCheck();
+        Result<HealthCheckVO> result = controller.healthCheck();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        Map<String, Object> data = result.getData();
+        HealthCheckVO data = result.getData();
         assertNotNull(data);
-        assertNotNull(data.get("status"));
-        assertNotNull(data.get("memoryUsage"));
+        assertNotNull(data.getStatus());
+        assertNotNull(data.getMemoryUsage());
 
-        String status = (String) data.get("status");
+        String status = data.getStatus();
         assertTrue(status.equals("HEALTHY") || status.equals("WARNING"));
     }
 
     @Test
     void healthCheck_MemoryUsageFormat() {
-        Result<Map<String, Object>> result = controller.healthCheck();
+        Result<HealthCheckVO> result = controller.healthCheck();
 
         assertNotNull(result);
         assertTrue(result.isSuccess());
 
-        String memoryUsage = (String) result.getData().get("memoryUsage");
+        String memoryUsage = result.getData().getMemoryUsage();
         assertNotNull(memoryUsage);
         assertTrue(memoryUsage.endsWith("%"));
     }

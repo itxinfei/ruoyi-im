@@ -559,4 +559,55 @@ public class ImGroupServiceImpl implements ImGroupService {
     public IPage<ImGroup> getGroupPage(Page<ImGroup> page, String keyword) {
         return imGroupMapper.selectGroupPage(page, keyword);
     }
+
+    @Override
+    public ImGroup getGroupByIdForAdmin(Long groupId) {
+        return imGroupMapper.selectImGroupById(groupId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void dissolveGroupForAdmin(Long groupId) {
+        ImGroup group = imGroupMapper.selectImGroupById(groupId);
+        if (group == null) {
+            throw new BusinessException("群组不存在");
+        }
+        group.setIsDeleted(1);
+        group.setDeletedTime(LocalDateTime.now());
+        imGroupMapper.updateImGroup(group);
+        imGroupMemberMapper.deleteByGroupIds(java.util.Collections.singletonList(groupId));
+    }
+
+    @Override
+    public void updateGroupForAdmin(ImGroup group) {
+        imGroupMapper.updateImGroup(group);
+    }
+
+    @Override
+    public long countActiveGroups() {
+        return imGroupMapper.selectCount(
+                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<ImGroup>()
+                        .eq(ImGroup::getIsDeleted, 0));
+    }
+
+    @Override
+    public List<Map<String, Object>> getGroupMembersForAdmin(Long groupId) {
+        List<Map<String, Object>> members = imGroupMemberMapper.selectMembersByGroupId(groupId);
+        for (Map<String, Object> member : members) {
+            String role = (String) member.get("role");
+            if ("OWNER".equals(role)) {
+                member.put("roleDisplay", "群主");
+            } else if ("ADMIN".equals(role)) {
+                member.put("roleDisplay", "管理员");
+            } else {
+                member.put("roleDisplay", "成员");
+            }
+        }
+        return members;
+    }
+
+    @Override
+    public void removeGroupMemberForAdmin(Long groupId, Long userId) {
+        imGroupMemberMapper.deleteByGroupIdAndUserId(groupId, userId);
+    }
 }

@@ -4,6 +4,7 @@ import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImVoiceTranscriptService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.transcript.ImVoiceTranscriptVO;
+import com.ruoyi.im.vo.transcript.VoiceTranscriptStatsVO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
@@ -51,7 +52,7 @@ public class ImVoiceTranscriptController {
             return Result.success("任务已创建", taskId);
         } catch (Exception e) {
             log.error("创建转写任务失败: messageId={}, userId={}", messageId, userId, e);
-            return Result.fail("创建失败: " + e.getMessage());
+            return Result.fail("创建失败");
         }
     }
 
@@ -72,7 +73,7 @@ public class ImVoiceTranscriptController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("获取转写结果失败: messageId={}", messageId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -90,7 +91,7 @@ public class ImVoiceTranscriptController {
             return Result.success("已重新提交", taskId);
         } catch (Exception e) {
             log.error("重新转写失败: messageId={}, userId={}", messageId, userId, e);
-            return Result.fail("操作失败: " + e.getMessage());
+            return Result.fail("操作失败");
         }
     }
 
@@ -107,7 +108,7 @@ public class ImVoiceTranscriptController {
             return Result.success(transcripts);
         } catch (Exception e) {
             log.error("获取转写列表失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -116,15 +117,20 @@ public class ImVoiceTranscriptController {
      */
     
     @GetMapping("/stats")
-    public Result<Map<String, Object>> getTranscriptStats() {
+    public Result<VoiceTranscriptStatsVO> getTranscriptStats() {
         Long userId = SecurityUtils.getLoginUserId();
 
         try {
             Map<String, Object> stats = voiceTranscriptService.getTranscriptStats(userId);
-            return Result.success(stats);
+            VoiceTranscriptStatsVO vo = new VoiceTranscriptStatsVO();
+            vo.setTotalCount((Integer) stats.get("totalCount"));
+            vo.setSuccessCount((Integer) stats.get("successCount"));
+            vo.setFailedCount((Integer) stats.get("failedCount"));
+            vo.setPendingCount((Integer) stats.get("pendingCount"));
+            return Result.success(vo);
         } catch (Exception e) {
             log.error("获取转写统计失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 }

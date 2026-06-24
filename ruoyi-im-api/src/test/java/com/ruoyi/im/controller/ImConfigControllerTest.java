@@ -3,6 +3,7 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.service.ImConfigService;
 import com.ruoyi.im.util.SecurityUtils;
+import com.ruoyi.im.vo.config.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,11 +54,11 @@ class ImConfigControllerTest {
 
             when(configService.getNotificationSettings(TEST_USER_ID)).thenReturn(settings);
 
-            Result<Map<String, Object>> result = controller.getNotificationSettings();
+            Result<NotificationSettingsVO> result = controller.getNotificationSettings();
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
-            assertEquals(true, result.getData().get("messageNotification"));
+            assertTrue(result.getData().getMessageNotification());
             verify(configService).getNotificationSettings(TEST_USER_ID);
         }
     }
@@ -105,11 +107,11 @@ class ImConfigControllerTest {
 
             when(configService.getPrivacySettings(TEST_USER_ID)).thenReturn(settings);
 
-            Result<Map<String, Object>> result = controller.getPrivacySettings();
+            Result<PrivacySettingsVO> result = controller.getPrivacySettings();
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
-            assertEquals(true, result.getData().get("showOnlineStatus"));
+            assertTrue(result.getData().getShowOnlineStatus());
             verify(configService).getPrivacySettings(TEST_USER_ID);
         }
     }
@@ -154,16 +156,16 @@ class ImConfigControllerTest {
             Map<String, Object> settings = new HashMap<>();
             settings.put("language", "zh-CN");
             settings.put("theme", "dark");
-            settings.put("fontSize", "medium");
+            settings.put("fontSize", 14);
 
             when(configService.getGeneralSettings(TEST_USER_ID)).thenReturn(settings);
 
-            Result<Map<String, Object>> result = controller.getGeneralSettings();
+            Result<GeneralSettingsVO> result = controller.getGeneralSettings();
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
-            assertEquals("zh-CN", result.getData().get("language"));
-            assertEquals("dark", result.getData().get("theme"));
+            assertEquals("zh-CN", result.getData().getLanguage());
+            assertEquals("dark", result.getData().getTheme());
         }
     }
 
@@ -206,15 +208,15 @@ class ImConfigControllerTest {
 
             Map<String, Object> blocked1 = new HashMap<>();
             blocked1.put("userId", 3001L);
-            blocked1.put("username", "blocked_user1");
+            blocked1.put("nickname", "blocked_user1");
             Map<String, Object> blocked2 = new HashMap<>();
             blocked2.put("userId", 3002L);
-            blocked2.put("username", "blocked_user2");
+            blocked2.put("nickname", "blocked_user2");
 
             when(configService.getBlockedUsers(TEST_USER_ID))
                     .thenReturn(Arrays.asList(blocked1, blocked2));
 
-            Result<List<Map<String, Object>>> result = controller.getBlockedUsers();
+            Result<List<BlockedUserVO>> result = controller.getBlockedUsers();
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
@@ -229,7 +231,7 @@ class ImConfigControllerTest {
 
             when(configService.getBlockedUsers(TEST_USER_ID)).thenReturn(Arrays.asList());
 
-            Result<List<Map<String, Object>>> result = controller.getBlockedUsers();
+            Result<List<BlockedUserVO>> result = controller.getBlockedUsers();
 
             assertNotNull(result);
             assertTrue(result.isSuccess());

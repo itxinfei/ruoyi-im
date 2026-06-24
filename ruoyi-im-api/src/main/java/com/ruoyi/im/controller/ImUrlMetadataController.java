@@ -3,10 +3,8 @@ package com.ruoyi.im.controller;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImUrlMetadata;
 import com.ruoyi.im.service.ImUrlMetadataService;
+import com.ruoyi.im.vo.url.UrlMetadataVO;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * URL 元数据控制器
@@ -34,7 +32,7 @@ public class ImUrlMetadataController {
      */
     
     @GetMapping("/parse")
-    public Result<Map<String, Object>> parseUrl(@RequestParam String url) {
+    public Result<UrlMetadataVO> parseUrl(@RequestParam String url) {
         try {
             // 验证 URL 格式
             if (!isValidUrl(url)) {
@@ -43,18 +41,18 @@ public class ImUrlMetadataController {
 
             ImUrlMetadata metadata = urlMetadataService.parseUrl(url);
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("url", metadata.getUrl());
-            result.put("title", metadata.getTitle());
-            result.put("description", metadata.getDescription());
-            result.put("imageUrl", metadata.getImageUrl());
-            result.put("siteName", metadata.getSiteName());
-            result.put("faviconUrl", metadata.getFaviconUrl());
-            result.put("contentType", metadata.getContentType());
-            result.put("fetchStatus", metadata.getFetchStatus());
+            UrlMetadataVO result = new UrlMetadataVO();
+            result.setUrl(metadata.getUrl());
+            result.setTitle(metadata.getTitle());
+            result.setDescription(metadata.getDescription());
+            result.setImageUrl(metadata.getImageUrl());
+            result.setSiteName(metadata.getSiteName());
+            result.setFaviconUrl(metadata.getFaviconUrl());
+            result.setContentType(metadata.getContentType());
+            result.setFetchStatus(metadata.getFetchStatus());
 
             if ("FAILED".equals(metadata.getFetchStatus())) {
-                result.put("errorMessage", metadata.getErrorMessage());
+                result.setErrorMessage(metadata.getErrorMessage());
             }
 
             return Result.success(result);
@@ -72,7 +70,7 @@ public class ImUrlMetadataController {
      */
     
     @PostMapping("/refresh")
-    public Result<Map<String, Object>> refreshUrl(@RequestParam String url) {
+    public Result<UrlMetadataVO> refreshUrl(@RequestParam String url) {
         try {
             if (!isValidUrl(url)) {
                 return Result.fail("无效的 URL 格式");
@@ -80,14 +78,14 @@ public class ImUrlMetadataController {
 
             ImUrlMetadata metadata = urlMetadataService.refreshUrl(url);
 
-            Map<String, Object> result = new HashMap<>();
-            result.put("url", metadata.getUrl());
-            result.put("title", metadata.getTitle());
-            result.put("description", metadata.getDescription());
-            result.put("imageUrl", metadata.getImageUrl());
-            result.put("siteName", metadata.getSiteName());
-            result.put("faviconUrl", metadata.getFaviconUrl());
-            result.put("fetchStatus", metadata.getFetchStatus());
+            UrlMetadataVO result = new UrlMetadataVO();
+            result.setUrl(metadata.getUrl());
+            result.setTitle(metadata.getTitle());
+            result.setDescription(metadata.getDescription());
+            result.setImageUrl(metadata.getImageUrl());
+            result.setSiteName(metadata.getSiteName());
+            result.setFaviconUrl(metadata.getFaviconUrl());
+            result.setFetchStatus(metadata.getFetchStatus());
 
             return Result.success(result);
         } catch (Exception e) {

@@ -4,9 +4,7 @@ import org.slf4j.MDC;
 import cn.hutool.core.lang.UUID;
 
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class TraceIdUtil
 {
@@ -16,7 +14,28 @@ public class TraceIdUtil
     public static final String USER_NAME = "userName";
     public static final String IP_ADDR = "ipAddr";
 
-    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool();
+    private static final ExecutorService EXECUTOR = new ThreadPoolExecutor(
+            0, Runtime.getRuntime().availableProcessors() * 2,
+            60L, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>(),
+            new ThreadPoolExecutor.CallerRunsPolicy());
+
+    /**
+     * 优雅关闭线程池（JVM关闭时自动调用）
+     */
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            EXECUTOR.shutdown();
+            try {
+                if (!EXECUTOR.awaitTermination(3, TimeUnit.SECONDS)) {
+                    EXECUTOR.shutdownNow();
+                }
+            } catch (InterruptedException e) {
+                EXECUTOR.shutdownNow();
+                Thread.currentThread().interrupt();
+            }
+        }));
+    }
 
     public static String getTraceId()
     {

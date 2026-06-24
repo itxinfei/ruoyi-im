@@ -359,7 +359,7 @@ public class ImFileController {
             }
             return userId;
         } catch (Exception e) {
-            LOGGER.error("解析JWT token失败: {}", e.getMessage());
+            LOGGER.error("解析JWT token失败", e);
             throw new RuntimeException("无效的token");
         }
     }

@@ -58,7 +58,7 @@ public class ImCloudDriveController {
             return Result.success("创建成功", folderId);
         } catch (Exception e) {
             log.error("创建文件夹失败: userId={}", userId, e);
-            return Result.fail("创建失败: " + e.getMessage());
+            return Result.fail("创建失败");
         }
     }
 
@@ -77,7 +77,7 @@ public class ImCloudDriveController {
             return Result.success("重命名成功");
         } catch (Exception e) {
             log.error("重命名文件夹失败: folderId={}, userId={}", folderId, userId, e);
-            return Result.fail("重命名失败: " + e.getMessage());
+            return Result.fail("重命名失败");
         }
     }
 
@@ -95,7 +95,7 @@ public class ImCloudDriveController {
             return Result.success("已移入回收站");
         } catch (Exception e) {
             log.error("删除文件夹失败: folderId={}, userId={}", folderId, userId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -113,7 +113,7 @@ public class ImCloudDriveController {
             return Result.success("已永久删除");
         } catch (Exception e) {
             log.error("永久删除文件夹失败: folderId={}, userId={}", folderId, userId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -131,7 +131,7 @@ public class ImCloudDriveController {
             return Result.success("恢复成功");
         } catch (Exception e) {
             log.error("恢复文件夹失败: folderId={}, userId={}", folderId, userId, e);
-            return Result.fail("恢复失败: " + e.getMessage());
+            return Result.fail("恢复失败");
         }
     }
 
@@ -150,7 +150,7 @@ public class ImCloudDriveController {
             return Result.success(folders);
         } catch (Exception e) {
             log.error("获取文件夹列表失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -166,7 +166,7 @@ public class ImCloudDriveController {
             return Result.success(path);
         } catch (Exception e) {
             log.error("获取文件夹路径失败: folderId={}", folderId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -187,7 +187,7 @@ public class ImCloudDriveController {
             return Result.success("上传成功", fileVO);
         } catch (Exception e) {
             log.error("上传文件失败: userId={}", userId, e);
-            return Result.fail("上传失败: " + e.getMessage());
+            return Result.fail("上传失败");
         }
     }
 
@@ -209,7 +209,7 @@ public class ImCloudDriveController {
             return Result.success("上传成功", result);
         } catch (Exception e) {
             log.error("批量上传文件失败: userId={}", userId, e);
-            return Result.fail("上传失败: " + e.getMessage());
+            return Result.fail("上传失败");
         }
     }
 
@@ -228,7 +228,7 @@ public class ImCloudDriveController {
             return Result.success("重命名成功");
         } catch (Exception e) {
             log.error("重命名文件失败: fileId={}, userId={}", fileId, userId, e);
-            return Result.fail("重命名失败: " + e.getMessage());
+            return Result.fail("重命名失败");
         }
     }
 
@@ -246,7 +246,7 @@ public class ImCloudDriveController {
             return Result.success("已移入回收站");
         } catch (Exception e) {
             log.error("删除文件失败: fileId={}, userId={}", fileId, userId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -264,7 +264,7 @@ public class ImCloudDriveController {
             return Result.success("已永久删除");
         } catch (Exception e) {
             log.error("永久删除文件失败: fileId={}, userId={}", fileId, userId, e);
-            return Result.fail("删除失败: " + e.getMessage());
+            return Result.fail("删除失败");
         }
     }
 
@@ -282,7 +282,7 @@ public class ImCloudDriveController {
             return Result.success("恢复成功");
         } catch (Exception e) {
             log.error("恢复文件失败: fileId={}, userId={}", fileId, userId, e);
-            return Result.fail("恢复失败: " + e.getMessage());
+            return Result.fail("恢复失败");
         }
     }
 
@@ -300,7 +300,7 @@ public class ImCloudDriveController {
             return Result.success("移动成功");
         } catch (Exception e) {
             log.error("移动文件失败: userId={}", userId, e);
-            return Result.fail("移动失败: " + e.getMessage());
+            return Result.fail("移动失败");
         }
     }
 
@@ -318,7 +318,7 @@ public class ImCloudDriveController {
             return Result.success(files);
         } catch (Exception e) {
             log.error("获取文件列表失败: folderId={}, userId={}", folderId, userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -337,7 +337,7 @@ public class ImCloudDriveController {
             return Result.success(files);
         } catch (Exception e) {
             log.error("搜索文件失败: userId={}, keyword={}", userId, keyword, e);
-            return Result.fail("搜索失败: " + e.getMessage());
+            return Result.fail("搜索失败");
         }
     }
 
@@ -355,7 +355,7 @@ public class ImCloudDriveController {
             return Result.success(files);
         } catch (Exception e) {
             log.error("获取最近文件失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -372,7 +372,7 @@ public class ImCloudDriveController {
             return Result.success(files);
         } catch (Exception e) {
             log.error("获取回收站失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -390,7 +390,7 @@ public class ImCloudDriveController {
             return Result.success("保存成功", vo);
         } catch (Exception e) {
             log.error("从消息保存文件失败: messageId={}, userId={}", messageId, userId, e);
-            return Result.fail("保存失败: " + e.getMessage());
+            return Result.fail("保存失败");
         }
     }
 
@@ -410,7 +410,7 @@ public class ImCloudDriveController {
             return Result.success("创建成功", shareVO);
         } catch (Exception e) {
             log.error("创建分享失败: userId={}", userId, e);
-            return Result.fail("创建失败: " + e.getMessage());
+            return Result.fail("创建失败");
         }
     }
 
@@ -428,7 +428,7 @@ public class ImCloudDriveController {
             return Result.success("已取消分享");
         } catch (Exception e) {
             log.error("取消分享失败: shareId={}, userId={}", shareId, userId, e);
-            return Result.fail("取消失败: " + e.getMessage());
+            return Result.fail("取消失败");
         }
     }
 
@@ -445,7 +445,7 @@ public class ImCloudDriveController {
             return Result.success(shares);
         } catch (Exception e) {
             log.error("获取分享列表失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 
@@ -462,7 +462,7 @@ public class ImCloudDriveController {
             return Result.success(shareVO);
         } catch (Exception e) {
             log.error("访问分享失败: shareCode={}", shareCode, e);
-            return Result.fail("访问失败: " + e.getMessage());
+            return Result.fail("访问失败");
         }
     }
 
@@ -481,7 +481,7 @@ public class ImCloudDriveController {
             return Result.success(quota);
         } catch (Exception e) {
             log.error("获取存储配额失败: userId={}", userId, e);
-            return Result.fail("获取失败: " + e.getMessage());
+            return Result.fail("获取失败");
         }
     }
 }

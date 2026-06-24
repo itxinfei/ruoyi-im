@@ -6,10 +6,9 @@ import com.ruoyi.im.dto.ai.ChatResponse;
 import com.ruoyi.im.dto.ai.SummaryRequest;
 import com.ruoyi.im.dto.ai.SummaryResponse;
 import com.ruoyi.im.service.ImAIService;
+import com.ruoyi.im.util.SecurityUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import javax.annotation.Resource;
 
 /**
  * AI助手控制器
@@ -21,8 +20,16 @@ import javax.annotation.Resource;
 @RequestMapping("/api/im/ai")
 public class ImAIController {
 
-    @Resource
-    private ImAIService aiService;
+    private final ImAIService aiService;
+
+    /**
+     * 构造器注入依赖
+     *
+     * @param aiService AI服务
+     */
+    public ImAIController(ImAIService aiService) {
+        this.aiService = aiService;
+    }
 
     /**
      * AI聊天对话
@@ -50,8 +57,8 @@ public class ImAIController {
     
     @DeleteMapping("/conversation/{conversationId}")
     public Result<Void> clearConversation(
-            @PathVariable("conversationId") String conversationId,
-            @RequestParam("userId") Long userId) {
+            @PathVariable("conversationId") String conversationId) {
+        Long userId = SecurityUtils.getLoginUserId();
         aiService.clearConversation(conversationId, userId);
         return Result.success();
     }

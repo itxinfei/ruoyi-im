@@ -5,8 +5,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.dto.group.ImGroupUpdateRequest;
-import com.ruoyi.im.mapper.ImGroupMapper;
-import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupService;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
 import org.springframework.beans.BeanUtils;
@@ -31,22 +29,14 @@ import java.util.Map;
 public class ImGroupAdminController {
 
     private final ImGroupService imGroupService;
-    private final ImGroupMapper imGroupMapper;
-    private final ImGroupMemberMapper imGroupMemberMapper;
 
     /**
      * 构造器注入依赖
      *
      * @param imGroupService 群组服务
-     * @param imGroupMapper 群组 Mapper
-     * @param imGroupMemberMapper 群组成员 Mapper
      */
-    public ImGroupAdminController(ImGroupService imGroupService,
-                                    ImGroupMapper imGroupMapper,
-                                    ImGroupMemberMapper imGroupMemberMapper) {
+    public ImGroupAdminController(ImGroupService imGroupService) {
         this.imGroupService = imGroupService;
-        this.imGroupMapper = imGroupMapper;
-        this.imGroupMemberMapper = imGroupMemberMapper;
     }
 
     /**
@@ -64,13 +54,9 @@ public class ImGroupAdminController {
             @RequestParam(required = false, defaultValue = "1") Integer pageNum,
             @RequestParam(required = false, defaultValue = "20") Integer pageSize) {
 
-        // 构建分页
         Page<ImGroup> page = new Page<>(pageNum, pageSize);
-
-        // 查询群组列表
         IPage<ImGroup> groupPage = imGroupService.getGroupPage(page, keyword);
 
-        // 返回结果
         Map<String, Object> data = new HashMap<>();
         data.put("list", groupPage.getRecords());
         data.put("total", groupPage.getTotal());
@@ -90,15 +76,10 @@ public class ImGroupAdminController {
     
     @GetMapping("/{id}")
     public Result<ImGroup> getById(@PathVariable Long id) {
-        ImGroup group = imGroupMapper.selectImGroupById(id);
+        ImGroup group = imGroupService.getGroupByIdForAdmin(id);
         if (group == null) {
             return Result.fail("群组不存在");
         }
-
-        // 设置成员数量
-        Integer memberCount = imGroupMemberMapper.countMembersByGroupId(id);
-        group.setMemberCount(memberCount);
-
         return Result.success(group);
     }
 
@@ -111,20 +92,11 @@ public class ImGroupAdminController {
     
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
-        ImGroup group = imGroupMapper.selectImGroupById(id);
+        ImGroup group = imGroupService.getGroupByIdForAdmin(id);
         if (group == null) {
             return Result.fail("群组不存在");
         }
-
-        // 软删除群组
-        group.setIsDeleted(1);
-        group.setDeletedTime(LocalDateTime.now());
-        imGroupMapper.updateImGroup(group);
-
-        // 删除群组成员关系
-        List<Long> groupIds = java.util.Collections.singletonList(id);
-        imGroupMemberMapper.deleteByGroupIds(groupIds);
-
+        imGroupService.dissolveGroupForAdmin(id);
         return Result.success("群组已解散");
     }
 
@@ -140,16 +112,11 @@ public class ImGroupAdminController {
         BatchOperationResult result = new BatchOperationResult();
 
         for (Long id : ids) {
-            ImGroup group = imGroupMapper.selectImGroupById(id);
+            ImGroup group = imGroupService.getGroupByIdForAdmin(id);
             if (group == null) {
                 result.addFailedItem(id, "群组不存在");
             } else {
-                // 软删除群组
-                group.setIsDeleted(1);
-                group.setDeletedTime(LocalDateTime.now());
-                imGroupMapper.updateImGroup(group);
-                // 删除群组成员关系
-                imGroupMemberMapper.deleteByGroupIds(java.util.Collections.singletonList(id));
+                imGroupService.dissolveGroupForAdmin(id);
                 result.setSuccessCount(result.getSuccessCount() + 1);
             }
         }
@@ -167,16 +134,15 @@ public class ImGroupAdminController {
     
     @PutMapping("/{id}")
     public Result<Void> update(@PathVariable Long id, @RequestBody ImGroupUpdateRequest request) {
-        ImGroup existGroup = imGroupMapper.selectImGroupById(id);
+        ImGroup existGroup = imGroupService.getGroupByIdForAdmin(id);
         if (existGroup == null) {
             return Result.fail("群组不存在");
         }
 
-        // 将 DTO 属性复制到 Entity
         BeanUtils.copyProperties(request, existGroup);
         existGroup.setId(id);
         existGroup.setUpdateTime(LocalDateTime.now());
-        imGroupMapper.updateImGroup(existGroup);
+        imGroupService.updateGroupForAdmin(existGroup);
 
         return Result.success("更新成功");
     }
@@ -189,11 +155,7 @@ public class ImGroupAdminController {
     
     @GetMapping("/stats")
     public Result<Map<String, Object>> getStats() {
-        // 查询所有群组
-        List<ImGroup> allGroups = imGroupMapper.selectImGroupList(new ImGroup());
-
-        // 统计未删除的群组
-        long total = allGroups.stream().filter(g -> g.getIsDeleted() == null || g.getIsDeleted() == 0).count();
+        long total = imGroupService.countActiveGroups();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("total", total);
@@ -210,20 +172,7 @@ public class ImGroupAdminController {
     
     @GetMapping("/{id}/members")
     public Result<List<Map<String, Object>>> getMembers(@PathVariable Long id) {
-        List<Map<String, Object>> members = imGroupMemberMapper.selectMembersByGroupId(id);
-
-        // 转换为适合前端显示的格式
-        for (Map<String, Object> member : members) {
-            String role = (String) member.get("role");
-            if ("OWNER".equals(role)) {
-                member.put("roleDisplay", "群主");
-            } else if ("ADMIN".equals(role)) {
-                member.put("roleDisplay", "管理员");
-            } else {
-                member.put("roleDisplay", "成员");
-            }
-        }
-
+        List<Map<String, Object>> members = imGroupService.getGroupMembersForAdmin(id);
         return Result.success(members);
     }
 
@@ -237,8 +186,7 @@ public class ImGroupAdminController {
     
     @DeleteMapping("/{groupId}/members/{userId}")
     public Result<Void> removeMember(@PathVariable Long groupId, @PathVariable Long userId) {
-        imGroupMemberMapper.deleteByGroupIdAndUserId(groupId, userId);
+        imGroupService.removeGroupMemberForAdmin(groupId, userId);
         return Result.success("成员已移除");
     }
 }
-

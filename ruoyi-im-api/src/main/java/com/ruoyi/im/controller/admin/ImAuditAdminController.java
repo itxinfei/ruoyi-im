@@ -3,13 +3,14 @@ package com.ruoyi.im.controller.admin;
 import com.ruoyi.im.common.Result;
 import com.ruoyi.im.domain.ImAuditLog;
 import com.ruoyi.im.service.ImAuditService;
+import com.ruoyi.im.vo.audit.AuditLogListVO;
+import com.ruoyi.im.vo.audit.AuditStatisticsVO;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * 管理员 - 审计日志控制器
@@ -43,9 +44,8 @@ public class ImAuditAdminController {
      * @param endTime 结束时间（可选）
      * @return 分页结果
      */
-    
     @GetMapping("/list")
-    public Result<Map<String, Object>> list(
+    public Result<AuditLogListVO> list(
              @RequestParam(defaultValue = "1") Integer pageNum,
              @RequestParam(defaultValue = "20") Integer pageSize,
              @RequestParam(required = false) Long userId,
@@ -53,7 +53,7 @@ public class ImAuditAdminController {
              @RequestParam(required = false) String operationResult,
              @RequestParam(required = false) LocalDateTime startTime,
              @RequestParam(required = false) LocalDateTime endTime) {
-        Map<String, Object> result = imAuditService.getAuditLogList(
+        AuditLogListVO result = imAuditService.getAuditLogList(
                 pageNum, pageSize, userId, operationType, operationResult, startTime, endTime);
         return Result.success(result);
     }
@@ -64,7 +64,6 @@ public class ImAuditAdminController {
      * @param id 日志ID
      * @return 日志详情
      */
-    
     @GetMapping("/{id}")
     public Result<ImAuditLog> getById(
              @PathVariable Long id) {
@@ -79,12 +78,11 @@ public class ImAuditAdminController {
      * @param endTime 结束时间（可选）
      * @return 统计信息
      */
-    
     @GetMapping("/statistics")
-    public Result<Map<String, Object>> statistics(
+    public Result<AuditStatisticsVO> statistics(
              @RequestParam(required = false) LocalDateTime startTime,
              @RequestParam(required = false) LocalDateTime endTime) {
-        Map<String, Object> stats = imAuditService.getStatistics(startTime, endTime);
+        AuditStatisticsVO stats = imAuditService.getStatistics(startTime, endTime);
         return Result.success(stats);
     }
 
@@ -94,7 +92,6 @@ public class ImAuditAdminController {
      *
      * @return 操作类型列表
      */
-    
     @GetMapping("/operation-types")
     public Result<List<String>> getOperationTypes() {
         List<String> types = Arrays.asList(
@@ -112,7 +109,6 @@ public class ImAuditAdminController {
      *
      * @return 目标类型列表
      */
-    
     @GetMapping("/target-types")
     public Result<List<String>> getTargetTypes() {
         List<String> types = Arrays.asList(
@@ -127,7 +123,6 @@ public class ImAuditAdminController {
      * @param beforeDate 删除此日期之前的日志
      * @return 删除结果
      */
-    
     @DeleteMapping("/clean")
     public Result<Integer> deleteExpiredLogs(
              @RequestParam LocalDateTime beforeDate) {
@@ -135,4 +130,3 @@ public class ImAuditAdminController {
         return Result.success("删除成功，共删除" + count + "条记录", count);
     }
 }
-
