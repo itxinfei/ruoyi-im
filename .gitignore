@@ -33,8 +33,24 @@ Thumbs.db
 # 忽略Claude相关文件
 **/.claude/
 
+# AI工具配置
+.codebuddy/
+.cursorrules
+.gemini/
+.mcp.json
+.playwright-mcp/
+.windsurfrules
+
 # 忽略Trae相关文件
 **/.trae/
+
+# 截图和临时图片
+*.png
+!ruoyi-im-web/public/**/*.png
+
+# 分析脚本
+ruoyi-im-api/find_methods.js
+ruoyi-im-api/find_violations.js
 
 # 忽略临时文件
 **/tmpclaude*

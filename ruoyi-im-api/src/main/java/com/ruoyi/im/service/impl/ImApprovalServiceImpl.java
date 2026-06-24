@@ -497,10 +497,17 @@ public class ImApprovalServiceImpl implements ImApprovalService {
      * 查找当前用户可处理的节点
      */
     private ImApprovalNode findCurrentNode(List<ImApprovalNode> pendingNodes, Long approverId) {
+        String approverIdStr = String.valueOf(approverId);
         for (ImApprovalNode node : pendingNodes) {
             String approverIds = node.getApproverIds();
-            if (approverIds != null && approverIds.contains(String.valueOf(approverId))) {
-                return node;
+            if (approverIds != null) {
+                // 精确匹配：按逗号分隔后逐个比较，避免 "1".contains("1") 匹配到 "11" 的问题
+                String[] ids = approverIds.split(",");
+                for (String id : ids) {
+                    if (id.trim().equals(approverIdStr)) {
+                        return node;
+                    }
+                }
             }
         }
         return null;

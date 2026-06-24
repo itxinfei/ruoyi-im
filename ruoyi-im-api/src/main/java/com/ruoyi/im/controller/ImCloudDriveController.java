@@ -349,6 +349,8 @@ public class ImCloudDriveController {
     public Result<List<ImCloudFileVO>> getRecentFiles(
              @RequestParam(defaultValue = "10") Integer limit) {
         Long userId = SecurityUtils.getLoginUserId();
+        // 防止恶意请求超大分页
+        limit = Math.min(limit, 100);
 
         try {
             List<ImCloudFileVO> files = cloudDriveService.getRecentFiles(userId, limit);

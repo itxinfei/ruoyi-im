@@ -165,6 +165,11 @@ public class ImUserAdminController {
     
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
+        // 防止管理员删除自己
+        Long currentUserId = SecurityUtils.getLoginUserId();
+        if (id.equals(currentUserId)) {
+            return Result.fail("不能删除自己的账号");
+        }
         ImUser user = imUserMapper.selectImUserById(id);
         if (user == null) {
             return Result.fail("用户不存在");

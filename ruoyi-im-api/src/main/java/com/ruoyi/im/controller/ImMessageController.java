@@ -8,8 +8,6 @@ import com.ruoyi.im.domain.ImMessageMention;
 import com.ruoyi.im.dto.message.*;
 import com.ruoyi.im.dto.reaction.ImMessageReactionAddRequest;
 import com.ruoyi.im.exception.BusinessException;
-import com.ruoyi.im.mapper.ImConversationMemberMapper;
-import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.service.*;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.message.ImMessageSearchResultVO;
@@ -59,8 +57,6 @@ public class ImMessageController {
         this.mentionService = mentionService;
         this.messageReadService = messageReadService;
         this.broadcastService = broadcastService;
-        this.imMessageMapper = imMessageMapper;
-        this.imConversationMemberMapper = imConversationMemberMapper;
     }
 
     @PostMapping("/send")

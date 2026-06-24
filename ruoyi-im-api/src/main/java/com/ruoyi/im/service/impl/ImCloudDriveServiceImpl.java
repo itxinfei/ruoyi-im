@@ -113,7 +113,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     @Transactional(rollbackFor = Exception.class)
     public Long createFolder(ImCloudFolderCreateRequest request, Long userId) {
         // 检查父文件夹是否存在
-        if (request.getParentId() != 0) {
+        if (request.getParentId() != null && request.getParentId().longValue() != 0) {
             ImCloudFolder parentFolder = cloudFolderMapper.selectById(request.getParentId());
             if (parentFolder == null) {
                 BusinessExceptionHelper.throwFolderNotFound();
