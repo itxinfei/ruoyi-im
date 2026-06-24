@@ -28,6 +28,9 @@ export default {
     // WebSocket 连接状态
     wsConnected: false,
 
+    // 输入中状态 { conversationId: { userId: timestamp } }
+    typingUsers: {},
+
     // 系统实用设置
     settings: {
       notifications: {
@@ -55,6 +58,16 @@ export default {
     // 是否已登录
     isLoggedIn: (state) => !!state.currentUser.id,
 
+    // 获取指定会话的输入中用户列表
+    getTypingUsers: (state) => (conversationId) => {
+      const users = state.typingUsers[conversationId] || {}
+      const now = Date.now()
+      // 过滤掉超过 5 秒的输入状态
+      return Object.entries(users)
+        .filter(([_, timestamp]) => now - timestamp < 5000)
+        .map(([userId]) => userId)
+    },
+
     // 通知设置
     notificationSettings: (state) => state.settings.notifications,
 
@@ -77,6 +90,25 @@ export default {
     // 设置 WebSocket 连接状态
     SET_WS_CONNECTED(state, connected) {
       state.wsConnected = connected
+    },
+
+    // 设置用户输入中状态
+    SET_TYPING_USER(state, { conversationId, userId, isTyping }) {
+      if (!state.typingUsers[conversationId]) {
+        state.typingUsers[conversationId] = {}
+      }
+      if (isTyping) {
+        state.typingUsers[conversationId][userId] = Date.now()
+      } else {
+        delete state.typingUsers[conversationId][userId]
+      }
+    },
+
+    // 清除会话的输入中状态
+    CLEAR_TYPING_USERS(state, conversationId) {
+      if (state.typingUsers[conversationId]) {
+        delete state.typingUsers[conversationId]
+      }
     },
 
     // 更新系统设置
@@ -106,6 +138,7 @@ export default {
         email: ''
       }
       state.wsConnected = false
+      state.typingUsers = {}
     }
   },
 
@@ -143,6 +176,11 @@ export default {
     // 设置 WebSocket 连接状态
     setWsConnected({ commit }, connected) {
       commit('SET_WS_CONNECTED', connected)
+    },
+
+    // 设置用户输入中状态
+    setTypingUser({ commit }, payload) {
+      commit('SET_TYPING_USER', payload)
     },
 
     // 登出 - 清空所有状态

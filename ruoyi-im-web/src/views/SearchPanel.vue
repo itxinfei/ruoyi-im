@@ -169,8 +169,23 @@ const handleItemClick = (item, type) => {
 
 const highlightKeyword = (text, kw) => {
   if (!text || !kw) return text
-  const regex = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi')
+  // 支持多个搜索词（空格分隔）
+  const keywords = kw.trim().split(/\s+/).filter(Boolean)
+  if (!keywords.length) return text
+  // 转义每个关键词并构建正则
+  const escaped = keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const regex = new RegExp(`(${escaped.join('|')})`, 'gi')
   return String(text).replace(regex, '<mark class="search-highlight">$1</mark>')
+}
+
+// 计算匹配次数
+const getMatchCount = (text, kw) => {
+  if (!text || !kw) return 0
+  const keywords = kw.trim().split(/\s+/).filter(Boolean)
+  const escaped = keywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+  const regex = new RegExp(escaped.join('|'), 'gi')
+  const matches = String(text).match(regex)
+  return matches ? matches.length : 0
 }
 
 const formatTime = (t) => t ? new Date(t).toLocaleDateString() : ''
@@ -249,5 +264,11 @@ onMounted(() => {
   .el-icon { font-size: 48px; opacity: 0.3; margin-bottom: 16px; }
 }
 
-:deep(.search-highlight) { background: transparent; color: var(--dt-brand-color); font-weight: 700; padding: 0; }
+:deep(.search-highlight) {
+  background: var(--dt-brand-bg);
+  color: var(--dt-brand-color);
+  font-weight: 700;
+  padding: 1px 2px;
+  border-radius: 2px;
+}
 </style>

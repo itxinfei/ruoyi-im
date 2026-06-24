@@ -75,7 +75,8 @@ const emit = defineEmits([
   'attach-click',
   'emoji-click',
   'mention-click',
-  'link-click'
+  'link-click',
+  'typing'
 ])
 
 const props = defineProps({
@@ -106,6 +107,10 @@ const handleInput = () => {
   const text = editorRef.value?.innerText.trim() || ''
   hasContent.value = !!text
   emit('update:modelValue', text)
+  // 发送输入中状态
+  if (text.length > 0) {
+    emit('typing', true)
+  }
 }
 
 const handleKeydownEnter = (e) => {

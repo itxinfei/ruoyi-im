@@ -34,6 +34,29 @@
               <span class="num">{{ stats.dingCount }}</span>
               <span class="lab">未读 DING</span>
             </div>
+            <div class="v-divider"></div>
+            <div class="stat-box" @click="$emit('switch-module', 'approval')">
+              <span class="num">{{ stats.approvalCount }}</span>
+              <span class="lab">待审批</span>
+            </div>
+            <div class="v-divider"></div>
+            <div class="stat-box">
+              <span class="num">{{ stats.unreadMessages }}</span>
+              <span class="lab">未读消息</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 快捷入口 -->
+        <section class="quick-actions">
+          <div class="section-title">快捷入口</div>
+          <div class="action-grid">
+            <div v-for="action in quickActions" :key="action.id" class="action-item" @click="handleActionClick(action)">
+              <div class="action-icon" :style="{ color: action.color, background: action.bgColor }">
+                <el-icon><component :is="action.icon" /></el-icon>
+              </div>
+              <span class="action-name">{{ action.name }}</span>
+            </div>
           </div>
         </section>
 
@@ -67,6 +90,42 @@
             </div>
           </div>
         </section>
+
+        <!-- 今日数据概览 -->
+        <section class="data-overview">
+          <div class="group-header">
+            <span class="g-title">今日数据</span>
+          </div>
+          <div class="overview-grid">
+            <div class="overview-card">
+              <div class="overview-icon" style="color: var(--dt-brand-color); background: var(--dt-brand-bg);">
+                <el-icon><ChatDotRound /></el-icon>
+              </div>
+              <div class="overview-info">
+                <span class="overview-value">{{ stats.todayMessages }}</span>
+                <span class="overview-label">今日消息</span>
+              </div>
+            </div>
+            <div class="overview-card">
+              <div class="overview-icon" style="color: var(--dt-success-color); background: var(--dt-success-bg);">
+                <el-icon><User /></el-icon>
+              </div>
+              <div class="overview-info">
+                <span class="overview-value">{{ stats.activeUsers }}</span>
+                <span class="overview-label">活跃用户</span>
+              </div>
+            </div>
+            <div class="overview-card">
+              <div class="overview-icon" style="color: var(--dt-warning-color); background: var(--dt-warning-bg);">
+                <el-icon><FolderOpened /></el-icon>
+              </div>
+              <div class="overview-info">
+                <span class="overview-value">{{ stats.todayFiles }}</span>
+                <span class="overview-label">今日文件</span>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -77,12 +136,21 @@ import { ref, computed } from 'vue'
 import { useStore } from 'vuex'
 import {
   Files, Finished, Clock, Notebook, Calendar,
-  Promotion, Tickets, Management, FolderOpened
+  Promotion, Tickets, Management, FolderOpened,
+  ChatDotRound, User, Document, Setting
 } from '@element-plus/icons-vue'
 
 const store = useStore()
 const activeMenu = ref('center')
-const stats = ref({ todoCount: 8, dingCount: 2 })
+const stats = ref({ 
+  todoCount: 8, 
+  dingCount: 2, 
+  approvalCount: 3, 
+  unreadMessages: 12,
+  todayMessages: 156,
+  activeUsers: 42,
+  todayFiles: 8
+})
 
 // 用户名（响应式，从 store 读取）
 const userName = computed(() => {
@@ -117,6 +185,16 @@ const menus = [
   { id: 'manage', label: '应用管理', icon: Management }
 ]
 
+// 快捷入口
+const quickActions = [
+  { id: 1, name: '写审批', icon: Tickets, color: 'var(--dt-brand-color)', bgColor: 'var(--dt-brand-bg)', module: 'approval' },
+  { id: 2, name: '写日志', icon: Promotion, color: 'var(--dt-success-color)', bgColor: 'var(--dt-success-bg)', module: 'workReport' },
+  { id: 3, name: '新建待办', icon: Finished, color: 'var(--dt-warning-color)', bgColor: 'var(--dt-warning-bg)', module: 'todo' },
+  { id: 4, name: '发邮件', icon: Document, color: 'var(--dt-purple-color)', bgColor: 'var(--dt-purple-bg)', module: 'mail' },
+  { id: 5, name: '日程', icon: Calendar, color: 'var(--dt-cyan-color)', bgColor: 'var(--dt-cyan-bg)', module: 'calendar' },
+  { id: 6, name: '设置', icon: Setting, color: 'var(--dt-text-tertiary)', bgColor: 'var(--dt-bg-hover)', module: 'settings' }
+]
+
 const recentApps = [
   { id: 1, name: '审批', icon: Finished, color: 'var(--dt-brand-color)' },
   { id: 2, name: '考勤', icon: Clock, color: 'var(--dt-success-color)' },
@@ -130,6 +208,12 @@ const baseApps = [
 ]
 
 const handleAppClick = (app) => {}
+const handleActionClick = (action) => {
+  if (action.module) {
+    // 切换到对应模块
+    console.log('Switch to module:', action.module)
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -354,5 +438,96 @@ const handleAppClick = (app) => {}
       margin-top: 4px;
     }
   }
+}
+
+/* 快捷入口 */
+.quick-actions {
+  margin-bottom: 24px;
+  .section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+    margin-bottom: 12px;
+  }
+}
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+}
+.action-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 8px;
+  border-radius: var(--dt-radius-lg);
+  cursor: pointer;
+  transition: background var(--dt-transition-fast);
+  &:hover {
+    background: var(--dt-bg-hover);
+  }
+}
+.action-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--dt-radius-lg);
+  @include flex-center;
+  font-size: 20px;
+}
+.action-name {
+  font-size: 12px;
+  color: var(--dt-text-secondary);
+  text-align: center;
+}
+
+/* 今日数据概览 */
+.data-overview {
+  margin-top: 24px;
+  .group-header {
+    margin-bottom: 12px;
+  }
+  .g-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dt-text-primary);
+  }
+}
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.overview-card {
+  background: var(--dt-bg-card);
+  padding: 20px;
+  border-radius: var(--dt-radius-lg);
+  border: 1px solid var(--dt-border-light);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.overview-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--dt-radius-lg);
+  @include flex-center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.overview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.overview-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dt-text-primary);
+  line-height: 1;
+}
+.overview-label {
+  font-size: 12px;
+  color: var(--dt-text-tertiary);
 }
 </style>

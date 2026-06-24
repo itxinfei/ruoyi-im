@@ -199,6 +199,22 @@ class ImWebSocket {
   }
 
   /**
+   * 发送输入中状态
+   * @param {string} conversationId - 会话ID
+   * @param {boolean} isTyping - 是否正在输入
+   */
+  sendTyping(conversationId, isTyping) {
+    this.send({
+      type: MESSAGE_TYPE.TYPING,
+      data: {
+        conversationId,
+        isTyping
+      }
+    })
+    debug('ImWebSocket', '发送输入中状态, conversationId:', conversationId, 'isTyping:', isTyping)
+  }
+
+  /**
    * 发送消息
    * @param {Object} message - 消息对象
    * @returns {boolean} 是否发送成功

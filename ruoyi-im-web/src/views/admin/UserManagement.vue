@@ -63,6 +63,39 @@
             <el-option label="超级管理员" value="SUPER_ADMIN" />
           </el-select>
         </el-col>
+        <el-col
+          :xs="24"
+          :sm="8"
+          :md="6"
+          :lg="4"
+        >
+          <el-select
+            v-model="searchStatus"
+            placeholder="选择状态"
+            clearable
+            style="width: 100%"
+            @change="handleSearch"
+          >
+            <el-option label="启用" :value="1" />
+            <el-option label="禁用" :value="0" />
+          </el-select>
+        </el-col>
+        <el-col
+          :xs="24"
+          :sm="12"
+          :md="8"
+          :lg="6"
+        >
+          <el-date-picker
+            v-model="dateRange"
+            type="daterange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期"
+            style="width: 100%"
+            @change="handleSearch"
+          />
+        </el-col>
       </el-row>
 
       <div v-if="selectedUsers.length" class="batch-actions">
@@ -387,6 +420,8 @@ const uploadRef = ref(null)
 const templateFile = ref(null)
 const searchKeyword = ref('')
 const searchRole = ref('')
+const searchStatus = ref('')
+const dateRange = ref(null)
 const pageNum = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
@@ -408,12 +443,22 @@ const isSuperAdmin = ref(false)
 const loadUsers = async () => {
   loading.value = true
   try {
-    const res = await getUserList({
+    const params = {
       keyword: searchKeyword.value,
       role: searchRole.value,
       pageNum: pageNum.value,
       pageSize: pageSize.value
-    })
+    }
+    // 添加状态筛选
+    if (searchStatus.value !== '') {
+      params.status = searchStatus.value
+    }
+    // 添加日期范围筛选
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0].toISOString().split('T')[0]
+      params.endDate = dateRange.value[1].toISOString().split('T')[0]
+    }
+    const res = await getUserList(params)
     if (res.code === 200) {
       userList.value = res.data.list || []
       total.value = res.data.total || 0
@@ -437,6 +482,8 @@ const handleSearch = () => {
 const handleReset = () => {
   searchKeyword.value = ''
   searchRole.value = ''
+  searchStatus.value = ''
+  dateRange.value = null
   pageNum.value = 1
   loadUsers()
 }

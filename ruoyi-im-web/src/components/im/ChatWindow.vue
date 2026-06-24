@@ -23,6 +23,16 @@
           @load-more="handleLoadMore"
           @show-user="handleShowUser"
         />
+
+        <!-- 输入中指示器 -->
+        <div v-if="typingUserNames.length > 0" class="typing-indicator">
+          <div class="typing-dots">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <span class="typing-text">{{ typingText }}</span>
+        </div>
       </div>
 
       <!-- 底部输入区 (对齐钉钉：通铺纯白) -->
@@ -34,6 +44,7 @@
         @emoji-click="handleOpenEmoji"
         @mention-click="handleOpenMention"
         @link-click="handleInsertLink"
+        @typing="handleTyping"
       />
 
       <!-- @提及选择器 -->
@@ -86,7 +97,7 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useStore } from 'vuex'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ChatWindowHeader from './ChatWindow/ChatWindowHeader.vue'
@@ -99,6 +110,7 @@ import AtMemberPicker from './AtMemberPicker.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import { uploadFile } from '@/api/im/file'
 import { getGroupMembers } from '@/api/im/group'
+import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const store = useStore()
 const isDetailOpen = ref(false)
@@ -134,6 +146,48 @@ const messages = computed(() => {
   if (!currentSession.value?.id) return []
   return store.state.im.message.messages[currentSession.value.id] || []
 })
+
+// 输入中指示器
+const typingUserIds = computed(() => {
+  if (!currentSession.value?.id) return []
+  return store.getters['im/getTypingUsers'](currentSession.value.id)
+})
+
+const typingUserNames = computed(() => {
+  if (!typingUserIds.value.length) return []
+  const members = currentSession.value.members || []
+  return typingUserIds.value
+    .map(id => {
+      const member = members.find(m => m.userId === id || m.id === id)
+      return member?.nickname || member?.name || '对方'
+    })
+    .slice(0, 3) // 最多显示 3 个用户
+})
+
+const typingText = computed(() => {
+  const count = typingUserNames.value.length
+  if (count === 0) return ''
+  if (count === 1) return `${typingUserNames.value[0]} 正在输入...`
+  if (count === 2) return `${typingUserNames.value[0]}、${typingUserNames.value[1]} 正在输入...`
+  return `${typingUserNames.value[0]} 等${count}人正在输入...`
+})
+
+// 处理输入中状态
+let typingTimer = null
+const handleTyping = (isTyping) => {
+  if (!currentSession.value?.id) return
+  // 发送输入中状态
+  const imWebSocket = require('@/utils/websocket/imWebSocket').default
+  imWebSocket.sendTyping(currentSession.value.id, isTyping)
+  // 清除之前的定时器
+  if (typingTimer) clearTimeout(typingTimer)
+  // 3 秒后自动停止输入中状态
+  if (isTyping) {
+    typingTimer = setTimeout(() => {
+      imWebSocket.sendTyping(currentSession.value.id, false)
+    }, 3000)
+  }
+}
 
 // 监听会话切换，加载消息
 watch(currentSession, async (newSession) => {
@@ -402,6 +456,30 @@ const handleVideoCall = () => {
     })
   }
 }
+
+// WebSocket 输入中状态监听
+const { on } = useImWebSocket()
+let typingCleanup = null
+
+onMounted(() => {
+  // 监听输入中事件
+  typingCleanup = on('typing', (payload) => {
+    if (!payload || !currentSession.value?.id) return
+    const { conversationId, userId, isTyping } = payload
+    // 只处理当前会话的输入中状态
+    if (conversationId === currentSession.value.id) {
+      store.dispatch('im/setTypingUser', {
+        conversationId,
+        userId,
+        isTyping
+      })
+    }
+  })
+})
+
+onBeforeUnmount(() => {
+  if (typingCleanup) typingCleanup()
+})
 </script>
 
 <style scoped lang="scss">
@@ -486,5 +564,41 @@ const handleVideoCall = () => {
       }
     }
   }
+}
+
+/* 输入中指示器 */
+.typing-indicator {
+  display: flex;
+  align-items: center;
+  gap: var(--dt-spacing-sm);
+  padding: var(--dt-spacing-xs) var(--dt-spacing-md);
+  color: var(--dt-text-tertiary);
+  font-size: var(--dt-font-size-xs);
+}
+
+.typing-dots {
+  display: flex;
+  gap: 3px;
+
+  .dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--dt-text-quaternary);
+    animation: typingBounce 1.4s infinite ease-in-out;
+
+    &:nth-child(1) { animation-delay: 0s; }
+    &:nth-child(2) { animation-delay: 0.2s; }
+    &:nth-child(3) { animation-delay: 0.4s; }
+  }
+}
+
+@keyframes typingBounce {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.typing-text {
+  white-space: nowrap;
 }
 </style>
