@@ -13,6 +13,7 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.cloud.ImCloudFileMoveRequest;
 import com.ruoyi.im.dto.cloud.ImCloudFileShareRequest;
 import com.ruoyi.im.dto.cloud.ImCloudFolderCreateRequest;
+import cn.hutool.core.collection.CollUtil;
 import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.mapper.ImCloudFileMapper;
 import com.ruoyi.im.mapper.ImCloudFileShareMapper;
@@ -22,6 +23,10 @@ import com.ruoyi.im.mapper.ImFileAssetMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImCloudDriveService;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Collectors;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.FileUtils;
 import com.ruoyi.im.vo.cloud.ImCloudFileShareVO;

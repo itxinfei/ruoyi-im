@@ -139,8 +139,8 @@ export default {
   getters: {
     // 获取当前会话的消息列表
     currentMessages: (state, getters, rootState) => {
-      if (!rootState.session.currentSession) return []
-      return state.messages[rootState.session.currentSession.id] || []
+      if (!rootState.im.session.currentSession) return []
+      return state.messages[rootState.im.session.currentSession.id] || []
     },
 
     // 获取指定会话的消息列表
@@ -374,17 +374,17 @@ export default {
     },
 
     // 编辑消息
-    async editMessage({ commit, rootState }, { messageId, content }) {
+    async editMessage({ commit, state, rootState }, { messageId, content }) {
       const res = await apiEditMessage(messageId, { content })
       if (res.code === 200) {
         // 查找该消息在哪个会话中 (通常是当前会话)
-        const sessionId = rootState.session.currentSession?.id
-        if (sessionId && rootState.message.messages[sessionId]) {
-          const editedMsg = { ...rootState.message.messages[sessionId].find(m => m.messageId === messageId), content, isEdited: true }
+        const sessionId = rootState.im.session.currentSession?.id
+        if (sessionId && state.messages[sessionId]) {
+          const editedMsg = { ...state.messages[sessionId].find(m => m.messageId === messageId), content, isEdited: true }
           commit('UPDATE_MESSAGE', { sessionId, message: editedMsg })
 
           // 如果是最后一条消息，更新会话列表
-          const session = rootState.session.sessions.find(s => s.id === sessionId)
+          const session = rootState.im.session.sessions.find(s => s.id === sessionId)
           if (session && (session.lastMessageId === messageId || session.lastMessageId === editedMsg.messageId)) {
             commit('im/session/UPDATE_SESSION', {
               id: sessionId,
@@ -444,9 +444,9 @@ export default {
     },
 
     // 处理已读回执（收到对方已读通知）
-    async handleReadReceipt({ commit, rootState }, { conversationId, messageId }) {
+    async handleReadReceipt({ commit, state, rootState }, { conversationId, messageId }) {
       const sessionId = conversationId
-      if (!rootState.message.messages[sessionId]) return
+      if (!state.messages[sessionId]) return
       
       // 更新指定消息状态为已读
       commit('UPDATE_MESSAGE_STATUS', {
@@ -456,7 +456,7 @@ export default {
       })
       
       // 更新会话未读数
-      const session = rootState.session.sessions.find(s => s.id === sessionId)
+      const session = rootState.im.session.sessions.find(s => s.id === sessionId)
       if (session && session.unreadCount > 0) {
         commit('im/session/UPDATE_SESSION', {
           id: sessionId,
@@ -474,7 +474,7 @@ export default {
     async deleteMessage({ commit, rootState }, messageId) {
       await deleteMessage(messageId)
       // 需要找到该消息所属的会话ID
-      const sessionId = rootState.session.currentSession?.id
+      const sessionId = rootState.im.session.currentSession?.id
       if (sessionId) {
         commit('DELETE_MESSAGE', { sessionId, messageId })
       }
@@ -483,7 +483,7 @@ export default {
     // 批量删除消息
     async batchDeleteMessagesAction({ commit, rootState }, messageIds) {
       await batchDeleteMessages(messageIds)
-      const sessionId = rootState.session.currentSession?.id
+      const sessionId = rootState.im.session.currentSession?.id
       if (sessionId) {
         messageIds.forEach(messageId => {
           commit('DELETE_MESSAGE', { sessionId, messageId })
@@ -498,12 +498,12 @@ export default {
     },
 
     // 撤回消息
-    async recallMessage({ commit, rootState }, messageId) {
+    async recallMessage({ commit, state, rootState }, messageId) {
       await recallMessage(messageId)
       // 需要找到该消息所属的会话ID并更新为撤回状态
-      const sessionId = rootState.session.currentSession?.id
-      if (sessionId && rootState.message.messages[sessionId]) {
-        const msg = rootState.message.messages[sessionId].find(m => m.messageId === messageId)
+      const sessionId = rootState.im.session.currentSession?.id
+      if (sessionId && state.messages[sessionId]) {
+        const msg = state.messages[sessionId].find(m => m.messageId === messageId)
         if (msg) {
           commit('UPDATE_MESSAGE_STATUS', {
             sessionId,
@@ -523,8 +523,8 @@ export default {
       commit('ADD_MESSAGE', { sessionId, message })
 
       // 如果不是当前正在查看的会话，则增加未读数
-      const isCurrentSession = rootState.session.currentSession && rootState.session.currentSession.id === sessionId
-      const session = rootState.session.sessions.find(s => s.id === sessionId)
+      const isCurrentSession = rootState.im.session.currentSession && rootState.im.session.currentSession.id === sessionId
+      const session = rootState.im.session.sessions.find(s => s.id === sessionId)
 
       // 检查是否有 @ 我
       const currentUser = rootState.im?.currentUser
@@ -558,7 +558,7 @@ export default {
         if (res.code === 200) {
           // 重新获取最新的 reactions
           const reactionsRes = await getMessageReactions(messageId)
-          const sessionId = rootState.session.currentSession?.id
+          const sessionId = rootState.im.session.currentSession?.id
           if (sessionId && reactionsRes.code === 200) {
             commit('UPDATE_MESSAGE_REACTIONS', {
               sessionId,
@@ -579,7 +579,7 @@ export default {
     async addFavorite({ commit, rootState }, { messageId, conversationId }) {
       const res = await addMessageFavorite({ messageId, conversationId })
       if (res.code === 200) {
-        const sessionId = rootState.session.currentSession?.id
+        const sessionId = rootState.im.session.currentSession?.id
         if (sessionId) {
           commit('UPDATE_MESSAGE_FAVORITE', {
             sessionId,
@@ -597,7 +597,7 @@ export default {
     async removeFavorite({ commit, rootState }, { messageId, conversationId: _conversationId }) {
       const res = await removeMessageFavorite(messageId)
       if (res.code === 200) {
-        const sessionId = rootState.session.currentSession?.id
+        const sessionId = rootState.im.session.currentSession?.id
         if (sessionId) {
           commit('UPDATE_MESSAGE_FAVORITE', {
             sessionId,

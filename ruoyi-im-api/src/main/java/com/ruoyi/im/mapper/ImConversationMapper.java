@@ -126,4 +126,13 @@ public interface ImConversationMapper extends BaseMapper<ImConversation> {
      * @return 群组列表
      */
     List<ImGroup> selectGroupsByIds(@Param("groupIds") List<Long> groupIds);
+
+    /**
+     * 统计用户会话数量
+     *
+     * @param userId 用户ID
+     * @return 会话数量
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COUNT(*) FROM im_conversation_member WHERE user_id = #{userId} AND is_deleted = 0")
+    int countByUserId(@Param("userId") Long userId);
 }

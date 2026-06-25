@@ -13,6 +13,9 @@ import com.ruoyi.im.mapper.ImScheduleEventMapper;
 import com.ruoyi.im.mapper.ImScheduleParticipantMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImScheduleEventService;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.schedule.ScheduleEventDetailVO;
 import com.ruoyi.im.vo.schedule.ScheduleParticipantVO;

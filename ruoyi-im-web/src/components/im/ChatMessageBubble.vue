@@ -62,7 +62,7 @@
 
         <!-- 文件消息 -->
         <div v-else-if="messageType === 'FILE'" class="bubble bubble-file" @click="handleFileClick">
-          <div class="file-icon-wrapper" :style="{ background: fileIconColor + '1a', color: fileIconColor }">
+          <div class="file-icon-wrapper" :style="{ background: fileIconBg, color: fileIconColor }">
             <el-icon class="file-icon"><Document /></el-icon>
           </div>
           <div class="file-info">
@@ -222,6 +222,16 @@ const fileIconColor = computed(() => {
   if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'var(--dt-file-excel)'
   if (name.endsWith('.ppt') || name.endsWith('.pptx')) return 'var(--dt-file-ppt)'
   return 'var(--dt-file-other)'
+})
+
+// 文件图标背景色（与 fileIconColor 对应的浅色背景）
+const fileIconBg = computed(() => {
+  const name = resolvedFileName.value.toLowerCase()
+  if (name.endsWith('.pdf')) return 'rgba(255, 77, 79, 0.1)'
+  if (name.endsWith('.doc') || name.endsWith('.docx')) return 'rgba(43, 125, 255, 0.1)'
+  if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'rgba(34, 171, 92, 0.1)'
+  if (name.endsWith('.ppt') || name.endsWith('.pptx')) return 'rgba(255, 122, 0, 0.1)'
+  return 'rgba(173, 177, 184, 0.1)'
 })
 
 const reactions = computed(() => props.message.reactions || [])

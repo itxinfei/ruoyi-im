@@ -91,9 +91,9 @@ const isFocused = ref(false)
 const hasContent = ref(false)
 const isDragover = ref(false)
 const isSending = ref(false)
+const charCount = ref(0)
 
 const canSend = computed(() => hasContent.value && !isSending.value)
-const charCount = computed(() => editorRef.value?.innerText?.length || 0)
 
 // 监听外部 modelValue 变化，同步到编辑器
 watch(() => props.modelValue, (newVal) => {
@@ -106,6 +106,7 @@ watch(() => props.modelValue, (newVal) => {
 const handleInput = () => {
   const text = editorRef.value?.innerText.trim() || ''
   hasContent.value = !!text
+  charCount.value = editorRef.value?.innerText?.length || 0
   emit('update:modelValue', text)
   // 发送输入中状态
   if (text.length > 0) {
@@ -125,20 +126,22 @@ const handleKeydownEnter = (e) => {
 
 const executeSendMessage = () => {
   if (!canSend.value) return
-  
+
   isSending.value = true
-  
+
   const content = editorRef.value?.innerText.trim()
   if (content) {
     emit('send', content)
     editorRef.value.innerHTML = ''
     hasContent.value = false
+    charCount.value = 0
     emit('update:modelValue', '')
   }
-  
-  setTimeout(() => {
-    isSending.value = false
-  }, 1000)
+}
+
+// 供父组件调用：发送完成后重置状态
+const resetSending = () => {
+  isSending.value = false
 }
 
 const handleDragOver = () => { isDragover.value = true }
@@ -181,7 +184,8 @@ onMounted(() => editorRef.value?.focus())
 
 // 暴露方法给父组件调用
 defineExpose({
-  insertText
+  insertText,
+  resetSending
 })
 </script>
 

@@ -32,6 +32,11 @@ Thumbs.db
 
 # 忽略Claude相关文件
 **/.claude/
+CLAUDE.md
+MASTER_PROMPT.md
+docs/Claude提示词库.md
+docs/LLM任务模板.md
+docs/05-AI执行文档使用协议.md
 
 # AI工具配置
 .codebuddy/

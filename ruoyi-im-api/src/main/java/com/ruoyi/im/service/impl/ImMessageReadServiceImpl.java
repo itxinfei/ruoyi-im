@@ -231,14 +231,37 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         }
 
         // 获取需要标记为已读的消息列表
-        // 查询该会话中最后已读消息ID之后、直到upToMessageId的所有消息
         List<ImMessage> messagesToMark = getMessagesToMarkAsRead(conversationId, userId, actualUpToMessageId);
+        if (messagesToMark.isEmpty()) {
+            return;
+        }
 
-        for (ImMessage message : messagesToMark) {
+        // 过滤掉自己发送的消息
+        List<Long> messageIds = messagesToMark.stream()
+                .filter(m -> !m.getSenderId().equals(userId))
+                .map(ImMessage::getId)
+                .collect(Collectors.toList());
+
+        if (!messageIds.isEmpty()) {
+            // 批量插入已读记录（1次INSERT替代N次）
+            LocalDateTime now = LocalDateTime.now();
+            List<ImMessageRead> readRecords = messageIds.stream().map(messageId -> {
+                ImMessageRead record = new ImMessageRead();
+                record.setMessageId(messageId);
+                record.setUserId(userId);
+                record.setConversationId(conversationId);
+                record.setReadTime(now);
+                record.setReadType(READ_TYPE_MANUAL);
+                record.setDeviceType(DEVICE_TYPE_WEB);
+                record.setCreateTime(now);
+                return record;
+            }).collect(Collectors.toList());
+
             try {
-                markMessageAsRead(conversationId, message.getId(), userId);
-            } catch (Exception e) {
-                log.error("标记消息已读失败: messageId={}, userId={}", message.getId(), userId, e);
+                messageReadMapper.batchInsertImMessageRead(readRecords);
+            } catch (org.springframework.dao.DuplicateKeyException e) {
+                // 部分记录已存在（并发场景），忽略
+                log.debug("批量标记已读部分记录已存在: conversationId={}, userId={}", conversationId, userId);
             }
         }
 
@@ -449,14 +472,33 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
                 .last("100") // 只返回最近100条
         );
 
+        // 批量加载所有消息的已读记录（1次查询替代N次）
+        List<Long> messageIds = messages.stream().map(ImMessage::getId).collect(Collectors.toList());
+        List<Map<String, Object>> readCounts = messageReadMapper.batchCountReadUsersByMessageIds(messageIds);
+        Map<Long, Integer> readCountMap = new HashMap<>();
+        for (Map<String, Object> row : readCounts) {
+            readCountMap.put(((Number) row.get("message_id")).longValue(), ((Number) row.get("read_count")).intValue());
+        }
+
+        // 获取会话成员总数
+        ImConversation conversation = conversationMapper.selectById(conversationId);
+        int totalCount = 2;
+        if (conversation != null && CONVERSATION_TYPE_GROUP.equals(conversation.getType())) {
+            List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
+            totalCount = members.size();
+        }
+
         List<ImMessageReadStatusVO> statusList = new ArrayList<>();
         for (ImMessage message : messages) {
-            try {
-                ImMessageReadStatusVO status = getMessageReadStatus(message.getId(), userId);
-                statusList.add(status);
-            } catch (Exception e) {
-                log.error("获取消息已读状态失败: messageId={}", message.getId(), e);
-            }
+            ImMessageReadStatusVO status = new ImMessageReadStatusVO();
+            status.setMessageId(message.getId());
+            status.setConversationId(conversationId);
+            status.setSenderId(userId);
+            status.setTotalCount(totalCount);
+            status.setReadCount(readCountMap.getOrDefault(message.getId(), 0));
+            status.setUnreadCount(totalCount - status.getReadCount());
+            status.setCanViewReadStatus(true);
+            statusList.add(status);
         }
 
         return statusList;

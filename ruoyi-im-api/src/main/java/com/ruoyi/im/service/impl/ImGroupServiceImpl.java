@@ -122,25 +122,28 @@ public class ImGroupServiceImpl implements ImGroupService {
         addConversationMember(conversation.getId(), userId);
 
         if (request.getMemberIds() != null && !request.getMemberIds().isEmpty()) {
-            for (Long memberId : request.getMemberIds()) {
+            // 批量插入群组成员（1次INSERT替代N次）
+            LocalDateTime now = LocalDateTime.now();
+            List<ImGroupMember> members = request.getMemberIds().stream().map(memberId -> {
                 ImGroupMember member = new ImGroupMember();
                 member.setGroupId(group.getId());
                 member.setUserId(memberId);
                 member.setRole(ROLE_MEMBER);
                 member.setInviterId(userId);
-                member.setJoinedTime(LocalDateTime.now());
-                member.setCreateTime(LocalDateTime.now());
-                member.setUpdateTime(LocalDateTime.now());
-                imGroupMemberMapper.insertImGroupMember(member);
+                member.setJoinedTime(now);
+                member.setCreateTime(now);
+                member.setUpdateTime(now);
+                return member;
+            }).collect(Collectors.toList());
+            imGroupMemberMapper.batchInsert(members);
 
-                // 添加成员到会话
+            // 逐个添加到会话（会话成员表需要单独处理）
+            for (Long memberId : request.getMemberIds()) {
                 addConversationMember(conversation.getId(), memberId);
             }
-            // 原子更新成员数，避免并发计数丢失
-            int addedSize = request.getMemberIds().size();
-            if (addedSize > 0) {
-                imGroupMapper.adjustMemberCount(group.getId(), addedSize);
-            }
+
+            // 原子更新成员数
+            imGroupMapper.adjustMemberCount(group.getId(), request.getMemberIds().size());
         }
 
         return group.getId();

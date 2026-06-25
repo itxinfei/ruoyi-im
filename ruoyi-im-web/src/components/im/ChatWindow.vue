@@ -287,10 +287,21 @@ const handleOpenMention = async () => {
     }]
   }
 
-  // 计算弹窗位置（在输入框上方）
-  mentionPickerPosition.value = {
-    top: -300,
-    left: 20
+  // 计算弹窗位置（基于输入框位置，在输入框上方）
+  const inputArea = chatInputAreaRef.value?.$el
+  if (inputArea) {
+    const rect = inputArea.getBoundingClientRect()
+    const parentRect = inputArea.closest('.chat-container')?.getBoundingClientRect()
+    if (parentRect) {
+      mentionPickerPosition.value = {
+        top: rect.top - parentRect.top - 310,
+        left: rect.left - parentRect.left + 20
+      }
+    } else {
+      mentionPickerPosition.value = { top: -310, left: 20 }
+    }
+  } else {
+    mentionPickerPosition.value = { top: -310, left: 20 }
   }
   mentionPickerVisible.value = true
 }

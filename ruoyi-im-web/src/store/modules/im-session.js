@@ -126,6 +126,17 @@ export default {
     SET_SESSION_GROUP(state, { sessionId, groupId }) {
       const session = state.sessions.find(s => s.id === sessionId)
       if (session) session.groupId = groupId
+    },
+
+    // 清空所有状态（登出时调用）
+    CLEAR_STATE(state) {
+      state.sessions = []
+      state.currentSession = null
+      state.totalUnreadCount = 0
+      state.loading = false
+      state.currentFilter = 'all'
+      state.sessionGroups = []
+      state.defaultGroupId = null
     }
   },
 
@@ -136,7 +147,7 @@ export default {
       try {
         const res = await getConversations(filter)
         if (res.code === 200 && res.data) {
-          const currentUserId = rootState.user?.userId
+          const currentUserId = rootState.user?.userInfo?.id
           const drafts = getDraftMap(currentUserId)
           const sessions = res.data.map(session => ({
             ...session,
@@ -166,7 +177,7 @@ export default {
     // 保存草稿 (带用户隔离与持久化)
     async saveDraft({ commit, rootState }, { sessionId, content }) {
       if (!sessionId) return
-      const currentUserId = rootState.user?.userId
+      const currentUserId = rootState.user?.userInfo?.id
       const drafts = getDraftMap(currentUserId)
       
       const trimmedContent = (content || '').trim()
@@ -195,7 +206,7 @@ export default {
     // 清除草稿
     clearDraft({ commit, rootState }, sessionId) {
       if (!sessionId) return
-      const currentUserId = rootState.user?.userId
+      const currentUserId = rootState.user?.userInfo?.id
       const drafts = getDraftMap(currentUserId)
       delete drafts[sessionId]
       setDraftMap(drafts, currentUserId)
@@ -206,7 +217,7 @@ export default {
     async deleteSession({ commit, rootState }, sessionId) {
       try {
         await apiDeleteConversation(sessionId)
-        const currentUserId = rootState.user?.userId
+        const currentUserId = rootState.user?.userInfo?.id
         const drafts = getDraftMap(currentUserId)
         if (drafts[sessionId]) {
           delete drafts[sessionId]
