@@ -34,7 +34,6 @@ public class ImRedisUtil {
     private static final String KEY_PREFIX = "im:";
     private static final String USER_PREFIX = "user:";
     private static final String CONVERSATION_PREFIX = "conversation:";
-    private static final String MESSAGE_PREFIX = "message:";
     private static final String ONLINE_PREFIX = "online:";
     private static final String UNREAD_PREFIX = "unread:";
     private static final String OFFLINE_MSG_PREFIX = "offline:messages:";

@@ -241,10 +241,7 @@ public class ImTaskServiceImpl implements ImTaskService {
         IPage<ImTask> taskPage = taskMapper.selectTaskPage(page, request);
 
         Page<ImTaskVO> voPage = new Page<>(taskPage.getCurrent(), taskPage.getSize(), taskPage.getTotal());
-        List<ImTaskVO> vos = taskPage.getRecords().stream()
-                .map(this::convertToVO)
-                .collect(Collectors.toList());
-        voPage.setRecords(vos);
+        voPage.setRecords(batchConvertToVO(taskPage.getRecords()));
 
         return voPage;
     }
@@ -252,17 +249,13 @@ public class ImTaskServiceImpl implements ImTaskService {
     @Override
     public List<ImTaskVO> getMyTasks(Long userId, String status) {
         List<ImTask> tasks = taskMapper.selectByAssigneeId(userId, status);
-        return tasks.stream()
-                .map(this::convertToVO)
-                .collect(Collectors.toList());
+        return batchConvertToVO(tasks);
     }
 
     @Override
     public List<ImTaskVO> getMyCreatedTasks(Long userId) {
         List<ImTask> tasks = taskMapper.selectByCreatorId(userId);
-        return tasks.stream()
-                .map(this::convertToVO)
-                .collect(Collectors.toList());
+        return batchConvertToVO(tasks);
     }
 
     @Override
@@ -527,38 +520,79 @@ public class ImTaskServiceImpl implements ImTaskService {
      * 转换为VO
      */
     private ImTaskVO convertToVO(ImTask task) {
+        return convertToVO(task, null, null, null);
+    }
+
+    /**
+     * 转换为VO，支持预加载的子任务/评论数/附件数（避免N+1）
+     */
+    private ImTaskVO convertToVO(ImTask task, Map<Long, List<ImTask>> subtaskMap,
+                                  Map<Long, Integer> commentCountMap, Map<Long, Integer> attachmentCountMap) {
         ImTaskVO vo = new ImTaskVO();
         BeanUtils.copyProperties(task, vo);
 
-        // 设置显示名称
         vo.setPriorityDisplay(getPriorityDisplay(task.getPriority()));
         vo.setStatusDisplay(getStatusDisplay(task.getStatus()));
         vo.setTaskTypeDisplay(getTaskTypeDisplay(task.getTaskType()));
 
-        // 解析标签
         if (task.getTags() != null && !task.getTags().isEmpty()) {
             vo.setTags(Arrays.asList(task.getTags().split(",")));
         }
 
-        // 计算是否逾期
         if (task.getDueDate() != null && !SystemConstants.STATUS_COMPLETED.equals(task.getStatus())) {
             boolean isOverdue = task.getDueDate().isBefore(LocalDate.now());
             vo.setIsOverdue(isOverdue);
             vo.setRemainingDays((int) (task.getDueDate().toEpochDay() - LocalDate.now().toEpochDay()));
         }
 
-        // 设置子任务数量
+        // 子任务数量（优先使用预加载数据）
         if (task.getHasSubtask()) {
-            List<ImTask> subtasks = taskMapper.selectSubtasks(task.getId());
+            List<ImTask> subtasks = subtaskMap != null ? subtaskMap.getOrDefault(task.getId(), Collections.emptyList()) : taskMapper.selectSubtasks(task.getId());
             vo.setSubtaskCount(subtasks.size());
             long completedCount = subtasks.stream().filter(t -> SystemConstants.STATUS_COMPLETED.equals(t.getStatus())).count();
             vo.setCompletedSubtaskCount((int) completedCount);
         }
 
-        vo.setCommentCount(taskCommentMapper.countByTaskId(task.getId()));
-        vo.setAttachmentCount(taskAttachmentMapper.countByTaskId(task.getId()));
+        vo.setCommentCount(commentCountMap != null ? commentCountMap.getOrDefault(task.getId(), 0) : taskCommentMapper.countByTaskId(task.getId()));
+        vo.setAttachmentCount(attachmentCountMap != null ? attachmentCountMap.getOrDefault(task.getId(), 0) : taskAttachmentMapper.countByTaskId(task.getId()));
 
         return vo;
+    }
+
+    /**
+     * 批量转换任务列表，预加载子任务/评论数/附件数
+     */
+    private List<ImTaskVO> batchConvertToVO(List<ImTask> tasks) {
+        if (tasks == null || tasks.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载子任务
+        Map<Long, List<ImTask>> subtaskMap = new HashMap<>();
+        List<Long> parentIds = tasks.stream().filter(ImTask::getHasSubtask).map(ImTask::getId).collect(Collectors.toList());
+        if (!parentIds.isEmpty()) {
+            List<ImTask> allSubtasks = taskMapper.selectSubtasksByParentIds(parentIds);
+            for (ImTask subtask : allSubtasks) {
+                subtaskMap.computeIfAbsent(subtask.getParentId(), k -> new ArrayList<>()).add(subtask);
+            }
+        }
+
+        // 批量加载评论数
+        Map<Long, Integer> commentCountMap = new HashMap<>();
+        List<Long> taskIds = tasks.stream().map(ImTask::getId).collect(Collectors.toList());
+        for (Long taskId : taskIds) {
+            commentCountMap.put(taskId, taskCommentMapper.countByTaskId(taskId));
+        }
+
+        // 批量加载附件数
+        Map<Long, Integer> attachmentCountMap = new HashMap<>();
+        for (Long taskId : taskIds) {
+            attachmentCountMap.put(taskId, taskAttachmentMapper.countByTaskId(taskId));
+        }
+
+        return tasks.stream()
+                .map(t -> convertToVO(t, subtaskMap, commentCountMap, attachmentCountMap))
+                .collect(Collectors.toList());
     }
 
     /**

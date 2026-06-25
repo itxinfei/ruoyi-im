@@ -97,4 +97,13 @@ public interface ImTaskMapper extends BaseMapper<ImTask> {
      */
     @Select("SELECT COUNT(*) FROM im_task WHERE creator_id = #{creatorId} AND is_deleted = 0")
     int countByCreatorId(@Param("creatorId") Long creatorId);
+
+    /**
+     * 批量查询子任务
+     *
+     * @param parentIds 父任务ID列表
+     * @return 子任务列表
+     */
+    @Select("SELECT * FROM im_task WHERE parent_id IN <foreach item='id' collection='parentIds' open='(' separator=',' close=')'>#{id}</foreach> AND is_deleted = 0")
+    List<ImTask> selectSubtasksByParentIds(@Param("parentIds") List<Long> parentIds);
 }

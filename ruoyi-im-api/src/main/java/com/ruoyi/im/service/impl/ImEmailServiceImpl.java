@@ -83,10 +83,8 @@ public class ImEmailServiceImpl implements ImEmailService {
             emails.add(email);
         }
 
-        // 为每个接收者创建邮件记录
-        for (ImEmail email : emails) {
-            emailMapper.insertEmail(email);
-        }
+        // 批量插入邮件记录（1次INSERT替代N次）
+        emailMapper.batchInsertEmails(emails);
 
         log.info("发送邮件: senderId={}, toIds={}, count={}", senderId, toIds, emails.size());
 

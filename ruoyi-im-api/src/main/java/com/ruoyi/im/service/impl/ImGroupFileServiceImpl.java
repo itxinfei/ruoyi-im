@@ -47,12 +47,6 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     private static final String ROLE_ADMIN = "ADMIN";
     /** 所有人权限 */
     private static final String PERMISSION_ALL = "ALL";
-    /** 文件大小单位：KB */
-    private static final long SIZE_KB = 1024;
-    /** 文件大小单位：MB */
-    private static final long SIZE_MB = 1024 * 1024;
-    /** 文件大小单位：GB */
-    private static final long SIZE_GB = 1024 * 1024 * 1024;
 
     @Autowired
     private ImGroupFileMapper groupFileMapper;
@@ -111,39 +105,33 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
 
     @Override
     public IPage<ImGroupFileVO> getFileList(ImGroupFileQueryRequest request, Long userId) {
-        // 验证用户是否为群组成员
+        // 预加载用户在群组中的角色（1次查询，循环内复用）
+        String userRole = null;
         if (request.getGroupId() != null) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
             if (member == null) {
                 BusinessExceptionHelper.throwNotGroupMember();
             }
+            userRole = member.getRole();
         }
 
         // 分页查询
         Page<ImGroupFile> page = new Page<>(request.getPageNum(), request.getPageSize());
         IPage<ImGroupFile> groupFilePage = groupFileMapper.selectFilePage(page, request);
 
-        // 转换为VO
+        // 转换为VO（复用预加载的角色信息，避免N+1）
+        boolean isOwner = ROLE_OWNER.equals(userRole);
+        boolean isAdmin = ROLE_ADMIN.equals(userRole);
+
         Page<ImGroupFileVO> voPage = new Page<>(groupFilePage.getCurrent(), groupFilePage.getSize(), groupFilePage.getTotal());
         List<ImGroupFileVO> voList = groupFilePage.getRecords().stream().map(gf -> {
             ImGroupFileVO vo = new ImGroupFileVO();
             BeanUtils.copyProperties(gf, vo);
             vo.setFileSizeFormat(formatFileSize(gf.getFileSize()));
 
-            // 判断权限
-            ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(gf.getGroupId(), userId);
-            if (member != null) {
-                String role = member.getRole();
-                boolean isOwner = ROLE_OWNER.equals(role);
-                boolean isAdmin = ROLE_ADMIN.equals(role);
-                boolean isUploader = gf.getUploaderId().equals(userId);
-
-                vo.setCanDelete(isOwner || isAdmin || isUploader);
-                vo.setCanDownload(PERMISSION_ALL.equals(gf.getPermission()) || isOwner || isAdmin || isUploader);
-            } else {
-                vo.setCanDelete(false);
-                vo.setCanDownload(false);
-            }
+            boolean isUploader = gf.getUploaderId().equals(userId);
+            vo.setCanDelete(isOwner || isAdmin || isUploader);
+            vo.setCanDownload(PERMISSION_ALL.equals(gf.getPermission()) || isOwner || isAdmin || isUploader);
 
             return vo;
         }).collect(Collectors.toList());
@@ -331,17 +319,6 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
      * @return 格式化后的字符串
      */
     private String formatFileSize(Long size) {
-        if (size == null) {
-            return "0 B";
-        }
-        if (size < SIZE_KB) {
-            return size + " B";
-        } else if (size < SIZE_MB) {
-            return String.format("%.2f KB", size / (double) SIZE_KB);
-        } else if (size < SIZE_GB) {
-            return String.format("%.2f MB", size / (double) SIZE_MB);
-        } else {
-            return String.format("%.2f GB", size / (double) SIZE_GB);
-        }
+        return com.ruoyi.im.util.FileUtils.formatFileSize(size != null ? size : 0L);
     }
 }

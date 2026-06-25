@@ -29,7 +29,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -207,6 +210,16 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
     @Override
     public List<ImAttendanceGroupVO> getGroupList(Long userId) {
         List<ImAttendanceGroup> groups = attendanceGroupMapper.selectGroupsByUser(userId);
+        if (groups.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载成员数量
+        Map<Long, Integer> memberCountMap = new HashMap<>();
+        for (ImAttendanceGroup group : groups) {
+            Integer count = attendanceGroupMapper.countMembers(group.getId());
+            memberCountMap.put(group.getId(), count != null ? count : 0);
+        }
 
         return groups.stream().map(group -> {
             ImAttendanceGroupVO vo = new ImAttendanceGroupVO();
@@ -218,8 +231,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
                         .collect(Collectors.toList()));
             }
 
-            Integer memberCount = attendanceGroupMapper.countMembers(group.getId());
-            vo.setMemberCount(memberCount != null ? memberCount : 0);
+            vo.setMemberCount(memberCountMap.getOrDefault(group.getId(), 0));
 
             return vo;
         }).collect(Collectors.toList());
@@ -434,15 +446,28 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
     @Override
     public List<ImAttendanceShiftVO> getUserSchedule(Long userId, LocalDate startDate, LocalDate endDate) {
         List<ImAttendanceSchedule> schedules = attendanceScheduleMapper.selectUserSchedule(userId, startDate, endDate);
+        if (schedules.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载班次信息
+        List<Long> shiftIds = schedules.stream().map(ImAttendanceSchedule::getShiftId).distinct().collect(Collectors.toList());
+        Map<Long, ImAttendanceShift> shiftMap = new HashMap<>();
+        if (!shiftIds.isEmpty()) {
+            List<ImAttendanceShift> shifts = attendanceShiftMapper.selectBatchIds(shiftIds);
+            for (ImAttendanceShift shift : shifts) {
+                shiftMap.put(shift.getId(), shift);
+            }
+        }
 
         return schedules.stream().map(schedule -> {
-            ImAttendanceShift shift = attendanceShiftMapper.selectById(schedule.getShiftId());
+            ImAttendanceShift shift = shiftMap.get(schedule.getShiftId());
             if (shift != null) {
                 ImAttendanceShiftVO vo = new ImAttendanceShiftVO();
                 BeanUtils.copyProperties(shift, vo);
                 return vo;
             }
             return null;
-        }).filter(vo -> vo != null).collect(Collectors.toList());
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

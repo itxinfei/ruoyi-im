@@ -217,9 +217,30 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         Page<ImAnnouncement> page = new Page<>(request.getPageNum(), request.getPageSize());
         IPage<ImAnnouncement> announcementPage = announcementMapper.selectAnnouncementPage(page, request);
 
+        // 批量加载用户的点赞和已读状态
+        final Set<Long> likedIds = new HashSet<>();
+        final Set<Long> readIds = new HashSet<>();
+        if (userId != null) {
+            List<Long> announcementIds = announcementPage.getRecords().stream()
+                    .map(ImAnnouncement::getId).collect(Collectors.toList());
+            if (!announcementIds.isEmpty()) {
+                List<ImAnnouncementLike> likes = announcementLikeMapper.selectList(
+                        new LambdaQueryWrapper<ImAnnouncementLike>()
+                                .eq(ImAnnouncementLike::getUserId, userId)
+                                .in(ImAnnouncementLike::getAnnouncementId, announcementIds));
+                likedIds.addAll(likes.stream().map(ImAnnouncementLike::getAnnouncementId).collect(Collectors.toSet()));
+
+                List<ImAnnouncementRead> reads = announcementReadMapper.selectList(
+                        new LambdaQueryWrapper<ImAnnouncementRead>()
+                                .eq(ImAnnouncementRead::getUserId, userId)
+                                .in(ImAnnouncementRead::getAnnouncementId, announcementIds));
+                readIds.addAll(reads.stream().map(ImAnnouncementRead::getAnnouncementId).collect(Collectors.toSet()));
+            }
+        }
+
         Page<ImAnnouncementVO> voPage = new Page<>(announcementPage.getCurrent(), announcementPage.getSize(), announcementPage.getTotal());
         List<ImAnnouncementVO> vos = announcementPage.getRecords().stream()
-                .map(a -> convertToVO(a, userId))
+                .map(a -> convertToVO(a, userId, likedIds, readIds))
                 .collect(Collectors.toList());
         voPage.setRecords(vos);
 
@@ -311,21 +332,31 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         queryWrapper.eq(ImAnnouncement::getStatus, STATUS_PUBLISHED);
         List<ImAnnouncement> announcements = announcementMapper.selectList(queryWrapper);
 
-        // 批量插入已读记录
+        // 筛选未读公告
         List<Long> readAnnouncementIds = announcementReadMapper.selectReadAnnouncementIdsByUserId(userId);
-        for (ImAnnouncement announcement : announcements) {
-            if (!readAnnouncementIds.contains(announcement.getId())) {
-                ImAnnouncementRead announcementRead = new ImAnnouncementRead();
-                announcementRead.setAnnouncementId(announcement.getId());
-                announcementRead.setUserId(userId);
-                announcementRead.setReadTime(LocalDateTime.now());
-                announcementReadMapper.insert(announcementRead);
+        Set<Long> readSet = new HashSet<>(readAnnouncementIds);
+        List<ImAnnouncement> unreadAnnouncements = announcements.stream()
+                .filter(a -> !readSet.contains(a.getId()))
+                .collect(Collectors.toList());
 
-                // 原子递增已读人数
+        if (!unreadAnnouncements.isEmpty()) {
+            // 批量插入已读记录（1次INSERT替代N次）
+            LocalDateTime now = LocalDateTime.now();
+            List<ImAnnouncementRead> readRecords = unreadAnnouncements.stream().map(a -> {
+                ImAnnouncementRead read = new ImAnnouncementRead();
+                read.setAnnouncementId(a.getId());
+                read.setUserId(userId);
+                read.setReadTime(now);
+                return read;
+            }).collect(Collectors.toList());
+            announcementReadMapper.batchInsert(readRecords);
+
+            // 逐个递增已读人数（需要原子SQL）
+            for (ImAnnouncement announcement : unreadAnnouncements) {
                 announcementMapper.incrementReadCount(announcement.getId());
             }
         }
-        log.info("标记所有公告已读: userId={}, count={}", userId, announcements.size());
+        log.info("标记所有公告已读: userId={}, count={}", userId, unreadAnnouncements.size());
     }
 
     @Override
@@ -495,36 +526,42 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
      * 转换为VO
      */
     private ImAnnouncementVO convertToVO(ImAnnouncement announcement, Long userId) {
+        return convertToVO(announcement, userId, null, null);
+    }
+
+    private ImAnnouncementVO convertToVO(ImAnnouncement announcement, Long userId,
+                                          Set<Long> preloadedLikedIds, Set<Long> preloadedReadIds) {
         ImAnnouncementVO vo = new ImAnnouncementVO();
         BeanUtils.copyProperties(announcement, vo);
 
-        // 设置显示名称
         vo.setAnnouncementTypeDisplay(getTypeDisplay(announcement.getAnnouncementType()));
         vo.setPriorityDisplay(getPriorityDisplay(announcement.getPriority()));
         vo.setStatusDisplay(getStatusDisplay(announcement.getStatus()));
 
-        // 计算阅读进度百分比
         if (announcement.getTotalTargetCount() != null && announcement.getTotalTargetCount() > 0) {
             int readPercent = (int) ((announcement.getReadCount() * 100.0) / announcement.getTotalTargetCount());
             vo.setReadPercent(readPercent);
         }
 
-        // 判断是否过期
         if (announcement.getExpiryTime() != null) {
             vo.setIsExpired(announcement.getExpiryTime().isBefore(LocalDateTime.now()));
         } else {
             vo.setIsExpired(false);
         }
 
-        // 设置点赞和已读状态
         if (userId != null) {
-            // 检查是否已点赞
-            ImAnnouncementLike likeRecord = announcementLikeMapper.selectByAnnouncementIdAndUserId(announcement.getId(), userId);
-            vo.setIsLiked(likeRecord != null);
-
-            // 检查是否已读
-            ImAnnouncementRead readRecord = announcementReadMapper.selectByAnnouncementIdAndUserId(announcement.getId(), userId);
-            vo.setIsRead(readRecord != null);
+            if (preloadedLikedIds != null) {
+                vo.setIsLiked(preloadedLikedIds.contains(announcement.getId()));
+            } else {
+                ImAnnouncementLike likeRecord = announcementLikeMapper.selectByAnnouncementIdAndUserId(announcement.getId(), userId);
+                vo.setIsLiked(likeRecord != null);
+            }
+            if (preloadedReadIds != null) {
+                vo.setIsRead(preloadedReadIds.contains(announcement.getId()));
+            } else {
+                ImAnnouncementRead readRecord = announcementReadMapper.selectByAnnouncementIdAndUserId(announcement.getId(), userId);
+                vo.setIsRead(readRecord != null);
+            }
         } else {
             vo.setIsLiked(false);
             vo.setIsRead(false);

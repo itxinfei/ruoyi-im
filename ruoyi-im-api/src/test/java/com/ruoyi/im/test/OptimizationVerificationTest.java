@@ -1,7 +1,7 @@
 package com.ruoyi.im.test;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.constant.ApiErrorCode;
+import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.controller.ImAuthController;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.service.ImUserService;
@@ -42,29 +42,18 @@ public class OptimizationVerificationTest {
     }
 
     /**
-     * 测试错误码枚举的正确性
+     * 测试错误码常量
      */
     @Test
-    void testApiErrorCodeEnum() {
-        // 验证SUCCESS错误码
-        assertEquals(200, ApiErrorCode.SUCCESS.getCode());
-        assertEquals("操作成功", ApiErrorCode.SUCCESS.getMessage());
+    void testErrorCodes() {
+        // 验证成功错误码
+        assertEquals(200, ImErrorCode.SUCCESS);
 
-        // 验证ERROR错误码
-        assertEquals(500, ApiErrorCode.ERROR.getCode());
-        assertEquals("操作失败", ApiErrorCode.ERROR.getMessage());
+        // 验证失败错误码
+        assertEquals(500, ImErrorCode.ERROR);
 
         // 验证USER_NOT_EXIST错误码
-        assertEquals(4001, ApiErrorCode.USER_NOT_EXIST.getCode());
-        assertEquals("用户不存在", ApiErrorCode.USER_NOT_EXIST.getMessage());
-
-        // 验证通过错误码获取枚举
-        assertEquals(ApiErrorCode.SUCCESS, ApiErrorCode.fromCode(200));
-        assertEquals(ApiErrorCode.ERROR, ApiErrorCode.fromCode(500));
-        assertEquals(ApiErrorCode.USER_NOT_EXIST, ApiErrorCode.fromCode(4001));
-
-        // 验证不存在的错误码返回默认值
-        assertEquals(ApiErrorCode.ERROR, ApiErrorCode.fromCode(9999));
+        assertEquals(4001, ImErrorCode.USER_NOT_EXIST);
     }
 
     /**
@@ -72,23 +61,23 @@ public class OptimizationVerificationTest {
      */
     @Test
     void testResultClassEnhancements() {
-        // 测试使用错误码枚举的成功响应
+        // 测试成功响应
         Result<String> successResult = Result.success(null, "测试数据");
         assertTrue(successResult.isSuccess());
-        assertEquals(ApiErrorCode.SUCCESS.getCode(), successResult.getCode());
+        assertEquals(ImErrorCode.SUCCESS, successResult.getCode());
         assertEquals("测试数据", successResult.getData());
 
-        // 测试使用错误码枚举的错误响应
-        Result<Void> errorResult = Result.error(ApiErrorCode.USER_NOT_EXIST);
+        // 测试错误响应
+        Result<Void> errorResult = Result.error(ImErrorCode.USER_NOT_EXIST, "用户不存在");
         assertFalse(errorResult.isSuccess());
-        assertEquals(ApiErrorCode.USER_NOT_EXIST.getCode(), errorResult.getCode());
-        assertEquals(ApiErrorCode.USER_NOT_EXIST.getMessage(), errorResult.getMsg());
+        assertEquals(ImErrorCode.USER_NOT_EXIST, errorResult.getCode());
+        assertEquals("用户不存在", errorResult.getMsg());
 
-        // 测试使用错误码枚举的失败响应
-        Result<Void> failResult = Result.fail(ApiErrorCode.PARAM_ERROR);
+        // 测试失败响应
+        Result<Void> failResult = Result.fail(ImErrorCode.PARAM_ERROR, "参数错误");
         assertFalse(failResult.isSuccess());
-        assertEquals(ApiErrorCode.PARAM_ERROR.getCode(), failResult.getCode());
-        assertEquals(ApiErrorCode.PARAM_ERROR.getMessage(), failResult.getMsg());
+        assertEquals(ImErrorCode.PARAM_ERROR, failResult.getCode());
+        assertEquals("参数错误", failResult.getMsg());
     }
 
     /**

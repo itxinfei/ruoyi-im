@@ -685,16 +685,20 @@ public class ImConversationServiceImpl implements ImConversationService {
         clearConversationListCache(userId);
 
         // 添加其他成员到会话
-        if (request.getMemberIds() != null) {
-            for (Long memberId : request.getMemberIds()) {
-                if (!memberId.equals(userId)) {
-                    ImUser user = imUserMapper.selectImUserById(memberId);
-                    if (user != null) {
-                        addMemberToConversation(conversationId, memberId);
-                        // 清除成员缓存
-                        clearConversationListCache(memberId);
-                    }
-                }
+        if (request.getMemberIds() != null && !request.getMemberIds().isEmpty()) {
+            // 批量验证用户存在性
+            List<Long> validMemberIds = request.getMemberIds().stream()
+                    .filter(id -> !id.equals(userId))
+                    .collect(Collectors.toList());
+            if (!validMemberIds.isEmpty()) {
+                List<ImUser> users = imUserMapper.selectImUserListByIds(validMemberIds);
+                Set<Long> existingIds = users.stream().map(ImUser::getId).collect(Collectors.toSet());
+                validMemberIds = validMemberIds.stream().filter(existingIds::contains).collect(Collectors.toList());
+            }
+
+            for (Long memberId : validMemberIds) {
+                addMemberToConversation(conversationId, memberId);
+                clearConversationListCache(memberId);
             }
         }
 

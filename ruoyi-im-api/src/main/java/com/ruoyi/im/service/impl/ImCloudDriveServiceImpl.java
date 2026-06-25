@@ -928,20 +928,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
      * 格式化文件大小
      */
     private String formatFileSize(Long size) {
-        if (size == null || size == 0) {
-            return "0 B";
-        }
-
-        String[] units = {"B", "KB", "MB", "GB", "TB"};
-        int unitIndex = 0;
-        double fileSize = size.doubleValue();
-
-        while (fileSize >= 1024 && unitIndex < units.length - 1) {
-            fileSize /= 1024;
-            unitIndex++;
-        }
-
-        return String.format("%.2f %s", fileSize, units[unitIndex]);
+        return com.ruoyi.im.util.FileUtils.formatFileSize(size != null ? size : 0L);
     }
 
     @Override

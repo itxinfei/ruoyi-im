@@ -38,4 +38,12 @@ public interface ImAnnouncementReadMapper extends BaseMapper<ImAnnouncementRead>
      */
     ImAnnouncementRead selectByAnnouncementIdAndUserId(@Param("announcementId") Long announcementId,
                                                         @Param("userId") Long userId);
+
+    /**
+     * 批量插入已读记录
+     *
+     * @param list 已读记录列表
+     * @return 插入行数
+     */
+    int batchInsert(@Param("list") List<ImAnnouncementRead> list);
 }

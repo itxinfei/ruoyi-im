@@ -1,6 +1,6 @@
 package com.ruoyi.im.common;
 
-import com.ruoyi.im.constant.ApiErrorCode;
+import com.ruoyi.im.constant.ImErrorCode;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -49,7 +49,7 @@ public class Result<T> implements Serializable {
      * 成功返回结果
      */
     public static <T> Result<T> success() {
-        return new Result<>(ApiErrorCode.SUCCESS.getCode(), ApiErrorCode.SUCCESS.getMessage());
+        return new Result<>(ImErrorCode.SUCCESS, "操作成功");
     }
 
     /**
@@ -58,7 +58,7 @@ public class Result<T> implements Serializable {
      * @param msg 消息
      */
     public static <T> Result<T> success(String msg) {
-        return new Result<>(ApiErrorCode.SUCCESS.getCode(), msg);
+        return new Result<>(ImErrorCode.SUCCESS, msg);
     }
 
     /**
@@ -67,7 +67,7 @@ public class Result<T> implements Serializable {
      * @param data 数据
      */
     public static <T> Result<T> success(T data) {
-        return new Result<>(ApiErrorCode.SUCCESS.getCode(), ApiErrorCode.SUCCESS.getMessage(), data);
+        return new Result<>(ImErrorCode.SUCCESS, "操作成功", data);
     }
 
     /**
@@ -77,14 +77,14 @@ public class Result<T> implements Serializable {
      * @param data 数据
      */
     public static <T> Result<T> success(String msg, T data) {
-        return new Result<>(ApiErrorCode.SUCCESS.getCode(), msg, data);
+        return new Result<>(ImErrorCode.SUCCESS, msg, data);
     }
 
     /**
      * 失败返回结果
      */
     public static <T> Result<T> fail() {
-        return new Result<>(ApiErrorCode.ERROR.getCode(), ApiErrorCode.ERROR.getMessage());
+        return new Result<>(ImErrorCode.ERROR, "操作失败");
     }
 
     /**
@@ -93,7 +93,7 @@ public class Result<T> implements Serializable {
      * @param msg 消息
      */
     public static <T> Result<T> fail(String msg) {
-        return new Result<>(ApiErrorCode.ERROR.getCode(), msg);
+        return new Result<>(ImErrorCode.ERROR, msg);
     }
 
     /**
@@ -107,21 +107,12 @@ public class Result<T> implements Serializable {
     }
 
     /**
-     * 失败返回结果
-     *
-     * @param errorCode 错误码枚举
-     */
-    public static <T> Result<T> fail(ApiErrorCode errorCode) {
-        return new Result<>(errorCode.getCode(), errorCode.getMessage());
-    }
-
-    /**
      * 错误返回结果（便捷方法，默认500状态码）
      *
      * @param msg 消息
      */
     public static <T> Result<T> error(String msg) {
-        return new Result<>(ApiErrorCode.ERROR.getCode(), msg);
+        return new Result<>(ImErrorCode.ERROR, msg);
     }
 
     /**
@@ -137,31 +128,12 @@ public class Result<T> implements Serializable {
     /**
      * 错误返回结果
      *
-     * @param errorCode 错误码枚举
-     */
-    public static <T> Result<T> error(ApiErrorCode errorCode) {
-        return new Result<>(errorCode.getCode(), errorCode.getMessage());
-    }
-
-    /**
-     * 错误返回结果
-     *
      * @param code 状态码
      * @param msg 消息
      * @param data 数据
      */
     public static <T> Result<T> error(int code, String msg, T data) {
         return new Result<>(code, msg, data);
-    }
-
-    /**
-     * 错误返回结果
-     *
-     * @param errorCode 错误码枚举
-     * @param data 数据
-     */
-    public static <T> Result<T> error(ApiErrorCode errorCode, T data) {
-        return new Result<>(errorCode.getCode(), errorCode.getMessage(), data);
     }
 
     /**
@@ -180,7 +152,7 @@ public class Result<T> implements Serializable {
      * 判断是否成功
      */
     public boolean isSuccess() {
-        return this.code == ApiErrorCode.SUCCESS.getCode();
+        return this.code == ImErrorCode.SUCCESS;
     }
 
 }

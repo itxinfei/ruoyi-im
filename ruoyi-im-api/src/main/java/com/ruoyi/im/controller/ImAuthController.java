@@ -1,7 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
-import com.ruoyi.im.constant.ApiErrorCode;
+import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.dto.user.ImLoginRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.exception.BusinessException;
@@ -101,7 +101,7 @@ public class ImAuthController {
 
         ImUserVO userVO = imUserService.getUserById(userId);
         if (userVO == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         // 生成新的JWT令牌

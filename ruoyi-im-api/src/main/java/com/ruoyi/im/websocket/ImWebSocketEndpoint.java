@@ -65,7 +65,6 @@ public class ImWebSocketEndpoint {
     private static ImWebSocketBroadcastService staticBroadcastService;
     private static IOfflineMessageService staticOfflineMessageService;
     private static boolean staticSecurityEnabled;
-    private static Long staticDevUserId;
 
     @Autowired
     public void setImMessageService(ImMessageService imMessageService) {
@@ -116,10 +115,6 @@ public class ImWebSocketEndpoint {
     @Value("${app.security.enabled:true}")
     public void setSecurityEnabled(boolean securityEnabled) {
         staticSecurityEnabled = securityEnabled;
-    }
-
-    public void setDevUserId(Long devUserId) {
-        staticDevUserId = devUserId;
     }
 
     /**
@@ -837,27 +832,6 @@ public class ImWebSocketEndpoint {
                 }
             }
         }
-    }
-
-    /**
-     * 从查询字符串中提取 token
-     * 解析 WebSocket 连接 URL 的查询参数，提取认证 token
-     *
-     * @param queryString 查询字符串（格式：token=xxx&param2=yyy）
-     * @return token 值，如果未找到则返回 null
-     */
-    private String extractTokenFromQuery(String queryString) {
-        if (queryString == null || queryString.isEmpty()) {
-            return null;
-        }
-
-        String[] params = queryString.split("&");
-        for (String param : params) {
-            if (param.startsWith("token=")) {
-                return param.substring(6);
-            }
-        }
-        return null;
     }
 
     /**

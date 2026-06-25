@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -264,13 +265,22 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
         // 获取会话成员
         List<ImConversationMember> members = conversationMemberMapper.selectByConversationId(conversationId);
 
+        // 批量加载用户信息
+        List<Long> userIds = members.stream().map(ImConversationMember::getUserId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<ImUser> userList = userMapper.selectImUserListByIds(userIds);
+            for (ImUser u : userList) {
+                userMap.put(u.getId(), u);
+            }
+        }
+
         for (ImConversationMember member : members) {
-            ImUser user = userMapper.selectImUserById(member.getUserId());
+            ImUser user = userMap.get(member.getUserId());
             if (user == null || user.getStatus() == null || user.getStatus() == 0) {
                 continue;
             }
 
-            // 过滤关键词
             if (keyword != null && !keyword.isEmpty()) {
                 String name = user.getNickname() != null ? user.getNickname() : user.getUsername();
                 if (!name.toLowerCase().contains(keyword.toLowerCase())) {

@@ -33,4 +33,10 @@ public interface ImScheduleParticipantMapper extends BaseMapper<ImSchedulePartic
      */
     @Select("SELECT COUNT(*) FROM im_schedule_participant WHERE event_id = #{eventId}")
     Integer countByEventId(@Param("eventId") Long eventId);
+
+    /**
+     * 删除日程的所有参与人
+     */
+    @org.apache.ibatis.annotations.Delete("DELETE FROM im_schedule_participant WHERE event_id = #{eventId}")
+    int deleteByEventId(@Param("eventId") Long eventId);
 }

@@ -110,22 +110,26 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         eventMapper.updateById(event);
 
         // 更新参与人
-        List<ImScheduleParticipant> existingParticipants = participantMapper.selectByEventId(eventId);
-        for (ImScheduleParticipant p : existingParticipants) {
-            participantMapper.deleteById(p.getId());
-        }
+        participantMapper.deleteByEventId(eventId);
 
         if (CollUtil.isNotEmpty(request.getParticipantIds())) {
-            for (Long participantId : request.getParticipantIds()) {
-                ImUser user = userMapper.selectImUserById(participantId);
-                if (user != null && !participantId.equals(userId)) {
-                    ImScheduleParticipant participant = new ImScheduleParticipant();
-                    participant.setEventId(eventId);
-                    participant.setUserId(participantId);
-                    participant.setStatus(PARTICIPANT_STATUS_PENDING);
-                    participant.setCreateTime(LocalDateTime.now());
-                    participantMapper.insert(participant);
-                }
+            // 批量验证用户
+            List<Long> validUserIds = request.getParticipantIds().stream()
+                    .filter(id -> !id.equals(userId))
+                    .collect(Collectors.toList());
+            if (!validUserIds.isEmpty()) {
+                List<ImUser> users = userMapper.selectImUserListByIds(validUserIds);
+                Set<Long> existingIds = users.stream().map(ImUser::getId).collect(Collectors.toSet());
+                validUserIds = validUserIds.stream().filter(existingIds::contains).collect(Collectors.toList());
+            }
+
+            for (Long participantId : validUserIds) {
+                ImScheduleParticipant participant = new ImScheduleParticipant();
+                participant.setEventId(eventId);
+                participant.setUserId(participantId);
+                participant.setStatus(PARTICIPANT_STATUS_PENDING);
+                participant.setCreateTime(LocalDateTime.now());
+                participantMapper.insert(participant);
             }
         }
     }

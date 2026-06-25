@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import com.ruoyi.im.constant.ApiErrorCode;
+import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImUser;
@@ -175,7 +175,7 @@ public class ImUserServiceImpl implements ImUserService {
     public ImUserVO getUserById(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         ImUserVO vo = new ImUserVO();
@@ -189,7 +189,7 @@ public class ImUserServiceImpl implements ImUserService {
     public void updateUser(Long userId, ImUserUpdateRequest request) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         BeanUtils.copyProperties(request, user);
@@ -203,7 +203,7 @@ public class ImUserServiceImpl implements ImUserService {
     public void updateStatus(Long userId, Integer status) { // 0=禁用, 1=启用
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         user.setStatus(status);
@@ -217,11 +217,11 @@ public class ImUserServiceImpl implements ImUserService {
     public boolean changePassword(Long userId, String oldPassword, String newPassword) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new BusinessException(ApiErrorCode.PASSWORD_ERROR);
+            throw new BusinessException(ImErrorCode.PASSWORD_ERROR);
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -287,7 +287,7 @@ public class ImUserServiceImpl implements ImUserService {
     public Long createUser(ImRegisterRequest request) {
         ImUser existingUser = imUserMapper.selectImUserByUsername(request.getUsername());
         if (existingUser != null) {
-            throw new BusinessException(ApiErrorCode.USER_ALREADY_EXIST);
+            throw new BusinessException(ImErrorCode.USER_ALREADY_EXIST);
         }
 
         ImUser user = new ImUser();
@@ -303,7 +303,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         int result = imUserMapper.insertImUser(user);
         if (result <= 0) {
-            throw new BusinessException(ApiErrorCode.REGISTER_FAILED);
+            throw new BusinessException(ImErrorCode.REGISTER_FAILED);
         }
         return user.getId();
     }
@@ -313,7 +313,7 @@ public class ImUserServiceImpl implements ImUserService {
     public void deleteUser(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
         imUserMapper.deleteImUserById(userId);
     }
@@ -336,7 +336,7 @@ public class ImUserServiceImpl implements ImUserService {
     public void resetPassword(Long userId) {
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         // 重置为默认密码，从配置读取或使用随机密码（使用Optional优化）
@@ -370,19 +370,19 @@ public class ImUserServiceImpl implements ImUserService {
     @CacheEvict(value = "user_local_cache", key = "#userId")
     public String uploadAvatar(Long userId, MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new BusinessException(ApiErrorCode.FILE_EMPTY);
+            throw new BusinessException(ImErrorCode.FILE_EMPTY);
         }
 
         String originalFilename = file.getOriginalFilename();
         String fileExtension = FileUtils.getFileExtension(originalFilename);
 
         if (!FileUtils.isImage(originalFilename)) {
-            throw new BusinessException(ApiErrorCode.FILE_TYPE_NOT_SUPPORTED);
+            throw new BusinessException(ImErrorCode.FILE_TYPE_NOT_SUPPORTED);
         }
 
         long maxSize = SystemConstants.MAX_AVATAR_SIZE_MB * 1024 * 1024;
         if (file.getSize() > maxSize) {
-            throw new BusinessException(ApiErrorCode.FILE_SIZE_EXCEEDED);
+            throw new BusinessException(ImErrorCode.FILE_SIZE_EXCEEDED);
         }
 
         String fileName = UUID.randomUUID().toString() + "." + fileExtension;
@@ -413,7 +413,7 @@ public class ImUserServiceImpl implements ImUserService {
 
         ImUser user = imUserMapper.selectImUserById(userId);
         if (user == null) {
-            throw new BusinessException(ApiErrorCode.USER_NOT_EXIST);
+            throw new BusinessException(ImErrorCode.USER_NOT_EXIST);
         }
 
         user.setAvatar(avatarUrl);

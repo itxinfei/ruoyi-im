@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -164,20 +165,26 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         ImWorkReportLike myLike = likeMapper.selectByReportAndUser(reportId, userId);
         vo.setIsLiked(myLike != null);
 
-        // 转换点赞用户列表
-        List<WorkReportLikeUserVO> likeUsers = likes.stream()
-                .map(like -> {
-                    WorkReportLikeUserVO likeUserVO = new WorkReportLikeUserVO();
-                    likeUserVO.setUserId(like.getUserId());
-                    ImUser likeUser = userMapper.selectImUserById(like.getUserId());
-                    if (likeUser != null) {
-                        likeUserVO.setUserName(likeUser.getNickname());
-                        likeUserVO.setUserAvatar(likeUser.getAvatar());
-                    }
-                    return likeUserVO;
-                })
-                .collect(Collectors.toList());
-        vo.setLikeUsers(likeUsers);
+        // 批量加载点赞用户信息
+        List<Long> likeUserIds = likes.stream().map(ImWorkReportLike::getUserId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> likeUserMap = new HashMap<>();
+        if (!likeUserIds.isEmpty()) {
+            List<ImUser> likeUsers = userMapper.selectImUserListByIds(likeUserIds);
+            for (ImUser u : likeUsers) {
+                likeUserMap.put(u.getId(), u);
+            }
+        }
+        List<WorkReportLikeUserVO> likeUserVOs = likes.stream().map(like -> {
+            WorkReportLikeUserVO likeUserVO = new WorkReportLikeUserVO();
+            likeUserVO.setUserId(like.getUserId());
+            ImUser likeUser = likeUserMap.get(like.getUserId());
+            if (likeUser != null) {
+                likeUserVO.setUserName(likeUser.getNickname());
+                likeUserVO.setUserAvatar(likeUser.getAvatar());
+            }
+            return likeUserVO;
+        }).collect(Collectors.toList());
+        vo.setLikeUsers(likeUserVOs);
 
         // 设置附件列表
         if (StrUtil.isNotBlank(report.getAttachments())) {
@@ -328,18 +335,30 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     @Override
     public List<WorkReportLikeUserVO> getLikeUsers(Long reportId) {
         List<ImWorkReportLike> likes = likeMapper.selectByReportId(reportId);
-        return likes.stream()
-                .map(like -> {
-                    WorkReportLikeUserVO vo = new WorkReportLikeUserVO();
-                    vo.setUserId(like.getUserId());
-                    ImUser user = userMapper.selectImUserById(like.getUserId());
-                    if (user != null) {
-                        vo.setUserName(user.getNickname());
-                        vo.setUserAvatar(user.getAvatar());
-                    }
-                    return vo;
-                })
-                .collect(Collectors.toList());
+        if (likes.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载用户信息
+        List<Long> userIds = likes.stream().map(ImWorkReportLike::getUserId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<ImUser> users = userMapper.selectImUserListByIds(userIds);
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
+        return likes.stream().map(like -> {
+            WorkReportLikeUserVO vo = new WorkReportLikeUserVO();
+            vo.setUserId(like.getUserId());
+            ImUser user = userMap.get(like.getUserId());
+            if (user != null) {
+                vo.setUserName(user.getNickname());
+                vo.setUserAvatar(user.getAvatar());
+            }
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     @Override
@@ -420,24 +439,35 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
             return new ArrayList<>();
         }
 
-        return comments.stream()
-                .map(comment -> {
-                    WorkReportCommentVO vo = new WorkReportCommentVO();
-                    BeanUtils.copyProperties(comment, vo);
-                    vo.setUserName(comment.getUserName());
-                    vo.setUserAvatar(comment.getUserAvatar());
-
-                    // 如果有父评论，查找父评论内容
-                    if (comment.getParentId() != null) {
-                        ImWorkReportComment parent = commentMapper.selectById(comment.getParentId());
-                        if (parent != null) {
-                            vo.setParentContent(parent.getContent());
-                        }
-                    }
-
-                    return vo;
-                })
+        // 批量加载父评论
+        List<Long> parentIds = comments.stream()
+                .map(ImWorkReportComment::getParentId)
+                .filter(Objects::nonNull)
+                .distinct()
                 .collect(Collectors.toList());
+        Map<Long, ImWorkReportComment> parentMap = new HashMap<>();
+        if (!parentIds.isEmpty()) {
+            List<ImWorkReportComment> parents = commentMapper.selectBatchIds(parentIds);
+            for (ImWorkReportComment parent : parents) {
+                parentMap.put(parent.getId(), parent);
+            }
+        }
+
+        return comments.stream().map(comment -> {
+            WorkReportCommentVO vo = new WorkReportCommentVO();
+            BeanUtils.copyProperties(comment, vo);
+            vo.setUserName(comment.getUserName());
+            vo.setUserAvatar(comment.getUserAvatar());
+
+            if (comment.getParentId() != null) {
+                ImWorkReportComment parent = parentMap.get(comment.getParentId());
+                if (parent != null) {
+                    vo.setParentContent(parent.getContent());
+                }
+            }
+
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     private String getReportTypeName(String type) {

@@ -23,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -76,22 +78,43 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
             }
         }
 
-        List<ImDocumentCollaborator> collaborators = new ArrayList<>();
-        for (Long targetUserId : request.getUserIds()) {
-            // 检查是否已是协作者
-            ImDocumentCollaborator existCollaborator = documentCollaboratorMapper.selectByDocumentAndUser(
-                    request.getDocumentId(), targetUserId);
+        // 批量加载已存在的协作者
+        List<ImDocumentCollaborator> existingCollaborators = documentCollaboratorMapper.selectByDocumentId(request.getDocumentId());
+        Map<Long, ImDocumentCollaborator> existingMap = new HashMap<>();
+        for (ImDocumentCollaborator ec : existingCollaborators) {
+            existingMap.put(ec.getUserId(), ec);
+        }
 
+        // 批量加载用户信息
+        List<Long> newUserIds = request.getUserIds().stream()
+                .filter(id -> !existingMap.containsKey(id))
+                .collect(Collectors.toList());
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!newUserIds.isEmpty()) {
+            List<ImUser> users = userMapper.selectImUserListByIds(newUserIds);
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
+        // 处理已有协作者的权限更新
+        List<ImDocumentCollaborator> toUpdate = new ArrayList<>();
+        for (Long targetUserId : request.getUserIds()) {
+            ImDocumentCollaborator existCollaborator = existingMap.get(targetUserId);
             if (existCollaborator != null) {
-                // 更新权限
                 existCollaborator.setPermission(request.getPermission());
                 existCollaborator.setUpdateTime(LocalDateTime.now());
-                documentCollaboratorMapper.updateById(existCollaborator);
-                continue;
+                toUpdate.add(existCollaborator);
             }
+        }
+        for (ImDocumentCollaborator collaborator : toUpdate) {
+            documentCollaboratorMapper.updateById(collaborator);
+        }
 
-            // 获取用户信息
-            ImUser user = userMapper.selectImUserById(targetUserId);
+        // 批量插入新协作者
+        List<ImDocumentCollaborator> collaborators = new ArrayList<>();
+        for (Long targetUserId : newUserIds) {
+            ImUser user = userMap.get(targetUserId);
             if (user == null) {
                 continue;
             }
@@ -110,7 +133,6 @@ public class ImDocumentCollaborationServiceImpl implements ImDocumentCollaborati
             collaborator.setUpdateTime(LocalDateTime.now());
             collaborators.add(collaborator);
         }
-
         if (!collaborators.isEmpty()) {
             for (ImDocumentCollaborator collaborator : collaborators) {
                 documentCollaboratorMapper.insert(collaborator);

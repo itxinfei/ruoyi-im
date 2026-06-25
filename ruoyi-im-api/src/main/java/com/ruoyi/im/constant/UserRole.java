@@ -31,24 +31,4 @@ public class UserRole {
         }
         return role.startsWith(ROLE_PREFIX) ? role : ROLE_PREFIX + role;
     }
-
-    /**
-     * 判断是否为管理员角色
-     *
-     * @param role 角色名称
-     * @return true 表示是管理员
-     */
-    public static boolean isAdmin(String role) {
-        return ADMIN.equals(role) || SUPER_ADMIN.equals(role);
-    }
-
-    /**
-     * 判断是否为超级管理员
-     *
-     * @param role 角色名称
-     * @return true 表示是超级管理员
-     */
-    public static boolean isSuperAdmin(String role) {
-        return SUPER_ADMIN.equals(role);
-    }
 }

@@ -49,7 +49,6 @@ public class ImMessageServiceImpl implements ImMessageService {
     private static final Logger log = LoggerFactory.getLogger(ImMessageServiceImpl.class);
 
     private static final String CACHE_KEY_CONVERSATION_LIST = SystemConstants.CACHE_KEY_CONVERSATION_LIST;
-    private static final int CACHE_EVICT_THRESHOLD = 20;
     private static final String MESSAGE_TYPE_TEXT = MessageStatusConstants.MESSAGE_TYPE_TEXT;
     private static final String MESSAGE_TYPE_IMAGE = MessageStatusConstants.MESSAGE_TYPE_IMAGE;
     private static final String MESSAGE_TYPE_FILE = MessageStatusConstants.MESSAGE_TYPE_FILE;

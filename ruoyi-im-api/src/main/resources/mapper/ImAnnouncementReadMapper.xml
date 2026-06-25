@@ -37,4 +37,12 @@
         LIMIT 1
     </select>
 
+    <insert id="batchInsert">
+        INSERT INTO im_announcement_read (announcement_id, user_id, read_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.announcementId}, #{item.userId}, #{item.readTime})
+        </foreach>
+    </insert>
+
 </mapper>

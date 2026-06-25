@@ -41,7 +41,6 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
     private static final Logger log = LoggerFactory.getLogger(ImVideoMeetingServiceImpl.class);
 
     private static final String MEETING_CACHE_KEY = "im:meeting:";
-    private static final String MEETING_USER_PREFIX = "im:meeting_user:";
 
     /** 会议类型：普通会议 */
     private static final String MEETING_TYPE_MEETING = "MEETING";

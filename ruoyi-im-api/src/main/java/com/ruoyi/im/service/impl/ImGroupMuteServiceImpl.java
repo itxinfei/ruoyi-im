@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -188,18 +189,23 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
         // 计算禁言结束时间
         LocalDateTime muteEndTime = LocalDateTime.now().plusMinutes(muteDuration);
 
-        // 批量禁言
+        // 批量加载成员信息
+        List<ImGroupMember> members = new ArrayList<>();
         for (Long userId : userIds) {
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, userId);
             if (member != null) {
-                // 管理员不能禁言群主和其他管理员
                 String memberRole = member.getRole();
                 if (isAdmin && (ROLE_OWNER.equals(memberRole) || ROLE_ADMIN.equals(memberRole))) {
-                    continue; // 跳过群主和管理员
+                    continue;
                 }
                 member.setMuteEndTime(muteEndTime);
-                groupMemberMapper.updateImGroupMember(member);
+                members.add(member);
             }
+        }
+
+        // 逐个更新（BaseMapper.updateBatchById 需要 SqlSession 批量模式）
+        for (ImGroupMember member : members) {
+            groupMemberMapper.updateById(member);
         }
     }
 }
