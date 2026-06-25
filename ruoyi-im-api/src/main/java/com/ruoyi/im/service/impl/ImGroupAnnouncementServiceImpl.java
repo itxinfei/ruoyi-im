@@ -34,7 +34,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     private ImGroupMemberMapper groupMemberMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long createAnnouncement(Long groupId, String content, Integer type, String attachmentUrl,
                                    Integer isPinned, LocalDateTime expireTime, Long senderId) {
         // 验证用户是否为群主或管理员
@@ -110,7 +110,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateAnnouncement(Long announcementId, String content, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -139,7 +139,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteAnnouncement(Long announcementId, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -165,7 +165,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void recallAnnouncement(Long announcementId, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -193,7 +193,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void setPinned(Long announcementId, Integer isPinned, Long userId) {
         ImGroupAnnouncement announcement = announcementMapper.selectById(announcementId);
         if (announcement == null) {
@@ -217,7 +217,7 @@ public class ImGroupAnnouncementServiceImpl implements ImGroupAnnouncementServic
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public int cleanupExpiredAnnouncements() {
         List<ImGroupAnnouncement> expiredAnnouncements = announcementMapper.selectExpiredAnnouncements(LocalDateTime.now());
         int count = 0;

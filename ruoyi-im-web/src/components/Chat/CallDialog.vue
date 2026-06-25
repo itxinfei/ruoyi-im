@@ -248,7 +248,7 @@ defineExpose({ open, end, handleWebRTCSignal: (a, d) => { if (a === 'answer') { 
   .remote-track, .video-element { width: 100%; height: 100%; object-fit: cover; }
   .local-track {
     position: absolute; top: 20px; right: 20px; width: 120px; height: 160px;
-    border-radius: 12px; overflow: hidden; border: 2px solid var(--dt-border-light); z-index: 2;
+    border-radius: var(--dt-radius-lg); overflow: hidden; border: 2px solid var(--dt-border-light); z-index: 2;
   }
 }
 
@@ -263,7 +263,7 @@ defineExpose({ open, end, handleWebRTCSignal: (a, d) => { if (a === 'answer') { 
 }
 
 .console-btn {
-  background: none; border: none; cursor: pointer; color: var(--dt-text-white); display: flex; flex-direction: column; align-items: center; gap: 10px;
+  background: none; border: none; cursor: pointer; color: var(--dt-text-white); display: flex; flex-direction: column; align-items: center; gap: 12px;
   .icon-circle {
     width: 64px; height: 64px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
     font-size: 28px; background: rgba(255,255,255,0.15); transition: background var(--dt-transition-fast);

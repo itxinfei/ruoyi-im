@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageService;
+import com.ruoyi.im.service.IOfflineMessageService;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.ImRedisUtil;
 import com.ruoyi.im.util.JwtUtils;
@@ -15,7 +16,9 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
+import javax.websocket.server.HandshakeRequest;
 import javax.websocket.server.ServerEndpoint;
+import javax.websocket.server.ServerEndpointConfig;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -30,10 +33,15 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author ruoyi
  */
 @Component
-@ServerEndpoint("/ws/im")
+@ServerEndpoint(value = "/ws/im", configurator = ImWebSocketEndpoint.WebSocketConfigurator.class)
 public class ImWebSocketEndpoint {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketEndpoint.class);
+
+    /**
+     * ObjectMapper 单例（线程安全）
+     */
+    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     /**
      * 存储所有在线用户的 WebSocket 会话（用户ID -> 会话）
@@ -55,6 +63,7 @@ public class ImWebSocketEndpoint {
     private static ImUserMapper staticImUserMapper;
     private static ImRedisUtil staticImRedisUtil;
     private static ImWebSocketBroadcastService staticBroadcastService;
+    private static IOfflineMessageService staticOfflineMessageService;
     private static boolean staticSecurityEnabled;
     private static Long staticDevUserId;
 
@@ -71,6 +80,12 @@ public class ImWebSocketEndpoint {
     @Autowired
     public void setBroadcastService(ImWebSocketBroadcastService broadcastService) {
         staticBroadcastService = broadcastService;
+    }
+
+    @Autowired
+    @org.springframework.context.annotation.Lazy
+    public void setOfflineMessageService(IOfflineMessageService offlineMessageService) {
+        staticOfflineMessageService = offlineMessageService;
     }
 
     @Autowired
@@ -118,31 +133,14 @@ public class ImWebSocketEndpoint {
         try {
             log.info("WebSocket 连接请求: sessionId={}", session.getId());
 
+            // 从 Configurator 设置的用户属性中获取 token
+            String tokenValue = (String) session.getUserProperties().get("token");
+            
             Long userId = null;
-            String queryString = session.getQueryString();
-            String tokenValue = extractTokenFromQuery(queryString);
 
-            // 尝试从查询参数中直接获取userId（开发环境支持）
-            if (queryString != null && queryString.contains("userId=")) {
+            // 从token中解析用户ID
+            if (tokenValue != null && !tokenValue.isEmpty() && staticJwtUtils != null) {
                 try {
-                    String[] params = queryString.split("&");
-                    for (String param : params) {
-                        if (param.startsWith("userId=")) {
-                            String userIdStr = param.substring(7);
-                            userId = Long.parseLong(userIdStr);
-                            log.info("从查询参数中获取到用户ID: userId={}", userId);
-                            break;
-                        }
-                    }
-                } catch (Exception e) {
-                    log.warn("从查询参数解析userId失败: {}", e.getMessage());
-                }
-            }
-
-            // 如果没有从查询参数获取到userId，尝试从token中解析
-            if (userId == null && tokenValue != null && !tokenValue.isEmpty() && staticJwtUtils != null) {
-                try {
-                    // 生产环境需要验证token，开发环境跳过验证但仍然解析用户ID
                     if (staticSecurityEnabled) {
                         log.debug("生产环境模式：进行token验证");
                         if (!staticJwtUtils.validateToken(tokenValue)) {
@@ -159,17 +157,14 @@ public class ImWebSocketEndpoint {
                         log.info("从token解析到用户ID: userId={}", userId);
                     }
                 } catch (Exception e) {
-                    log.warn("从token解析用户ID失败: {}", e.getMessage());
+                    log.warn("从token解析用户ID失败", e);
                 }
             }
 
-            // 如果仍然无法获取userId，连接暂时挂起，等待客户端发送认证消息
-            // 这种情况下，不立即关闭连接，允许客户端通过auth消息进行认证
+            // 如果无法获取userId，连接暂时挂起，等待客户端发送认证消息
             if (userId == null) {
                 log.warn("WebSocket连接时无法获取用户ID，等待客户端发送认证消息: sessionId={}", session.getId());
-                // 将session标记为未认证状态，使用特殊标记
-                sessionUserMap.put(session, -1L); // -1 表示未认证
-                // 发送需要认证的消息
+                sessionUserMap.put(session, -1L);
                 sendMessage(session, buildStatusMessage("auth_required", null, "请发送认证消息"));
                 return;
             }
@@ -243,8 +238,7 @@ public class ImWebSocketEndpoint {
             // 检查是否为未认证状态（-1表示未认证）
             if (userId == -1L) {
                 // 只允许认证消息通过
-                ObjectMapper mapper = new ObjectMapper();
-                Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {
+                Map<String, Object> messageMap = MAPPER.readValue(message, new TypeReference<Map<String, Object>>() {
                 });
                 String type = (String) messageMap.get("type");
                 if ("auth".equals(type)) {
@@ -265,7 +259,7 @@ public class ImWebSocketEndpoint {
 
             log.debug("收到消息: userId={}, message={}", userId, message);
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             Map<String, Object> messageMap = mapper.readValue(message, new TypeReference<Map<String, Object>>() {
             });
 
@@ -398,7 +392,7 @@ public class ImWebSocketEndpoint {
         String clientMsgId = null;
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             Map<String, Object> messageData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -525,7 +519,7 @@ public class ImWebSocketEndpoint {
      */
     private void handleTypingStatus(Long userId, Object payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             Map<String, Object> typingData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -563,7 +557,7 @@ public class ImWebSocketEndpoint {
      */
     private void handleCallSignal(Long userId, Object payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             Map<String, Object> callData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -595,41 +589,23 @@ public class ImWebSocketEndpoint {
         try {
             String token = (String) messageData.get("token");
             Long userId = null;
-            boolean isNewLogin = false; // 标记是否是新登录（从未认证到认证）
+            boolean isNewLogin = false;
 
-            // 优先从消息payload中直接获取userId（前端发送的userId）
-            Object userIdObj = messageData.get("userId");
-            if (userIdObj != null) {
+            // 从token中解析用户ID（已移除payload中直接传userId的认证绕过漏洞）
+            if (token != null && !token.isEmpty() && staticJwtUtils != null) {
                 try {
-                    if (userIdObj instanceof Number) {
-                        userId = ((Number) userIdObj).longValue();
-                        log.info("从认证消息中获取到用户ID: userId={}", userId);
-                    } else if (userIdObj instanceof String) {
-                        userId = Long.parseLong((String) userIdObj);
-                        log.info("从认证消息中获取到用户ID: userId={}", userId);
-                    }
-                } catch (Exception e) {
-                    log.warn("解析消息中的userId失败: {}", e.getMessage());
-                }
-            }
-
-            // 如果消息中没有userId，尝试从token中解析用户ID
-            if (userId == null && token != null && !token.isEmpty() && staticJwtUtils != null) {
-                try {
-                    // 生产环境需要验证token，开发环境跳过验证但仍然解析用户ID
                     if (staticSecurityEnabled) {
                         if (staticJwtUtils.validateToken(token)) {
                             userId = staticJwtUtils.getUserIdFromToken(token);
                         }
                     } else {
-                        // 开发环境：跳过验证但仍然解析token中的用户ID
                         userId = staticJwtUtils.getUserIdFromToken(token);
                         if (userId != null) {
                             log.info("开发环境：从token解析到用户ID: userId={}", userId);
                         }
                     }
                 } catch (Exception e) {
-                    log.warn("从token解析用户ID失败: {}", e.getMessage());
+                    log.warn("从token解析用户ID失败", e);
                 }
             }
 
@@ -726,7 +702,7 @@ public class ImWebSocketEndpoint {
                 response.put("success", false);
                 response.put("message", "认证异常: " + e.getMessage());
 
-                session.getBasicRemote().sendText(new ObjectMapper().writeValueAsString(response));
+                session.getAsyncRemote().sendText(MAPPER.writeValueAsString(response));
             } catch (Exception ex) {
                 log.error("发送认证失败消息异常", ex);
             }
@@ -742,7 +718,7 @@ public class ImWebSocketEndpoint {
      */
     private void handleReadReceipt(Long userId, Object payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             Map<String, Object> readData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -781,7 +757,7 @@ public class ImWebSocketEndpoint {
      */
     private void handleDeliveryAck(Long userId, Object payload) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             Map<String, Object> ackData = mapper.convertValue(payload, new TypeReference<Map<String, Object>>() {
             });
 
@@ -831,9 +807,9 @@ public class ImWebSocketEndpoint {
     private void sendMessage(Session session, Object message) {
         try {
             if (session != null && session.isOpen()) {
-                ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = MAPPER;
                 String messageJson = mapper.writeValueAsString(message);
-                session.getBasicRemote().sendText(messageJson);
+                session.getAsyncRemote().sendText(messageJson);
             }
         } catch (IOException e) {
             log.error("发送消息异常", e);
@@ -851,8 +827,12 @@ public class ImWebSocketEndpoint {
         for (Session session : sessions) {
             if (session.isOpen()) {
                 try {
-                    session.getBasicRemote().sendText(messageJson);
-                } catch (IOException e) {
+                    session.getAsyncRemote().sendText(messageJson, result -> {
+                        if (!result.isOK()) {
+                            log.error("发送消息失败: sessionId={}", session.getId(), result.getException());
+                        }
+                    });
+                } catch (Exception e) {
                     log.error("发送消息失败: sessionId={}", session.getId(), e);
                 }
             }
@@ -922,9 +902,9 @@ public class ImWebSocketEndpoint {
         Session session = onlineUsers.get(userId);
         if (session != null && session.isOpen()) {
             try {
-                ObjectMapper mapper = new ObjectMapper();
+                ObjectMapper mapper = MAPPER;
                 String messageJson = mapper.writeValueAsString(message);
-                session.getBasicRemote().sendText(messageJson);
+                session.getAsyncRemote().sendText(messageJson);
             } catch (Exception e) {
                 LoggerFactory.getLogger(ImWebSocketEndpoint.class).error("发送消息给用户失败: userId={}", userId, e);
             }
@@ -1002,7 +982,7 @@ public class ImWebSocketEndpoint {
                 // 注意：这里传入 null 为 toUserId 意味着让 BroadcastService 根据 callId 内部查找或广播
                 // 建议在 Controller 层直接调用 broadcastService.sendCallSignal(toUserId, ...)
             } else {
-                broadcastToAllOnline(new ObjectMapper().writeValueAsString(signalMessage));
+                broadcastToAllOnline(MAPPER.writeValueAsString(signalMessage));
             }
 
             log.debug("转发WebRTC信令: callId={}, type={}, from={}", callId, signalType, fromUserId);
@@ -1050,22 +1030,134 @@ public class ImWebSocketEndpoint {
      * @param userId 用户ID
      */
     private void pushOfflineMessages(Long userId) {
-        // 使用Spring ApplicationContext获取离线消息服务Bean
-        if (applicationContext != null) {
+        if (staticOfflineMessageService != null) {
             CompletableFuture.runAsync(() -> {
                 try {
-                    Object offlineService = applicationContext.getBean("offlineMessageServiceImpl");
-                    if (offlineService != null) {
-                        // 调用离线消息服务推送消息
-                        java.lang.reflect.Method method = offlineService.getClass()
-                                .getMethod("pushAndClearOfflineMessages", Long.class);
-                        int count = (int) method.invoke(offlineService, userId);
-                        log.info("推送离线消息完成: userId={}, count={}", userId, count);
-                    }
+                    int count = staticOfflineMessageService.pushAndClearOfflineMessages(userId);
+                    log.info("推送离线消息完成: userId={}, count={}", userId, count);
                 } catch (Exception e) {
                     log.error("推送离线消息失败: userId={}", userId, e);
                 }
             });
+        }
+    }
+
+    /**
+     * 自定义 WebSocket 配置器
+     * 用于在握手阶段获取 HTTP 请求，验证 JWT token 和 Origin 白名单
+     */
+    public static class WebSocketConfigurator extends ServerEndpointConfig.Configurator {
+        
+        private static final Logger log = LoggerFactory.getLogger(WebSocketConfigurator.class);
+        
+        // 允许的 Origin 白名单（生产环境应配置为具体域名）
+        private static final Set<String> ALLOWED_ORIGINS = new HashSet<>(Arrays.asList(
+                "http://localhost:3000",
+                "http://localhost:8080",
+                "https://your-domain.com" // 替换为实际域名
+        ));
+        
+        @Override
+        public void modifyHandshake(ServerEndpointConfig sec, HandshakeRequest request, HandshakeResponse response) {
+            // 1. 验证 Origin 白名单
+            List<String> origins = request.getHeaders().get("Origin");
+            String origin = (origins != null && !origins.isEmpty()) ? origins.get(0) : null;
+            
+            if (origin == null || origin.isEmpty()) {
+                log.warn("WebSocket 握手失败: Origin 为空");
+                throw new RuntimeException("Origin 不能为空");
+            }
+            
+            if (!isOriginAllowed(origin)) {
+                log.warn("WebSocket 握手失败: Origin 不在白名单中, origin={}", origin);
+                throw new RuntimeException("Origin 不在白名单中");
+            }
+            
+            // 2. 从 header 或 cookie 获取 JWT token
+            String token = extractTokenFromRequest(request);
+            if (token == null || token.isEmpty()) {
+                log.warn("WebSocket 握手失败: 缺少 token");
+                throw new RuntimeException("缺少认证 token");
+            }
+            
+            // 3. 验证 token（这里只是提取，实际验证在 onOpen 中进行）
+            // 将 token 存储到用户属性中，供 onOpen 使用
+            sec.getUserProperties().put("token", token);
+            
+            // 4. 设置安全响应头
+            response.getHeaders().put("X-Content-Type-Options", Arrays.asList("nosniff"));
+            response.getHeaders().put("X-Frame-Options", Arrays.asList("DENY"));
+            response.getHeaders().put("X-XSS-Protection", Arrays.asList("1; mode=block"));
+            
+            log.info("WebSocket 握手成功: origin={}", origin);
+        }
+        
+        /**
+         * 检查 Origin 是否在白名单中
+         */
+        private boolean isOriginAllowed(String origin) {
+            // 开发环境允许所有 Origin
+            if (ALLOWED_ORIGINS.contains("*")) {
+                return true;
+            }
+            
+            // 检查精确匹配
+            if (ALLOWED_ORIGINS.contains(origin)) {
+                return true;
+            }
+            
+            // 检查通配符匹配（如 *.example.com）
+            for (String allowedOrigin : ALLOWED_ORIGINS) {
+                if (allowedOrigin.startsWith("*.")) {
+                    String domain = allowedOrigin.substring(2);
+                    if (origin.endsWith(domain)) {
+                        return true;
+                    }
+                }
+            }
+            
+            return false;
+        }
+        
+        /**
+         * 从 HTTP 请求中提取 JWT token
+         * 优先从 Authorization header 获取，其次从 cookie 获取
+         */
+        private String extractTokenFromRequest(HandshakeRequest request) {
+            // 1. 尝试从 Authorization header 获取
+            List<String> authHeaders = request.getHeaders().get("Authorization");
+            if (authHeaders != null && !authHeaders.isEmpty()) {
+                String authHeader = authHeaders.get(0);
+                if (authHeader.startsWith("Bearer ")) {
+                    return authHeader.substring(7);
+                }
+            }
+            
+            // 2. 尝试从 cookie 获取
+            String cookieHeader = request.getHeaders().get("Cookie") != null 
+                    ? request.getHeaders().get("Cookie").get(0) : null;
+            if (cookieHeader != null) {
+                String[] cookies = cookieHeader.split(";");
+                for (String cookie : cookies) {
+                    String[] parts = cookie.trim().split("=");
+                    if (parts.length == 2 && "token".equals(parts[0])) {
+                        return parts[1];
+                    }
+                }
+            }
+            
+            // 3. 尝试从查询参数获取（兼容旧版本）
+            String query = request.getQueryString();
+            if (query != null) {
+                String[] params = query.split("&");
+                for (String param : params) {
+                    if (param.startsWith("token=")) {
+                        return param.substring(6);
+                    }
+                }
+            }
+            
+            return null;
         }
     }
 }

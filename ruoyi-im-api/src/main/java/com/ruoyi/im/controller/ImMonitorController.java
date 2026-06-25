@@ -172,7 +172,7 @@ public class ImMonitorController {
         double memoryUsagePercent = calculateUsagePercent(heapUsage.getUsed(), heapUsage.getMax());
 
         HealthCheckVO health = new HealthCheckVO();
-        health.setStatus(memoryUsagePercent < MEMORY_WARNING_THRESHOLD ? STATUS_HEALTHY : STATUS_WARNING);
+        health.setStatus(memoryUsagePercent < MEMORY_WARNING_THRESHOLD ? HEALTH_STATUS_HEALTHY : HEALTH_STATUS_WARNING);
         health.setMemoryUsage(String.format("%.2f%%", memoryUsagePercent));
 
         return Result.success(health);

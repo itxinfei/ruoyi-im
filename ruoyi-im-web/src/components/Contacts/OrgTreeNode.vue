@@ -77,7 +77,7 @@ const handleClick = () => {
     background: var(--dt-brand-lighter);
     .node-name {
       color: var(--dt-brand-color);
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
     }
     .type-icon {
       color: var(--dt-brand-color);

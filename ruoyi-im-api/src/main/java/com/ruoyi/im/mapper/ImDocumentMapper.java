@@ -58,4 +58,13 @@ public interface ImDocumentMapper extends BaseMapper<ImDocument> {
      */
     List<ImDocument> searchDocuments(@Param("userId") Long userId,
                                      @Param("keyword") String keyword);
+
+    /**
+     * 原子递增文档版本号（带乐观锁检查）
+     *
+     * @param documentId 文档ID
+     * @param expectedVersion 期望的当前版本号
+     * @return 更新行数（0表示版本冲突）
+     */
+    int incrementVersionWithCheck(@Param("documentId") Long documentId, @Param("expectedVersion") Integer expectedVersion);
 }

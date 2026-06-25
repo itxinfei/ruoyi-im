@@ -43,6 +43,7 @@
         <div v-if="filteredTodos.length === 0" class="empty-view">
           <el-icon class="empty-icon"><CircleCheck /></el-icon>
           <p>太棒了，目前没有待办任务</p>
+          <button class="empty-cta-btn" @click="showAddDialog = true"><el-icon><Plus /></el-icon>创建待办</button>
         </div>
         <div v-else class="todo-list">
           <div v-for="todo in filteredTodos" :key="todo.id" class="todo-card-v2" :class="{ completed: todo.status === 'COMPLETED' }" @click="handleViewDetail(todo)">
@@ -101,6 +102,7 @@ import {
   Plus, List, Clock, Check, Calendar, Bell, Edit, 
   Delete, CircleCheck, Search, Box, User, Reading, MoreFilled, Close, ArrowUp 
 } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 import { getMyTasks, updateTaskStatus, deleteTask } from '@/api/im/task'
 
 const activeFilter = ref('all')
@@ -138,12 +140,16 @@ const filteredTodos = computed(() => {
 const currentTabLabel = computed(() => [...statusTabs, ...categoryTabs].find(t => t.key === activeFilter.value)?.label || '任务')
 
 const loadTodos = async () => {
-  const res = await getMyTasks()
-  if (res.code === 200) {
-    todos.value = (res.data || []).map(t => ({
-      ...t,
-      priorityClass: t.priority?.toLowerCase() || 'low'
-    }))
+  try {
+    const res = await getMyTasks()
+    if (res.code === 200) {
+      todos.value = (res.data || []).map(t => ({
+        ...t,
+        priorityClass: t.priority?.toLowerCase() || 'low'
+      }))
+    }
+  } catch (e) {
+    ElMessage.error('加载待办失败')
   }
 }
 
@@ -167,17 +173,17 @@ onMounted(loadTodos)
 .todo-sidebar {
   width: var(--dt-contact-panel-width); background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .sidebar-header { padding: 0 20px; height: var(--dt-header-height); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--dt-border-light); .sidebar-title { font-size: 16px; font-weight: 700; margin: 0; color: var(--dt-text-primary); } }
+  .sidebar-header { padding: 0 20px; height: var(--dt-header-height); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--dt-border-light); .sidebar-title { font-size: 16px; font-weight: var(--dt-font-weight-bold); margin: 0; color: var(--dt-text-primary); } }
   .add-todo-icon-btn { width: 28px; height: 28px; border-radius: var(--dt-radius-sm); border: none; background: var(--dt-brand-color); color: var(--dt-text-white); cursor: pointer; @include flex-center; transition: var(--dt-transition-fast); &:hover { background: var(--dt-brand-hover); } }
   .sidebar-content {
     flex: 1; padding: 12px 8px;
-    .nav-section { margin-bottom: 20px; .section-title { font-size: 11px; color: var(--dt-text-quaternary); padding: 8px 12px; } }
+    .nav-section { margin-bottom: 24px; .section-title { font-size: 12px; color: var(--dt-text-quaternary); padding: 8px 12px; } }
     .nav-item {
       height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
-      border-radius: 8px; cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
+      border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
       &:hover { background: var(--dt-bg-hover); }
-      &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
-      .nav-badge { margin-left: auto; font-size: 11px; background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 6px; border-radius: 10px; }
+      &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
+      .nav-badge { margin-left: auto; font-size: 12px; background: var(--dt-error-color); color: var(--dt-text-white); padding: 0 6px; border-radius: var(--dt-radius-lg); }
     }
     .nav-divider { height: 1px; background: var(--dt-border-light); margin: 12px; }
   }
@@ -188,13 +194,13 @@ onMounted(loadTodos)
 .todo-header {
   height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
-  .view-title { font-size: 16px; font-weight: 600; }
+  .view-title { font-size: 16px; font-weight: var(--dt-font-weight-semibold); }
 }
 
 .todo-search {
   width: 200px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm);
   display: flex; align-items: center; padding: 0 12px; color: var(--dt-text-tertiary);
-  input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; margin-left: 8px; }
+  input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; margin-left: 8px; }
 }
 
 .todo-body { flex: 1; overflow-y: auto; padding: 16px 24px; }
@@ -202,7 +208,15 @@ onMounted(loadTodos)
 .empty-view {
   height: 80%; @include flex-center; flex-direction: column; text-align: center;
   .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
-  p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+  p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0 0 var(--dt-spacing-lg); }
+  .empty-cta-btn {
+    display: inline-flex; align-items: center; gap: var(--dt-spacing-sm);
+    height: var(--dt-btn-height-sm); padding: 0 var(--dt-spacing-lg);
+    background: var(--dt-brand-color); color: var(--dt-text-white);
+    border: none; border-radius: var(--dt-radius-sm); font-size: var(--dt-font-size-base);
+    cursor: pointer; transition: var(--dt-transition-fast);
+    &:hover { background: var(--dt-brand-hover); }
+  }
 }
 
 .todo-card-v2 {
@@ -228,12 +242,12 @@ onMounted(loadTodos)
 
 .todo-main-content {
   flex: 1; min-width: 0;
-  .todo-title { font-size: 14px; font-weight: 500; color: var(--dt-text-primary); }
+  .todo-title { font-size: 14px; font-weight: var(--dt-font-weight-medium); color: var(--dt-text-primary); }
   .todo-meta {
     display: flex; align-items: center; gap: 16px; margin-top: 6px;
     .meta-item { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--dt-text-tertiary); }
-    .meta-item.overdue { color: var(--dt-error-color); font-weight: 600; }
-    .meta-tag { font-size: 11px; background: var(--dt-bg-hover); padding: 1px 6px; border-radius: 4px; color: var(--dt-text-secondary); }
+    .meta-item.overdue { color: var(--dt-error-color); font-weight: var(--dt-font-weight-semibold); }
+    .meta-tag { font-size: 12px; background: var(--dt-bg-hover); padding: 1px 6px; border-radius: var(--dt-radius-sm); color: var(--dt-text-secondary); }
   }
 }
 
@@ -245,8 +259,8 @@ onMounted(loadTodos)
 .todo-detail-aside {
   width: var(--dt-drawer-width); background: var(--dt-bg-body); border-left: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .detail-header { height: var(--dt-header-height); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: 600; border-bottom: 1px solid var(--dt-border-light); }
-  .detail-body { padding: 24px; .detail-title { font-size: 18px; margin-bottom: 24px; } }
+  .detail-header { height: var(--dt-header-height); padding: 0 16px; display: flex; align-items: center; justify-content: space-between; font-weight: var(--dt-font-weight-semibold); border-bottom: 1px solid var(--dt-border-light); }
+  .detail-body { padding: 24px; .detail-title { font-size: var(--dt-font-size-xl); margin-bottom: 24px; } }
 }
 
 .slide-enter-active, .slide-leave-active { transition: opacity 0.3s ease; }

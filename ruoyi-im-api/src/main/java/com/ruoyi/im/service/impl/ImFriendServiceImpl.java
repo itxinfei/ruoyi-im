@@ -12,6 +12,8 @@ import com.ruoyi.im.mapper.ImFriendRequestMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImConversationService;
 import com.ruoyi.im.service.ImFriendService;
+
+import static com.ruoyi.im.constant.SystemConstants.*;
 import com.ruoyi.im.util.BeanCopyUtil;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.contact.ImContactGroupVO;
@@ -111,7 +113,7 @@ public class ImFriendServiceImpl implements ImFriendService {
         friendRequest.setFromUserId(userId);
         friendRequest.setToUserId(request.getTargetUserId());
         friendRequest.setMessage(request.getMessage());
-        friendRequest.setStatus("PENDING");
+        friendRequest.setStatus(STATUS_PENDING);
         friendRequest.setCreateTime(LocalDateTime.now());
         imFriendRequestMapper.insertImFriendRequest(friendRequest);
 
@@ -124,16 +126,26 @@ public class ImFriendServiceImpl implements ImFriendService {
         query.setFromUserId(userId);
         List<ImFriendRequest> requestList = imFriendRequestMapper.selectImFriendRequestList(query);
 
-        List<ImFriendRequest> pendingList = new ArrayList<>();
-        for (ImFriendRequest request : requestList) {
-            if ("PENDING".equals(request.getStatus())) {
-                // 查询目标用户信息
-                ImUser toUser = imUserMapper.selectImUserById(request.getToUserId());
-                if (toUser != null) {
-                    request.setFromUserName(toUser.getNickname() != null ? toUser.getNickname() : toUser.getUsername());
-                    request.setFromUserAvatar(toUser.getAvatar());
-                }
-                pendingList.add(request);
+        // 筛选待处理请求
+        List<ImFriendRequest> pendingList = requestList.stream()
+                .filter(r -> STATUS_PENDING.equals(r.getStatus()))
+                .collect(Collectors.toList());
+
+        // 批量加载目标用户信息
+        List<Long> toUserIds = pendingList.stream().map(ImFriendRequest::getToUserId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!toUserIds.isEmpty()) {
+            List<ImUser> users = imUserMapper.selectImUserListByIds(toUserIds);
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
+        for (ImFriendRequest request : pendingList) {
+            ImUser toUser = userMap.get(request.getToUserId());
+            if (toUser != null) {
+                request.setFromUserName(toUser.getNickname() != null ? toUser.getNickname() : toUser.getUsername());
+                request.setFromUserAvatar(toUser.getAvatar());
             }
         }
 
@@ -198,6 +210,10 @@ public class ImFriendServiceImpl implements ImFriendService {
         @SuppressWarnings("unchecked")
         List<ImFriendVO> cachedList = (List<ImFriendVO>) imRedisUtil.get(cacheKey);
         if (cachedList != null) {
+            // 刷新在线状态（在线状态变化频繁，不适合随好友列表一起缓存）
+            for (ImFriendVO vo : cachedList) {
+                vo.setOnline(imRedisUtil.isOnlineUser(vo.getFriendId()));
+            }
             return cachedList;
         }
 
@@ -324,7 +340,7 @@ public class ImFriendServiceImpl implements ImFriendService {
 
         List<ImFriendRequest> pendingList = new ArrayList<>();
         for (ImFriendRequest request : requestList) {
-            if ("PENDING".equals(request.getStatus())) {
+            if (STATUS_PENDING.equals(request.getStatus())) {
                 ImUser fromUser = userMap.get(request.getFromUserId());
                 if (fromUser != null) {
                     request.setFromUserName(

@@ -25,19 +25,19 @@ public class SensitiveWordServiceImpl implements ISensitiveWordService {
     private ImSensitiveWordMapper sensitiveWordMapper;
 
     /**
-     * 敏感词字典（DFA模型）
+     * 敏感词字典（DFA模型）— volatile 保证引用可见性，reload 时整体替换
      */
-    private Map<String, Object> sensitiveWordMap = new HashMap<>();
+    private volatile Map<String, Object> sensitiveWordMap = new HashMap<>();
 
     /**
      * 最短匹配长度
      */
-    private int minLength = Integer.MAX_VALUE;
+    private volatile int minLength = Integer.MAX_VALUE;
 
     /**
      * 最长匹配长度
      */
-    private int maxLength = 0;
+    private volatile int maxLength = 0;
 
     /**
      * 默认替换符
@@ -56,7 +56,47 @@ public class SensitiveWordServiceImpl implements ISensitiveWordService {
     public void reload() {
         try {
             List<String> words = sensitiveWordMapper.selectAllEnabledWords();
-            initSensitiveWordMap(words);
+            // 构建新的 DFA 字典，完成后原子替换引用，避免读线程看到半构建状态
+            Map<String, Object> newMap = new HashMap<>();
+            int newMin = Integer.MAX_VALUE;
+            int newMax = 0;
+
+            for (String word : words) {
+                if (word == null || word.isEmpty()) {
+                    continue;
+                }
+                int len = word.length();
+                if (len < newMin) newMin = len;
+                if (len > newMax) newMax = len;
+
+                Map<String, Object> nowMap = newMap;
+                for (int i = 0; i < len; i++) {
+                    String key = String.valueOf(word.charAt(i));
+                    Object nextObj = nowMap.get(key);
+                    Map<String, Object> nextMap;
+                    if (nextObj == null) {
+                        nextMap = new HashMap<>();
+                        nowMap.put(key, nextMap);
+                    } else if (nextObj instanceof Map) {
+                        @SuppressWarnings("unchecked")
+                        Map<String, Object> casted = (Map<String, Object>) nextObj;
+                        nextMap = casted;
+                    } else {
+                        nextMap = new HashMap<>();
+                        nowMap.put(key, nextMap);
+                    }
+                    nowMap = nextMap;
+                    if (i == len - 1) {
+                        nowMap.put("isEnd", true);
+                    }
+                }
+            }
+
+            // 原子替换引用
+            this.sensitiveWordMap = newMap;
+            this.minLength = newMin;
+            this.maxLength = newMax;
+
             logger.info("敏感词库加载完成，共加载{}个敏感词", words.size());
         } catch (Exception e) {
             logger.error("敏感词库加载失败", e);
@@ -141,58 +181,6 @@ public class SensitiveWordServiceImpl implements ISensitiveWordService {
             }
         }
         return count;
-    }
-
-    /**
-     * 初始化敏感词字典（DFA模型）
-     *
-     * @param words 敏感词列表
-     */
-    private void initSensitiveWordMap(List<String> words) {
-        sensitiveWordMap.clear();
-        minLength = Integer.MAX_VALUE;
-        maxLength = 0;
-
-        for (String word : words) {
-            if (word == null || word.isEmpty()) {
-                continue;
-            }
-
-            // 更新最小/最大长度
-            int len = word.length();
-            if (len < minLength) {
-                minLength = len;
-            }
-            if (len > maxLength) {
-                maxLength = len;
-            }
-
-            Map<String, Object> nowMap = sensitiveWordMap;
-            for (int i = 0; i < len; i++) {
-                char charAt = word.charAt(i);
-                String key = String.valueOf(charAt);
-
-                Object nextObj = nowMap.get(key);
-                Map<String, Object> nextMap;
-                if (nextObj == null) {
-                    nextMap = new HashMap<>();
-                    nowMap.put(key, nextMap);
-                } else if (nextObj instanceof Map) {
-                    nextMap = (Map<String, Object>) nextObj;
-                } else {
-                    // 如果是其他类型（如Boolean），需要新建Map
-                    nextMap = new HashMap<>();
-                    nowMap.put(key, nextMap);
-                }
-
-                nowMap = nextMap;
-
-                // 判断是否为最后一个字符
-                if (i == len - 1) {
-                    nowMap.put("isEnd", true);
-                }
-            }
-        }
     }
 
     /**

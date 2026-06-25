@@ -92,13 +92,13 @@ const handleRedial = (_call) => { /* TODO: 拨号逻辑 */ }
 
 .call-list-container { width: 320px; border-right: 1px solid var(--dt-border-light); overflow-y: auto;
   .call-row {
-    height: 68px; display: flex; align-items: center; padding: 0 16px; gap: 12px; cursor: pointer; transition: var(--dt-transition-fast);
+    height: 64px; display: flex; align-items: center; padding: 0 16px; gap: 12px; cursor: pointer; transition: var(--dt-transition-fast);
     &:hover { background: var(--dt-bg-hover); .call-ops { opacity: 1; } }
     &.missed { .name, .status-text { color: var(--dt-error-color); } }
-    .call-main-info { flex: 1; min-width: 0; .name-row { display: flex; justify-content: space-between; .name { font-weight: 600; font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 11px; color: var(--dt-text-tertiary); } } .status-row { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dt-text-tertiary); .video { color: var(--dt-brand-color); } } }
+    .call-main-info { flex: 1; min-width: 0; .name-row { display: flex; justify-content: space-between; .name { font-weight: var(--dt-font-weight-semibold); font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 12px; color: var(--dt-text-tertiary); } } .status-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dt-text-tertiary); .video { color: var(--dt-brand-color); } } }
     .call-ops { opacity: 0; transition: var(--dt-transition-fast); .call-back-btn { font-size: 18px; color: var(--dt-brand-color); cursor: pointer; } }
   }
 }
 
-.call-detail-pane { flex: 1; background: var(--dt-bg-input); .detail-container { padding: 40px; text-align: center; h3 { margin: 16px 0 24px; font-size: 20px; } .action-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; } .info-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; label { font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 4px; } span { font-size: 15px; font-weight: 600; color: var(--dt-text-primary); } } } .detail-empty { height: 100%; @include flex-center; color: var(--dt-text-quaternary); } }
+.call-detail-pane { flex: 1; background: var(--dt-bg-input); .detail-container { padding: 40px; text-align: center; h3 { margin: 16px 0 24px; font-size: 20px; } .action-row { display: flex; justify-content: center; gap: 12px; margin-bottom: 40px; } .info-group { display: flex; flex-direction: column; align-items: center; margin-bottom: 20px; label { font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 4px; } span { font-size: 16px; font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); } } } .detail-empty { height: 100%; @include flex-center; color: var(--dt-text-quaternary); } }
 </style>

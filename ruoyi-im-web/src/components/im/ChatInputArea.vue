@@ -25,7 +25,7 @@
       <div class="toolbar-zone">
         <div class="tools-left">
           <button class="tool-btn" title="文件上传" @click="handleAttach"><el-icon><Upload /></el-icon></button>
-          <button class="tool-btn" title="截图" @click="handleScreenshot"><el-icon><Crop /></el-icon></button>
+          <button class="tool-btn" title="插入链接" @click="handleInsertLink"><el-icon><Link /></el-icon></button>
           <div class="sep" />
           <button class="tool-btn" title="表情" @click="handleEmoji"><el-icon><MagicStick /></el-icon></button>
           <button class="tool-btn" title="提及" @click="handleMention"><el-icon><User /></el-icon></button>
@@ -66,7 +66,7 @@
 
 <script setup lang="js">
 import { ref, computed, onMounted, watch } from 'vue'
-import { Upload, Crop, MagicStick, User, Promotion, UploadFilled, Loading } from '@element-plus/icons-vue'
+import { Upload, Link, MagicStick, User, Promotion, UploadFilled, Loading } from '@element-plus/icons-vue'
 
 const emit = defineEmits([
   'send',
@@ -155,8 +155,7 @@ const handleDrop = (e) => {
 const handleAttach = () => { emit('attach-click') }
 const handleEmoji = () => { emit('emoji-click') }
 const handleMention = () => { emit('mention-click') }
-// 注：当前"截图"按钮临时复用插入链接功能，待截图功能实现后切换为 screenshot-click
-const handleScreenshot = () => { emit('link-click') }
+const handleInsertLink = () => { emit('link-click') }
 
 // 插入文本到光标位置（供父组件调用）
 const insertText = (text) => {
@@ -219,7 +218,7 @@ defineExpose({
 // ============================================================================
 
 .editor-zone {
-  padding: 12px 0;
+  padding: var(--dt-spacing-sm) 0;
   min-height: var(--dt-input-min-height);
   max-height: var(--dt-input-max-height);
   overflow-y: auto;
@@ -379,7 +378,7 @@ defineExpose({
 .drag-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: var(--dt-bg-card);
   z-index: var(--dt-z-sticky);
   display: flex;
   align-items: center;
@@ -392,7 +391,7 @@ defineExpose({
   padding: var(--dt-spacing-3xl);
   color: var(--dt-brand-color);
   text-align: center;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   background: var(--dt-brand-bg);
 
   .el-icon {

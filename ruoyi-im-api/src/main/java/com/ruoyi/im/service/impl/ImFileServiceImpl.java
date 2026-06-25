@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 文件服务实现
@@ -59,10 +60,12 @@ public class ImFileServiceImpl implements ImFileService {
         String datePath = LocalDate.now().format(SystemConstants.DATE_FORMAT_SLASH);
         String relativePath = datePath + "/" + fileName;
 
+        File canonicalUploadPath = null;
+        File targetFile = null;
         try {
-            File canonicalUploadPath = new File(uploadPath).getCanonicalFile();
-            File targetFile = new File(canonicalUploadPath, relativePath);
-            
+            canonicalUploadPath = new File(uploadPath).getCanonicalFile();
+            targetFile = new File(canonicalUploadPath, relativePath);
+
             String canonicalPath = targetFile.getCanonicalPath();
             if (!canonicalPath.startsWith(canonicalUploadPath.getCanonicalPath() + File.separator)) {
                 BusinessExceptionHelper.throwInvalidFilePath();
@@ -75,6 +78,10 @@ public class ImFileServiceImpl implements ImFileService {
 
             file.transferTo(targetFile);
         } catch (IOException e) {
+            // 清理上传失败时的残留文件
+            if (targetFile != null && targetFile.exists()) {
+                targetFile.delete();
+            }
             logger.error("文件上传失败: {}", e.getMessage(), e);
             throw new BusinessException("文件上传失败");
         }
@@ -115,8 +122,8 @@ public class ImFileServiceImpl implements ImFileService {
             throw new BusinessException("无权下载此文件");
         }
 
-        fileAsset.setDownloadCount(fileAsset.getDownloadCount() + 1);
-        imFileAssetMapper.updateById(fileAsset);
+        // 原子递增下载次数
+        imFileAssetMapper.incrementDownloadCount(fileId);
     }
 
     @Override
@@ -132,6 +139,34 @@ public class ImFileServiceImpl implements ImFileService {
 
         fileAsset.setStatus("DELETED");
         imFileAssetMapper.updateById(fileAsset);
+    }
+
+    @Override
+    public void batchDeleteFiles(List<Long> fileIds, Long userId) {
+        if (fileIds == null || fileIds.isEmpty()) {
+            return;
+        }
+
+        // 批量查询所有文件
+        List<ImFileAsset> files = imFileAssetMapper.selectBatchIds(fileIds);
+
+        // 校验所有权
+        List<Long> unauthorizedIds = files.stream()
+                .filter(f -> !userId.equals(f.getUploaderId()))
+                .map(ImFileAsset::getId)
+                .collect(Collectors.toList());
+        if (!unauthorizedIds.isEmpty()) {
+            throw new BusinessException("无权删除文件: " + unauthorizedIds);
+        }
+
+        // 批量软删除
+        List<ImFileAsset> toDelete = files.stream()
+                .filter(f -> "ACTIVE".equals(f.getStatus()))
+                .peek(f -> f.setStatus("DELETED"))
+                .collect(Collectors.toList());
+        for (ImFileAsset fileAsset : toDelete) {
+            imFileAssetMapper.updateById(fileAsset);
+        }
     }
 
     @Override

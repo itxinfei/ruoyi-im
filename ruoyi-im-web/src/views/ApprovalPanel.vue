@@ -29,7 +29,8 @@
       <div v-if="!loading && approvals.length === 0" class="empty-view">
         <div class="empty-box">
           <el-icon class="empty-icon"><Tickets /></el-icon>
-          <p>暂无审批事项</p>
+          <p class="empty-title">暂无审批事项</p>
+          <p class="empty-hint">提交审批申请后将在此显示</p>
         </div>
       </div>
 
@@ -65,6 +66,7 @@
 
 <script setup lang="js">
 import { ref, watch, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Plus, Tickets, Loading } from '@element-plus/icons-vue'
 import { getPendingApprovals, getMyApprovals, getProcessedApprovals } from '@/api/im/approval'
 import CreateApprovalDialog from '@/components/CreateApprovalDialog/index.vue'
@@ -91,6 +93,8 @@ const loadData = async () => {
   try {
     const res = activeTab.value === 'pending' ? await getPendingApprovals() : await getProcessedApprovals()
     if (res.code === 200) approvals.value = res.data.map(i => ({ ...i, bgColor: 'var(--dt-brand-color)' }))
+  } catch (e) {
+    ElMessage.error('加载审批数据失败')
   } finally { loading.value = false }
 }
 
@@ -109,7 +113,7 @@ const handleApprovalAction = () => loadData()
   height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
   .header-left { display: flex; align-items: center; gap: 40px; }
-  .view-title { font-size: 18px; font-weight: 700; margin: 0; color: var(--dt-text-primary); }
+  .view-title { font-size: var(--dt-font-size-xl); font-weight: var(--dt-font-weight-bold); margin: 0; color: var(--dt-text-primary); }
 }
 
 .header-tab-bar {
@@ -119,10 +123,10 @@ const handleApprovalAction = () => loadData()
     cursor: pointer; position: relative; transition: var(--dt-transition-fast);
     &:hover { color: var(--dt-brand-color); }
     &.active {
-      color: var(--dt-brand-color); font-weight: 600;
+      color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold);
       &::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: var(--dt-brand-color); border-radius: var(--dt-radius-sm) var(--dt-radius-sm) 0 0; }
     }
-    .tab-badge { margin-left: 4px; font-size: 11px; background: var(--dt-error-color); color: var(--dt-text-white); padding: 1px 6px; border-radius: 10px; vertical-align: middle; }
+    .tab-badge { margin-left: 4px; font-size: 12px; background: var(--dt-error-color); color: var(--dt-text-white); padding: 1px 6px; border-radius: var(--dt-radius-lg); vertical-align: middle; }
   }
 }
 
@@ -139,13 +143,13 @@ const handleApprovalAction = () => loadData()
 
   .card-main { display: flex; align-items: center; gap: 16px; }
   .app-icon {
-    width: 44px; height: 44px; border-radius: 10px; color: var(--dt-text-white); @include flex-center;
-    font-size: 18px; font-weight: 700; transition: var(--dt-transition-fast);
+    width: 44px; height: 44px; border-radius: var(--dt-radius-lg); color: var(--dt-text-white); @include flex-center;
+    font-size: var(--dt-font-size-xl); font-weight: var(--dt-font-weight-bold); transition: var(--dt-transition-fast);
   }
-  .app-info { flex: 1; .app-title { font-size: 15px; font-weight: 600; margin: 0; color: var(--dt-text-primary); } .app-meta { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; } }
+  .app-info { flex: 1; .app-title { font-size: 16px; font-weight: var(--dt-font-weight-semibold); margin: 0; color: var(--dt-text-primary); } .app-meta { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; } }
 
   .app-status {
-    padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: var(--dt-radius-md); font-size: 12px; font-weight: var(--dt-font-weight-semibold);
     &.pending { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
     &.approved { background: var(--dt-success-bg); color: var(--dt-success-color); }
     &.rejected { background: var(--dt-error-bg); color: var(--dt-error-color); }
@@ -158,7 +162,8 @@ const handleApprovalAction = () => loadData()
   height: 100%; @include flex-center; text-align: center;
   .empty-box {
     .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
-    p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+    .empty-title { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0 0 var(--dt-spacing-sm); }
+    .empty-hint { font-size: var(--dt-font-size-sm); color: var(--dt-text-quaternary); margin: 0; }
   }
 }
 </style>

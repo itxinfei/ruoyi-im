@@ -232,7 +232,7 @@ watch(() => props.modelValue, (val) => {
 
   .dialog-title {
     font-size: 16px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 
@@ -253,7 +253,7 @@ watch(() => props.modelValue, (val) => {
     display: flex;
     align-items: center;
     gap: 16px;
-    padding: 20px 24px;
+    padding: 24px;
     background: var(--dt-bg-body);
     border-bottom: 1px solid var(--dt-border-light);
 
@@ -281,13 +281,13 @@ watch(() => props.modelValue, (val) => {
     .doc-meta {
       h3 {
         font-size: 16px;
-        font-weight: 600;
+        font-weight: var(--dt-font-weight-semibold);
         color: var(--dt-text-primary);
         margin: 0 0 4px 0;
       }
 
       p {
-        font-size: 13px;
+        font-size: 14px;
         color: var(--dt-text-secondary);
         margin: 0;
       }
@@ -335,21 +335,21 @@ watch(() => props.modelValue, (val) => {
       p {
         font-size: 14px;
         color: var(--dt-text-secondary);
-        margin-bottom: 20px;
+        margin-bottom: 24px;
       }
     }
   }
 }
 
 .edit-mode {
-  padding: 20px 24px;
+  padding: 24px;
 
   .title-input {
     margin-bottom: 16px;
 
     :deep(.el-input__inner) {
       font-size: 18px;
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
     }
   }
 

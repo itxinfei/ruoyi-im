@@ -11,6 +11,8 @@ import com.ruoyi.im.mapper.ImMessageMarkerMapper;
 import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageMarkerService;
+
+import static com.ruoyi.im.constant.SystemConstants.*;
 import com.ruoyi.im.service.ImWebSocketBroadcastService;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.vo.marker.ImMessageMarkerVO;
@@ -77,7 +79,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         marker.setUserId(userId);
         marker.setMarkerType(markerType);
         marker.setColor(color);
-        marker.setTodoStatus("PENDING");
+        marker.setTodoStatus(STATUS_PENDING);
         marker.setCreateTime(LocalDateTime.now());
         marker.setUpdateTime(LocalDateTime.now());
 
@@ -111,7 +113,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
 
         // 检查是否已有待办标记
         ImMessageMarker existMarker = messageMarkerMapper.selectByMessageAndUser(messageId, userId);
-        if (existMarker != null && "TODO".equals(existMarker.getMarkerType())) {
+        if (existMarker != null && MARKER_TYPE_TODO.equals(existMarker.getMarkerType())) {
             // 更新提醒时间
             existMarker.setRemindTime(remindTime);
             existMarker.setRemark(remark);
@@ -125,10 +127,10 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
         marker.setMessageId(messageId);
         marker.setConversationId(message.getConversationId());
         marker.setUserId(userId);
-        marker.setMarkerType("TODO");
+        marker.setMarkerType(MARKER_TYPE_TODO);
         marker.setRemindTime(remindTime);
         marker.setRemark(remark);
-        marker.setTodoStatus("PENDING");
+        marker.setTodoStatus(STATUS_PENDING);
         marker.setCreateTime(LocalDateTime.now());
         marker.setUpdateTime(LocalDateTime.now());
 
@@ -169,7 +171,7 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
             throw new BusinessException("无权限操作此待办");
         }
 
-        marker.setTodoStatus("PENDING");
+        marker.setTodoStatus(STATUS_PENDING);
         marker.setDoneTime(null);
         marker.setUpdateTime(LocalDateTime.now());
         messageMarkerMapper.updateById(marker);
@@ -180,13 +182,47 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
     @Override
     public List<ImMessageMarkerVO> getUserMarkers(Long userId, String markerType) {
         List<ImMessageMarker> markers = messageMarkerMapper.selectUserMarkers(userId, markerType);
+        if (markers == null || markers.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载消息信息
+        List<Long> messageIds = markers.stream().map(ImMessageMarker::getMessageId).distinct().collect(Collectors.toList());
+        Map<Long, ImMessage> messageMap = new HashMap<>();
+        if (!messageIds.isEmpty()) {
+            List<ImMessage> messages = messageMapper.selectImMessageListByIds(messageIds);
+            for (ImMessage msg : messages) {
+                messageMap.put(msg.getId(), msg);
+            }
+        }
+
+        // 批量加载发送者信息
+        List<Long> senderIds = messageMap.values().stream().map(ImMessage::getSenderId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> senderMap = new HashMap<>();
+        if (!senderIds.isEmpty()) {
+            List<ImUser> senders = userMapper.selectImUserListByIds(senderIds);
+            for (ImUser sender : senders) {
+                senderMap.put(sender.getId(), sender);
+            }
+        }
+
+        // 批量加载会话信息
+        List<Long> convIds = markers.stream().map(ImMessageMarker::getConversationId).distinct().collect(Collectors.toList());
+        Map<Long, ImConversation> convMap = new HashMap<>();
+        if (!convIds.isEmpty()) {
+            for (Long convId : convIds) {
+                ImConversation conv = conversationMapper.selectById(convId);
+                if (conv != null) {
+                    convMap.put(convId, conv);
+                }
+            }
+        }
 
         return markers.stream().map(marker -> {
             ImMessageMarkerVO vo = new ImMessageMarkerVO();
             BeanUtils.copyProperties(marker, vo);
 
-            // 获取消息信息
-            ImMessage message = messageMapper.selectById(marker.getMessageId());
+            ImMessage message = messageMap.get(marker.getMessageId());
             if (message != null) {
                 String content = message.getContent();
                 if (content != null && content.length() > 50) {
@@ -195,19 +231,17 @@ public class ImMessageMarkerServiceImpl implements ImMessageMarkerService {
                 vo.setMessagePreview(content);
                 vo.setSenderId(message.getSenderId());
 
-                ImUser sender = userMapper.selectImUserById(message.getSenderId());
+                ImUser sender = senderMap.get(message.getSenderId());
                 if (sender != null) {
                     vo.setSenderName(sender.getNickname());
                 }
             }
 
-            // 获取会话信息
-            ImConversation conversation = conversationMapper.selectById(marker.getConversationId());
+            ImConversation conversation = convMap.get(marker.getConversationId());
             if (conversation != null) {
                 vo.setConversationName(conversation.getName());
             }
 
-            // 检查是否过期
             if (marker.getRemindTime() != null) {
                 vo.setIsExpired(marker.getRemindTime().isBefore(LocalDateTime.now()));
             }

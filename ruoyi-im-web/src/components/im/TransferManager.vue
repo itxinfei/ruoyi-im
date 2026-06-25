@@ -114,7 +114,7 @@ defineExpose({ addTask, tasks })
 .manager-header {
   height: 48px; padding: 0 16px; display: flex; align-items: center; justify-content: space-between;
   background: var(--dt-brand-bg); cursor: pointer;
-  .header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--dt-brand-color); font-weight: 600; }
+  .header-left { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
   .header-right { display: flex; align-items: center; gap: 12px; color: var(--dt-text-tertiary);
     .close-icon:hover { color: var(--dt-error-color); }
   }
@@ -126,7 +126,7 @@ defineExpose({ addTask, tasks })
 }
 
 .transfer-row {
-  display: flex; align-items: center; padding: 10px 16px; gap: 12px;
+  display: flex; align-items: center; padding: 12px 16px; gap: 12px;
   &:hover { background: var(--dt-bg-hover); .transfer-ops { opacity: 1; } }
 }
 
@@ -141,9 +141,9 @@ defineExpose({ addTask, tasks })
   flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px;
   .info-top { display: flex; justify-content: space-between; align-items: center;
     .file-name { font-size: 13px; font-weight: 500; @include text-ellipsis; }
-    .file-status { font-size: 11px; color: var(--dt-text-tertiary); }
+    .file-status { font-size: 12px; color: var(--dt-text-tertiary); }
   }
-  .detail-row { display: flex; justify-content: space-between; font-size: 11px; color: var(--dt-text-quaternary); margin-top: 2px; }
+  .detail-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--dt-text-quaternary); margin-top: 2px; }
 }
 
 .transfer-ops {
@@ -152,7 +152,7 @@ defineExpose({ addTask, tasks })
   .del-icon:hover { color: var(--dt-error-color); }
 }
 
-.empty-list { text-align: center; padding: 40px 0; color: var(--dt-text-quaternary); font-size: 13px; }
+.empty-list { text-align: center; padding: 40px 0; color: var(--dt-text-quaternary); font-size: 12px; }
 
 .slide-up-enter-active, .slide-up-leave-active { transition: opacity var(--dt-transition-base); }
 .slide-up-enter-from, .slide-up-leave-to { opacity: 0; }

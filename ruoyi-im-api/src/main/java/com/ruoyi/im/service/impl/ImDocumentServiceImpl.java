@@ -66,7 +66,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long createDocument(ImDocumentCreateRequest request, Long userId) {
         ImDocument document = new ImDocument();
         document.setTitle(request.getTitle());
@@ -94,7 +94,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean updateDocument(ImDocumentUpdateRequest request, Long userId) {
         ImDocument document = documentMapper.selectById(request.getId());
         if (document == null) {
@@ -117,9 +117,13 @@ public class ImDocumentServiceImpl implements ImDocumentService {
         document.setLastModifiedBy(userId);
         document.setLastModifiedTime(LocalDateTime.now());
 
-        // 如果不是自动保存，创建新版本
+        // 如果不是自动保存，创建新版本（乐观锁：版本冲突时抛出异常）
         Boolean autoSave = request.getAutoSave() != null ? request.getAutoSave() : false;
         if (!autoSave) {
+            int updated = documentMapper.incrementVersionWithCheck(document.getId(), document.getVersion());
+            if (updated == 0) {
+                throw new BusinessException("文档已被其他人修改，请刷新后重试");
+            }
             document.setVersion(document.getVersion() + 1);
             createDocumentVersion(document.getId(), document.getContent(), document.getTitle(),
                 userId, request.getChangeDescription(), calculateContentSize(document.getContent()));
@@ -132,7 +136,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteDocument(Long documentId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
@@ -155,7 +159,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean permanentlyDeleteDocument(Long documentId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
@@ -183,7 +187,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean restoreDocument(Long documentId, Long userId) {
             ImDocument document = documentMapper.selectById(documentId);
             if (document == null) {
@@ -293,7 +297,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean toggleStar(Long documentId, Long userId, Boolean starred) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
@@ -313,7 +317,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean shareDocument(ImDocumentShareRequest request, Long userId) {
         ImDocument document = documentMapper.selectById(request.getDocumentId());
         if (document == null) {
@@ -356,7 +360,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean unshareDocument(Long documentId, Long targetUserId, Long userId) {
         // 检查权限
         Long count = documentShareMapper.selectCount(
@@ -378,7 +382,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long addComment(ImDocumentCommentRequest request, Long userId) {
         ImDocumentComment comment = new ImDocumentComment();
         comment.setDocumentId(request.getDocumentId());
@@ -398,7 +402,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean deleteComment(Long commentId, Long userId) {
         ImDocumentComment comment = documentCommentMapper.selectById(commentId);
         if (comment == null) {
@@ -492,7 +496,7 @@ public class ImDocumentServiceImpl implements ImDocumentService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean restoreVersion(Long documentId, Long versionId, Long userId) {
         ImDocument document = documentMapper.selectById(documentId);
         if (document == null) {
@@ -509,7 +513,11 @@ public class ImDocumentServiceImpl implements ImDocumentService {
             throw new BusinessException("版本不存在");
         }
 
-        // 恢复内容
+        // 恢复内容（乐观锁）
+        int updated = documentMapper.incrementVersionWithCheck(documentId, document.getVersion());
+        if (updated == 0) {
+            throw new BusinessException("文档已被其他人修改，请刷新后重试");
+        }
         document.setContent(version.getContent());
         document.setVersion(document.getVersion() + 1);
         document.setLastModifiedBy(userId);

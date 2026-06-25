@@ -36,6 +36,7 @@
             <if test="operationResult != null and operationResult != ''">and operation_result = #{operationResult}</if>
         </where>
         order by create_time desc
+        limit 500
     </select>
 
     <select id="selectUserLogs" resultMap="ImAuditLogResult">
@@ -43,6 +44,7 @@
         where user_id = #{userId}
         and create_time between #{startTime} and #{endTime}
         order by create_time desc
+        limit 500
     </select>
 
     <insert id="insertImAuditLog" parameterType="com.ruoyi.im.domain.ImAuditLog" useGeneratedKeys="true" keyProperty="id">

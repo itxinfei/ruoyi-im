@@ -131,11 +131,9 @@ public class ImNotificationController {
     
     @DeleteMapping("/batch")
     public Result<Void> batchDeleteNotifications(
-            @RequestBody List<Long> ids) {
+            @RequestBody @javax.validation.constraints.Size(max = 200) List<Long> ids) {
         Long userId = SecurityUtils.getLoginUserId();
-        for (Long id : ids) {
-            notificationService.deleteNotification(id, userId);
-        }
+        notificationService.batchDeleteNotifications(ids, userId);
         return Result.success("批量删除成功");
     }
 

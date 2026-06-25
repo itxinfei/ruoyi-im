@@ -54,11 +54,17 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long sendDing(DingSendRequest request, Long userId) {
-        // 验证接收者
-        if (request.getReceiverIds() != null) {
-            for (Long receiverId : request.getReceiverIds()) {
-                ImUser user = userMapper.selectImUserById(receiverId);
-                if (user == null) {
+        List<Long> targetList = request.getTargetUsers();
+        if (targetList == null && request.getReceiverIds() != null) {
+            targetList = Arrays.asList(request.getReceiverIds());
+        }
+
+        // 批量验证接收者（1次查询替代N次）
+        if (targetList != null && !targetList.isEmpty()) {
+            List<ImUser> users = userMapper.selectImUserListByIds(targetList);
+            Set<Long> validIds = users.stream().map(ImUser::getId).collect(Collectors.toSet());
+            for (Long receiverId : targetList) {
+                if (!validIds.contains(receiverId)) {
                     throw new BusinessException("接收者不存在: " + receiverId);
                 }
             }
@@ -71,18 +77,11 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
         ding.setDingType(request.getDingType());
         ding.setPriority(request.getPriority());
 
-        // 处理目标用户列表
-        List<Long> targetList = request.getTargetUsers();
-        if (targetList == null && request.getReceiverIds() != null) {
-            // 兼容旧版字段
-            targetList = Arrays.asList(request.getReceiverIds());
-        }
         if (targetList != null && !targetList.isEmpty()) {
             ding.setTargetUsers(String.join(",", targetList.stream()
                     .map(String::valueOf).toArray(String[]::new)));
         }
 
-        // 设置过期时间
         LocalDateTime now = LocalDateTime.now();
         if (request.getExpireHours() != null && request.getExpireHours() > 0) {
             ding.setExpireTime(now.plusHours(request.getExpireHours()));
@@ -96,18 +95,20 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
 
         dingMessageMapper.insert(ding);
 
-        // 创建回执记录并推送
-        List<Long> receivers = targetList;
-        if (receivers != null) {
-            for (Long receiverId : receivers) {
+        // 批量插入回执记录（1次INSERT替代N次）
+        if (targetList != null && !targetList.isEmpty()) {
+            List<ImDingReceipt> receipts = targetList.stream().map(receiverId -> {
                 ImDingReceipt receipt = new ImDingReceipt();
                 receipt.setDingId(ding.getId());
                 receipt.setReceiverId(receiverId);
                 receipt.setConfirmed(0);
                 receipt.setCreateTime(now);
-                dingReceiptMapper.insert(receipt);
+                return receipt;
+            }).collect(Collectors.toList());
+            dingReceiptMapper.batchInsert(receipts);
 
-                // 推送WebSocket通知
+            // 推送WebSocket通知
+            for (Long receiverId : targetList) {
                 sendDingNotification(receiverId, ding, userId);
             }
         }
@@ -177,10 +178,8 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             receipt.setReadTime(LocalDateTime.now());
             dingReceiptMapper.updateById(receipt);
 
-            // 更新已读计数
-            ImDingMessage ding = dingMessageMapper.selectById(dingId);
-            ding.setReadCount(ding.getReadCount() + 1);
-            dingMessageMapper.updateById(ding);
+            // 原子递增已读计数，避免并发读导致计数丢失
+            dingMessageMapper.incrementReadCount(dingId);
         }
     }
 

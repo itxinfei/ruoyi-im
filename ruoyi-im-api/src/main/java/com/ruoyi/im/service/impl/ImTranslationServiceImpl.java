@@ -150,7 +150,7 @@ public class ImTranslationServiceImpl implements ImTranslationService {
         } catch (Exception e) {
             log.error("翻译失败: text={}, from={}, to={}",
                     request.getText(), request.getFrom(), request.getTo(), e);
-            throw new BusinessException("翻译失败: " + e.getMessage());
+            throw new BusinessException("翻译失败");
         }
     }
 

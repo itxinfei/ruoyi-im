@@ -66,4 +66,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
+    <update id="incrementDownloadCount">
+        UPDATE im_file_asset SET download_count = download_count + 1 WHERE id = #{id}
+    </update>
+
 </mapper>

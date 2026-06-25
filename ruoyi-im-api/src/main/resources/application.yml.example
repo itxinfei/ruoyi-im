@@ -1,0 +1,38 @@
+# RuoYi-IM 应用配置示例
+# 复制此文件为 application.yml 并修改为你的实际配置
+
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/im?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: your_password_here
+  redis:
+    host: localhost
+    port: 6379
+    password: your_redis_password_here
+
+# IM模块配置
+im:
+  security:
+    jwt:
+      # JWT密钥 - 生产环境务必通过环境变量设置
+      secret: ${JWT_SECRET:your_jwt_secret_here}
+      expiration: ${JWT_EXPIRATION:900000}
+      refreshExpiration: ${JWT_REFRESH_EXPIRATION:604800000}
+  message:
+    maxLength: 2000
+    encryption:
+      enabled: true
+      # 消息加密密钥 - 生产环境务必通过环境变量设置
+      key: ${IM_ENCRYPTION_KEY:your_encryption_key_here}
+
+# AI模型配置（可选）
+ai:
+  openai:
+    api-key: ${OPENAI_API_KEY:}
+  qwen:
+    api-key: ${QWEN_API_KEY:}

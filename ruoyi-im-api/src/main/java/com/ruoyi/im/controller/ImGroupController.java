@@ -14,11 +14,16 @@ import com.ruoyi.im.vo.group.ImGroupMemberVO;
 import com.ruoyi.im.vo.group.ImGroupVO;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.validation.Valid;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 群组控制器
@@ -157,7 +162,7 @@ public class ImGroupController {
     
     @PostMapping("/{id}/members")
     public Result<Void> addMembers(@PathVariable Long id,
-                                   @RequestBody List<Long> userIds) {
+                                   @RequestBody @javax.validation.constraints.Size(min = 1, max = 500) List<Long> userIds) {
         Long userId = SecurityUtils.getLoginUserId();
         imGroupService.addMembers(id, userIds, userId);
         return Result.success("添加成功");
@@ -176,7 +181,7 @@ public class ImGroupController {
     
     @DeleteMapping("/{id}/members")
     public Result<Void> removeMembers(@PathVariable Long id,
-                                      @RequestBody List<Long> userIds) {
+                                      @RequestBody @javax.validation.constraints.Size(min = 1, max = 500) List<Long> userIds) {
         Long userId = SecurityUtils.getLoginUserId();
         imGroupService.removeMembers(id, userIds, userId);
         return Result.success("移除成功");
@@ -272,7 +277,13 @@ public class ImGroupController {
     public Result<String> getGroupQrCode(@PathVariable Long id) {
         Long userId = SecurityUtils.getLoginUserId();
         imGroupService.getGroupById(id, userId); // 校验群组是否存在
-        String qrContent = "ruoyi-im://join-group?" + id;
+        
+        // 生成签名二维码内容
+        String nonce = UUID.randomUUID().toString().replace("-", "").substring(0, 16);
+        long expireTime = System.currentTimeMillis() + 24 * 60 * 60 * 1000; // 24小时过期
+        String sign = generateQrCodeSign(id, nonce, expireTime);
+        String qrContent = String.format("ruoyi-im://join-group?g=%d&n=%s&e=%d&s=%s", id, nonce, expireTime, sign);
+        
         try {
             QRCodeWriter qrCodeWriter = new QRCodeWriter();
             Map<EncodeHintType, Object> hints = new HashMap<>();
@@ -285,6 +296,66 @@ public class ImGroupController {
             return Result.success("获取成功", "data:image/png;base64," + java.util.Base64.getEncoder().encodeToString(imageBytes));
         } catch (Exception e) {
             throw new RuntimeException("生成二维码失败", e);
+        }
+    }
+    
+    /**
+     * 生成二维码签名
+     * 使用 HMAC-SHA256 对群组ID、随机数和过期时间进行签名
+     */
+    private String generateQrCodeSign(Long groupId, String nonce, long expireTime) {
+        try {
+            // 使用固定的签名密钥（实际项目中应该从配置中读取）
+            String secret = "ruoyi-im-qrcode-secret-key-2026";
+            String data = groupId + nonce + expireTime;
+            
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            mac.init(secretKeySpec);
+            byte[] signBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            
+            // 转换为十六进制字符串
+            StringBuilder sb = new StringBuilder();
+            for (byte b : signBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("生成签名失败", e);
+        }
+    }
+    
+    /**
+     * 验证二维码签名
+     * 验证二维码内容的签名是否有效，是否过期
+     */
+    public static boolean verifyQrCodeSign(Long groupId, String nonce, long expireTime, String sign) {
+        try {
+            // 检查是否过期
+            if (System.currentTimeMillis() > expireTime) {
+                return false;
+            }
+            
+            // 使用固定的签名密钥（实际项目中应该从配置中读取）
+            String secret = "ruoyi-im-qrcode-secret-key-2026";
+            String data = groupId + nonce + expireTime;
+            
+            Mac mac = Mac.getInstance("HmacSHA256");
+            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+            mac.init(secretKeySpec);
+            byte[] signBytes = mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+            
+            // 转换为十六进制字符串
+            StringBuilder sb = new StringBuilder();
+            for (byte b : signBytes) {
+                sb.append(String.format("%02x", b));
+            }
+            String calculatedSign = sb.toString();
+            
+            // 比较签名
+            return calculatedSign.equals(sign);
+        } catch (Exception e) {
+            return false;
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -74,6 +75,12 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
     private static final int PRIORITY_IMPORTANT = 2;
     /** 紧急优先级 */
     private static final int PRIORITY_URGENT = 3;
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static String toJson(Object obj) {
+        try { return MAPPER.writeValueAsString(obj); }
+        catch (Exception e) { throw new RuntimeException("JSON序列化失败", e); }
+    }
 
     @Autowired
     private ImAnnouncementMapper announcementMapper;
@@ -103,12 +110,12 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
 
         // 处理附件
         if (request.getAttachments() != null && !request.getAttachments().isEmpty()) {
-            announcement.setAttachments(JSON.toJSONString(request.getAttachments()));
+            announcement.setAttachments(toJson(request.getAttachments()));
         }
 
         // 处理目标ID列表
         if (request.getTargetIds() != null && !request.getTargetIds().isEmpty()) {
-            announcement.setTargetIds(JSON.toJSONString(request.getTargetIds()));
+            announcement.setTargetIds(toJson(request.getTargetIds()));
             announcement.setTotalTargetCount(request.getTargetIds().size());
         } else {
             announcement.setTotalTargetCount(0); // 全员公告需要后续计算
@@ -184,9 +191,9 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             BusinessExceptionHelper.throwAnnouncementNotFound();
         }
 
-        // 增加浏览次数
+        // 原子递增浏览次数
+        announcementMapper.incrementViewCount(announcementId);
         announcement.setViewCount(announcement.getViewCount() + 1);
-        announcementMapper.updateById(announcement);
 
         // 记录用户已读状态
         ImAnnouncementRead existRead = announcementReadMapper.selectByAnnouncementIdAndUserId(announcementId, userId);
@@ -197,9 +204,9 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
             announcementRead.setReadTime(LocalDateTime.now());
             announcementReadMapper.insert(announcementRead);
 
-            // 更新公告的已读人数
+            // 原子递增已读人数
+            announcementMapper.incrementReadCount(announcementId);
             announcement.setReadCount(announcement.getReadCount() + 1);
-            announcementMapper.updateById(announcement);
         }
 
         return convertToDetailVO(announcement, userId);
@@ -291,12 +298,8 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         announcementRead.setReadTime(LocalDateTime.now());
         announcementReadMapper.insert(announcementRead);
 
-        // 更新公告的已读人数
-        ImAnnouncement announcement = announcementMapper.selectById(announcementId);
-        if (announcement != null) {
-            announcement.setReadCount(announcement.getReadCount() + 1);
-            announcementMapper.updateById(announcement);
-        }
+        // 原子递增已读人数
+        announcementMapper.incrementReadCount(announcementId);
         log.info("标记公告已读: announcementId={}, userId={}", announcementId, userId);
     }
 
@@ -318,9 +321,8 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
                 announcementRead.setReadTime(LocalDateTime.now());
                 announcementReadMapper.insert(announcementRead);
 
-                // 更新公告的已读人数
-                announcement.setReadCount(announcement.getReadCount() + 1);
-                announcementMapper.updateById(announcement);
+                // 原子递增已读人数
+                announcementMapper.incrementReadCount(announcement.getId());
             }
         }
         log.info("标记所有公告已读: userId={}, count={}", userId, announcements.size());
@@ -384,7 +386,7 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         announcement.setCommentCount(announcement.getCommentCount() + 1);
         announcementMapper.updateById(announcement);
 
-        log.info("添加公告评论: announcementId={}, content={}, userId={}", announcementId, content, userId);
+        log.info("添加公告评论: announcementId={}, contentLength={}, userId={}", announcementId, content != null ? content.length() : 0, userId);
         return comment.getId();
     }
 
@@ -548,10 +550,11 @@ public class ImAnnouncementServiceImpl implements ImAnnouncementService {
         if (announcement.getAttachments() != null && !announcement.getAttachments().isEmpty()) {
             try {
                 List<ImAnnouncementCreateRequest.AttachmentInfo> attachments =
-                        JSON.parseArray(announcement.getAttachments(), ImAnnouncementCreateRequest.AttachmentInfo.class);
+                        MAPPER.readValue(announcement.getAttachments(),
+                                MAPPER.getTypeFactory().constructCollectionType(List.class, ImAnnouncementCreateRequest.AttachmentInfo.class));
                 // 转换为详情VO的附件格式
             } catch (Exception e) {
-                log.warn("解析附件失败: announcementId={}", announcement.getId());
+                log.warn("解析附件失败: announcementId={}", announcement.getId(), e);
             }
         }
 

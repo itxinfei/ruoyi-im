@@ -62,7 +62,7 @@
 
         <!-- 文件消息 -->
         <div v-else-if="messageType === 'FILE'" class="bubble bubble-file" @click="handleFileClick">
-          <div class="file-icon-wrapper">
+          <div class="file-icon-wrapper" :style="{ background: fileIconColor + '1a', color: fileIconColor }">
             <el-icon class="file-icon"><Document /></el-icon>
           </div>
           <div class="file-info">
@@ -118,7 +118,7 @@
       <!-- 消息状态 (发送成功/失败/已读) -->
       <div v-if="isMe && !isGrouped" class="message-status">
         <el-icon v-if="message.status === 'failed'" class="status-icon failed"><CircleCloseFilled /></el-icon>
-        <el-icon v-else-if="message.status === 'read'" class="status-icon read"><Check /></el-icon>
+        <el-icon v-else-if="message.status === 'read'" class="status-icon read"><Select /></el-icon>
         <el-icon v-else-if="message.status === 'sent'" class="status-icon sent"><Check /></el-icon>
       </div>
 
@@ -157,9 +157,9 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed } from 'vue'
+import { ref, computed, onBeforeUnmount } from 'vue'
 import {
-  Check, Document, Download, Location, Microphone,
+  Check, Select, Document, Download, Location, Microphone,
   ChatDotSquare, Share, MoreFilled, VideoPlay,
   CircleCloseFilled, MagicStick, VideoPause
 } from '@element-plus/icons-vue'
@@ -214,6 +214,16 @@ const formatFileSize = (s) => {
   return s + ' B'
 }
 
+// 根据文件扩展名返回对应的语义颜色
+const fileIconColor = computed(() => {
+  const name = resolvedFileName.value.toLowerCase()
+  if (name.endsWith('.pdf')) return 'var(--dt-file-pdf)'
+  if (name.endsWith('.doc') || name.endsWith('.docx')) return 'var(--dt-file-word)'
+  if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'var(--dt-file-excel)'
+  if (name.endsWith('.ppt') || name.endsWith('.pptx')) return 'var(--dt-file-ppt)'
+  return 'var(--dt-file-other)'
+})
+
 const reactions = computed(() => props.message.reactions || [])
 
 const voiceProgressPercent = computed(() => {
@@ -241,6 +251,10 @@ const cleanupAudio = () => {
   isPlaying.value = false
   currentTime.value = 0
 }
+
+onBeforeUnmount(() => {
+  cleanupAudio()
+})
 
 // 事件处理
 const handleFileClick = () => {

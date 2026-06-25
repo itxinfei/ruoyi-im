@@ -639,7 +639,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
     .title {
       font-size: var(--dt-font-size-md);
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-white);
     }
 
@@ -673,7 +673,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
   .timer-value {
     font-size: var(--dt-font-size-xl);
-    font-weight: 700;
+    font-weight: var(--dt-font-weight-bold);
     font-family: monospace;
     color: var(--dt-brand-color);
   }
@@ -732,7 +732,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
     left: 0;
     right: 0;
     padding: 8px;
-    background: rgba(0, 0, 0, 0.6);
+    background: var(--dt-overlay-bg); /* 视频通话叠加层 */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -833,7 +833,7 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   display: flex;
   justify-content: center;
   padding: 16px;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.2); /* 视频通话叠加层 */
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 
   .control-group {
@@ -854,8 +854,8 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
   transition: color var(--dt-transition-fast);
 
   .icon-circle {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.1);
     display: flex;
@@ -875,11 +875,11 @@ defineExpose({ open, openAsInitiator, openAsParticipant, loadGroupMembers, callI
 
   &.active .icon-circle {
     background: var(--dt-error-color);
-    color: white;
+    color: var(--dt-text-white);
   }
 
   &:hover {
-    color: white;
+    color: var(--dt-text-white);
   }
 }
 

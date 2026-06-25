@@ -154,7 +154,7 @@ onMounted(() => {
 
 .view-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -220,7 +220,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   font-size: 18px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   flex-shrink: 0;
   overflow: hidden;
 }
@@ -237,14 +237,14 @@ onMounted(() => {
 }
 
 .request-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .request-message {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dt-text-secondary);
   white-space: nowrap;
   overflow: hidden;
@@ -258,7 +258,7 @@ onMounted(() => {
 }
 
 .status-text {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dt-text-secondary);
 }
 

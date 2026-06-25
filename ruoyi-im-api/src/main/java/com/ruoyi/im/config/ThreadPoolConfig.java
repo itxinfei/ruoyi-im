@@ -8,7 +8,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 线程池配置类
@@ -131,9 +133,34 @@ public class ThreadPoolConfig {
         // 初始化
         executor.initialize();
         
-        log.info("消息推送线程池初始化完成：核心线程数={}, 最大线程数={}, 队列容量={}", 
+        log.info("消息推送线程池初始化完成：核心线程数={}, 最大线程数={}, 队列容量={}",
                 executor.getCorePoolSize(), executor.getMaxPoolSize(), executor.getQueueCapacity());
-        
+
+        return executor;
+    }
+
+    /**
+     * 配置备份任务执行器
+     * 备份/恢复是长时间运行的IO密集型任务，使用有界队列防止任务堆积
+     *
+     * @return 备份任务线程池执行器
+     */
+    @Bean("backupExecutor")
+    public Executor backupExecutor() {
+        log.info("初始化备份任务线程池");
+
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(1);
+        executor.setMaxPoolSize(2);
+        executor.setQueueCapacity(5);
+        executor.setKeepAliveSeconds(60);
+        executor.setThreadNamePrefix("im-backup-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        executor.initialize();
+
+        log.info("备份任务线程池初始化完成：核心线程数={}, 最大线程数={}",
+                executor.getCorePoolSize(), executor.getMaxPoolSize());
+
         return executor;
     }
 }

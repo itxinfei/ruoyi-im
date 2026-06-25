@@ -215,4 +215,91 @@ public final class SystemConstants {
 
     /** 视频会议状态：已结束 */
     public static final String MEETING_STATUS_ENDED = "ENDED";
+
+    // ========== 通用状态 ==========
+
+    /** 状态：激活/活跃 */
+    public static final String STATUS_ACTIVE = "ACTIVE";
+
+    /** 状态：待处理 */
+    public static final String STATUS_PENDING = "PENDING";
+
+    /** 状态：成功 */
+    public static final String STATUS_SUCCESS = "SUCCESS";
+
+    /** 状态：已删除 */
+    public static final String STATUS_DELETED = "DELETED";
+
+    // ========== 群组角色 ==========
+
+    /** 群组角色：群主 */
+    public static final String ROLE_OWNER = "OWNER";
+
+    /** 群组角色：管理员 */
+    public static final String ROLE_ADMIN = "ADMIN";
+
+    /** 群组角色：普通成员 */
+    public static final String ROLE_MEMBER = "MEMBER";
+
+    // ========== 会话类型 ==========
+
+    /** 会话类型：群组 */
+    public static final String CONVERSATION_TYPE_GROUP = "GROUP";
+
+    /** 会话类型：私聊 */
+    public static final String CONVERSATION_TYPE_PRIVATE = "PRIVATE";
+
+    // ========== 通用开关 ==========
+
+    /** 开启 */
+    public static final int ENABLED = 1;
+
+    /** 关闭 */
+    public static final int DISABLED = 0;
+
+    // ========== 消息标记类型 ==========
+
+    /** 消息标记类型：待办 */
+    public static final String MARKER_TYPE_TODO = "TODO";
+
+    /** 消息标记类型：重要 */
+    public static final String MARKER_TYPE_IMPORTANT = "IMPORTANT";
+
+    // ========== 提及类型 ==========
+
+    /** 提及类型：用户 */
+    public static final String MENTION_TYPE_USER = "USER";
+
+    // ========== 考勤默认值 ==========
+
+    /** 考勤签到缓冲时间（分钟） */
+    public static final int ATTENDANCE_CHECK_IN_BEFORE_DEFAULT = 120;
+
+    /** 考勤签退缓冲时间（分钟） */
+    public static final int ATTENDANCE_CHECK_OUT_AFTER_DEFAULT = 60;
+
+    /** 考勤打卡范围（米） */
+    public static final int ATTENDANCE_CHECK_RANGE_DEFAULT = 100;
+
+    /** 考勤早退判定阈值（分钟） */
+    public static final int ATTENDANCE_EARLY_LEAVE_THRESHOLD = 30;
+
+    // ========== 文档配置 ==========
+
+    /** 文档自动删除天数 */
+    public static final int DOCUMENT_AUTO_DELETE_DAYS = 30;
+
+    /** 最近应用数量限制 */
+    public static final int RECENT_APPS_LIMIT = 10;
+
+    /** 初始版本号 */
+    public static final int INITIAL_VERSION = 1;
+
+    /** 默认排序值 */
+    public static final int DEFAULT_SORT_ORDER = 0;
+
+    // ========== 翻译配置 ==========
+
+    /** 语言自动检测标识 */
+    public static final String LANGUAGE_AUTO = "auto";
 }

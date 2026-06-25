@@ -79,7 +79,9 @@
     </select>
 
     <select id="selectAvailableRooms" resultMap="BaseResultMap">
-        SELECT *
+        SELECT id, room_name, room_number, department_id, location, floor, capacity,
+               has_projector, has_whiteboard, has_video_conf, has_phone, facilities,
+               photos, status, is_bookable, description, remark, create_time, update_time
         FROM im_meeting_room
         WHERE status = 'AVAILABLE'
           AND is_bookable = 1
@@ -87,7 +89,9 @@
     </select>
 
     <select id="selectByDepartmentId" resultMap="BaseResultMap">
-        SELECT *
+        SELECT id, room_name, room_number, department_id, location, floor, capacity,
+               has_projector, has_whiteboard, has_video_conf, has_phone, facilities,
+               photos, status, is_bookable, description, remark, create_time, update_time
         FROM im_meeting_room
         WHERE department_id = #{departmentId}
           AND status = 'AVAILABLE'

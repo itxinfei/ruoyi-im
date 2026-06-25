@@ -49,6 +49,14 @@ public interface ImFileService {
     void deleteFile(Long fileId, Long userId);
 
     /**
+     * 批量删除文件
+     *
+     * @param fileIds 文件ID列表
+     * @param userId 用户ID
+     */
+    void batchDeleteFiles(List<Long> fileIds, Long userId);
+
+    /**
      * 获取文件列表
      *
      * @param userId 用户ID

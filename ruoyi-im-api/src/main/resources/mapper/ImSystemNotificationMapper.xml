@@ -26,6 +26,14 @@
         where id = #{id}
     </select>
 
+    <select id="selectByIds" resultMap="ImSystemNotificationResult">
+        <include refid="selectImSystemNotificationVo"/>
+        where id in
+        <foreach item="id" collection="ids" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="selectImSystemNotificationList" parameterType="com.ruoyi.im.domain.ImSystemNotification" resultMap="ImSystemNotificationResult">
         <include refid="selectImSystemNotificationVo"/>
         <where>

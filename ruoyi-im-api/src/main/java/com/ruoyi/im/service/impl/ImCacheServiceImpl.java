@@ -124,10 +124,8 @@ public class ImCacheServiceImpl implements ImCacheService {
     public void incrementUnreadCount(Long userId, Long conversationId, Integer delta) {
         String key = UNREAD_COUNT_PREFIX + userId + ":" + conversationId;
         redisTemplate.opsForValue().increment(key, delta);
-        // 设置过期时间（如果不存在）
-        if (getExpire(key) == -1) {
-            expire(key, UNREAD_EXPIRE, TimeUnit.SECONDS);
-        }
+        // 原子设置过期时间（expire 是幂等操作，已存在 TTL 时会重置，可接受）
+        redisTemplate.expire(key, UNREAD_EXPIRE, TimeUnit.SECONDS);
     }
 
     @Override
@@ -156,9 +154,14 @@ public class ImCacheServiceImpl implements ImCacheService {
 
     @Override
     public void deleteByPattern(String pattern) {
-        Set<String> keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        org.springframework.data.redis.core.ScanOptions options =
+                org.springframework.data.redis.core.ScanOptions.scanOptions().match(pattern).count(100).build();
+        try (org.springframework.data.redis.core.Cursor<String> cursor = redisTemplate.scan(options)) {
+            java.util.List<String> keys = new java.util.ArrayList<>();
+            cursor.forEachRemaining(keys::add);
+            if (!keys.isEmpty()) {
+                redisTemplate.delete(keys);
+            }
         }
     }
 }

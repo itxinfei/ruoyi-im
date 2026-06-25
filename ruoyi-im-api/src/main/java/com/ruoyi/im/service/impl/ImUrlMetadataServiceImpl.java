@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
@@ -94,6 +95,7 @@ public class ImUrlMetadataServiceImpl implements ImUrlMetadataService {
      * 保存 URL 元数据
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void save(ImUrlMetadata metadata) {
         try {
             if (metadata.getId() == null) {
@@ -190,11 +192,11 @@ public class ImUrlMetadataServiceImpl implements ImUrlMetadataService {
             } catch (IOException e) {
                 log.error("URL 元数据抓取失败：url={}", url, e);
                 metadata.setFetchStatus("FAILED");
-                metadata.setErrorMessage(e.getMessage());
+                metadata.setErrorMessage("抓取失败");
             } catch (Exception e) {
                 log.error("URL 元数据抓取异常：url={}", url, e);
                 metadata.setFetchStatus("FAILED");
-                metadata.setErrorMessage(e.getMessage());
+                metadata.setErrorMessage("抓取异常");
             }
 
             // 4. 保存到数据库
@@ -211,7 +213,7 @@ public class ImUrlMetadataServiceImpl implements ImUrlMetadataService {
             return createFailedMetadata(url, "抓取超时");
         } catch (Exception e) {
             log.error("URL 元数据抓取异常：url={}", url, e);
-            return createFailedMetadata(url, "抓取失败：" + e.getMessage());
+            return createFailedMetadata(url, "抓取异常");
         }
     }
 

@@ -50,4 +50,22 @@ public interface ImVideoMeetingMapper extends BaseMapper<ImVideoMeeting> {
      * @return 更新行数
      */
     int updateStatus(@Param("meetingId") Long meetingId, @Param("status") String status);
+
+    /**
+     * 原子增加会议参与人数（带上限检查）
+     *
+     * @param meetingId    会议ID
+     * @param maxParticipants 最大参与人数
+     * @return 更新行数（0表示超过上限）
+     */
+    int incrementParticipants(@Param("meetingId") Long meetingId, @Param("maxParticipants") Integer maxParticipants);
+
+    /**
+     * 原子减少参与人数
+     *
+     * @param meetingId 会议ID
+     * @return 更新行数
+     */
+    @org.apache.ibatis.annotations.Update("UPDATE im_video_meeting SET current_participants = GREATEST(current_participants - 1, 0), update_time = NOW() WHERE id = #{meetingId}")
+    int decrementParticipants(@Param("meetingId") Long meetingId);
 }

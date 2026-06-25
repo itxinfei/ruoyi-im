@@ -246,7 +246,7 @@ const handleLeaveGroup = () => {
   &::-webkit-scrollbar { width: 4px; }
 }
 
-.section { background: var(--dt-bg-card); margin-bottom: 8px; padding: 20px; }
+.section { background: var(--dt-bg-card); margin-bottom: 8px; padding: 24px; }
 
 .hero-section {
   .hero-main { display: flex; align-items: center; gap: 16px; }
@@ -254,28 +254,28 @@ const handleLeaveGroup = () => {
     position: relative; cursor: default;
     &.can-edit { cursor: pointer; &:hover .avatar-edit-mask { opacity: 1; } }
     .avatar-edit-mask {
-      position: absolute; inset: 0; background: rgba(0,0,0,0.5); color: var(--dt-text-white);
-      @include flex-center; border-radius: 4px; opacity: 0; transition: var(--dt-transition-fast);
+      position: absolute; inset: 0; background: var(--dt-bg-mask); color: var(--dt-text-white);
+      @include flex-center; border-radius: var(--dt-radius-sm); opacity: 0; transition: var(--dt-transition-fast);
     }
   }
   .hero-info {
     flex: 1; min-width: 0;
     .name-row { display: flex; align-items: center; gap: 8px; cursor: pointer; &:hover .edit-icon { opacity: 1; } }
-    .name { font-size: 16px; font-weight: 600; margin: 0; @include text-ellipsis; }
+    .name { font-size: 16px; font-weight: var(--dt-font-weight-semibold); margin: 0; @include text-ellipsis; }
     .edit-icon { font-size: 14px; color: var(--dt-brand-color); opacity: 0; transition: var(--dt-transition-fast); }
     .sub-text { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; }
   }
 }
 
 .member-section {
-  .section-header { display: flex; justify-content: space-between; margin-bottom: 16px; .title { font-weight: 600; } .count { font-size: 12px; color: var(--dt-text-tertiary); } }
+  .section-header { display: flex; justify-content: space-between; margin-bottom: 16px; .title { font-weight: var(--dt-font-weight-semibold); } .count { font-size: 12px; color: var(--dt-text-tertiary); } }
   .member-grid {
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
     .member-item {
       display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer;
-      .avatar-wrapper { position: relative; .role-badge { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; @include flex-center; font-size: 10px; color: var(--dt-text-white); &.owner { background: var(--dt-warning-color); } &.admin { background: var(--dt-brand-color); } } }
-      .nickname { font-size: 11px; color: var(--dt-text-secondary); width: 100%; text-align: center; @include text-ellipsis; }
-      .icon-box { width: 34px; height: 34px; border-radius: 4px; border: 1px dashed var(--dt-border-light); @include flex-center; color: var(--dt-text-tertiary); }
+      .avatar-wrapper { position: relative; .role-badge { position: absolute; bottom: -2px; right: -2px; width: 14px; height: 14px; border-radius: 50%; @include flex-center; font-size: 12px; color: var(--dt-text-white); &.owner { background: var(--dt-warning-color); } &.admin { background: var(--dt-brand-color); } } }
+      .nickname { font-size: 12px; color: var(--dt-text-secondary); width: 100%; text-align: center; @include text-ellipsis; }
+      .icon-box { width: 34px; height: 34px; border-radius: var(--dt-radius-sm); border: 1px dashed var(--dt-border-light); @include flex-center; color: var(--dt-text-tertiary); }
       &.add-btn:hover .icon-box { border-color: var(--dt-brand-color); color: var(--dt-brand-color); }
       &.more-btn:hover .icon-box { background: var(--dt-bg-hover); }
     }
@@ -285,7 +285,7 @@ const handleLeaveGroup = () => {
 .menu-section {
   padding: 8px 0;
   .menu-item {
-    height: 54px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    height: 56px; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;
     &:hover { background: var(--dt-bg-hover); }
     .menu-left { display: flex; align-items: center; gap: 12px; font-size: 14px; color: var(--dt-text-primary); .el-icon { font-size: 18px; } }
     .menu-text { display: flex; flex-direction: column; .menu-sub { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; max-width: 200px; @include text-ellipsis; } }
@@ -294,11 +294,11 @@ const handleLeaveGroup = () => {
 }
 
 .settings-section {
-  .setting-row { height: 44px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: var(--dt-text-primary); }
+  .setting-row { height: 48px; display: flex; align-items: center; justify-content: space-between; font-size: 14px; color: var(--dt-text-primary); }
 }
 
 .bottom-actions {
-  margin-top: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px;
+  margin-top: auto; padding: 24px; display: flex; flex-direction: column; gap: 12px;
   .action-btn { width: 100%; margin: 0; }
 }
 </style>

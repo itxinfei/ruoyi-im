@@ -13,6 +13,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.support.RequestContextUtils;
 import org.springframework.web.socket.WebSocketSession;
 
 import javax.servlet.http.HttpServletRequest;
@@ -188,7 +190,7 @@ public class GlobalExceptionHandler {
         String traceId = generateTraceId();
         try {
             log.warn("非法参数[{}]: {}", traceId, e.getMessage());
-            return buildErrorResult(400, "参数错误: " + e.getMessage());
+            return buildErrorResult(400, "参数错误 [追踪ID:" + traceId + "]");
         } finally {
             clearTraceId();
         }
@@ -253,6 +255,36 @@ public class GlobalExceptionHandler {
         try {
             log.error("系统异常[{}]: {} - {}", traceId, e.getMessage(), request.getRequestURI(), e);
             return buildErrorResult(500, "系统内部错误 [追踪ID:" + traceId + "]");
+        } finally {
+            clearTraceId();
+        }
+    }
+
+    /**
+     * 处理请求方法不支持异常 (405)
+     */
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public Result<Void> handleMethodNotSupportedException(org.springframework.web.HttpRequestMethodNotSupportedException e, HttpServletRequest request) {
+        String traceId = generateTraceId();
+        try {
+            log.warn("请求方法不支持[{}]: {} - {} - {}", traceId, e.getMethod(), request.getRequestURI(), e.getMessage());
+            return buildErrorResult(405, "请求方法不支持 [追踪ID:" + traceId + "]");
+        } finally {
+            clearTraceId();
+        }
+    }
+
+    /**
+     * 处理资源未找到异常 (404)
+     */
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Result<Void> handleNoHandlerFoundException(NoHandlerFoundException e, HttpServletRequest request) {
+        String traceId = generateTraceId();
+        try {
+            log.warn("资源未找到[{}]: {} {} - {}", traceId, e.getHttpMethod(), e.getRequestURL(), e.getMessage());
+            return buildErrorResult(404, "请求的资源不存在 [追踪ID:" + traceId + "]");
         } finally {
             clearTraceId();
         }

@@ -111,13 +111,5 @@ textarea {
   scrollbar-color: var(--dt-scrollbar-thumb-bg) transparent;
 }
 
-// ============================================================================
-// Shadow System - 钉钉 Premium 阴影
-// ============================================================================
-
-:root {
-  --dt-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
-  --dt-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --dt-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.12);
-  --dt-shadow-brand: 0 4px 12px rgba(39, 126, 251, 0.2);
-}
+// Shadow Token 已统一定义在 design-tokens.scss 中，此处不再重复定义
+// 避免 reset.scss 覆盖 design-tokens.scss 的值导致样式不一致

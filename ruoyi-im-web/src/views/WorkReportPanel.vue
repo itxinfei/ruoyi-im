@@ -30,7 +30,10 @@
       </el-tabs>
 
       <div class="report-list" v-loading="loading">
-        <div v-if="reportList.length === 0" class="empty-view">暂无日志记录</div>
+        <div v-if="reportList.length === 0" class="empty-state">
+          <el-icon :size="64" color="var(--dt-text-quaternary)"><Document /></el-icon>
+          <p>暂无日志记录</p>
+        </div>
         
         <!-- 日志流布局 (对齐钉钉 8.2) -->
         <div v-for="report in reportList" :key="report.id" class="report-flow-item" @click="openDetail(report)">
@@ -61,8 +64,9 @@
 </template>
 
 <script setup lang="js">
-import { ref, onMounted } from 'vue'
-import { Plus, Calendar, Clock, Stamp, ChatDotRound, Star } from '@element-plus/icons-vue'
+import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Plus, Calendar, Clock, Stamp, ChatDotRound, Star, Document } from '@element-plus/icons-vue'
 import { getWorkReportPage, getWorkReportStatistics } from '@/api/im/workReport'
 
 const activeTab = ref('my')
@@ -76,6 +80,9 @@ const statItems = computed(() => [
   { label: '待我审批', value: stats.value.pendingApproval || 0, icon: Stamp, type: 'orange' }
 ])
 
+const openCreateDialog = () => { ElMessage.info('功能开发中') }
+const openDetail = (report) => { ElMessage.info('功能开发中') }
+
 const formatDay = (d) => d?.split('-')[2] || '--'
 const formatMonth = (d) => {
   const m = d?.split('-')[1]
@@ -88,6 +95,8 @@ const loadData = async () => {
     const [sRes, pRes] = await Promise.all([getWorkReportStatistics(), getWorkReportPage({ pageNum: 1, pageSize: 10 })])
     if (sRes.code === 200) stats.value = sRes.data
     if (pRes.code === 200) reportList.value = pRes.data.records || []
+  } catch (e) {
+    ElMessage.error('加载日志数据失败')
   } finally { loading.value = false }
 }
 
@@ -101,24 +110,24 @@ onMounted(loadData)
 .report-header {
   height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
   display: flex; align-items: center; justify-content: space-between;
-  .view-title { font-size: 18px; font-weight: 700; margin: 0; }
+  .view-title { font-size: var(--dt-font-size-xl); font-weight: var(--dt-font-weight-bold); margin: 0; }
 }
 
 .report-stats {
-  display: flex; gap: 16px; padding: 20px 24px;
+  display: flex; gap: 16px; padding: 24px 24px;
   .stat-box {
     flex: 1; height: 80px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light);
     border-radius: var(--dt-radius-lg); display: flex; align-items: center; padding: 0 20px; gap: 16px;
     transition: var(--dt-transition-fast); &:hover { box-shadow: var(--dt-shadow-1); border-color: var(--dt-brand-light); }
 
     .stat-icon {
-      width: 44px; height: 44px; border-radius: 10px; @include flex-center; font-size: 20px;
+      width: 44px; height: 44px; border-radius: var(--dt-radius-lg); @include flex-center; font-size: var(--dt-font-size-2xl);
       &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
       &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
       &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
     }
     .stat-content {
-      .stat-val { font-size: 20px; font-weight: 700; display: block; line-height: 1.2; }
+      .stat-val { font-size: var(--dt-font-size-2xl); font-weight: var(--dt-font-weight-bold); display: block; line-height: 1.2; }
       .stat-lab { font-size: 12px; color: var(--dt-text-tertiary); }
     }
   }
@@ -126,12 +135,22 @@ onMounted(loadData)
 
 .report-main { flex: 1; overflow-y: auto; padding: 0 24px 24px; }
 
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--dt-spacing-lg);
+  p { color: var(--dt-text-tertiary); font-size: var(--dt-font-size-base); margin: 0; }
+}
+
 .report-flow-item {
-  display: flex; gap: 20px; margin-bottom: 24px; cursor: pointer;
+  display: flex; gap: 24px; margin-bottom: 24px; cursor: pointer;
 
   .flow-date {
     width: 60px; text-align: right; flex-shrink: 0;
-    .day { font-size: 28px; font-weight: 800; color: var(--dt-text-primary); display: block; line-height: 1; }
+    .day { font-size: 32px; font-weight: var(--dt-font-weight-bold); color: var(--dt-text-primary); display: block; line-height: 1; }
     .month { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 4px; display: block; }
   }
 
@@ -142,8 +161,8 @@ onMounted(loadData)
 
     .card-header {
       display: flex; justify-content: space-between; margin-bottom: 12px;
-      .type-tag { font-size: 11px; font-weight: 600; color: var(--dt-brand-color); background: var(--dt-brand-bg); padding: 2px 8px; border-radius: var(--dt-radius-sm); }
-      .status-tag { font-size: 11px; &.APPROVED { color: var(--dt-success-color); } }
+      .type-tag { font-size: 12px; font-weight: var(--dt-font-weight-semibold); color: var(--dt-brand-color); background: var(--dt-brand-bg); padding: 2px 8px; border-radius: var(--dt-radius-sm); }
+      .status-tag { font-size: 12px; &.APPROVED { color: var(--dt-success-color); } }
     }
     .card-body-text { font-size: 14px; color: var(--dt-text-primary); line-height: 1.6; @include text-ellipsis-multiline(2); margin-bottom: 16px; }
     .card-footer {

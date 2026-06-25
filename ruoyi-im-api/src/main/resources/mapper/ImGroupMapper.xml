@@ -135,4 +135,11 @@
         </foreach>
         AND is_deleted = 0
     </select>
+
+    <!-- 原子增减群组成员数，防止并发计数丢失 -->
+    <update id="adjustMemberCount">
+        UPDATE im_group
+        SET member_count = member_count + #{delta}, update_time = NOW()
+        WHERE id = #{groupId} AND member_count + #{delta} >= 0
+    </update>
 </mapper>

@@ -16,6 +16,8 @@ import com.ruoyi.im.mapper.ImMessageMapper;
 import com.ruoyi.im.mapper.ImMessageMentionMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImMessageMentionService;
+
+import static com.ruoyi.im.constant.SystemConstants.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,19 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-/**
- * 消息@提及服务实现
- */
-@Service
-public class ImMessageMentionServiceImpl implements ImMessageMentionService {
-
-    private static final Logger log = LoggerFactory.getLogger(ImMessageMentionServiceImpl.class);
-
-    /** 匹配@所有人/@all */
-    private static final Pattern MENTION_ALL_PATTERN = Pattern.compile("@所有人|@all");
-    /** 匹配@{userId:name}或@userId格式 */
-    private static final Pattern MENTION_USER_PATTERN = Pattern.compile("\\@\\{(\\d+):[^}]+\\}|@(\\d+)");
 import java.util.stream.Collectors;
 
 /**
@@ -51,7 +40,14 @@ import java.util.stream.Collectors;
 @Service
 public class ImMessageMentionServiceImpl implements ImMessageMentionService {
 
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
+
     private static final Logger log = LoggerFactory.getLogger(ImMessageMentionServiceImpl.class);
+
+    /** 匹配@所有人/@all */
+    private static final Pattern MENTION_ALL_PATTERN = Pattern.compile("@所有人|@all");
+    /** 匹配@{userId:name}或@userId格式 */
+    private static final Pattern MENTION_USER_PATTERN = Pattern.compile("\\@\\{(\\d+):[^}]+\\}|@(\\d+)");
 
     @Autowired
     private ImMessageMentionMapper mentionMapper;
@@ -72,7 +68,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
     private ImMessageMapper messageMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void createMentions(Long messageId, ImMentionInfo mentionInfo, Long senderId) {
         if (mentionInfo == null) {
             return;
@@ -126,7 +122,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
                     mention.setMessageId(messageId);
                     mention.setMentionedUserId(userId);
                     mention.setMentionedBy(senderId);
-                    mention.setMentionType("USER");
+                    mention.setMentionType(MENTION_TYPE_USER);
                     mention.setIsRead(0);
                     mention.setCreateTime(LocalDateTime.now());
 
@@ -156,7 +152,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
         }
 
         // 只对群聊进行权限验证
-        if ("GROUP".equals(conversation.getType())) {
+        if (CONVERSATION_TYPE_GROUP.equals(conversation.getType())) {
             Long groupId = conversation.getTargetId();
             ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, senderId);
 
@@ -165,7 +161,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
             }
 
             String role = member.getRole();
-            if (!"OWNER".equals(role) && !"ADMIN".equals(role)) {
+            if (!ROLE_OWNER.equals(role) && !ROLE_ADMIN.equals(role)) {
                 throw new BusinessException("只有群主和管理员可以使用@所有人");
             }
         }
@@ -202,13 +198,13 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void markAsRead(Long messageId, Long userId) {
         mentionMapper.markAsRead(messageId, userId);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void batchMarkAsRead(List<Long> mentionIds) {
         if (mentionIds != null && !mentionIds.isEmpty()) {
             mentionMapper.batchMarkAsRead(mentionIds);
@@ -344,8 +340,7 @@ public class ImMessageMentionServiceImpl implements ImMessageMentionService {
                 notification.put("messagePreview", getMessagePreview(message.getContent()));
             }
 
-            com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-            String messageJson = mapper.writeValueAsString(notification);
+            String messageJson = OBJECT_MAPPER.writeValueAsString(notification);
 
             // 获取在线用户
             Map<Long, javax.websocket.Session> onlineUsers =

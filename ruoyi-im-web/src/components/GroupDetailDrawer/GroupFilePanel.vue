@@ -630,7 +630,7 @@ defineExpose({ open })
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
+  padding: 16px 24px;
   border-bottom: 1px solid var(--dt-border-light);
 
   .stats-bar {
@@ -644,12 +644,12 @@ defineExpose({ open })
 
       .stat-value {
         font-size: 20px;
-        font-weight: 600;
+        font-weight: var(--dt-font-weight-semibold);
         color: var(--dt-text-primary);
       }
 
       .stat-label {
-        font-size: 13px;
+        font-size: 14px;
         color: var(--dt-text-tertiary);
       }
     }
@@ -660,14 +660,14 @@ defineExpose({ open })
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 20px;
+  padding: 12px 24px;
   background: var(--dt-bg-body);
 }
 
 .file-list {
   flex: 1;
   overflow-y: auto;
-  padding: 12px 20px;
+  padding: 12px 24px;
 
   .file-item {
     display: flex;
@@ -740,7 +740,7 @@ defineExpose({ open })
 }
 
 .pagination-bar {
-  padding: 12px 20px;
+  padding: 12px 24px;
   border-top: 1px solid var(--dt-border-light);
   display: flex;
   justify-content: flex-end;

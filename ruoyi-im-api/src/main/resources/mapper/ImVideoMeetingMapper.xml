@@ -82,4 +82,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{meetingId}
     </update>
 
+    <update id="incrementParticipants">
+        UPDATE im_video_meeting
+        SET current_participants = current_participants + 1, update_time = NOW()
+        WHERE id = #{meetingId}
+          AND current_participants &lt; #{maxParticipants}
+    </update>
 </mapper>

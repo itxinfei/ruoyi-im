@@ -592,7 +592,7 @@ const formatDuration = (seconds) => {
   h2 {
     margin: 0;
     font-size: 16px;
-    font-weight: 500;
+    font-weight: var(--dt-font-weight-medium);
     color: var(--dt-text-primary);
   }
 }
@@ -609,7 +609,7 @@ const formatDuration = (seconds) => {
 
 .section-title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: var(--dt-font-weight-medium);
   color: var(--dt-text-secondary);
   margin-bottom: 12px;
   padding-left: 4px;
@@ -725,7 +725,7 @@ const formatDuration = (seconds) => {
     border: 2px solid var(--dt-bg-card);
 
     .call-icon {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--dt-text-white);
 
       &.voice {
@@ -749,7 +749,7 @@ const formatDuration = (seconds) => {
     margin-bottom: 4px;
 
     .peer-name {
-      font-weight: 500;
+      font-weight: var(--dt-font-weight-medium);
     }
   }
 

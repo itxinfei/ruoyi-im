@@ -152,21 +152,21 @@ const handleLogin = async () => {
     width: 60px;
     height: 60px;
     background: var(--dt-brand-gradient);
-    border-radius: 16px;
+    border-radius: var(--dt-radius-xl);
     @include flex-center;
     color: var(--dt-text-white);
     font-size: 32px;
-    margin: 0 auto 20px;
+    margin: 0 auto 24px;
     box-shadow: 0 4px 16px rgba(39, 126, 251, 0.3);
   }
   .v5-title {
-    font-size: 26px;
-    font-weight: 800;
+    font-size: 24px;
+    font-weight: var(--dt-font-weight-bold);
     color: var(--dt-text-primary);
     letter-spacing: -0.5px;
   }
   .v5-subtitle {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--dt-text-tertiary);
     margin-top: 8px;
   }
@@ -176,11 +176,11 @@ const handleLogin = async () => {
 .v5-form {
   width: 100%;
   .v5-field {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
     border-bottom: 1.5px solid var(--dt-border-light);
     transition: var(--dt-transition-base);
     label {
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--dt-text-quaternary);
       text-transform: uppercase;
@@ -196,14 +196,14 @@ const handleLogin = async () => {
         border: none;
         background: transparent;
         outline: none;
-        font-size: 15px;
+        font-size: 16px;
         color: var(--dt-text-primary);
         &::placeholder { color: var(--dt-text-quaternary); }
       }
       .eye-icon {
         color: var(--dt-text-quaternary);
         cursor: pointer;
-        font-size: 18px;
+        font-size: var(--dt-font-size-xl);
         transition: color 0.15s;
         &:hover { color: var(--dt-brand-color); }
       }
@@ -237,8 +237,8 @@ const handleLogin = async () => {
   border-radius: var(--dt-radius-md);
   background: var(--dt-brand-gradient);
   color: var(--dt-text-white);
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: var(--dt-font-weight-semibold);
   cursor: pointer;
   transition: var(--dt-transition-fast);
   box-shadow: var(--dt-shadow-brand);
@@ -256,7 +256,7 @@ const handleLogin = async () => {
   margin-top: 48px;
   text-align: center;
   .v-ver {
-    font-size: 10px;
+    font-size: 12px;
     color: var(--dt-text-quaternary);
     display: block;
     margin-bottom: 12px;
@@ -279,7 +279,7 @@ const handleLogin = async () => {
 .v5-copyright {
   position: absolute;
   bottom: 24px;
-  font-size: 10px;
+  font-size: 12px;
   color: var(--dt-text-quaternary);
 }
 </style>

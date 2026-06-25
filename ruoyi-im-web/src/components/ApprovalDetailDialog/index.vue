@@ -492,7 +492,7 @@ const confirmAction = async () => {
   padding: 4px 12px;
   background: var(--dt-bg-hover);
   border-radius: var(--dt-radius-sm);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .apply-time {
@@ -541,7 +541,7 @@ const confirmAction = async () => {
   display: flex;
   gap: 16px;
   position: relative;
-  padding-bottom: 20px;
+  padding-bottom: 24px;
 }
 
 .flow-item:not(:last-child)::before {
@@ -599,7 +599,7 @@ const confirmAction = async () => {
   padding: 8px 12px;
   background: var(--dt-bg-body);
   border-radius: var(--dt-radius-md);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dt-text-secondary);
 }
 
@@ -693,7 +693,7 @@ const confirmAction = async () => {
 
 .cc-empty {
   text-align: center;
-  padding: 20px;
+  padding: 24px;
   color: var(--dt-text-tertiary);
   font-size: 14px;
 }

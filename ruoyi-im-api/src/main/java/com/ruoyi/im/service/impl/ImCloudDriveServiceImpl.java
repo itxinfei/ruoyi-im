@@ -84,6 +84,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     private final ImUserMapper userMapper;
     private final ImMessageMapper messageMapper;
     private final com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
+    private final com.ruoyi.im.util.ImDistributedLock distributedLock;
 
     @Value("${file.upload.path}")
     private String uploadPath;
@@ -98,7 +99,8 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
                                    ImFileAssetMapper fileAssetMapper,
                                    ImUserMapper userMapper,
                                    ImMessageMapper messageMapper,
-                                   com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
+                                   com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil,
+                                   com.ruoyi.im.util.ImDistributedLock distributedLock) {
         this.cloudFolderMapper = cloudFolderMapper;
         this.cloudFileMapper = cloudFileMapper;
         this.cloudFileShareMapper = cloudFileShareMapper;
@@ -107,6 +109,7 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         this.userMapper = userMapper;
         this.messageMapper = messageMapper;
         this.encryptionUtil = encryptionUtil;
+        this.distributedLock = distributedLock;
     }
 
     @Override
@@ -339,22 +342,32 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     @Override
     public List<ImCloudFolderVO> getFolderList(Long parentId, String ownerType, Long userId) {
         List<ImCloudFolder> folders = cloudFolderMapper.selectUserFolders(userId, parentId, ownerType);
+        if (CollUtil.isEmpty(folders)) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载所有者信息
+        List<Long> ownerIds = folders.stream().map(ImCloudFolder::getOwnerId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> ownerMap = new HashMap<>();
+        if (!ownerIds.isEmpty()) {
+            List<ImUser> owners = userMapper.selectImUserListByIds(ownerIds);
+            for (ImUser owner : owners) {
+                ownerMap.put(owner.getId(), owner);
+            }
+        }
 
         return folders.stream().map(folder -> {
             ImCloudFolderVO vo = new ImCloudFolderVO();
             BeanUtils.copyProperties(folder, vo);
 
-            // 获取所有者信息
-            ImUser owner = userMapper.selectImUserById(folder.getOwnerId());
+            ImUser owner = ownerMap.get(folder.getOwnerId());
             if (owner != null) {
                 vo.setOwnerName(owner.getNickname());
             }
 
-            // 统计子文件夹和文件数量
             vo.setSubFolderCount(cloudFolderMapper.countSubFolders(folder.getId()));
             vo.setFileCount(cloudFolderMapper.countFilesInFolder(folder.getId()));
 
-            // 权限判断
             vo.setCanEdit(folder.getOwnerId().equals(userId));
             vo.setCanDelete(folder.getOwnerId().equals(userId));
 
@@ -382,13 +395,17 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
                         BusinessExceptionHelper.throwFolderNotFound();
                     }
                 }
-        
-                // 检查存储配额
-                Long usedSize = cloudFileMapper.sumUserFileSize(userId);
-                Long totalQuota = PERSONAL_QUOTA;
-                if (usedSize + file.getSize() > totalQuota) {
-                    BusinessExceptionHelper.throwStorageInsufficient();
-                }
+
+                // 使用分布式锁保护配额检查+文件写入，防止并发上传超配额
+                String lockKey = "cloud:upload:" + userId;
+                distributedLock.executeWithLock(lockKey, 30, () -> {
+                    Long usedSize = cloudFileMapper.sumUserFileSize(userId);
+                    Long totalQuota = PERSONAL_QUOTA;
+                    if (usedSize + file.getSize() > totalQuota) {
+                        BusinessExceptionHelper.throwStorageInsufficient();
+                    }
+                    return null;
+                });
         
         
         
@@ -885,12 +902,12 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         Long fileSize = 0L;
 
         try {
-            com.alibaba.fastjson.JSONObject json = com.alibaba.fastjson.JSON.parseObject(decryptedContent);
-            fileAssetId = json.getLong("fileAssetId");
-            fileName = json.getString("name");
-            fileSize = json.getLong("size");
+            com.fasterxml.jackson.databind.JsonNode json = new com.fasterxml.jackson.databind.ObjectMapper().readTree(decryptedContent);
+            fileAssetId = json.has("fileAssetId") ? json.get("fileAssetId").asLong() : null;
+            fileName = json.has("name") ? json.get("name").asText() : DEFAULT_FILE_NAME;
+            fileSize = json.has("size") ? json.get("size").asLong() : 0L;
         } catch (Exception e) {
-            logger.warn("解析文件消息内容失败，尝试降级处理: {}", e.getMessage());
+            logger.warn("解析文件消息内容失败，尝试降级处理", e);
         }
 
         if (fileAssetId == null) {

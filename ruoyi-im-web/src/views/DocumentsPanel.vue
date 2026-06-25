@@ -778,7 +778,7 @@ onMounted(() => {
 
 .sidebar-header {
   height: var(--dt-header-height); padding: 0 20px; display: flex; align-items: center;
-  .sidebar-title { font-size: 16px; font-weight: 600; color: var(--dt-text-primary); }
+  .sidebar-title { font-size: 16px; font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
 }
 
 .sidebar-content {
@@ -787,10 +787,10 @@ onMounted(() => {
     height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
     border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); margin-bottom: 2px;
     &:hover { background: var(--dt-bg-hover); }
-    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
+    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
   }
   .nav-divider { height: 1px; background: var(--dt-border-light); margin: 12px; }
-  .nav-section-label { font-size: 11px; color: var(--dt-text-quaternary); padding: 8px 12px; }
+  .nav-section-label { font-size: 12px; color: var(--dt-text-quaternary); padding: 8px 12px; }
 }
 
 // 2. 主区头部
@@ -807,13 +807,13 @@ onMounted(() => {
 .search-box {
   width: 240px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm);
   display: flex; align-items: center; padding: 0 12px;
-  input { flex: 1; border: none; background: transparent; outline: none; font-size: 13px; }
+  input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; }
   .search-icon { color: var(--dt-text-tertiary); margin-right: 8px; }
 }
 
 .new-btn {
   height: 32px; padding: 0 16px; background: var(--dt-brand-color); color: var(--dt-text-white);
-  border: none; border-radius: var(--dt-radius-sm); font-weight: 600; cursor: pointer;
+  border: none; border-radius: var(--dt-radius-sm); font-weight: var(--dt-font-weight-semibold); cursor: pointer;
   display: flex; align-items: center; gap: 6px;
   &:hover { background: var(--dt-brand-hover); }
 }
@@ -831,13 +831,13 @@ onMounted(() => {
     div { flex: 1; } .col-name { flex: 2; } .col-actions { width: 40px; flex: none; }
   }
   .list-row {
-    height: 52px; display: flex; align-items: center; padding: 0 12px; border-radius: 8px;
+    height: 52px; display: flex; align-items: center; padding: 0 12px; border-radius: var(--dt-radius-md);
     cursor: pointer; transition: var(--dt-transition-fast);
     &:hover { background: var(--dt-bg-hover); .more-btn { opacity: 1; } }
-    div { flex: 1; font-size: 13px; color: var(--dt-text-secondary); }
+    div { flex: 1; font-size: 14px; color: var(--dt-text-secondary); }
     .col-name { flex: 2; display: flex; align-items: center; gap: 12px;
       .file-name { color: var(--dt-text-primary); font-weight: 500; display: block; }
-      .file-size { font-size: 11px; color: var(--dt-text-quaternary); }
+      .file-size { font-size: 12px; color: var(--dt-text-quaternary); }
     }
     .more-btn { opacity: 0; color: var(--dt-text-tertiary); cursor: pointer; }
   }
@@ -845,18 +845,18 @@ onMounted(() => {
 
 // 网格视图
 .grid-view {
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 20px; padding: 12px 0;
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 24px; padding: 12px 0;
   .grid-item {
     padding: 12px; border-radius: var(--dt-radius-lg); border: 1px solid transparent; transition: var(--dt-transition-fast);
     text-align: center; cursor: pointer;
     &:hover { background: var(--dt-bg-hover); border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
     .grid-thumb {
-      height: 100px; background: var(--dt-bg-input); border-radius: var(--dt-radius-lg); @include flex-center; margin-bottom: 10px;
-      font-size: 40px; overflow: hidden;
+      height: 100px; background: var(--dt-bg-input); border-radius: var(--dt-radius-lg); @include flex-center; margin-bottom: 12px;
+      font-size: 48px; overflow: hidden;
       &.icon-doc { color: var(--dt-brand-color); } &.icon-pdf { color: var(--dt-error-color); } &.icon-sheet { color: var(--dt-success-color); }
     }
-    .grid-name { font-size: 13px; color: var(--dt-text-primary); @include text-ellipsis; display: block; }
-    .grid-sub { font-size: 11px; color: var(--dt-text-quaternary); }
+    .grid-name { font-size: 14px; color: var(--dt-text-primary); @include text-ellipsis; display: block; }
+    .grid-sub { font-size: 12px; color: var(--dt-text-quaternary); }
   }
 }
 

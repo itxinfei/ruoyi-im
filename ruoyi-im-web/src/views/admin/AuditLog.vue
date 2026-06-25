@@ -454,14 +454,14 @@ onMounted(() => {
 
 .kpi-value {
   margin-top: 8px;
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--dt-font-size-3xl);
+  font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-primary);
 }
 
 .kpi-value.small {
-  font-size: 18px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-xl);
+  font-weight: var(--dt-font-weight-semibold);
 }
 
 .kpi-value.success {
@@ -500,7 +500,7 @@ onMounted(() => {
 }
 
 .pager-wrap {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
 }

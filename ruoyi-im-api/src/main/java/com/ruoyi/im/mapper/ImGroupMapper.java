@@ -90,4 +90,13 @@ public interface ImGroupMapper extends BaseMapper<ImGroup> {
      * @return 群组列表
      */
     List<ImGroup> selectGroupsByIds(@Param("groupIds") List<Long> groupIds);
+
+    /**
+     * 原子增减群组成员数
+     *
+     * @param groupId 群组ID
+     * @param delta 增量（正数增加，负数减少）
+     * @return 更新行数
+     */
+    int adjustMemberCount(@Param("groupId") Long groupId, @Param("delta") int delta);
 }

@@ -75,6 +75,14 @@ public interface ImSystemNotificationService {
     void deleteNotification(Long notificationId, Long userId);
 
     /**
+     * 批量删除通知
+     *
+     * @param notificationIds 通知ID列表
+     * @param userId 用户ID
+     */
+    void batchDeleteNotifications(List<Long> notificationIds, Long userId);
+
+    /**
      * 获取通知详情
      *
      * @param notificationId 通知ID

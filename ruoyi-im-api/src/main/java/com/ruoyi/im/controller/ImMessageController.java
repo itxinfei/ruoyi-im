@@ -107,13 +107,7 @@ public class ImMessageController {
      * @return 操作结果
      */
     @DeleteMapping("/batch")
-    public Result<Void> batchDeleteMessages(@RequestBody List<Long> messageIds) {
-        if (messageIds == null || messageIds.isEmpty()) {
-            return Result.fail("消息ID列表不能为空");
-        }
-        if (messageIds.size() > 100) {
-            return Result.fail("单次最多删除100条消息");
-        }
+    public Result<Void> batchDeleteMessages(@RequestBody @javax.validation.constraints.Size(min = 1, max = 100) List<Long> messageIds) {
         Long userId = SecurityUtils.getLoginUserId();
         imMessageService.batchDeleteMessages(messageIds, userId);
         return Result.success("批量删除成功");

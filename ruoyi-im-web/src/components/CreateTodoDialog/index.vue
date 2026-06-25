@@ -208,12 +208,12 @@ const handleSubmit = async () => {
 <style scoped lang="scss">
 .create-todo-dialog {
   :deep(.el-dialog__header) {
-    padding: 20px 24px 16px;
+    padding: 24px 24px 16px;
     border-bottom: 1px solid var(--dt-border-light);
 
     .el-dialog__title {
       font-size: 18px;
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-primary);
     }
   }

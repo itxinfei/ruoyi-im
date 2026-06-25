@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -47,6 +47,12 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     private static final String BOOKING_STATUS_PENDING = "PENDING";
     private static final String BOOKING_STATUS_CONFIRMED = "CONFIRMED";
     private static final String BOOKING_STATUS_CANCELLED = "CANCELLED";
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static String toJson(Object obj) {
+        try { return MAPPER.writeValueAsString(obj); }
+        catch (Exception e) { throw new RuntimeException("JSON序列化失败", e); }
+    }
     private static final String BOOKING_STATUS_COMPLETED = "COMPLETED";
     private static final String MEETING_TYPE_REGULAR = "REGULAR";
     private static final String MEETING_TYPE_TRAINING = "TRAINING";
@@ -58,6 +64,9 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
 
     @Autowired
     private ImMeetingBookingMapper bookingMapper;
+
+    @Autowired
+    private com.ruoyi.im.util.ImDistributedLock distributedLock;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -83,12 +92,12 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
 
         // 处理设施列表
         if (request.getFacilities() != null && !request.getFacilities().isEmpty()) {
-            room.setFacilities(JSON.toJSONString(request.getFacilities()));
+            room.setFacilities(toJson(request.getFacilities()));
         }
 
         // 处理图片列表
         if (request.getPhotos() != null && !request.getPhotos().isEmpty()) {
-            room.setPhotos(JSON.toJSONString(request.getPhotos()));
+            room.setPhotos(toJson(request.getPhotos()));
         }
 
         roomMapper.insert(room);
@@ -147,10 +156,10 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
             room.setHasPhone(request.getHasPhone());
         }
         if (request.getFacilities() != null) {
-            room.setFacilities(JSON.toJSONString(request.getFacilities()));
+            room.setFacilities(toJson(request.getFacilities()));
         }
         if (request.getPhotos() != null) {
-            room.setPhotos(JSON.toJSONString(request.getPhotos()));
+            room.setPhotos(toJson(request.getPhotos()));
         }
         if (request.getStatus() != null) {
             room.setStatus(request.getStatus());
@@ -227,64 +236,65 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long bookRoom(ImMeetingBookingRequest request, Long userId) {
-        // 检查会议室是否存在
-        ImMeetingRoom room = roomMapper.selectById(request.getRoomId());
-        if (room == null) {
-            BusinessExceptionHelper.throwMeetingRoomNotFound();
-        }
+        // 使用分布式锁保护会议室预订，防止并发预订同一时段
+        String lockKey = "meeting:room:book:" + request.getRoomId() + ":" +
+                request.getStartTime().toLocalDate();
+        return distributedLock.executeWithLock(lockKey, 15, () -> {
+            // 检查会议室是否存在
+            ImMeetingRoom room = roomMapper.selectById(request.getRoomId());
+            if (room == null) {
+                BusinessExceptionHelper.throwMeetingRoomNotFound();
+            }
 
-        if (!room.getIsBookable()) {
-            BusinessExceptionHelper.throwMeetingRoomNotAvailable();
-        }
+            if (!room.getIsBookable()) {
+                BusinessExceptionHelper.throwMeetingRoomNotAvailable();
+            }
 
-        if (!ROOM_STATUS_AVAILABLE.equals(room.getStatus())) {
-            BusinessExceptionHelper.throwMeetingRoomUnavailable();
-        }
+            if (!ROOM_STATUS_AVAILABLE.equals(room.getStatus())) {
+                BusinessExceptionHelper.throwMeetingRoomUnavailable();
+            }
 
-        // 检查时间范围
-        if (request.getStartTime().isAfter(request.getEndTime())) {
-            BusinessExceptionHelper.throwInvalidTimeRange();
-        }
+            // 检查时间范围
+            if (request.getStartTime().isAfter(request.getEndTime())) {
+                BusinessExceptionHelper.throwInvalidTimeRange();
+            }
 
-        if (request.getStartTime().isBefore(LocalDateTime.now())) {
-            BusinessExceptionHelper.throwCannotBookPastTime();
-        }
+            if (request.getStartTime().isBefore(LocalDateTime.now())) {
+                BusinessExceptionHelper.throwCannotBookPastTime();
+            }
 
-        // 检查容纳人数
-        if (request.getAttendeeCount() > room.getCapacity()) {
-            BusinessExceptionHelper.throwExceedCapacity();
-        }
+            // 检查容纳人数
+            if (request.getAttendeeCount() > room.getCapacity()) {
+                BusinessExceptionHelper.throwExceedCapacity();
+            }
 
-        // 检查时间冲突
-        if (!checkAvailability(request.getRoomId(), request.getStartTime(), request.getEndTime())) {
-            BusinessExceptionHelper.throwTimeSlotBooked();
-        }
+            // 检查时间冲突
+            if (!checkAvailability(request.getRoomId(), request.getStartTime(), request.getEndTime())) {
+                BusinessExceptionHelper.throwTimeSlotBooked();
+            }
 
-        // 创建预订
-        ImMeetingBooking booking = new ImMeetingBooking();
-        BeanUtils.copyProperties(request, booking);
-        booking.setBookingUserId(userId);
-        booking.setStatus(BOOKING_STATUS_CONFIRMED);
-        booking.setReminderSent(false);
-        booking.setCreateTime(LocalDateTime.now());
-        booking.setUpdateTime(LocalDateTime.now());
+            // 创建预订
+            ImMeetingBooking booking = new ImMeetingBooking();
+            BeanUtils.copyProperties(request, booking);
+            booking.setBookingUserId(userId);
+            booking.setStatus(BOOKING_STATUS_CONFIRMED);
+            booking.setReminderSent(false);
+            booking.setCreateTime(LocalDateTime.now());
+            booking.setUpdateTime(LocalDateTime.now());
 
-        // 处理参会人员
-        if (request.getAttendees() != null && !request.getAttendees().isEmpty()) {
-            booking.setAttendees(JSON.toJSONString(request.getAttendees()));
-        }
+            if (request.getAttendees() != null && !request.getAttendees().isEmpty()) {
+                booking.setAttendees(toJson(request.getAttendees()));
+            }
 
-        // 处理资源列表
-        if (request.getResources() != null && !request.getResources().isEmpty()) {
-            booking.setResources(JSON.toJSONString(request.getResources()));
-        }
+            if (request.getResources() != null && !request.getResources().isEmpty()) {
+                booking.setResources(toJson(request.getResources()));
+            }
 
-        bookingMapper.insert(booking);
-        log.info("预订会议室成功: bookingId={}, roomId={}, userId={}", booking.getId(), request.getRoomId(), userId);
+            bookingMapper.insert(booking);
+            log.info("预订会议室成功: bookingId={}, roomId={}, userId={}", booking.getId(), request.getRoomId(), userId);
 
-        // 发送预订通知
-
-        return booking.getId();
+            return booking.getId();
+        });
     }
 
     @Override
@@ -508,7 +518,8 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 解析设施列表
         if (room.getFacilities() != null && !room.getFacilities().isEmpty()) {
             try {
-                vo.setFacilities(JSON.parseArray(room.getFacilities(), String.class));
+                vo.setFacilities(MAPPER.readValue(room.getFacilities(),
+                        MAPPER.getTypeFactory().constructCollectionType(List.class, String.class)));
             } catch (Exception e) {
                 log.warn("解析设施列表失败: roomId={}", room.getId());
             }
@@ -517,7 +528,8 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 解析图片列表
         if (room.getPhotos() != null && !room.getPhotos().isEmpty()) {
             try {
-                vo.setPhotos(JSON.parseArray(room.getPhotos(), String.class));
+                vo.setPhotos(MAPPER.readValue(room.getPhotos(),
+                        MAPPER.getTypeFactory().constructCollectionType(List.class, String.class)));
             } catch (Exception e) {
                 log.warn("解析图片列表失败: roomId={}", room.getId());
             }
@@ -559,7 +571,8 @@ public class ImMeetingRoomServiceImpl implements ImMeetingRoomService {
         // 解析资源列表
         if (booking.getResources() != null && !booking.getResources().isEmpty()) {
             try {
-                vo.setResources(JSON.parseArray(booking.getResources(), String.class));
+                vo.setResources(MAPPER.readValue(booking.getResources(),
+                        MAPPER.getTypeFactory().constructCollectionType(List.class, String.class)));
             } catch (Exception e) {
                 log.warn("解析资源列表失败: bookingId={}", booking.getId());
             }

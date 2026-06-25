@@ -888,7 +888,7 @@ onMounted(() => {
 
   p {
     margin: 0 0 var(--dt-spacing-sm);
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 

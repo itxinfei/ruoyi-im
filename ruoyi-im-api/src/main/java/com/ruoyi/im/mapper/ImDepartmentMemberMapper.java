@@ -83,4 +83,12 @@ public interface ImDepartmentMemberMapper extends BaseMapper<ImDepartmentMember>
      * @return 成员数量
      */
     int countMembersByDepartmentId(@Param("departmentId") Long departmentId);
+
+    /**
+     * 批量统计各部门成员数量
+     *
+     * @param departmentIds 部门ID列表
+     * @return 部门ID-成员数量映射列表
+     */
+    List<java.util.Map<String, Object>> countMembersByDepartmentIds(@Param("departmentIds") List<Long> departmentIds);
 }

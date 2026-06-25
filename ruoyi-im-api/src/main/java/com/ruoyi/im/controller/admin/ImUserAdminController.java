@@ -6,6 +6,7 @@ import com.ruoyi.im.domain.ImUser;
 import com.ruoyi.im.dto.admin.ImUserBatchImportRequest;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImUserService;
+import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.admin.BatchOperationResult;
 import com.ruoyi.im.vo.user.ImUserVO;
 import org.springframework.beans.BeanUtils;
@@ -17,6 +18,7 @@ import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 管理员 - 用户管理控制器
@@ -189,14 +191,21 @@ public class ImUserAdminController {
     public Result<BatchOperationResult> batchDelete(@RequestBody List<Long> ids) {
         BatchOperationResult result = new BatchOperationResult();
 
+        // 批量查询存在的用户
+        List<ImUser> existingUsers = imUserMapper.selectImUserListByIds(ids);
+        List<Long> existingIds = existingUsers.stream().map(ImUser::getId).collect(Collectors.toList());
+
+        // 标记不存在的用户
         for (Long id : ids) {
-            ImUser user = imUserMapper.selectImUserById(id);
-            if (user == null) {
+            if (!existingIds.contains(id)) {
                 result.addFailedItem(id, "用户不存在");
-            } else {
-                imUserService.deleteUser(id);
-                result.setSuccessCount(result.getSuccessCount() + 1);
             }
+        }
+
+        // 批量删除存在的用户
+        if (!existingIds.isEmpty()) {
+            imUserService.batchDeleteUsers(existingIds);
+            result.setSuccessCount(existingIds.size());
         }
 
         return Result.success(result);

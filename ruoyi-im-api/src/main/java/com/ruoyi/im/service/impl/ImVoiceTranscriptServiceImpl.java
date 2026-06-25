@@ -2,6 +2,8 @@ package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.SystemConstants;
+
+import static com.ruoyi.im.constant.SystemConstants.*;
 import com.ruoyi.im.domain.ImMessage;
 import com.ruoyi.im.domain.ImVoiceTranscript;
 import com.ruoyi.im.exception.BusinessException;
@@ -72,7 +74,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
 
         // 检查是否已有转写记录
         ImVoiceTranscript existTranscript = voiceTranscriptMapper.selectByMessageId(messageId);
-        if (existTranscript != null && "SUCCESS".equals(existTranscript.getStatus())) {
+        if (existTranscript != null && STATUS_SUCCESS.equals(existTranscript.getStatus())) {
             return existTranscript.getId();
         }
 
@@ -82,7 +84,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
         transcript.setVoiceUrl(voiceUrl);
         transcript.setDuration(duration);
         transcript.setLanguage(language != null ? language : DEFAULT_LANGUAGE);
-        transcript.setStatus("PENDING");
+        transcript.setStatus(STATUS_PENDING);
         transcript.setProvider(transcriptProvider != null ? transcriptProvider : DEFAULT_PROVIDER);
         transcript.setCreateTime(LocalDateTime.now());
 
@@ -143,7 +145,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
                 // 更新结果
                 if (result != null) {
                     task.setTranscriptText(result);
-                    task.setStatus("SUCCESS");
+                    task.setStatus(STATUS_SUCCESS);
                     task.setConfidence(95);
                     task.setCompleteTime(LocalDateTime.now());
                 } else {
@@ -160,7 +162,7 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
                 logger.error("处理语音转写任务失败: transcriptId={}", task.getId(), e);
                 task.setStatus(SystemConstants.STATUS_FAILED);
                 task.setErrorCode("PROCESS_ERROR");
-                task.setErrorMsg(e.getMessage());
+                task.setErrorMsg("语音处理失败");
                 voiceTranscriptMapper.updateById(task);
             }
         }
@@ -190,9 +192,9 @@ public class ImVoiceTranscriptServiceImpl implements ImVoiceTranscriptService {
         List<ImVoiceTranscript> transcripts = voiceTranscriptMapper.selectByUserId(userId);
 
         int totalCount = transcripts.size();
-        int successCount = (int) transcripts.stream().filter(t -> "SUCCESS".equals(t.getStatus())).count();
+        int successCount = (int) transcripts.stream().filter(t -> STATUS_SUCCESS.equals(t.getStatus())).count();
         int failedCount = (int) transcripts.stream().filter(t -> SystemConstants.STATUS_FAILED.equals(t.getStatus())).count();
-        int pendingCount = (int) transcripts.stream().filter(t -> "PENDING".equals(t.getStatus())
+        int pendingCount = (int) transcripts.stream().filter(t -> STATUS_PENDING.equals(t.getStatus())
                 || "PROCESSING".equals(t.getStatus())).count();
 
         stats.put("totalCount", totalCount);

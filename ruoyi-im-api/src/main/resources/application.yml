@@ -125,7 +125,7 @@ im:
     recallWindowSeconds: 120
     encryption:
       enabled: true
-      key: "aW1fZW5jcnlwdGlvbl9rZXlfMjAyNF9mb3JfbWVzc2FnZV9lbmNyeXB0aW9u"
+      key: ${IM_ENCRYPTION_KEY:aW1fZW5jcnlwdGlvbl9rZXlfMjAyNF9mb3JfbWVzc2FnZV9lbmNyeXB0aW9u}
   # 文件配置
   file:
     maxSizeMb: 20

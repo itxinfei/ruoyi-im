@@ -44,4 +44,14 @@ public interface ImVideoCallMapper {
      * @return 通话列表
      */
     java.util.List<ImVideoCall> selectCallsByUserId(@Param("userId") Long userId, @Param("limit") Integer limit);
+
+    /**
+     * 原子增减参与者数
+     *
+     * @param callId 通话ID
+     * @param delta 增量（正数增加，负数减少）
+     * @return 更新行数
+     */
+    @org.apache.ibatis.annotations.Update("UPDATE im_video_call SET current_participants = current_participants + #{delta} WHERE id = #{callId} AND current_participants + #{delta} >= 0")
+    int adjustParticipants(@Param("callId") Long callId, @Param("delta") int delta);
 }

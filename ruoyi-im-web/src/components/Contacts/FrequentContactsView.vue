@@ -182,7 +182,7 @@ onMounted(() => {
 
   .view-title {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 
@@ -307,7 +307,7 @@ onMounted(() => {
     position: absolute;
     top: var(--dt-spacing-sm);
     right: var(--dt-spacing-sm);
-    font-size: 10px;
+    font-size: 12px;
     color: var(--dt-text-quaternary);
     background: var(--dt-bg-body);
     padding: 2px 6px;

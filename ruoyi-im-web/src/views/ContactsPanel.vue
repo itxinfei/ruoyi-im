@@ -64,16 +64,22 @@
           </div>
 
           <!-- 成员网格 (纯白成员卡片) -->
-          <div v-if="deptMembers.length" class="member-grid-header">直属成员 ({{ deptMembers.length }})</div>
-          <div class="members-grid">
-            <div v-for="m in deptMembers" :key="m.id" class="member-card-v3" @click="handleMemberClick(m)">
-              <DingtalkAvatar :src="m.avatar" :name="m.name" :size="40" shape="square" />
-              <div class="member-info">
-                <div class="m-name">{{ m.name || m.userName }}</div>
-                <div class="m-post">{{ m.position || '成员' }}</div>
+          <template v-if="deptMembers.length">
+            <div class="member-grid-header">直属成员 ({{ deptMembers.length }})</div>
+            <div class="members-grid">
+              <div v-for="m in deptMembers" :key="m.id" class="member-card-v3" @click="handleMemberClick(m)">
+                <DingtalkAvatar :src="m.avatar" :name="m.name" :size="40" shape="square" />
+                <div class="member-info">
+                  <div class="m-name">{{ m.name || m.userName }}</div>
+                  <div class="m-post">{{ m.position || '成员' }}</div>
+                </div>
+                <button class="chat-btn" @click.stop="handleChat(m)"><el-icon><ChatDotRound /></el-icon></button>
               </div>
-              <button class="chat-btn" @click.stop="handleChat(m)"><el-icon><ChatDotRound /></el-icon></button>
             </div>
+          </template>
+          <div v-else-if="!subDepartments.length" class="empty-state">
+            <el-icon :size="64" color="var(--dt-text-quaternary)"><OfficeBuilding /></el-icon>
+            <p>请选择部门查看成员</p>
           </div>
         </template>
 
@@ -86,15 +92,22 @@
 
 <script setup lang="js">
 import { ref, computed } from 'vue'
-import { Search, Plus, UserFilled, Menu, StarFilled, Link, Clock, FolderOpened, ArrowRight, ChatDotRound } from '@element-plus/icons-vue'
+import { useStore } from 'vuex'
+import { ElMessage } from 'element-plus'
+import { Search, Plus, UserFilled, Menu, StarFilled, Link, Clock, FolderOpened, ArrowRight, ChatDotRound, OfficeBuilding } from '@element-plus/icons-vue'
 import OrganizationTree from '@/components/Contacts/OrganizationTree.vue'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
+import { getDepartmentMembers } from '@/api/im/organization'
+import { createConversation } from '@/api/im/conversation'
+
+const store = useStore()
 
 const view = ref('dept')
 const sidebarSearch = ref('')
 const breadcrumbs = ref([])
 const subDepartments = ref([])
 const deptMembers = ref([])
+const membersLoading = ref(false)
 
 const navItems = [
   { id: 'new', label: '新的联系人', icon: UserFilled, color: 'var(--dt-warning-color)' },
@@ -104,10 +117,109 @@ const navItems = [
   { id: 'frequent', label: '常用联系人', icon: Clock, color: 'var(--dt-cyan-color)' }
 ]
 
-const switchView = (v) => view.value = v
-const handleDeptSelect = (dept) => { /* 加载逻辑 */ }
-const handleBreadcrumbClick = (n) => { /* 跳转逻辑 */ }
-const handleMemberClick = (m) => { /* 详情逻辑 */ }
+const switchView = (v) => {
+  view.value = v
+  if (v !== 'dept') {
+    breadcrumbs.value = []
+    subDepartments.value = []
+    deptMembers.value = []
+  }
+}
+
+/**
+ * 加载部门数据（子部门列表 + 成员列表）
+ * @param {Object} dept - 部门对象，需包含 id、name，可选 children
+ */
+const loadDeptData = async (dept) => {
+  subDepartments.value = dept.children || []
+  membersLoading.value = true
+  try {
+    const res = await getDepartmentMembers(dept.id)
+    if (res.code === 200) {
+      deptMembers.value = res.data || []
+    } else {
+      deptMembers.value = []
+    }
+  } catch (e) {
+    console.error('加载部门成员失败', e)
+    deptMembers.value = []
+  } finally {
+    membersLoading.value = false
+  }
+}
+
+/**
+ * 选中部门（来自组织树或部门卡片点击）
+ * - 来自组织树：重置面包屑为 [dept]
+ * - 来自部门卡片（下钻）：追加到面包屑末尾
+ */
+const handleDeptSelect = (dept) => {
+  if (!dept) return
+  view.value = 'dept'
+
+  // 判断是否为下钻操作（当前子部门列表中包含该部门）
+  const isDrillDown = subDepartments.value.some(d => d.id === dept.id)
+
+  if (isDrillDown) {
+    breadcrumbs.value = [...breadcrumbs.value, { id: dept.id, name: dept.name }]
+  } else {
+    // 来自组织树 - 根节点重置，否则设为单级面包屑
+    breadcrumbs.value = dept.id === 'root' ? [] : [{ id: dept.id, name: dept.name }]
+  }
+
+  loadDeptData(dept)
+}
+
+/**
+ * 面包屑点击 - 导航到对应层级
+ * @param {Object|null} node - null 表示点击根节点"公司通讯录"
+ */
+const handleBreadcrumbClick = (node) => {
+  if (node === null) {
+    // 回到根级：清空面包屑和数据
+    breadcrumbs.value = []
+    subDepartments.value = []
+    deptMembers.value = []
+    return
+  }
+
+  const idx = breadcrumbs.value.findIndex(b => b.id === node.id)
+  if (idx !== -1) {
+    breadcrumbs.value = breadcrumbs.value.slice(0, idx + 1)
+    // 重新加载该部门的数据（子部门信息已丢失，仅传 id/name）
+    loadDeptData({ id: node.id, name: node.name, children: [] })
+  }
+}
+
+/**
+ * 成员点击 - 打开与该成员的私聊会话
+ */
+const handleMemberClick = (m) => {
+  handleChat(m)
+}
+
+/**
+ * 发起私聊会话
+ */
+const handleChat = async (m) => {
+  try {
+    const userId = m.userId || m.id
+    if (!userId) {
+      ElMessage.warning('无法获取用户信息')
+      return
+    }
+    const res = await createConversation({ type: 'PRIVATE', targetId: userId })
+    if (res.code === 200) {
+      store.commit('im/session/SET_CURRENT_SESSION', res.data)
+      ElMessage.success(`已打开与 ${m.name || m.userName} 的会话`)
+    } else {
+      ElMessage.error(res.msg || '无法发起对话')
+    }
+  } catch (e) {
+    console.error('创建会话失败', e)
+    ElMessage.error('无法发起对话')
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -166,7 +278,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
     border: none;
     background: transparent;
     outline: none;
-    font-size: 13px;
+    font-size: 14px;
     flex: 1;
     color: var(--dt-text-primary);
     &::placeholder { color: var(--dt-text-tertiary); }
@@ -208,13 +320,13 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
     .label {
       color: var(--dt-brand-color);
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
     }
   }
 }
 
 .icon-wrapper {
-  font-size: 18px;
+  font-size: var(--dt-font-size-xl);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,9 +339,9 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 }
 
 .section-divider {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--dt-text-tertiary);
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   padding: 24px 12px 12px;
   letter-spacing: 0.3px;
 }
@@ -297,7 +409,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 .dept-card {
   background: var(--dt-bg-card);
-  padding: 18px 20px;
+  padding: 16px 24px;
   border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   display: flex;
@@ -323,15 +435,15 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
+  font-size: 24px;
   flex-shrink: 0;
 }
 
 .folder-info {
   flex: 1;
   .name {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
   .count {
@@ -354,7 +466,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
 .member-grid-header {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-secondary);
   margin-bottom: 16px;
 }
@@ -372,7 +484,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
   border: 1px solid var(--dt-border-light);
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 16px;
   cursor: pointer;
   transition: var(--dt-transition-fast);
 
@@ -390,7 +502,7 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
 
   .m-name {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 
@@ -399,6 +511,16 @@ const handleMemberClick = (m) => { /* 详情逻辑 */ }
     color: var(--dt-text-tertiary);
     margin-top: 4px;
   }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: var(--dt-spacing-lg);
+  p { color: var(--dt-text-tertiary); font-size: var(--dt-font-size-base); }
 }
 
 .chat-btn {

@@ -121,4 +121,12 @@ public interface ImGroupMemberMapper extends BaseMapper<ImGroupMember> {
      * @return 结果
      */
     int deleteByGroupIds(@Param("groupIds") List<Long> groupIds);
+
+    /**
+     * 批量插入群组成员
+     *
+     * @param members 成员列表
+     * @return 插入行数
+     */
+    int batchInsert(@Param("list") List<ImGroupMember> members);
 }

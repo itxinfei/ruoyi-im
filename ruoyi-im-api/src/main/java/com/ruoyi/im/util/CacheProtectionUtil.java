@@ -50,56 +50,58 @@ public class CacheProtectionUtil {
      * @param <T> 返回类型
      * @return 缓存数据或从数据源获取的数据
      */
+    private static final int MAX_RETRY = 5;
+
     public <T> T getWithMutexLock(String cacheKey, String lockKey, Supplier<T> supplier, long expireTime) {
-        // 尝试获取缓存
+        @SuppressWarnings("unchecked")
         T result = (T) redisTemplate.opsForValue().get(cacheKey);
         if (result != null) {
             logger.debug("从缓存获取数据: key={}", cacheKey);
             return result;
         }
 
-        // 缓存未命中，尝试获取锁
-        String lockValue = Thread.currentThread().getName() + "_" + System.currentTimeMillis();
-        Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, 30, TimeUnit.SECONDS);
+        for (int attempt = 0; attempt <= MAX_RETRY; attempt++) {
+            String lockValue = Thread.currentThread().getName() + "_" + System.currentTimeMillis();
+            Boolean lockAcquired = redisTemplate.opsForValue().setIfAbsent(lockKey, lockValue, 30, TimeUnit.SECONDS);
 
-        if (Boolean.TRUE.equals(lockAcquired)) {
-            try {
-                // 再次检查缓存，防止重复加载
-                result = (T) redisTemplate.opsForValue().get(cacheKey);
-                if (result != null) {
-                    logger.debug("双重检查从缓存获取数据: key={}", cacheKey);
-                    return result;
+            if (Boolean.TRUE.equals(lockAcquired)) {
+                try {
+                    result = (T) redisTemplate.opsForValue().get(cacheKey);
+                    if (result != null) {
+                        logger.debug("双重检查从缓存获取数据: key={}", cacheKey);
+                        return result;
+                    }
+                    result = supplier.get();
+                    if (result != null) {
+                        setWithRandomExpire(cacheKey, result, expireTime, 300);
+                        logger.debug("从数据源加载并缓存数据: key={}", cacheKey);
+                    } else {
+                        // 空值仅缓存极短时间（3-5秒），防止缓存穿透的同时避免"刚创建却读到空"的问题
+                        setWithRandomExpire(cacheKey, null, 3, 5);
+                        logger.debug("缓存空值防止穿透: key={}", cacheKey);
+                    }
+                } finally {
+                    releaseLock(lockKey, lockValue);
                 }
-
-                // 从数据源加载数据
-                result = supplier.get();
-                
-                if (result != null) {
-                    // 设置缓存，使用随机过期时间防止缓存雪崩
-                    setWithRandomExpire(cacheKey, result, expireTime, 300); // 在基础时间上增加最多5分钟随机时间
-                    logger.debug("从数据源加载并缓存数据: key={}", cacheKey);
-                } else {
-                    // 缓存空值，防止缓存穿透，但设置较短过期时间
-                    setWithRandomExpire(cacheKey, null, 60, 60); // 1-2分钟
-                    logger.debug("缓存空值防止穿透: key={}", cacheKey);
+                return result;
+            } else {
+                try {
+                    Thread.sleep(50);
+                    logger.debug("等待锁释放后重试: key={}, attempt={}", cacheKey, attempt + 1);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    logger.error("等待锁期间被中断", e);
+                    throw new RuntimeException("获取数据时被中断", e);
                 }
-            } finally {
-                // 释放锁（使用Lua脚本确保原子性）
-                releaseLock(lockKey, lockValue);
-            }
-        } else {
-            // 获取锁失败，等待一段时间后递归调用
-            try {
-                Thread.sleep(50);
-                logger.debug("等待锁释放后重试: key={}", cacheKey);
-                return getWithMutexLock(cacheKey, lockKey, supplier, expireTime);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                logger.error("等待锁期间被中断", e);
-                throw new RuntimeException("获取数据时被中断", e);
             }
         }
 
+        // 重试耗尽，直接从数据源加载（降级策略）
+        logger.warn("获取锁重试耗尽，直接加载数据源: key={}", cacheKey);
+        result = supplier.get();
+        if (result != null) {
+            setWithRandomExpire(cacheKey, result, expireTime, 300);
+        }
         return result;
     }
 

@@ -90,7 +90,7 @@
     <!-- 2. 侧边详情区 (去虚构：Push 布局而非覆盖) -->
     <transition name="push-sidebar">
       <aside v-if="isDetailOpen" class="chat-right-sidebar">
-        <ChatDetailDrawer :session="currentSession" @close="isDetailOpen = false" />
+        <ChatDetailDrawer v-model="isDetailOpen" :session="currentSession" @close="isDetailOpen = false" />
       </aside>
     </transition>
   </div>
@@ -110,6 +110,7 @@ import AtMemberPicker from './AtMemberPicker.vue'
 import CallDialog from '@/components/Chat/CallDialog.vue'
 import { uploadFile } from '@/api/im/file'
 import { getGroupMembers } from '@/api/im/group'
+import imWebSocket from '@/utils/websocket/imWebSocket'
 import { useImWebSocket } from '@/composables/useImWebSocket'
 
 const store = useStore()
@@ -177,7 +178,6 @@ let typingTimer = null
 const handleTyping = (isTyping) => {
   if (!currentSession.value?.id) return
   // 发送输入中状态
-  const imWebSocket = require('@/utils/websocket/imWebSocket').default
   imWebSocket.sendTyping(currentSession.value.id, isTyping)
   // 清除之前的定时器
   if (typingTimer) clearTimeout(typingTimer)
@@ -393,12 +393,12 @@ const handleBatchFavorite = async () => {
   if (messageIds.length === 0) return
 
   try {
-    for (const messageId of messageIds) {
-      await store.dispatch('im/message/addFavorite', {
+    await Promise.all(messageIds.map(messageId =>
+      store.dispatch('im/message/addFavorite', {
         messageId,
         conversationId: currentSession.value.id
       })
-    }
+    ))
     ElMessage.success(`已收藏 ${messageIds.length} 条消息`)
     isSelectionMode.value = false
     selectedMessages.value.clear()
@@ -458,12 +458,12 @@ const handleVideoCall = () => {
 }
 
 // WebSocket 输入中状态监听
-const { on } = useImWebSocket()
+const { onTyping } = useImWebSocket()
 let typingCleanup = null
 
 onMounted(() => {
   // 监听输入中事件
-  typingCleanup = on('typing', (payload) => {
+  typingCleanup = onTyping((payload) => {
     if (!payload || !currentSession.value?.id) return
     const { conversationId, userId, isTyping } = payload
     // 只处理当前会话的输入中状态
@@ -479,6 +479,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (typingCleanup) typingCleanup()
+  if (typingTimer) clearTimeout(typingTimer)
 })
 </script>
 

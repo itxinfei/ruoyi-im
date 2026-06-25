@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.constant.SystemConstants;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.domain.ImBackup;
 import com.ruoyi.im.domain.ImConversationMember;
 import com.ruoyi.im.domain.ImMessage;
@@ -14,6 +15,7 @@ import com.ruoyi.im.service.ImBackupService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 数据备份服务实现
@@ -79,6 +83,10 @@ public class ImBackupServiceImpl implements ImBackupService {
      */
     @Value("${spring.datasource.password:}")
     private String datasourcePassword;
+
+    @Autowired
+    @Qualifier("backupExecutor")
+    private Executor backupExecutor;
 
     @Override
     public List<Map<String, Object>> getBackupList() {
@@ -260,7 +268,7 @@ public class ImBackupServiceImpl implements ImBackupService {
 
         } catch (Exception e) {
             logger.error("导出用户数据失败，userId: {}", userId, e);
-            throw new RuntimeException("导出用户数据失败: " + e.getMessage(), e);
+            throw new BusinessException("导出用户数据失败");
         }
     }
 
@@ -294,7 +302,8 @@ public class ImBackupServiceImpl implements ImBackupService {
      * 执行数据库备份
      */
     private void performBackup(ImBackup backup) {
-        new Thread(() -> {
+        backupExecutor.execute(() -> {
+            Process process = null;
             try {
                 logger.info("开始执行备份任务，ID: {}", backup.getId());
 
@@ -310,7 +319,7 @@ public class ImBackupServiceImpl implements ImBackupService {
                 ProcessBuilder processBuilder = new ProcessBuilder(command);
                 processBuilder.redirectErrorStream(true);
 
-                Process process = processBuilder.start();
+                process = processBuilder.start();
 
                 // 写入备份文件
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
@@ -323,35 +332,46 @@ public class ImBackupServiceImpl implements ImBackupService {
                     }
                 }
 
-                int exitCode = process.waitFor();
+                boolean finished = process.waitFor(30, TimeUnit.MINUTES);
+                if (!finished) {
+                    process.destroyForcibly();
+                    imBackupMapper.updateStatus(backup.getId(), SystemConstants.STATUS_FAILED, "备份超时(30分钟)");
+                    logger.error("备份执行超时，ID: {}", backup.getId());
+                    return;
+                }
+
+                int exitCode = process.exitValue();
                 if (exitCode == 0) {
-                    // 备份成功，更新记录
                     File backupFile = new File(filePath);
                     imBackupMapper.updateCompleteInfo(backup.getId(), filePath, backupFile.length());
                     logger.info("备份执行成功，ID: {}, 文件大小: {} bytes", backup.getId(), backupFile.length());
                 } else {
-                    // 备份失败
                     imBackupMapper.updateStatus(backup.getId(), SystemConstants.STATUS_FAILED, "mysqldump退出码: " + exitCode);
                     logger.error("备份执行失败，退出码: {}", exitCode);
                 }
 
             } catch (Exception e) {
                 logger.error("备份执行异常，ID: {}", backup.getId(), e);
-                imBackupMapper.updateStatus(backup.getId(), SystemConstants.STATUS_FAILED, e.getMessage());
+                imBackupMapper.updateStatus(backup.getId(), SystemConstants.STATUS_FAILED, "备份执行异常");
+            } finally {
+                if (process != null) {
+                    process.destroy();
+                }
             }
-        }).start();
+        });
     }
 
     /**
      * 执行数据库恢复
      */
     private void performRestore(ImBackup backup) {
+        Process process = null;
         try {
             String filePath = backup.getFilePath();
             File backupFile = new File(filePath);
 
             if (!backupFile.exists()) {
-                throw new RuntimeException("备份文件不存在: " + filePath);
+                throw new BusinessException("备份文件不存在: " + filePath);
             }
 
             // 构建mysql命令
@@ -359,7 +379,7 @@ public class ImBackupServiceImpl implements ImBackupService {
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             processBuilder.redirectErrorStream(true);
 
-            Process process = processBuilder.start();
+            process = processBuilder.start();
 
             // 写入SQL文件
             try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
@@ -372,16 +392,28 @@ public class ImBackupServiceImpl implements ImBackupService {
                 }
             }
 
-            int exitCode = process.waitFor();
+            boolean finished = process.waitFor(60, TimeUnit.MINUTES);
+            if (!finished) {
+                process.destroyForcibly();
+                throw new BusinessException("恢复超时(60分钟)");
+            }
+
+            int exitCode = process.exitValue();
             if (exitCode != 0) {
-                throw new RuntimeException("恢复失败，mysql退出码: " + exitCode);
+                throw new BusinessException("恢复失败，mysql退出码: " + exitCode);
             }
 
             logger.info("数据库恢复成功，备份ID: {}", backup.getId());
 
+        } catch (BusinessException e) {
+            throw e;
         } catch (Exception e) {
             logger.error("数据库恢复异常，备份ID: {}", backup.getId(), e);
-            throw new RuntimeException("数据库恢复失败: " + e.getMessage(), e);
+            throw new BusinessException("数据库恢复失败");
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
         }
     }
 

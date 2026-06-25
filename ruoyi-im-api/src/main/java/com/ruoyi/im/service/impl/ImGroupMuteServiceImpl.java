@@ -8,6 +8,8 @@ import com.ruoyi.im.mapper.ImGroupMemberMapper;
 import com.ruoyi.im.service.ImGroupMuteService;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,7 +36,8 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
     private ImGroupMemberMapper groupMemberMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
+    @CacheEvict(value = "group_mute", key = "#groupId")
     public void setAllMuted(Long groupId, Boolean allMuted, Long operatorId) {
         // 验证操作者权限：只有群主可以设置全员禁言
         ImGroup group = groupMapper.selectImGroupById(groupId);
@@ -57,7 +60,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void muteMember(Long groupId, Long userId, Integer muteDuration, Long operatorId) {
         // 验证操作者权限：只有群主和管理员可以禁言成员
         ImGroupMember operator = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
@@ -92,7 +95,7 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void unmuteMember(Long groupId, Long userId, Long operatorId) {
         // 验证操作者权限：只有群主和管理员可以解除禁言
         ImGroupMember operator = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
@@ -159,13 +162,14 @@ public class ImGroupMuteServiceImpl implements ImGroupMuteService {
     }
 
     @Override
+    @Cacheable(value = "group_mute", key = "#groupId", unless = "#result == false")
     public boolean isAllMuted(Long groupId) {
         ImGroup group = groupMapper.selectImGroupById(groupId);
         return group != null && group.getAllMuted() != null && group.getAllMuted() == ALL_MUTED_ON;
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void batchMuteMembers(Long groupId, List<Long> userIds, Integer muteDuration, Long operatorId) {
         // 验证操作者权限
         ImGroupMember operator = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);

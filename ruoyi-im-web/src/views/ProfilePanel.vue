@@ -423,7 +423,7 @@ onMounted(loadUser)
     align-items: center;
     padding: var(--dt-spacing-md) var(--dt-spacing-lg);
     border-bottom: 1px solid var(--dt-border-lighter);
-    min-height: 56px;
+    min-height: var(--dt-header-height);
     transition: background-color var(--dt-transition-fast);
 
     &:last-child {

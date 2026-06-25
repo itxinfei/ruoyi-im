@@ -74,7 +74,7 @@
               <div class="row-bottom">
                 <span v-if="session.draftContent" class="draft-tag">[草稿]</span>
                 <span class="msg-preview">{{ session.draftContent || session.lastMessage }}</span>
-                <el-icon v-if="session.isMuted && !session.draftContent" class="mute-icon"><BellFilled /></el-icon>
+                <el-icon v-if="session.isMuted && !session.draftContent" class="mute-icon"><Mute /></el-icon>
               </div>
             </div>
           </div>
@@ -101,14 +101,18 @@ onMounted(() => {
   store.dispatch('im/session/loadSessions')
 })
 
-const tabs = [{ label: '全部', value: 'all' }, { label: '单聊', value: 'PRIVATE' }, { label: '群聊', value: 'GROUP' }]
+const tabs = [{ label: '全部', value: 'all' }, { label: '未读', value: 'unread' }, { label: '单聊', value: 'PRIVATE' }, { label: '群聊', value: 'GROUP' }]
 
 const currentSession = computed(() => store.state.im.session.currentSession)
 const sessions = computed(() => store.state.im.session.sessions)
 
 const filteredSessions = computed(() => {
   let list = sessions.value
-  if (filterType.value !== 'all') list = list.filter(s => s.type === filterType.value)
+  if (filterType.value === 'unread') {
+    list = list.filter(s => s.unreadCount > 0)
+  } else if (filterType.value !== 'all') {
+    list = list.filter(s => s.type === filterType.value)
+  }
   if (searchKeyword.value) {
     const kw = searchKeyword.value.toLowerCase()
     list = list.filter(s => s.name?.toLowerCase().includes(kw))
@@ -132,7 +136,27 @@ const togglePin = (s) => store.dispatch('im/session/pinSession', { sessionId: s.
 const toggleMute = (s) => store.dispatch('im/session/muteSession', { sessionId: s.id, muted: !s.isMuted })
 const handleDelete = (s) => store.dispatch('im/session/deleteSession', s.id)
 const handleContextMenu = (event, session) => { /* 右键菜单预留 */ }
-const formatTime = (t) => t ? new Date(t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+const formatTime = (t) => {
+  if (!t) return ''
+  const date = new Date(t)
+  const now = new Date()
+  const diffMs = now - date
+  const diffMin = Math.floor(diffMs / 60000)
+  const diffHour = Math.floor(diffMs / 3600000)
+  const diffDay = Math.floor(diffMs / 86400000)
+
+  if (diffMin < 1) return '刚刚'
+  if (diffMin < 60) return diffMin + '分钟前'
+  if (diffHour < 24 && date.getDate() === now.getDate()) {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  }
+  if (diffDay === 1 || (diffDay < 2 && date.getDate() === now.getDate() - 1)) return '昨天'
+  if (diffDay === 2) return '前天'
+  if (date.getFullYear() === now.getFullYear()) {
+    return (date.getMonth() + 1) + '月' + date.getDate() + '日'
+  }
+  return date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate()
+}
 const handleGlobalClick = () => { /* 预留全局点击处理 */ }
 const handleOpenCreateChat = () => { /* 预留创建会话 */ }
 </script>
@@ -142,7 +166,6 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
   width: var(--dt-session-panel-width);
   height: 100%;
   background: var(--dt-bg-session-list);
-  border-right: 1px solid var(--dt-border-light);
   display: flex;
   flex-direction: column;
 }
@@ -150,7 +173,7 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
 .panel-header-v4 {
   padding: var(--dt-spacing-md) var(--dt-spacing-lg) var(--dt-spacing-sm);
   .search-box-v4 {
-    height: 36px;
+    height: 32px;
     background: var(--dt-bg-input);
     border-radius: var(--dt-radius-md);
     display: flex;
@@ -200,7 +223,7 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
     &:hover { color: var(--dt-text-secondary); }
     &.active {
       color: var(--dt-text-primary);
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
       &::after {
         content: '';
         position: absolute;
@@ -228,11 +251,11 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
   background: var(--dt-bg-body);
   color: var(--dt-text-tertiary);
   .arrow {
-    font-size: 10px;
+    font-size: 12px;
     transition: var(--dt-transition-fast);
     &.collapsed { transform: rotate(-90deg); }
   }
-  .label { font-size: 11px; font-weight: 700; letter-spacing: 0.3px; }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: 0.3px; }
 }
 
 .session-item-v4 {
@@ -249,8 +272,8 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
 
   &:hover {
     background-color: var(--dt-bg-session-hover);
-    .time { opacity: 0; }
-    .quick-actions { opacity: 1; }
+    .time { opacity: 0; width: 0; overflow: hidden; }
+    .quick-actions { opacity: 1; width: 76px; }
   }
 
   &.active {
@@ -262,18 +285,35 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
       top: 50%;
       transform: translateY(-50%);
       width: 3px;
-      height: 20px;
+      height: 22px;
       background: var(--dt-brand-color);
       border-radius: 0 2px 2px 0;
     }
+    .name {
+      color: var(--dt-brand-color);
+      font-weight: 600;
+    }
   }
 
-  &.pinned { background-color: rgba(23, 26, 29, 0.02); }
+  &.pinned {
+    background-color: var(--dt-bg-hover);
+    &::after {
+      content: '';
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 6px;
+      height: 6px;
+      background: var(--dt-brand-color);
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+  }
 
   .avatar-area {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
     flex-shrink: 0;
     .avatar-img {
       width: 100%;
@@ -290,9 +330,9 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
       padding: 0 5px;
       background: var(--dt-error-color);
       color: var(--dt-text-white);
-      font-size: 10px;
+      font-size: 12px;
       font-weight: 700;
-      border-radius: 9px;
+      border-radius: var(--dt-radius-md);
       @include flex-center;
       border: 1.5px solid var(--dt-bg-card);
       &.dot {
@@ -325,16 +365,19 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
         align-items: center;
         flex-shrink: 0;
         .time {
-          font-size: 11px;
+          font-size: 12px;
           color: var(--dt-text-tertiary);
           opacity: 1;
-          transition: opacity 0.2s;
+          transition: opacity 0.15s, width 0.2s;
+          white-space: nowrap;
         }
         .quick-actions {
           display: flex;
           gap: 2px;
           opacity: 0;
-          transition: opacity 0.2s;
+          width: 0;
+          overflow: hidden;
+          transition: opacity 0.15s, width 0.2s;
           .action-btn {
             width: 24px;
             height: 24px;
@@ -356,8 +399,8 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
       display: flex;
       align-items: center;
       gap: 4px;
-      .draft-tag { font-size: 11px; color: var(--dt-warning-color); flex-shrink: 0; font-weight: 600; }
-      .msg-preview { font-size: 13px; color: var(--dt-text-tertiary); @include text-ellipsis; flex: 1; }
+      .draft-tag { font-size: 12px; color: var(--dt-warning-color); flex-shrink: 0; font-weight: var(--dt-font-weight-semibold); }
+      .msg-preview { font-size: 12px; color: var(--dt-text-tertiary); @include text-ellipsis; flex: 1; }
       .mute-icon { font-size: 12px; color: var(--dt-text-quaternary); }
     }
   }

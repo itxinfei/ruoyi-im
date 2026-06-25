@@ -96,7 +96,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, onUnmounted } from 'vue'
 import { globalSearch } from '@/api/im/search'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 import { ElMessage } from 'element-plus'
@@ -192,10 +192,16 @@ const formatTime = (t) => t ? new Date(t).toLocaleDateString() : ''
 const clearSearch = () => { keyword.value = ''; searched.value = false; results.value = {} }
 const searchWithKeyword = (k) => { keyword.value = k; handleSearch() }
 
+const handleKeydown = (e) => {
+  if (e.ctrlKey && e.key === 'f') { e.preventDefault(); /* 触发唤起逻辑 */ }
+}
+
 onMounted(() => {
-  window.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.key === 'f') { e.preventDefault(); /* 触发唤起逻辑 */ }
-  })
+  window.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
@@ -210,11 +216,11 @@ onMounted(() => {
 }
 
 .search-input-box {
-  flex: 1; height: 36px; background: var(--dt-bg-hover); border-radius: 18px; display: flex; align-items: center; padding: 0 16px;
+  flex: 1; height: 36px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-full); display: flex; align-items: center; padding: 0 16px;
   transition: var(--dt-transition-fast);
   &.is-active { background: var(--dt-bg-card); box-shadow: 0 0 0 2px var(--dt-brand-lighter); border: 1px solid var(--dt-brand-color); }
   
-  .prefix-icon { color: var(--dt-text-tertiary); margin-right: 10px; }
+  .prefix-icon { color: var(--dt-text-tertiary); margin-right: 12px; }
   input { flex: 1; border: none; background: transparent; outline: none; font-size: 14px; }
   .clear-icon { cursor: pointer; color: var(--dt-text-tertiary); &:hover { color: var(--dt-text-primary); } }
 }
@@ -227,7 +233,7 @@ onMounted(() => {
     height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 16px; border-radius: var(--dt-radius-lg);
     cursor: pointer; color: var(--dt-text-secondary); font-size: 14px; transition: var(--dt-transition-fast);
     &:hover { background: var(--dt-bg-hover); }
-    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
+    &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
     .el-icon { font-size: 16px; }
   }
 }
@@ -238,7 +244,7 @@ onMounted(() => {
 .history-tags {
   display: flex; flex-wrap: wrap; gap: 8px;
   .h-tag {
-    padding: 4px 12px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); font-size: 13px;
+    padding: 4px 12px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); font-size: 14px;
     cursor: pointer; display: flex; align-items: center; gap: 6px;
     &:hover { background: var(--dt-border-light); }
   }
@@ -250,12 +256,12 @@ onMounted(() => {
 }
 
 .result-item {
-  display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: var(--dt-radius-lg); cursor: pointer;
+  display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: var(--dt-radius-lg); cursor: pointer;
   &:hover { background: var(--dt-bg-hover); }
   .item-info { flex: 1; min-width: 0; }
-  .item-title { font-size: 14px; color: var(--dt-text-primary); font-weight: 500; }
+  .item-title { font-size: 14px; color: var(--dt-text-primary); font-weight: var(--dt-font-weight-medium); }
   .item-sub { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; @include text-ellipsis; }
-  .item-time { font-size: 11px; color: var(--dt-text-quaternary); }
+  .item-time { font-size: 12px; color: var(--dt-text-quaternary); }
   .file-thumb { width: 32px; height: 32px; background: var(--dt-bg-hover); border-radius: var(--dt-radius-sm); @include flex-center; color: var(--dt-brand-color); }
 }
 
@@ -267,8 +273,8 @@ onMounted(() => {
 :deep(.search-highlight) {
   background: var(--dt-brand-bg);
   color: var(--dt-brand-color);
-  font-weight: 700;
+  font-weight: var(--dt-font-weight-bold);
   padding: 1px 2px;
-  border-radius: 2px;
+  border-radius: var(--dt-radius-sm);
 }
 </style>

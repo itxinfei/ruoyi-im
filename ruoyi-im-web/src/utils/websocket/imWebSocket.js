@@ -35,8 +35,9 @@ class ImWebSocket {
     this.reconnectTimer = null
     this.heartbeatTimer = null
     this.reconnectAttempts = 0
-    this.maxReconnectAttempts = 5
-    this.reconnectInterval = 3000
+    this.maxReconnectAttempts = Infinity // IM 应用应持续重连
+    this.baseReconnectInterval = 1000 // 初始重连间隔 1 秒
+    this.maxReconnectInterval = 30000 // 最大重连间隔 30 秒
     this.heartbeatInterval = 30000 // 30 秒心跳
     this.eventHandlers = new Map()
   }
@@ -272,11 +273,16 @@ class ImWebSocket {
     }
 
     this.reconnectAttempts++
-    info('ImWebSocket', `尝试重连 (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+    // 指数退避 + 随机抖动，避免惊群效应
+    const delay = Math.min(
+      this.maxReconnectInterval,
+      this.baseReconnectInterval * Math.pow(2, this.reconnectAttempts - 1)
+    ) + Math.random() * 1000
+    info('ImWebSocket', `尝试重连 (${this.reconnectAttempts}), 延迟 ${Math.round(delay)}ms`)
 
     this.reconnectTimer = setTimeout(() => {
       this.connect(this.token)
-    }, this.reconnectInterval)
+    }, delay)
   }
 
   /**

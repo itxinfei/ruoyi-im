@@ -1,5 +1,6 @@
 package com.ruoyi.im.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ruoyi.im.domain.ImGroupBot;
 import com.ruoyi.im.dto.groupbot.BotCreateRequest;
 import com.ruoyi.im.dto.groupbot.BotRuleRequest;
@@ -99,9 +100,9 @@ public interface ImGroupBotService {
      * @param token     机器人 Token
      * @param timestamp 时间戳
      * @param sign      签名
-     * @param payload   消息负载 (FastJSON)
+     * @param payload   消息负载 (JSON)
      */
-    void handleWebhook(String token, String timestamp, String sign, com.alibaba.fastjson.JSONObject payload);
+    void handleWebhook(String token, String timestamp, String sign, JsonNode payload);
 
     /**
      * 处理群消息，触发机器人自动回复

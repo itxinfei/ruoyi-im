@@ -136,8 +136,11 @@ public class ImGroupServiceImpl implements ImGroupService {
                 // 添加成员到会话
                 addConversationMember(conversation.getId(), memberId);
             }
-            group.setMemberCount(group.getMemberCount() + request.getMemberIds().size());
-            imGroupMapper.updateImGroup(group);
+            // 原子更新成员数，避免并发计数丢失
+            int addedSize = request.getMemberIds().size();
+            if (addedSize > 0) {
+                imGroupMapper.adjustMemberCount(group.getId(), addedSize);
+            }
         }
 
         return group.getId();
@@ -185,7 +188,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             BusinessExceptionHelper.throwGroupNotFound();
         }
 
-        if (!group.getOwnerId().equals(userId)) {
+        if (!userId.equals(group.getOwnerId())) {
             BusinessExceptionHelper.throwOwnerOnly();
         }
 
@@ -347,10 +350,8 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         if (addedCount > 0) {
-            group = imGroupMapper.selectImGroupById(groupId);
-            group.setMemberCount(group.getMemberCount() + addedCount);
-            group.setUpdateTime(LocalDateTime.now());
-            imGroupMapper.updateImGroup(group);
+            // 原子更新成员数
+            imGroupMapper.adjustMemberCount(groupId, addedCount);
 
             // 清除缓存
             imRedisUtil.evictGroupInfo(groupId);
@@ -389,9 +390,10 @@ public class ImGroupServiceImpl implements ImGroupService {
             }
         }
 
-        group.setMemberCount(group.getMemberCount() - removedCount);
-        group.setUpdateTime(LocalDateTime.now());
-        imGroupMapper.updateImGroup(group);
+        // 原子更新成员数
+        if (removedCount > 0) {
+            imGroupMapper.adjustMemberCount(groupId, -removedCount);
+        }
 
         // 清除缓存
         imRedisUtil.evictGroupInfo(groupId);
@@ -405,7 +407,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             BusinessExceptionHelper.throwGroupNotFound();
         }
 
-        if (group.getOwnerId().equals(userId)) {
+        if (userId.equals(group.getOwnerId())) {
             BusinessExceptionHelper.throwNotAllowed("群主不能退出群组，请先转让群主或解散群组");
         }
 
@@ -416,9 +418,8 @@ public class ImGroupServiceImpl implements ImGroupService {
 
         imGroupMemberMapper.deleteImGroupMemberById(member.getId());
 
-        group.setMemberCount(group.getMemberCount() - 1);
-        group.setUpdateTime(LocalDateTime.now());
-        imGroupMapper.updateImGroup(group);
+        // 原子更新成员数
+        imGroupMapper.adjustMemberCount(groupId, -1);
 
         // 清除缓存
         imRedisUtil.evictGroupInfo(groupId);
@@ -431,7 +432,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             BusinessExceptionHelper.throwGroupNotFound();
         }
 
-        if (!group.getOwnerId().equals(operatorId)) {
+        if (!operatorId.equals(group.getOwnerId())) {
             BusinessExceptionHelper.throwOwnerOnly();
         }
 
@@ -501,7 +502,7 @@ public class ImGroupServiceImpl implements ImGroupService {
             BusinessExceptionHelper.throwGroupNotFound();
         }
 
-        if (!group.getOwnerId().equals(operatorId)) {
+        if (!operatorId.equals(group.getOwnerId())) {
             BusinessExceptionHelper.throwOwnerOnly();
         }
 
@@ -515,6 +516,9 @@ public class ImGroupServiceImpl implements ImGroupService {
         }
 
         ImGroupMember oldOwner = imGroupMemberMapper.selectImGroupMemberByGroupIdAndUserId(groupId, operatorId);
+        if (oldOwner == null) {
+            BusinessExceptionHelper.throwNotInGroup();
+        }
 
         oldOwner.setRole(ROLE_ADMIN);
         oldOwner.setUpdateTime(LocalDateTime.now());
@@ -583,11 +587,13 @@ public class ImGroupServiceImpl implements ImGroupService {
         group.setDeletedTime(LocalDateTime.now());
         imGroupMapper.updateImGroup(group);
         imGroupMemberMapper.deleteByGroupIds(java.util.Collections.singletonList(groupId));
+        imRedisUtil.evictGroupInfo(groupId);
     }
 
     @Override
     public void updateGroupForAdmin(ImGroup group) {
         imGroupMapper.updateImGroup(group);
+        imRedisUtil.evictGroupInfo(group.getId());
     }
 
     @Override

@@ -71,12 +71,12 @@ defineEmits(['action'])
   }
 
   &__title {
-    font-size: 16px; font-weight: 600; color: var(--dt-text-secondary);
+    font-size: 16px; font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-secondary);
     margin: 0 0 var(--dt-spacing-sm) 0;
   }
 
   &__desc {
-    font-size: 13px; color: var(--dt-text-tertiary);
+    font-size: 14px; color: var(--dt-text-tertiary);
     line-height: 1.6; margin: 0;
   }
 

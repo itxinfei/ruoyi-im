@@ -6,6 +6,9 @@ import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFilePreviewInfoVO;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 /**
  * 文件预览控制器
  *
@@ -58,9 +61,12 @@ public class ImFilePreviewController {
     @GetMapping("/thumbnail/{fileId}")
     public Result<String> generateThumbnail(
             @PathVariable Long fileId,
-            @RequestParam(required = false, defaultValue = "200") Integer width,
-            @RequestParam(required = false, defaultValue = "200") Integer height) {
+            @RequestParam(required = false, defaultValue = "200") @Min(1) @Max(2000) Integer width,
+            @RequestParam(required = false, defaultValue = "200") @Min(1) @Max(2000) Integer height) {
         Long userId = SecurityUtils.getLoginUserId();
+        // 在 controller 层 clamp 尺寸，防止过大图片
+        width = Math.min(width, 2000);
+        height = Math.min(height, 2000);
         String thumbnailUrl = filePreviewService.generateThumbnail(fileId, width, height, userId);
         return Result.success(thumbnailUrl);
     }

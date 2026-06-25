@@ -59,6 +59,17 @@
         WHERE conversation_id = #{conversationId} AND user_id = #{userId}
     </update>
 
+    <update id="batchIncrementUnreadCount">
+        UPDATE im_conversation_member
+        SET unread_count = unread_count + #{count}, update_time = NOW()
+        WHERE conversation_id = #{conversationId}
+        AND user_id IN
+        <foreach item="userId" collection="userIds" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+        AND user_id != #{excludeUserId}
+    </update>
+
     <update id="decrementUnreadCount">
         UPDATE im_conversation_member
         SET unread_count = GREATEST(unread_count - #{count}, 0), update_time = NOW()

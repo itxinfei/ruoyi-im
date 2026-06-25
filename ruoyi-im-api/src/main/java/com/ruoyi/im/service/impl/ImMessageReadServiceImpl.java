@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Collectors;
 
 /**
  * 消息已读回执服务实现
@@ -41,6 +40,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ImMessageReadServiceImpl implements ImMessageReadService {
+
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageReadServiceImpl.class);
 
@@ -95,22 +96,24 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
             return;
         }
 
-        // 创建已读记录
+        // 创建已读记录，捕获并发插入的唯一键冲突
         ImMessageRead messageRead = new ImMessageRead();
         messageRead.setMessageId(messageId);
         messageRead.setUserId(userId);
         messageRead.setConversationId(conversationId);
         messageRead.setReadTime(LocalDateTime.now());
-        messageRead.setReadType(READ_TYPE_MANUAL); // 手动标记
+        messageRead.setReadType(READ_TYPE_MANUAL);
         messageRead.setDeviceType(DEVICE_TYPE_WEB);
         messageRead.setCreateTime(LocalDateTime.now());
 
-        messageReadMapper.insertImMessageRead(messageRead);
+        try {
+            messageReadMapper.insertImMessageRead(messageRead);
 
-        // 更新会话成员的未读数
-        Integer currentUnread = member.getUnreadCount();
-        if (currentUnread != null && currentUnread > 0) {
+            // 更新会话成员的未读数
             conversationMemberMapper.decrementUnreadCount(conversationId, userId, 1);
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            // 并发插入导致重复，忽略
+            log.debug("消息已读记录并发插入已存在: messageId={}, userId={}", messageId, userId);
         }
 
         // 广播已读状态给发送者
@@ -298,13 +301,18 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
 
         status.setAllRead(readCount >= totalCount);
 
-        // 获取最近已读用户名称
+        // 批量加载已读用户信息（消除 N+1 查询）
         if (!readRecords.isEmpty()) {
+            List<Long> readUserIds = readRecords.stream()
+                    .map(ImMessageRead::getUserId).distinct().collect(Collectors.toList());
+            Map<Long, ImUser> userMap = userMapper.selectImUserListByIds(readUserIds).stream()
+                    .collect(Collectors.toMap(ImUser::getId, u -> u, (a, b) -> a));
+
             StringBuilder sb = new StringBuilder();
             int count = 0;
             for (ImMessageRead read : readRecords) {
                 if (count >= 3) { break; }
-                ImUser user = userMapper.selectImUserById(read.getUserId());
+                ImUser user = userMap.get(read.getUserId());
                 if (user != null) {
                     if (count > 0) { sb.append("、"); }
                     sb.append(user.getNickname() != null ? user.getNickname() : user.getUsername());
@@ -315,25 +323,25 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
                 sb.append("等").append(readRecords.size()).append("人");
             }
             status.setRecentReadUsers(sb.toString());
-        }
 
-        // 获取已读用户头像列表（最多5个）
-        List<com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar> avatars = new ArrayList<>();
-        int avatarCount = Math.min(5, readRecords.size());
-        for (int i = 0; i < avatarCount; i++) {
-            ImMessageRead read = readRecords.get(i);
-            ImUser user = userMapper.selectImUserById(read.getUserId());
-            if (user != null) {
-                com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar avatar =
-                    new com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar();
-                avatar.setUserId(user.getId());
-                avatar.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
-                avatar.setAvatar(user.getAvatar());
-                avatar.setReadTime(read.getReadTime());
-                avatars.add(avatar);
+            // 获取已读用户头像列表（最多5个）
+            List<com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar> avatars = new ArrayList<>();
+            int avatarCount = Math.min(5, readRecords.size());
+            for (int i = 0; i < avatarCount; i++) {
+                ImMessageRead read = readRecords.get(i);
+                ImUser user = userMap.get(read.getUserId());
+                if (user != null) {
+                    com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar avatar =
+                        new com.ruoyi.im.vo.message.ImMessageReadStatusVO.ReadUserAvatar();
+                    avatar.setUserId(user.getId());
+                    avatar.setUserName(user.getNickname() != null ? user.getNickname() : user.getUsername());
+                    avatar.setAvatar(user.getAvatar());
+                    avatar.setReadTime(read.getReadTime());
+                    avatars.add(avatar);
+                }
             }
+            status.setReadUserAvatars(avatars);
         }
-        status.setReadUserAvatars(avatars);
 
         return status;
     }
@@ -383,10 +391,17 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         detail.setReadCount(readUserIds.size());
         detail.setUnreadCount(members.size() - readUserIds.size());
 
+        // 批量加载所有相关用户信息（消除 N+1 查询）
+        Set<Long> readUserIdSet = new HashSet<>(readUserIds);
+        List<Long> allUserIds = members.stream()
+                .map(ImConversationMember::getUserId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> userMap = userMapper.selectImUserListByIds(allUserIds).stream()
+                .collect(Collectors.toMap(ImUser::getId, u -> u, (a, b) -> a));
+
         // 构建已读用户列表
         List<ImMessageReadDetailVO.ReadUserInfo> readUsers = new ArrayList<>();
         for (ImMessageRead read : readRecords) {
-            ImUser user = userMapper.selectImUserById(read.getUserId());
+            ImUser user = userMap.get(read.getUserId());
             if (user != null) {
                 ImMessageReadDetailVO.ReadUserInfo userInfo = new ImMessageReadDetailVO.ReadUserInfo();
                 userInfo.setUserId(user.getId());
@@ -401,8 +416,8 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
         // 构建未读用户列表
         List<ImMessageReadDetailVO.UnreadUserInfo> unreadUsers = new ArrayList<>();
         for (ImConversationMember member : members) {
-            if (!readUserIds.contains(member.getUserId())) {
-                ImUser user = userMapper.selectImUserById(member.getUserId());
+            if (!readUserIdSet.contains(member.getUserId())) {
+                ImUser user = userMap.get(member.getUserId());
                 if (user != null) {
                     ImMessageReadDetailVO.UnreadUserInfo userInfo = new ImMessageReadDetailVO.UnreadUserInfo();
                     userInfo.setUserId(user.getId());
@@ -478,8 +493,7 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
                 readNotification.put("userName", readerName);
                 readNotification.put("timestamp", LocalDateTime.now().toString());
 
-                com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
-                String json = mapper.writeValueAsString(readNotification);
+                String json = OBJECT_MAPPER.writeValueAsString(readNotification);
                 senderSession.getBasicRemote().sendText(json);
 
                 log.debug("已广播已读状态: messageId={}, readerId={}, senderId={}", messageId, readerUserId, senderId);

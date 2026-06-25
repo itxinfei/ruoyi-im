@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.dto.user.ImChangePasswordRequest;
 import com.ruoyi.im.dto.user.ImRegisterRequest;
 import com.ruoyi.im.dto.user.ImUserStatusUpdateRequest;
 import com.ruoyi.im.dto.user.ImUserUpdateRequest;
@@ -357,18 +358,23 @@ public class ImUserControllerTest {
      */
     @Test
     void testChangeStatus_Enable() {
-        ImUserStatusUpdateRequest request = new ImUserStatusUpdateRequest();
-        request.setId(1002L);
-        request.setStatus("ENABLED");
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(1001L);
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserRole).thenReturn("ADMIN");
 
-        doNothing().when(imUserService).updateStatus(1002L, 1);
+            ImUserStatusUpdateRequest request = new ImUserStatusUpdateRequest();
+            request.setId(1002L);
+            request.setStatus("ENABLED");
 
-        Result<Void> result = imUserController.changeStatus(request);
+            doNothing().when(imUserService).updateStatus(1002L, 1);
 
-        assertNotNull(result);
-        assertTrue(result.isSuccess());
-        assertEquals("状态修改成功", result.getMsg());
-        verify(imUserService).updateStatus(1002L, 1);
+            Result<Void> result = imUserController.changeStatus(request);
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals("状态修改成功", result.getMsg());
+            verify(imUserService).updateStatus(1002L, 1);
+        }
     }
 
     /**
@@ -376,18 +382,23 @@ public class ImUserControllerTest {
      */
     @Test
     void testChangeStatus_Disable() {
-        ImUserStatusUpdateRequest request = new ImUserStatusUpdateRequest();
-        request.setId(1002L);
-        request.setStatus("DISABLED");
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(1001L);
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserRole).thenReturn("ADMIN");
 
-        doNothing().when(imUserService).updateStatus(1002L, 0);
+            ImUserStatusUpdateRequest request = new ImUserStatusUpdateRequest();
+            request.setId(1002L);
+            request.setStatus("DISABLED");
 
-        Result<Void> result = imUserController.changeStatus(request);
+            doNothing().when(imUserService).updateStatus(1002L, 0);
 
-        assertNotNull(result);
-        assertTrue(result.isSuccess());
-        assertEquals("状态修改成功", result.getMsg());
-        verify(imUserService).updateStatus(1002L, 0);
+            Result<Void> result = imUserController.changeStatus(request);
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals("状态修改成功", result.getMsg());
+            verify(imUserService).updateStatus(1002L, 0);
+        }
     }
 
     /**
@@ -483,8 +494,11 @@ public class ImUserControllerTest {
             when(imUserService.changePassword(TEST_USER_ID, "oldpass", "newpass"))
                     .thenReturn(true);
 
-            Result<Void> result = imUserController.changePassword(
-                    TEST_USER_ID, "oldpass", "newpass");
+            ImChangePasswordRequest request = new ImChangePasswordRequest();
+            request.setOldPassword("oldpass");
+            request.setNewPassword("newpass");
+
+            Result<Void> result = imUserController.changePassword(TEST_USER_ID, request);
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
@@ -504,8 +518,11 @@ public class ImUserControllerTest {
             when(imUserService.changePassword(TEST_USER_ID, "wrongpass", "newpass"))
                     .thenReturn(false);
 
-            Result<Void> result = imUserController.changePassword(
-                    TEST_USER_ID, "wrongpass", "newpass");
+            ImChangePasswordRequest request = new ImChangePasswordRequest();
+            request.setOldPassword("wrongpass");
+            request.setNewPassword("newpass");
+
+            Result<Void> result = imUserController.changePassword(TEST_USER_ID, request);
 
             assertNotNull(result);
             assertFalse(result.isSuccess());
@@ -522,8 +539,12 @@ public class ImUserControllerTest {
             mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
             mockedSecurityUtils.when(SecurityUtils::getLoginUserRole).thenReturn("USER");
 
+            ImChangePasswordRequest request = new ImChangePasswordRequest();
+            request.setOldPassword("oldpass");
+            request.setNewPassword("newpass");
+
             BusinessException exception = assertThrows(BusinessException.class, () -> {
-                imUserController.changePassword(1002L, "oldpass", "newpass");
+                imUserController.changePassword(1002L, request);
             });
 
             assertEquals(403, exception.getCode());

@@ -143,16 +143,16 @@ watch(visible, (v) => emit('update:modelValue', v))
 
 // 2. Body
 .v4-info-body {
-  flex: 1; padding: 40px 24px 20px; overflow-y: auto;
+  flex: 1; padding: 40px 24px 24px; overflow-y: auto;
 
   .primary-info { margin-bottom: 24px;
-    .u-name { font-size: var(--dt-font-size-2xl); font-weight: 600; color: var(--dt-text-primary); margin-bottom: 4px; }
+    .u-name { font-size: var(--dt-font-size-2xl); font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); margin-bottom: 4px; }
     .u-org { font-size: var(--dt-font-size-sm); color: var(--dt-text-tertiary); .sep { margin: 0 6px; } }
   }
 
   .info-sections {
     .section-block { margin-bottom: 18px;
-      label { display: block; font-size: 11px; color: var(--dt-text-tertiary); margin-bottom: 4px; font-weight: 600; }
+      label { display: block; font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 4px; font-weight: var(--dt-font-weight-semibold); }
       .val { font-size: 14px; color: var(--dt-text-primary); &.signature { line-height: 1.5; color: var(--dt-text-tertiary); } }
     }
   }
@@ -163,13 +163,13 @@ watch(visible, (v) => emit('update:modelValue', v))
   padding: 0 24px 32px; display: flex; justify-content: center;
 
   .action-pills {
-    height: 44px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: 22px;
+    height: 48px; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-full);
     padding: 4px; display: flex; align-items: center; box-shadow: var(--dt-shadow-2);
 
     .pill-btn {
-      height: 36px; border: none; background: transparent; cursor: pointer; border-radius: 18px;
+      height: 36px; border: none; background: transparent; cursor: pointer; border-radius: var(--dt-radius-xl);
       display: flex; align-items: center; gap: 8px; padding: 0 16px;
-      transition: background var(--dt-transition-fast); color: var(--dt-text-primary); font-weight: 600;
+      transition: background var(--dt-transition-fast); color: var(--dt-text-primary); font-weight: var(--dt-font-weight-semibold);
 
       &:hover { background: var(--dt-bg-hover); }
       &.chat { background: var(--dt-brand-color); color: var(--dt-text-white); &:hover { background: var(--dt-brand-hover); } }

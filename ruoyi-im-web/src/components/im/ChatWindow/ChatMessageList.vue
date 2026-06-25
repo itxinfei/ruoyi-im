@@ -98,16 +98,19 @@ const handleScroll = async () => {
   }
 }
 
-// 监听消息变化，自动滚动到底部（当发送新消息时）
+// 监听消息变化，自动滚动到底部
+// 自身发送的消息始终滚动；他人消息仅在用户已在底部附近时滚动
 watch(() => props.messages.length, async (newLen, oldLen) => {
   if (!containerRef.value) return
 
   if (newLen > oldLen) {
     const lastMessage = props.messages[props.messages.length - 1]
-    // 如果是自身发送的消息，自动滚动到底部
-    if (lastMessage && lastMessage.isSelf) {
+    const container = containerRef.value
+    const isNearBottom = container.scrollHeight - container.scrollTop - container.clientHeight < 150
+
+    if (lastMessage && (lastMessage.isSelf || isNearBottom)) {
       await nextTick()
-      containerRef.value.scrollTop = containerRef.value.scrollHeight
+      container.scrollTop = container.scrollHeight
     }
   }
 })
@@ -123,7 +126,7 @@ defineExpose({
 .v6-message-viewport {
   flex: 1;
   overflow: visible;
-  padding: var(--dt-spacing-md) 0;
+  padding: var(--dt-spacing-md) var(--dt-spacing-xl);
   background-color: var(--dt-bg-card);
 
   &::-webkit-scrollbar {

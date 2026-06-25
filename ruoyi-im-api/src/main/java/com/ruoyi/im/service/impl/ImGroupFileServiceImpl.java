@@ -67,7 +67,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     private ImUserMapper userMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Long uploadFile(ImGroupFileUploadRequest request, Long userId) {
         // 验证用户是否为群组成员
         ImGroupMember member = groupMemberMapper.selectImGroupMemberByGroupIdAndUserId(request.getGroupId(), userId);
@@ -182,7 +182,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateFile(Long groupFileId, ImGroupFileUpdateRequest request, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
@@ -219,7 +219,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFile(Long groupFileId, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
@@ -247,7 +247,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public String downloadFile(Long groupFileId, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {
@@ -284,7 +284,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void batchDeleteFiles(List<Long> groupFileIds, Long userId) {
         for (Long groupFileId : groupFileIds) {
             try {
@@ -297,7 +297,7 @@ public class ImGroupFileServiceImpl implements ImGroupFileService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void moveFile(Long groupFileId, String category, Long userId) {
         ImGroupFile groupFile = groupFileMapper.selectById(groupFileId);
         if (groupFile == null || groupFile.getStatus() == STATUS_DISABLED) {

@@ -1,6 +1,8 @@
 package com.ruoyi.im.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.ImErrorCode;
+import com.ruoyi.im.constant.MessageStatusConstants;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.*;
 import com.ruoyi.im.dto.conversation.ImConversationCreateRequest;
@@ -29,7 +31,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * 会话服务实现
@@ -42,16 +49,16 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     private static final Logger log = LoggerFactory.getLogger(ImConversationServiceImpl.class);
 
-    private static final String CONVERSATION_TYPE_PRIVATE = CONVERSATION_TYPE_PRIVATE;
-    private static final String CONVERSATION_TYPE_SINGLE = CONVERSATION_TYPE_SINGLE;
-    private static final String CONVERSATION_TYPE_GROUP = CONVERSATION_TYPE_GROUP;
-    private static final String MARKER_TYPE_CONV_PIN = MARKER_TYPE_CONV_PIN;
-    private static final String DEFAULT_GROUP_AVATAR = DEFAULT_GROUP_AVATAR;
-    private static final String CACHE_KEY_PREFIX_CONVERSATION_LIST = CACHE_KEY_PREFIX_CONVERSATION_LIST;
+    private static final String CONVERSATION_TYPE_PRIVATE = MessageStatusConstants.CONVERSATION_TYPE_PRIVATE;
+    private static final String CONVERSATION_TYPE_SINGLE = "SINGLE";
+    private static final String CONVERSATION_TYPE_GROUP = MessageStatusConstants.CONVERSATION_TYPE_GROUP;
+    private static final String MARKER_TYPE_CONV_PIN = "CONV_PIN";
+    private static final String DEFAULT_GROUP_AVATAR = "/images/group-avatar.png";
+    private static final String CACHE_KEY_PREFIX_CONVERSATION_LIST = SystemConstants.CACHE_KEY_CONVERSATION_LIST;
     private static final int CONVERSATION_LIST_CACHE_TTL_MINUTES = 5;
-    private static final String ROLE_OWNER = ROLE_OWNER;
-    private static final String ROLE_ADMIN = ROLE_ADMIN;
-    private static final String ROLE_MEMBER = ROLE_MEMBER;
+    private static final String ROLE_OWNER = "OWNER";
+    private static final String ROLE_ADMIN = "ADMIN";
+    private static final String ROLE_MEMBER = "MEMBER";
 
     private final ImConversationMapper imConversationMapper;
     private final ImConversationMemberMapper imConversationMemberMapper;
@@ -64,6 +71,7 @@ public class ImConversationServiceImpl implements ImConversationService {
     private final ImRedisUtil imRedisUtil;
     private final ImGroupMapper imGroupMapper;
     private final com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil;
+    private final com.ruoyi.im.util.ImDistributedLock distributedLock;
 
     /**
      * 构造器注入依赖
@@ -78,7 +86,8 @@ public class ImConversationServiceImpl implements ImConversationService {
             ImMessageMarkerMapper imMessageMarkerMapper,
             ImRedisUtil imRedisUtil,
             ImGroupMapper imGroupMapper,
-            com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil) {
+            com.ruoyi.im.util.MessageEncryptionUtil encryptionUtil,
+            com.ruoyi.im.util.ImDistributedLock distributedLock) {
         this.imConversationMapper = imConversationMapper;
         this.imConversationMemberMapper = imConversationMemberMapper;
         this.imGroupMemberMapper = imGroupMemberMapper;
@@ -90,6 +99,7 @@ public class ImConversationServiceImpl implements ImConversationService {
         this.imRedisUtil = imRedisUtil;
         this.imGroupMapper = imGroupMapper;
         this.encryptionUtil = encryptionUtil;
+        this.distributedLock = distributedLock;
     }
 
     @Override
@@ -290,7 +300,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                     try {
                         messageVO.setContent(encryptionUtil.decryptMessage(lastMessage.getContent()));
                     } catch (Exception e) {
-                        log.warn("消息解密失败: messageId={}, error={}", lastMessage.getId(), e.getMessage());
+                        log.warn("消息解密失败: messageId={}", lastMessage.getId(), e);
                         messageVO.setContent("[加密消息]");
                     }
                 }
@@ -385,6 +395,21 @@ public class ImConversationServiceImpl implements ImConversationService {
     private void clearConversationListCache(Long userId) {
         String cacheKey = CACHE_KEY_PREFIX_CONVERSATION_LIST + userId;
         imRedisUtil.delete(cacheKey);
+    }
+
+    /**
+     * 清除会话所有成员的会话列表缓存（置顶/免打扰等全局变更时使用）
+     */
+    private void clearAllMembersCache(Long conversationId) {
+        List<com.ruoyi.im.domain.ImConversationMember> members =
+                imConversationMemberMapper.selectByConversationId(conversationId);
+        if (members != null) {
+            for (com.ruoyi.im.domain.ImConversationMember member : members) {
+                if (member != null && member.getUserId() != null) {
+                    clearConversationListCache(member.getUserId());
+                }
+            }
+        }
     }
 
     @Override
@@ -482,8 +507,8 @@ public class ImConversationServiceImpl implements ImConversationService {
         marker.setCreateTime(java.time.LocalDateTime.now());
         imMessageMarkerMapper.insert(marker);
 
-        // 清除缓存
-        clearConversationListCache(userId);
+        // 清除所有成员的会话列表缓存（置顶对所有人可见）
+        clearAllMembersCache(conversationId);
     }
 
     @Override
@@ -497,7 +522,7 @@ public class ImConversationServiceImpl implements ImConversationService {
                         .eq(ImMessageMarker::getMarkerType, MARKER_TYPE_CONV_PIN)
         );
 
-        clearConversationListCache(userId);
+        clearAllMembersCache(conversationId);
     }
 
     /**
@@ -580,52 +605,59 @@ public class ImConversationServiceImpl implements ImConversationService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createPrivateConversation(Long userId, ImPrivateConversationCreateRequest request) {
-        // ... (保持现有逻辑，仅添加缓存清除)
-        // 检查对方用户是否存在
-        ImUser peerUser = imUserMapper.selectImUserById(request.getPeerUserId());
-        if (peerUser == null) {
-            throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "对方用户不存在");
-        }
+        // 使用分布式锁防止两个用户同时创建同一私聊会话导致重复
+        Long peerUserId = request.getPeerUserId();
+        String lockKey = com.ruoyi.im.util.ImDistributedLock.LockKeys.friendRelationKey(userId, peerUserId);
 
-        // 检查是否已经存在私聊会话
-        ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget(CONVERSATION_TYPE_PRIVATE,
-                Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
-        if (existingConversation == null) {
-            existingConversation = imConversationMapper.selectByTypeAndTarget(CONVERSATION_TYPE_SINGLE,
-                    Math.min(userId, request.getPeerUserId()), Math.max(userId, request.getPeerUserId()));
-        }
-
-        Long conversationId;
-        if (existingConversation != null) {
-            conversationId = existingConversation.getId();
-            ensureConversationMember(conversationId, userId);
-            ensureConversationMember(conversationId, request.getPeerUserId());
-        } else {
-            // 创建会话
-            ImConversation conversation = new ImConversation();
-            conversation.setType(CONVERSATION_TYPE_PRIVATE);
-            conversation.setTargetId(Math.min(userId, request.getPeerUserId()));
-            conversation.setLastMessageId(null);
-            conversation.setCreateTime(LocalDateTime.now());
-            conversation.setUpdateTime(LocalDateTime.now());
-
-            int result = imConversationMapper.insert(conversation);
-            if (result <= 0) {
-                throw new BusinessException(ImErrorCode.CREATE_CONVERSATION_FAILED, "创建会话失败");
+        return distributedLock.executeWithLock(lockKey, 10, () -> {
+            // 检查对方用户是否存在
+            ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
+            if (peerUser == null) {
+                throw new BusinessException(ImErrorCode.USER_NOT_EXIST, "对方用户不存在");
             }
 
-            conversationId = conversation.getId();
+            // 检查是否已经存在私聊会话
+            Long minId = Math.min(userId, peerUserId);
+            Long maxId = Math.max(userId, peerUserId);
+            ImConversation existingConversation = imConversationMapper.selectByTypeAndTarget(
+                    CONVERSATION_TYPE_PRIVATE, minId, maxId);
+            if (existingConversation == null) {
+                existingConversation = imConversationMapper.selectByTypeAndTarget(
+                        CONVERSATION_TYPE_SINGLE, minId, maxId);
+            }
 
-            // 添加两个用户到会话成员
-            addMemberToConversation(conversationId, userId);
-            addMemberToConversation(conversationId, request.getPeerUserId());
-        }
+            Long conversationId;
+            if (existingConversation != null) {
+                conversationId = existingConversation.getId();
+                ensureConversationMember(conversationId, userId);
+                ensureConversationMember(conversationId, peerUserId);
+            } else {
+                // 创建会话
+                ImConversation conversation = new ImConversation();
+                conversation.setType(CONVERSATION_TYPE_PRIVATE);
+                conversation.setTargetId(minId);
+                conversation.setLastMessageId(null);
+                conversation.setCreateTime(LocalDateTime.now());
+                conversation.setUpdateTime(LocalDateTime.now());
 
-        // 清除双方缓存
-        clearConversationListCache(userId);
-        clearConversationListCache(request.getPeerUserId());
+                int result = imConversationMapper.insert(conversation);
+                if (result <= 0) {
+                    throw new BusinessException(ImErrorCode.CREATE_CONVERSATION_FAILED, "创建会话失败");
+                }
 
-        return conversationId;
+                conversationId = conversation.getId();
+
+                // 添加两个用户到会话成员
+                addMemberToConversation(conversationId, userId);
+                addMemberToConversation(conversationId, peerUserId);
+            }
+
+            // 清除双方缓存
+            clearConversationListCache(userId);
+            clearConversationListCache(peerUserId);
+
+            return conversationId;
+        });
     }
 
     @Override
@@ -736,6 +768,40 @@ public class ImConversationServiceImpl implements ImConversationService {
             return voList;
         }
 
+        // 批量预加载数据（消除 N+1 查询）
+        List<Long> convIds = conversations.stream().map(ImConversation::getId).collect(Collectors.toList());
+        List<ImConversationMember> allMembers = imConversationMemberMapper.selectList(
+                new LambdaQueryWrapper<ImConversationMember>()
+                        .in(ImConversationMember::getConversationId, convIds)
+                        .eq(ImConversationMember::getIsDeleted, 0));
+
+        // 构建每个会话的成员列表映射
+        Map<Long, List<ImConversationMember>> membersByConv = allMembers.stream()
+                .collect(Collectors.groupingBy(ImConversationMember::getConversationId));
+
+        // 收集私聊对方用户ID和群组ID
+        Set<Long> peerUserIds = new HashSet<>();
+        Set<Long> groupIds = new HashSet<>();
+        for (ImConversation conv : conversations) {
+            if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(conv.getType())
+                    || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(conv.getType())) {
+                List<ImConversationMember> convMembers = membersByConv.get(conv.getId());
+                if (convMembers != null) {
+                    convMembers.stream().map(ImConversationMember::getUserId)
+                            .filter(uid -> !uid.equals(userId)).forEach(peerUserIds::add);
+                }
+            } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(conv.getType()) && conv.getTargetId() != null) {
+                groupIds.add(conv.getTargetId());
+            }
+        }
+
+        Map<Long, ImUser> userMap = peerUserIds.isEmpty() ? new HashMap<>() :
+                imUserMapper.selectImUserListByIds(new ArrayList<>(peerUserIds)).stream()
+                        .collect(Collectors.toMap(ImUser::getId, u -> u, (a, b) -> a));
+        Map<Long, ImGroup> groupMap = groupIds.isEmpty() ? new HashMap<>() :
+                imGroupMapper.selectBatchIds(groupIds).stream()
+                        .collect(Collectors.toMap(ImGroup::getId, g -> g, (a, b) -> a));
+
         for (ImConversation conversation : conversations) {
             if (conversation != null) {
                 ImConversationVO vo = new ImConversationVO();
@@ -746,10 +812,17 @@ public class ImConversationServiceImpl implements ImConversationService {
                 // 兼容PRIVATE和SINGLE类型（历史数据可能使用SINGLE）
                 if (CONVERSATION_TYPE_PRIVATE.equalsIgnoreCase(conversation.getType())
                         || CONVERSATION_TYPE_SINGLE.equalsIgnoreCase(conversation.getType())) {
-                    // 私聊会话，获取对方用户信息
-                    Long peerUserId = getPeerUserId(conversation.getId(), userId);
+                    // 私聊会话，从预加载数据获取对方用户信息
+                    List<ImConversationMember> convMembers = membersByConv.get(conversation.getId());
+                    Long peerUserId = null;
+                    if (convMembers != null) {
+                        peerUserId = convMembers.stream()
+                                .map(ImConversationMember::getUserId)
+                                .filter(uid -> !uid.equals(userId))
+                                .findFirst().orElse(null);
+                    }
                     if (peerUserId != null) {
-                        ImUser peerUser = imUserMapper.selectImUserById(peerUserId);
+                        ImUser peerUser = userMap.get(peerUserId);
                         if (peerUser != null) {
                             String peerName = peerUser.getNickname() != null ? peerUser.getNickname()
                                     : peerUser.getUsername();
@@ -766,11 +839,8 @@ public class ImConversationServiceImpl implements ImConversationService {
                         }
                     }
                 } else if (CONVERSATION_TYPE_GROUP.equalsIgnoreCase(conversation.getType())) {
-                    // 群聊会话，从群组表获取信息
-                    ImGroup group = null;
-                    if (conversation.getTargetId() != null) {
-                        group = imGroupMapper.selectImGroupById(conversation.getTargetId());
-                    }
+                    // 群聊会话，从预加载数据获取信息
+                    ImGroup group = conversation.getTargetId() != null ? groupMap.get(conversation.getTargetId()) : null;
                     String groupAvatar;
                     String groupName;
                     if (group != null) {
@@ -811,10 +881,22 @@ public class ImConversationServiceImpl implements ImConversationService {
      * @param userId         用户ID
      */
     private void addMemberToConversation(Long conversationId, Long userId) {
+        // 先检查是否已存在
+        ImConversationMember existing = imConversationMemberMapper.selectByConversationIdAndUserId(conversationId, userId);
+        if (existing != null) {
+            if (existing.getIsDeleted() != null && existing.getIsDeleted() == 1) {
+                existing.setIsDeleted(0);
+                existing.setUpdateTime(LocalDateTime.now());
+                imConversationMemberMapper.updateById(existing);
+            }
+            ensureUserSession(conversationId, userId);
+            return;
+        }
+
         ImConversationMember member = new ImConversationMember();
         member.setConversationId(conversationId);
         member.setUserId(userId);
-        member.setRole(ROLE_MEMBER); // 设置默认角色
+        member.setRole(ROLE_MEMBER);
         member.setUnreadCount(0);
         member.setIsPinned(0);
         member.setIsMuted(0);
@@ -822,7 +904,12 @@ public class ImConversationServiceImpl implements ImConversationService {
         member.setCreateTime(LocalDateTime.now());
         member.setUpdateTime(LocalDateTime.now());
 
-        imConversationMemberMapper.insertImConversationMember(member);
+        try {
+            imConversationMemberMapper.insertImConversationMember(member);
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            // 并发插入导致重复，忽略
+            log.debug("addMemberToConversation 并发插入已存在: convId={}, userId={}", conversationId, userId);
+        }
         ensureUserSession(conversationId, userId);
     }
 
@@ -930,7 +1017,12 @@ public class ImConversationServiceImpl implements ImConversationService {
         newSession.setIsDeleted(0);
         newSession.setCreateTime(LocalDateTime.now());
         newSession.setUpdateTime(LocalDateTime.now());
-        imUserSessionMapper.insert(newSession);
+        try {
+            imUserSessionMapper.insert(newSession);
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            // 并发插入时另一个线程已创建，忽略即可
+            log.debug("ensureUserSession 并发插入已存在: conversationId={}, userId={}", conversationId, userId);
+        }
     }
 
     private void applyConversationState(ImConversationVO vo, Long conversationId, Long userId) {

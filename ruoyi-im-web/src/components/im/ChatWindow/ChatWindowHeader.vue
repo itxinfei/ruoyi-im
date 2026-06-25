@@ -60,6 +60,7 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
   justify-content: space-between;
   background-color: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
   flex-shrink: 0;
   z-index: var(--dt-z-sticky);
 }
@@ -101,9 +102,9 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
   color: var(--dt-text-tertiary);
 }
 
-// 钉钉规范：标题 16px，字重 600
+// 钉钉规范：标题 17px，字重 600
 .channel-name {
-  font-size: var(--dt-font-size-lg);
+  font-size: var(--dt-font-size-17);
   font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
 }
@@ -151,7 +152,7 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
   border: none;
   background: transparent;
   color: var(--dt-text-secondary);
-  border-radius: var(--dt-radius-md);
+  border-radius: var(--dt-radius-lg);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -165,8 +166,8 @@ defineEmits(['show-detail', 'toggle-sidebar', 'voice-call', 'video-call'])
   }
 
   &.active {
-    background: var(--dt-border-light);
-    color: var(--dt-text-primary);
+    background: var(--dt-brand-bg);
+    color: var(--dt-brand-color);
   }
 }
 </style>

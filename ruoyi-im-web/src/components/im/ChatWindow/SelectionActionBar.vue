@@ -81,9 +81,9 @@ defineEmits([
     background: var(--dt-brand-color);
     color: var(--dt-text-white);
     padding: 2px 8px;
-    border-radius: 4px;
+    border-radius: var(--dt-radius-sm);
     font-size: 14px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
   }
   
   .label {
@@ -107,7 +107,7 @@ defineEmits([
   border: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
   border-radius: var(--dt-radius-md);
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dt-text-primary);
   cursor: pointer;
   transition: all var(--dt-transition-fast);

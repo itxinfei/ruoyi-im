@@ -428,7 +428,7 @@ onMounted(() => {
   flex-shrink: 0;
 
   .el-icon {
-    font-size: 22px;
+    font-size: 24px;
   }
 
   &.type-text {

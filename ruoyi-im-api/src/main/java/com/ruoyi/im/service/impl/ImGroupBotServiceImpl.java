@@ -2,6 +2,7 @@ package com.ruoyi.im.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.domain.ImGroup;
 import com.ruoyi.im.domain.ImGroupBot;
@@ -356,7 +357,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void handleWebhook(String token, String timestamp, String sign, com.alibaba.fastjson.JSONObject payload) {
+    public void handleWebhook(String token, String timestamp, String sign, com.fasterxml.jackson.databind.JsonNode payload) {
         // 1. 查找机器人
         ImGroupBot bot = groupBotMapper.selectOne(new LambdaQueryWrapper<ImGroupBot>()
                 .eq(ImGroupBot::getWebhookToken, token)
@@ -393,16 +394,23 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
         }
 
         // 3. 解析并发送消息
-        String msgType = payload.getString("msgtype");
+        String msgType = payload.has("msgtype") ? payload.get("msgtype").asText() : null;
         String content = "";
         if (MSG_TYPE_TEXT.equals(msgType)) {
-            content = payload.getJSONObject("text").getString("content");
+            JsonNode textNode = payload.get("text");
+            content = textNode != null && textNode.has("content") ? textNode.get("content").asText() : "";
         } else if (MSG_TYPE_MARKDOWN.equals(msgType)) {
-            content = payload.getJSONObject("markdown").getString("text");
+            JsonNode markdownNode = payload.get("markdown");
+            content = markdownNode != null && markdownNode.has("text") ? markdownNode.get("text").asText() : "";
         } else if (MSG_TYPE_LINK.equals(msgType)) {
-            content = payload.getJSONObject("link").getString("title") + "\n" + payload.getJSONObject("link").getString("messageUrl");
+            JsonNode linkNode = payload.get("link");
+            if (linkNode != null) {
+                String title = linkNode.has("title") ? linkNode.get("title").asText() : "";
+                String messageUrl = linkNode.has("messageUrl") ? linkNode.get("messageUrl").asText() : "";
+                content = title + "\n" + messageUrl;
+            }
         } else {
-            content = payload.toJSONString(); // 兜底：直接发 JSON 文本
+            content = payload.toString(); // 兜底：直接发 JSON 文本
         }
 
         if (StrUtil.isNotBlank(content)) {
@@ -415,8 +423,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
 
     @Override
     public void processGroupMessage(Long groupId, Long senderId, String messageContent) {
-        log.debug("处理群消息触发机器人: groupId={}, senderId={}, content={}",
-                groupId, senderId, messageContent);
+        log.debug("处理群消息触发机器人: groupId={}, senderId={}, contentLength={}",
+                groupId, senderId, messageContent != null ? messageContent.length() : 0);
 
         // 获取群组启用的机器人列表
         List<ImGroupBot> bots = groupBotMapper.selectEnabledByGroupId(groupId);
@@ -466,8 +474,8 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
             }
 
             if (isMatch(content, rule.getTriggerContent(), rule.getMatchMode())) {
-                log.info("机器人规则匹配成功: botId={}, ruleName={}, content={}",
-                        botId, rule.getRuleName(), content);
+                log.info("机器人规则匹配成功: botId={}, ruleName={}, contentLength={}",
+                        botId, rule.getRuleName(), content != null ? content.length() : 0);
                 return rule.getReplyContent();
             }
         }
@@ -581,6 +589,7 @@ public class ImGroupBotServiceImpl implements ImGroupBotService {
             request.setConversationId(groupId); // 群组ID即为会话ID
             request.setType(REPLY_TYPE_TEXT);
             request.setContent(replyContent);
+            request.setClientMsgId("bot_" + bot.getId() + "_" + java.util.UUID.randomUUID());
 
             // 使用机器人ID作为发送者（需要特殊处理）
             // 这里暂时使用系统用户ID发送，后续可以优化为机器人专用ID

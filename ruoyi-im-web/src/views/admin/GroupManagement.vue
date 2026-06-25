@@ -524,7 +524,7 @@ onMounted(() => {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 24px;
 
       &.groups { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
       &.active { background: var(--dt-info-bg); color: var(--dt-info-color); }
@@ -533,8 +533,8 @@ onMounted(() => {
 
     .stat-info {
       .stat-value {
-        font-size: 22px;
-        font-weight: 700;
+        font-size: 24px;
+        font-weight: var(--dt-font-weight-bold);
         color: var(--dt-text-primary);
         line-height: 1.2;
       }
@@ -559,7 +559,7 @@ onMounted(() => {
 }
 
 .pager-wrap {
-  margin-top: 14px;
+  margin-top: 16px;
   display: flex;
   justify-content: flex-end;
 }

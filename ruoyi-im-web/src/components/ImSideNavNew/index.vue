@@ -9,22 +9,28 @@
 
     <!-- 2. 中间主导航 (已对齐) -->
     <div class="l1-body custom-scrollbar">
-      <div
+      <el-tooltip
         v-for="item in topNavs"
         :key="item.id"
-        class="nav-v4-item-wrap"
-        :class="{ active: activeModule === item.id }"
-        @click="$emit('switch-module', item.id)"
+        :content="item.name"
+        placement="right"
+        :show-after="500"
       >
-        <div class="indicator"></div>
-        <div class="nav-v4-content">
-          <el-icon class="icon">
-            <component :is="activeModule === item.id ? item.activeIcon : item.icon" />
-          </el-icon>
-          <span class="label">{{ item.name }}</span>
+        <div
+          class="nav-v4-item-wrap"
+          :class="{ active: activeModule === item.id }"
+          @click="$emit('switch-module', item.id)"
+        >
+          <div class="indicator"></div>
+          <div class="nav-v4-content">
+            <el-icon class="icon">
+              <component :is="activeModule === item.id ? item.activeIcon : item.icon" />
+            </el-icon>
+            <span class="label">{{ item.name }}</span>
+          </div>
+          <div v-if="item.badge" class="v4-badge">{{ item.badge }}</div>
         </div>
-        <div v-if="item.badge" class="v4-badge">{{ item.badge }}</div>
-      </div>
+      </el-tooltip>
     </div>
 
     <!-- 3. 底部功能菜单 -->
@@ -106,7 +112,7 @@ const topNavs = [
   align-items: center;
   padding: var(--dt-spacing-md) 0;
   flex-shrink: 0;
-  z-index: 2000;
+  z-index: var(--dt-z-fixed, 200);
   border-right: 1px solid var(--dt-border-subtle, rgba(255, 255, 255, 0.05));
 }
 
@@ -141,6 +147,8 @@ const topNavs = [
   display: flex;
   flex-direction: column;
   gap: 2px;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 // ============================================================================
@@ -150,7 +158,7 @@ const topNavs = [
 .nav-v4-item-wrap {
   position: relative;
   width: 100%;
-  height: 52px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -160,10 +168,10 @@ const topNavs = [
   .indicator {
     position: absolute;
     left: 0;
-    width: 3px;
+    width: 4px;
     height: 18px;
     background: var(--dt-brand-color);
-    border-radius: 0 2px 2px 0;
+    border-radius: 0 3px 3px 0;
     opacity: 0;
     transition: opacity 0.2s, height 0.2s;
   }
@@ -197,12 +205,12 @@ const topNavs = [
   &.active {
     .indicator {
       opacity: 1;
-      height: 22px;
+      height: 24px;
     }
 
     .nav-v4-content {
       color: var(--dt-nav-sidebar-text-active);
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
     }
 
     background: var(--dt-nav-active);

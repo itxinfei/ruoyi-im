@@ -1,5 +1,6 @@
 package com.ruoyi.im.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,16 +28,28 @@ public class WebSocketRedisListenerConfig {
     private static final String JSON_KEY_BROADCAST_ALL = "broadcastAll";
     private static final String JSON_KEY_MESSAGE_JSON = "messageJson";
     private static final String JSON_KEY_TARGET_USER_ID = "targetUserId";
+    private static final String JSON_KEY_NODE_ID = "nodeId";
     private static final String JSON_OBJECT_PREFIX = "{";
+    private static final ObjectMapper JACKSON_MAPPER = new ObjectMapper();
+
+    // 当前节点标识，用于过滤自身发出的 Redis 广播（static 供内部类访问）
+    private static String localNodeId;
 
     @Autowired
     private RedisMessageListenerContainer redisContainer;
 
     @PostConstruct
     public void init() {
+        // 生成本节点唯一标识
+        try {
+            String host = java.net.InetAddress.getLocalHost().getHostAddress();
+            localNodeId = host + "_" + System.currentTimeMillis();
+        } catch (Exception e) {
+            localNodeId = "node_" + System.currentTimeMillis();
+        }
         // 添加消息监听器，监听WebSocket广播频道
         redisContainer.addMessageListener(new WebSocketMessageListener(), new ChannelTopic(IM_WS_CHANNEL));
-        log.info("WebSocket Redis Pub/Sub 监听器已启动，监听频道: {}", IM_WS_CHANNEL);
+        log.info("WebSocket Redis Pub/Sub 监听器已启动，监听频道: {}, nodeId: {}", IM_WS_CHANNEL, localNodeId);
     }
 
     /**
@@ -64,20 +77,26 @@ public class WebSocketRedisListenerConfig {
                     return;
                 }
 
-                com.alibaba.fastjson.JSONObject obj = com.alibaba.fastjson.JSON.parseObject(body);
+                com.fasterxml.jackson.databind.JsonNode obj = JACKSON_MAPPER.readTree(body);
 
-                if (obj.containsKey(JSON_KEY_BROADCAST_ALL)) {
+                if (obj.has(JSON_KEY_BROADCAST_ALL)) {
                     // 全量广播消息
-                    String messageJson = obj.getString(JSON_KEY_MESSAGE_JSON);
-                    if (obj.getBoolean(JSON_KEY_BROADCAST_ALL)) {
+                    String messageJson = obj.has(JSON_KEY_MESSAGE_JSON) ? obj.get(JSON_KEY_MESSAGE_JSON).asText() : null;
+                    if (obj.get(JSON_KEY_BROADCAST_ALL).asBoolean()) {
                         // 广播给所有在线用户
                         ImWebSocketEndpoint.broadcastToAllOnline(messageJson);
                         listenerLog.debug("全量广播消息已分发到本地用户");
                     }
-                } else if (obj.containsKey(JSON_KEY_TARGET_USER_ID)) {
-                    // 单用户消息
-                    Long targetUserId = obj.getLong(JSON_KEY_TARGET_USER_ID);
-                    String messageJson = obj.getString(JSON_KEY_MESSAGE_JSON);
+                } else if (obj.has(JSON_KEY_TARGET_USER_ID)) {
+                    // 单用户消息 — 跳过本节点发出的消息，避免重复推送
+                    String remoteNodeId = obj.has(JSON_KEY_NODE_ID) ? obj.get(JSON_KEY_NODE_ID).asText() : null;
+                    if (localNodeId.equals(remoteNodeId)) {
+                        listenerLog.debug("跳过本节点广播消息: targetUserId={}", obj.get(JSON_KEY_TARGET_USER_ID).asLong());
+                        return;
+                    }
+
+                    Long targetUserId = obj.get(JSON_KEY_TARGET_USER_ID).asLong();
+                    String messageJson = obj.has(JSON_KEY_MESSAGE_JSON) ? obj.get(JSON_KEY_MESSAGE_JSON).asText() : null;
 
                     if (targetUserId != null) {
                         ImWebSocketEndpoint.sendToUser(targetUserId, messageJson);

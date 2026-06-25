@@ -47,4 +47,6 @@ public interface ImFileAssetMapper extends BaseMapper<ImFileAsset> {
      * @return 下载总数
      */
     Long countTotalDownloads(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    int incrementDownloadCount(@Param("id") Long id);
 }

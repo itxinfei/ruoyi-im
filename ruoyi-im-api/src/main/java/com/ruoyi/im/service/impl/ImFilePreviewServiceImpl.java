@@ -188,7 +188,8 @@ public class ImFilePreviewServiceImpl implements ImFilePreviewService {
             return urlPrefix + thumbnailDir + dateDir + "/" + thumbnailFileName;
 
         } catch (IOException e) {
-            throw new BusinessException("生成缩略图失败: " + e.getMessage());
+            log.error("生成缩略图失败", e);
+            throw new BusinessException("生成缩略图失败");
         }
     }
 

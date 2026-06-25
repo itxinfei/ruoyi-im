@@ -386,7 +386,7 @@ watch(visible, (val) => {
 .tabs-header {
   display: flex;
   gap: 8px;
-  padding: 20px 24px;
+  padding: 24px;
   background: var(--dt-bg-body);
   border-bottom: 1px solid var(--dt-border-light);
 
@@ -395,7 +395,7 @@ watch(visible, (val) => {
     align-items: center;
     gap: 8px;
     padding: 16px 24px;
-    font-size: 15px;
+    font-size: 16px;
     color: var(--dt-text-secondary);
     cursor: pointer;
     transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast), box-shadow var(--dt-transition-fast);
@@ -421,7 +421,7 @@ watch(visible, (val) => {
     &.active {
       background: var(--dt-brand-color);
       color: var(--dt-text-white);
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
       box-shadow: var(--dt-shadow-4);
 
       .tab-icon {
@@ -500,7 +500,7 @@ watch(visible, (val) => {
           font-size: 22px;
           font-weight: 700;
           color: var(--dt-text-primary);
-          margin-bottom: 10px;
+          margin-bottom: 12px;
         }
 
         .user-id {
@@ -523,10 +523,10 @@ watch(visible, (val) => {
       .action-btn {
         flex: 1;
         height: 48px;
-        font-size: 15px;
+        font-size: 16px;
         border-radius: var(--dt-radius-xl);
         transition: box-shadow var(--dt-transition-fast);
-        font-weight: 600;
+        font-weight: var(--dt-font-weight-semibold);
 
         &.primary-btn {
           background: var(--dt-brand-color);
@@ -584,7 +584,7 @@ watch(visible, (val) => {
 
     .icon-wrapper {
       width: 52px;
-      height: 52px;
+      height: 56px;
       border-radius: var(--dt-radius-xl);
       display: flex;
       align-items: center;
@@ -610,7 +610,7 @@ watch(visible, (val) => {
 
       h4 {
         font-size: 16px;
-        font-weight: 600;
+        font-weight: var(--dt-font-weight-semibold);
         color: var(--dt-text-primary);
         margin-bottom: 6px;
       }
@@ -651,7 +651,7 @@ watch(visible, (val) => {
 
       .logo-inner {
         font-size: 36px;
-        font-weight: 800;
+        font-weight: var(--dt-font-weight-bold);
         color: var(--dt-text-white);
       }
     }
@@ -673,14 +673,14 @@ watch(visible, (val) => {
 
         .value {
           font-size: 14px;
-          font-weight: 600;
+          font-weight: var(--dt-font-weight-semibold);
           color: var(--dt-text-primary);
         }
       }
     }
 
     .copyright {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--dt-text-tertiary);
       margin-bottom: 24px;
     }
@@ -689,11 +689,11 @@ watch(visible, (val) => {
       background: var(--dt-brand-color);
       border: none;
       color: var(--dt-text-white);
-      height: 44px;
+      height: 48px;
       padding: 0 32px;
       border-radius: var(--dt-radius-lg);
-      font-size: 15px;
-      font-weight: 600;
+      font-size: 16px;
+      font-weight: var(--dt-font-weight-semibold);
       box-shadow: var(--dt-shadow-brand-strong);
       transition: box-shadow var(--dt-transition-fast);
 
@@ -710,7 +710,7 @@ watch(visible, (val) => {
   border-radius: var(--dt-radius-md);
   font-family: 'Courier New', monospace;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   border: 1px solid var(--dt-border-color);
 }

@@ -501,7 +501,7 @@ onMounted(() => {
 
   .view-title {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 
@@ -594,7 +594,7 @@ onMounted(() => {
     gap: var(--dt-spacing-xs);
 
     .name {
-      font-size: 15px;
+      font-size: 16px;
       font-weight: 500;
       color: var(--dt-text-primary);
     }
@@ -641,13 +641,13 @@ onMounted(() => {
 
     .detail-name {
       font-size: 18px;
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-primary);
       margin-top: var(--dt-spacing-md);
     }
 
     .detail-company {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--dt-text-tertiary);
       margin-top: 4px;
     }

@@ -54,4 +54,8 @@ public interface ImAnnouncementMapper extends BaseMapper<ImAnnouncement> {
      * @return 过期公告列表
      */
     List<ImAnnouncement> selectExpiredAnnouncements();
+
+    int incrementViewCount(@Param("id") Long id);
+
+    int incrementReadCount(@Param("id") Long id);
 }

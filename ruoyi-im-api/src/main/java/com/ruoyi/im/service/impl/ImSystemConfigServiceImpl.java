@@ -100,7 +100,7 @@ public class ImSystemConfigServiceImpl implements ImSystemConfigService {
      */
     private static final Integer DEFAULT_PASSWORD_COMPLEXITY_LEVEL = 2;
 
-    private static final int CONFIG_REDIS_TTL_MINUTES = 30;
+    private static final int CONFIG_REDIS_TTL_MINUTES = 60 * 24; // 24小时，系统配置变更频率低，避免频繁过期回退到默认值
     private static final int CONFIG_MAX_UPLOAD_MB = 2048;
     private static final int CONFIG_MAX_SESSION_EXPIRE_MINUTES = 43200;
     private static final int CONFIG_MAX_LOGIN_FAILURE_THRESHOLD = 20;

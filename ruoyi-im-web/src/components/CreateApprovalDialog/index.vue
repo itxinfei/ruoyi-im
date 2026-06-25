@@ -325,7 +325,7 @@ const resetForm = () => {
 }
 
 .template-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--dt-text-primary);
   margin-bottom: 4px;

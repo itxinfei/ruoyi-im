@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 系统通知服务实现
@@ -97,6 +98,29 @@ public class ImSystemNotificationServiceImpl implements ImSystemNotificationServ
             throw new BusinessException("无权限操作");
         }
         notificationMapper.deleteImSystemNotificationById(notificationId);
+    }
+
+    @Override
+    public void batchDeleteNotifications(List<Long> notificationIds, Long userId) {
+        if (notificationIds == null || notificationIds.isEmpty()) {
+            return;
+        }
+
+        // 批量查询所有通知
+        List<ImSystemNotification> notifications = notificationMapper.selectByIds(notificationIds);
+
+        // 校验所有权
+        List<Long> unauthorizedIds = notifications.stream()
+                .filter(n -> !userId.equals(n.getReceiverId()))
+                .map(ImSystemNotification::getId)
+                .collect(Collectors.toList());
+        if (!unauthorizedIds.isEmpty()) {
+            throw new BusinessException("无权删除通知: " + unauthorizedIds);
+        }
+
+        // 批量删除
+        Long[] idsArray = notificationIds.toArray(new Long[0]);
+        notificationMapper.deleteImSystemNotificationByIds(idsArray);
     }
 
     @Override

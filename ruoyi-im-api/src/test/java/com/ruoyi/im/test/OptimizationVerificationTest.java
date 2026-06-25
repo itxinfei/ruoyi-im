@@ -157,7 +157,7 @@ public class OptimizationVerificationTest {
     @Test
     void testXssFilter() {
         String maliciousInput = "<script>alert('XSS')</script><p>Safe content</p>";
-        String cleanOutput = com.ruoyi.im.filter.XssFilter.cleanXss(maliciousInput);
+        String cleanOutput = com.ruoyi.im.util.XssUtil.cleanXss(maliciousInput);
         
         // 验证恶意脚本被移除
         assertFalse(cleanOutput.contains("<script>"));

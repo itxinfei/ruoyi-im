@@ -20,6 +20,14 @@ public interface ImSystemNotificationMapper {
     ImSystemNotification selectImSystemNotificationById(Long id);
 
     /**
+     * 根据ID列表批量查询系统通知
+     *
+     * @param ids 通知ID列表
+     * @return 系统通知集合
+     */
+    List<ImSystemNotification> selectByIds(List<Long> ids);
+
+    /**
      * 查询系统通知列表
      *
      * @param imSystemNotification 系统通知

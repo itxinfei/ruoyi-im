@@ -215,4 +215,6 @@ public interface ImMessageMapper extends BaseMapper<ImMessage> {
      * @return 删除数量
      */
     int batchSoftDeleteMessages(@Param("messageIds") List<Long> messageIds);
+
+    int incrementEditCount(@Param("id") Long id);
 }

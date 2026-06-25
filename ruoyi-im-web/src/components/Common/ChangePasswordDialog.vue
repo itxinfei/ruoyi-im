@@ -136,13 +136,13 @@ const handleSubmit = async () => {
 <style scoped lang="scss">
 .change-password-dialog {
   :deep(.el-dialog__header) {
-    padding: 20px 24px 16px;
+    padding: 24px;
     border-bottom: 1px solid var(--dt-border-light);
   }
 
   :deep(.el-dialog__title) {
     font-size: 18px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 
@@ -177,7 +177,7 @@ const handleSubmit = async () => {
   }
 
   :deep(.el-input__inner) {
-    font-size: 15px;
+    font-size: 16px;
     color: var(--dt-text-primary);
 
     &::placeholder {

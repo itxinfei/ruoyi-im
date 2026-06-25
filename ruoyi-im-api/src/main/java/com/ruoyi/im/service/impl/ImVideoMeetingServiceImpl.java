@@ -369,9 +369,9 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         // 检查或创建参与者记录
         ImVideoMeetingParticipant participant = participantMapper.selectByMeetingAndUser(meetingId, userId);
         if (participant == null) {
-            // 检查人数限制
-            Integer currentCount = participantMapper.countJoinedByMeetingId(meetingId);
-            if (currentCount >= meeting.getMaxParticipants()) {
+            // 原子增加参与人数（带上限检查），防止并发超限
+            int updated = meetingMapper.incrementParticipants(meetingId, meeting.getMaxParticipants());
+            if (updated == 0) {
                 BusinessExceptionHelper.throwMeetingFull();
             }
 
@@ -390,10 +390,6 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
             participant.setCreateTime(LocalDateTime.now());
 
             participantMapper.insert(participant);
-
-            // 更新当前参与人数
-            meeting.setCurrentParticipants(currentCount + 1);
-            meetingMapper.updateById(meeting);
         } else if (PARTICIPANT_STATUS_LEFT.equals(participant.getStatus())) {
             // 重新加入
             participant.setStatus(PARTICIPANT_STATUS_JOINED);
@@ -420,12 +416,8 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
 
         ImVideoMeeting meeting = getMeetingEntity(meetingId);
         if (meeting != null && SystemConstants.MEETING_STATUS_IN_PROGRESS.equals(meeting.getStatus())) {
-            // 更新参与人数
-            Integer currentCount = meeting.getCurrentParticipants();
-            if (currentCount != null && currentCount > 0) {
-                meeting.setCurrentParticipants(currentCount - 1);
-                meetingMapper.updateById(meeting);
-            }
+            // 原子递减参与人数
+            meetingMapper.decrementParticipants(meetingId);
         }
 
         // 如果正在共享屏幕，停止共享
@@ -580,11 +572,8 @@ public class ImVideoMeetingServiceImpl implements ImVideoMeetingService {
         participantMapper.updateById(participant);
 
         // 更新参与人数
-        Integer currentCount = meeting.getCurrentParticipants();
-        if (currentCount != null && currentCount > 0) {
-            meeting.setCurrentParticipants(currentCount - 1);
-            meetingMapper.updateById(meeting);
-        }
+        // 原子递减参与人数
+        meetingMapper.decrementParticipants(meetingId);
 
         cacheMeetingInfo(meeting);
 

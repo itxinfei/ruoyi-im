@@ -154,4 +154,12 @@
             #{id}
         </foreach>
     </delete>
+
+    <insert id="batchInsert">
+        INSERT INTO im_group_member (group_id, user_id, nickname, role, inviter_id, joined_time, create_time, update_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.groupId}, #{item.userId}, #{item.nickname}, #{item.role}, #{item.inviterId}, #{item.joinedTime}, #{item.createTime}, #{item.updateTime})
+        </foreach>
+    </insert>
 </mapper>

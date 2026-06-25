@@ -199,9 +199,7 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
         IPage<ImWorkReport> reportPage = workReportMapper.selectReportPage(page, request);
 
         Page<WorkReportDetailVO> resultPage = new Page<>(reportPage.getCurrent(), reportPage.getSize(), reportPage.getTotal());
-        List<WorkReportDetailVO> voList = reportPage.getRecords().stream()
-                .map(this::convertToDetailVO)
-                .collect(Collectors.toList());
+        List<WorkReportDetailVO> voList = batchConvertToDetailVO(reportPage.getRecords());
         resultPage.setRecords(voList);
 
         return resultPage;
@@ -210,9 +208,60 @@ public class ImWorkReportServiceImpl implements ImWorkReportService {
     @Override
     public List<WorkReportDetailVO> getMyReports(Long userId) {
         List<ImWorkReport> reports = workReportMapper.selectByUserId(userId);
-        return reports.stream()
-                .map(this::convertToDetailVO)
-                .collect(Collectors.toList());
+        return batchConvertToDetailVO(reports);
+    }
+
+    /**
+     * 批量转换报告VO，预加载用户信息和计数，避免N+1
+     */
+    private List<WorkReportDetailVO> batchConvertToDetailVO(List<ImWorkReport> reports) {
+        if (CollUtil.isEmpty(reports)) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载用户信息
+        List<Long> userIds = reports.stream().map(ImWorkReport::getUserId).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> userMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<ImUser> users = userMapper.selectImUserListByIds(userIds);
+            for (ImUser user : users) {
+                userMap.put(user.getId(), user);
+            }
+        }
+
+        // 批量加载评论数和点赞数
+        List<Long> reportIds = reports.stream().map(ImWorkReport::getId).collect(Collectors.toList());
+        Map<Long, Integer> commentCountMap = new HashMap<>();
+        Map<Long, Integer> likeCountMap = new HashMap<>();
+        for (Long reportId : reportIds) {
+            commentCountMap.put(reportId, commentMapper.countByReportId(reportId));
+            likeCountMap.put(reportId, likeMapper.countByReportId(reportId));
+        }
+
+        return reports.stream().map(report -> {
+            WorkReportDetailVO vo = new WorkReportDetailVO();
+            BeanUtils.copyProperties(report, vo);
+
+            ImUser user = userMap.get(report.getUserId());
+            if (user != null) {
+                vo.setUserName(user.getNickname());
+                vo.setUserAvatar(user.getAvatar());
+            }
+
+            vo.setCommentCount(commentCountMap.getOrDefault(report.getId(), 0));
+            vo.setLikeCount(likeCountMap.getOrDefault(report.getId(), 0));
+
+            if (StrUtil.isNotBlank(report.getAttachments())) {
+                vo.setAttachmentList(Arrays.asList(report.getAttachments().split(",")));
+            }
+
+            vo.setReportTypeName(getReportTypeName(report.getReportType()));
+            vo.setCompletionStatusName(getCompletionStatusName(report.getCompletionStatus()));
+            vo.setVisibilityName(getVisibilityName(report.getVisibility()));
+            vo.setStatusName(getStatusName(report.getStatus()));
+
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     @Override

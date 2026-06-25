@@ -1,6 +1,6 @@
 package com.ruoyi.im.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.ImErrorCode;
 import com.ruoyi.im.domain.ImDepartment;
 import com.ruoyi.im.domain.ImDepartmentMember;
@@ -24,7 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -52,20 +54,45 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
         List<ImDepartment> allDepartments = imDepartmentMapper.selectAllDepartments();
         List<ImDepartmentTreeVO> treeList = new ArrayList<>();
 
+        // 批量加载所有部门的成员数量（1次查询替代N次）
+        List<Long> allDeptIds = allDepartments.stream()
+                .map(ImDepartment::getId)
+                .collect(java.util.stream.Collectors.toList());
+        Map<Long, Integer> memberCountMap = new HashMap<>();
+        if (!allDeptIds.isEmpty()) {
+            List<Map<String, Object>> counts = imDepartmentMemberMapper.countMembersByDepartmentIds(allDeptIds);
+            for (Map<String, Object> row : counts) {
+                memberCountMap.put(((Number) row.get("departmentId")).longValue(), ((Number) row.get("memberCount")).intValue());
+            }
+        }
+
+        // 批量加载所有部门负责人的用户信息（1次查询替代N次）
+        List<Long> leaderIds = allDepartments.stream()
+                .map(ImDepartment::getLeaderId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(java.util.stream.Collectors.toList());
+        Map<Long, ImUser> leaderMap = new HashMap<>();
+        if (!leaderIds.isEmpty()) {
+            List<ImUser> leaders = imUserMapper.selectImUserListByIds(leaderIds);
+            for (ImUser leader : leaders) {
+                leaderMap.put(leader.getId(), leader);
+            }
+        }
+
         for (ImDepartment department : allDepartments) {
             ImDepartmentTreeVO treeVO = new ImDepartmentTreeVO();
             BeanUtils.copyProperties(department, treeVO);
 
-            ImUser leader = imUserMapper.selectImUserById(department.getLeaderId());
+            ImUser leader = leaderMap.get(department.getLeaderId());
             if (leader != null) {
                 treeVO.setLeaderName(leader.getNickname());
             }
 
-            int memberCount = imDepartmentMemberMapper.countMembersByDepartmentId(department.getId());
-            treeVO.setMemberCount(memberCount);
+            treeVO.setMemberCount(memberCountMap.getOrDefault(department.getId(), 0));
 
             if (department.getParentId() != null && department.getParentId() == 0L) {
-                treeVO.setChildren(buildChildrenTree(department.getId(), allDepartments));
+                treeVO.setChildren(buildChildrenTree(department.getId(), allDepartments, memberCountMap, leaderMap));
                 treeList.add(treeVO);
             }
         }
@@ -73,23 +100,23 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
         return treeList;
     }
 
-    private List<ImDepartmentTreeVO> buildChildrenTree(Long parentId, List<ImDepartment> allDepartments) {
+    private List<ImDepartmentTreeVO> buildChildrenTree(Long parentId, List<ImDepartment> allDepartments,
+                                                        Map<Long, Integer> memberCountMap, Map<Long, ImUser> leaderMap) {
         List<ImDepartmentTreeVO> children = new ArrayList<>();
 
         for (ImDepartment department : allDepartments) {
-            if (department.getParentId().equals(parentId)) {
+            if (department.getParentId() != null && department.getParentId().equals(parentId)) {
                 ImDepartmentTreeVO treeVO = new ImDepartmentTreeVO();
                 BeanUtils.copyProperties(department, treeVO);
 
-                ImUser leader = imUserMapper.selectImUserById(department.getLeaderId());
+                ImUser leader = leaderMap.get(department.getLeaderId());
                 if (leader != null) {
                     treeVO.setLeaderName(leader.getNickname());
                 }
 
-                int memberCount = imDepartmentMemberMapper.countMembersByDepartmentId(department.getId());
-                treeVO.setMemberCount(memberCount);
+                treeVO.setMemberCount(memberCountMap.getOrDefault(department.getId(), 0));
 
-                treeVO.setChildren(buildChildrenTree(department.getId(), allDepartments));
+                treeVO.setChildren(buildChildrenTree(department.getId(), allDepartments, memberCountMap, leaderMap));
                 children.add(treeVO);
             }
         }
@@ -337,13 +364,13 @@ public class ImOrganizationServiceImpl implements ImOrganizationService {
 
     @Override
     public boolean checkDepartmentNameExists(String name, Long parentId, Long excludeId) {
-        QueryWrapper<ImDepartment> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("name", name);
-        queryWrapper.eq("parent_id", parentId);
-        queryWrapper.eq("del_flag", 0);
+        LambdaQueryWrapper<ImDepartment> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(ImDepartment::getName, name);
+        queryWrapper.eq(ImDepartment::getParentId, parentId);
+        queryWrapper.eq(ImDepartment::getDelFlag, 0);
 
         if (excludeId != null) {
-            queryWrapper.ne("id", excludeId);
+            queryWrapper.ne(ImDepartment::getId, excludeId);
         }
 
         Long count = imDepartmentMapper.selectCount(queryWrapper);

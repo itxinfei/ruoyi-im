@@ -1,6 +1,7 @@
 package com.ruoyi.im.controller;
 
 import com.ruoyi.im.common.Result;
+import com.ruoyi.im.exception.BusinessException;
 import com.ruoyi.im.service.ImFileService;
 import com.ruoyi.im.util.SecurityUtils;
 import com.ruoyi.im.vo.file.ImFileStatisticsVO;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -98,7 +100,7 @@ public class ImFileController {
     @GetMapping("/download/{fileId}")
     public void downloadFile(@PathVariable Long fileId,
             @RequestParam(required = false) String token,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws Exception {
         // 从token参数中获取用户信息（用于文件下载时的JWT验证）
         Long userId;
         if (token != null && !token.isEmpty()) {
@@ -139,7 +141,9 @@ public class ImFileController {
 
         // 设置响应头
         response.setContentType("application/octet-stream");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileVO.getFileName() + "\"");
+        String fileName = fileVO.getFileName().replaceAll("[\r\n]", "");
+        String encodedFileName = URLEncoder.encode(fileName, "UTF-8").replaceAll("\\+", "%20");
+        response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedFileName);
         response.setContentLengthLong(file.length());
 
         // 更新下载次数
@@ -180,7 +184,7 @@ public class ImFileController {
             @PathVariable String day,
             @PathVariable String fileName,
             @RequestParam(required = false) String token,
-            HttpServletResponse response) {
+            HttpServletResponse response) throws Exception {
         // 验证token
         if (token != null && !token.isEmpty()) {
             getUserIdFromToken(token);
@@ -224,10 +228,12 @@ public class ImFileController {
         response.setContentType(contentType);
 
         // 如果是图片文件，设置为内联显示；其他文件设置为下载
+        String cleanFileName = fileName.replaceAll("[\r\n]", "");
+        String encodedName = URLEncoder.encode(cleanFileName, "UTF-8").replaceAll("\\+", "%20");
         if (isImageFile(fileName)) {
-            response.setHeader("Content-Disposition", "inline; filename=\"" + fileName + "\"");
+            response.setHeader("Content-Disposition", "inline; filename*=UTF-8''" + encodedName);
         } else {
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
+            response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + encodedName);
         }
 
         response.setContentLengthLong(file.length());
@@ -279,7 +285,16 @@ public class ImFileController {
     @GetMapping("/{fileId}")
     public Result<ImFileVO> getFileById(@PathVariable Long fileId) {
         Long userId = SecurityUtils.getLoginUserId();
-        ImFileVO fileVO = imFileService.getFileById(fileId, userId);
+        ImFileVO fileVO = imFileService.getFileById(fileId);
+        // 校验文件所有权：只有文件上传者可以查看详情
+        if (fileVO != null && !userId.equals(fileVO.getUploaderId())) {
+            // 管理员除外
+            String role = SecurityUtils.getLoginUserRole();
+            boolean isAdmin = "ROLE_ADMIN".equals(role) || "ROLE_SUPER_ADMIN".equals(role);
+            if (!isAdmin) {
+                throw new BusinessException(403, "无权查看此文件");
+            }
+        }
         return Result.success(fileVO);
     }
 
@@ -308,12 +323,9 @@ public class ImFileController {
      */
     
     @DeleteMapping("/batch")
-    public Result<Void> batchDeleteFiles(@RequestBody List<Long> fileIds) {
+    public Result<Void> batchDeleteFiles(@RequestBody @javax.validation.constraints.Size(max = 100) List<Long> fileIds) {
         Long userId = SecurityUtils.getLoginUserId();
-
-        for (Long fileId : fileIds) {
-            imFileService.deleteFile(fileId, userId);
-        }
+        imFileService.batchDeleteFiles(fileIds, userId);
         return Result.success("批量删除成功");
     }
 

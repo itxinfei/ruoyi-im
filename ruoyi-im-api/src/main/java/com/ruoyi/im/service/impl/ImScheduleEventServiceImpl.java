@@ -66,18 +66,25 @@ public class ImScheduleEventServiceImpl implements ImScheduleEventService {
         event.setStatus(EVENT_STATUS_SCHEDULED);
         eventMapper.insert(event);
 
-        // 添加参与人
+        // 批量添加参与人
         if (CollUtil.isNotEmpty(request.getParticipantIds())) {
-            for (Long participantId : request.getParticipantIds()) {
-                ImUser user = userMapper.selectImUserById(participantId);
-                if (user != null && !participantId.equals(userId)) {
-                    ImScheduleParticipant participant = new ImScheduleParticipant();
-                    participant.setEventId(event.getId());
-                    participant.setUserId(participantId);
-                    participant.setStatus(PARTICIPANT_STATUS_PENDING);
-                    participant.setCreateTime(LocalDateTime.now());
-                    participantMapper.insert(participant);
-                }
+            // 批量验证用户存在性
+            List<Long> validUserIds = request.getParticipantIds().stream()
+                    .filter(id -> !id.equals(userId))
+                    .collect(Collectors.toList());
+            if (!validUserIds.isEmpty()) {
+                List<ImUser> users = userMapper.selectImUserListByIds(validUserIds);
+                Set<Long> existingIds = users.stream().map(ImUser::getId).collect(Collectors.toSet());
+                validUserIds = validUserIds.stream().filter(existingIds::contains).collect(Collectors.toList());
+            }
+
+            for (Long participantId : validUserIds) {
+                ImScheduleParticipant participant = new ImScheduleParticipant();
+                participant.setEventId(event.getId());
+                participant.setUserId(participantId);
+                participant.setStatus(PARTICIPANT_STATUS_PENDING);
+                participant.setCreateTime(LocalDateTime.now());
+                participantMapper.insert(participant);
             }
         }
 

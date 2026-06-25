@@ -41,6 +41,10 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    @org.springframework.beans.factory.annotation.Qualifier("asyncExecutor")
+    private java.util.concurrent.Executor asyncExecutor;
+
     @Override
     public boolean storeOfflineMessage(Long userId, ImMessage message) {
         if (userId == null || message == null) {
@@ -195,7 +199,7 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
             return;
         }
 
-        // 异步推送离线消息，避免阻塞WebSocket连接建立
+        // 使用专用线程池异步推送离线消息，避免占用 ForkJoinPool.commonPool()
         CompletableFuture.runAsync(() -> {
             try {
                 Thread.sleep(500); // 延迟500ms，确保连接完全建立
@@ -203,7 +207,7 @@ public class OfflineMessageServiceImpl implements IOfflineMessageService {
             } catch (Exception e) {
                 log.error("检查和推送离线消息失败: userId={}", userId, e);
             }
-        });
+        }, asyncExecutor);
     }
 
     /**

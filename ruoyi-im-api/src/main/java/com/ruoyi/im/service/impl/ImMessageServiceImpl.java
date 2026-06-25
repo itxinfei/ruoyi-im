@@ -1,5 +1,6 @@
 package com.ruoyi.im.service.impl;
 
+import com.ruoyi.im.constant.MessageStatusConstants;
 import com.ruoyi.im.constant.SystemConstants;
 import com.ruoyi.im.domain.ImConversation;
 import com.ruoyi.im.domain.ImConversationMember;
@@ -47,16 +48,16 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImMessageServiceImpl.class);
 
-    private static final String CACHE_KEY_CONVERSATION_LIST = "conversation:list:";
+    private static final String CACHE_KEY_CONVERSATION_LIST = SystemConstants.CACHE_KEY_CONVERSATION_LIST;
     private static final int CACHE_EVICT_THRESHOLD = 20;
-    private static final String MESSAGE_TYPE_TEXT = MESSAGE_TYPE_TEXT;
-    private static final String MESSAGE_TYPE_IMAGE = MESSAGE_TYPE_IMAGE;
-    private static final String MESSAGE_TYPE_FILE = MESSAGE_TYPE_FILE;
-    private static final String MESSAGE_TYPE_VIDEO = MESSAGE_TYPE_VIDEO;
-    private static final String MESSAGE_TYPE_VOICE = MESSAGE_TYPE_VOICE;
-    private static final String MESSAGE_TYPE_COMBINE_FORWARD = MESSAGE_TYPE_COMBINE_FORWARD;
-    private static final String CONVERSATION_TYPE_GROUP = CONVERSATION_TYPE_GROUP;
-    private static final String URL_FETCH_STATUS_SUCCESS = URL_FETCH_STATUS_SUCCESS;
+    private static final String MESSAGE_TYPE_TEXT = MessageStatusConstants.MESSAGE_TYPE_TEXT;
+    private static final String MESSAGE_TYPE_IMAGE = MessageStatusConstants.MESSAGE_TYPE_IMAGE;
+    private static final String MESSAGE_TYPE_FILE = MessageStatusConstants.MESSAGE_TYPE_FILE;
+    private static final String MESSAGE_TYPE_VIDEO = MessageStatusConstants.MESSAGE_TYPE_VIDEO;
+    private static final String MESSAGE_TYPE_VOICE = MessageStatusConstants.MESSAGE_TYPE_VOICE;
+    private static final String MESSAGE_TYPE_COMBINE_FORWARD = "COMBINE_FORWARD";
+    private static final String CONVERSATION_TYPE_GROUP = MessageStatusConstants.CONVERSATION_TYPE_GROUP;
+    private static final String URL_FETCH_STATUS_SUCCESS = "SUCCESS";
     private static final long LOCK_EXPIRE_SECONDS = 10L;
     private static final int ERROR_CODE_INTERNAL = 500;
     private static final int QUOTED_CONTENT_MAX_LENGTH = 50;
@@ -234,10 +235,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         message.setSendRetryCount(0);
         // deliveredTime 不在这里设置，收到对方 ACK 后再更新
 
-        // 生成递增 Seq (Doc-34 §2.1)
-        String seqKey = "im:seq:" + conversationId;
-        Long nextSeq = redisUtil.increment(seqKey);
-        message.setSeq(nextSeq);
+        // 生成递增 Seq (Doc-34 §2.1) — 使用 SQL 原子递增替代 Redis，避免事务回滚导致序号空洞
+        // 临时 seq 先设为 0，commit 后通过同步回调从 Redis 获取真实值
+        message.setSeq(0L);
 
         try {
             imMessageMapper.insertImMessage(message);
@@ -246,9 +246,37 @@ public class ImMessageServiceImpl implements ImMessageService {
             throw new BusinessException(ERROR_CODE_INTERNAL, "消息存储失败");
         }
 
-        if (clientMsgId != null && !clientMsgId.isEmpty()) {
-            redisUtil.recordClientMsgId(clientMsgId, message.getId());
-        }
+        // 收集需要在事务提交后执行的 Redis 操作
+        final Long msgId = message.getId();
+        final Long convId = conversationId;
+        final Long senderId = userId;
+        final String finalClientMsgId = clientMsgId;
+
+        org.springframework.transaction.support.TransactionSynchronizationManager.registerSynchronization(
+            new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    // 事务提交后再分配真实 seq，保证不会因回滚产生空洞
+                    String seqKey = "im:seq:" + convId;
+                    Long realSeq = redisUtil.increment(seqKey);
+                    redisUtil.expire(seqKey, 30, java.util.concurrent.TimeUnit.DAYS);
+                    // 回写 seq 到 DB（异步，失败不影响主流程）
+                    try {
+                        ImMessage seqUpdate = new ImMessage();
+                        seqUpdate.setId(msgId);
+                        seqUpdate.setSeq(realSeq);
+                        imMessageMapper.updateImMessage(seqUpdate);
+                    } catch (Exception e) {
+                        log.warn("回写消息seq失败: msgId={}", msgId, e);
+                    }
+
+                    // 记录幂等键
+                    if (finalClientMsgId != null && !finalClientMsgId.isEmpty()) {
+                        redisUtil.recordClientMsgId(finalClientMsgId, msgId);
+                    }
+                }
+            }
+        );
 
         try {
             ImConversation conversationUpdate = new ImConversation();
@@ -266,10 +294,26 @@ public class ImMessageServiceImpl implements ImMessageService {
             members = imConversationMemberMapper.selectByConversationId(conversationId);
 
             if (members != null && !members.isEmpty()) {
+                // 批量获取所有非发送者的用户ID
+                List<Long> memberUserIds = members.stream()
+                        .filter(m -> m != null && m.getUserId() != null && !m.getUserId().equals(userId))
+                        .map(com.ruoyi.im.domain.ImConversationMember::getUserId)
+                        .collect(java.util.stream.Collectors.toList());
+
+                // 批量更新未读数（单条SQL替代N条）
+                if (!memberUserIds.isEmpty()) {
+                    imConversationMemberMapper.batchIncrementUnreadCount(conversationId, memberUserIds, userId, 1);
+                    // 批量更新Redis未读数
+                    for (Long memberId : memberUserIds) {
+                        incrementSessionUnread(conversationId, memberId, 1);
+                    }
+                }
+
+                // 新消息到达，清除所有成员的会话列表缓存
+                String cachePrefix = com.ruoyi.im.constant.SystemConstants.CACHE_KEY_CONVERSATION_LIST;
                 for (com.ruoyi.im.domain.ImConversationMember member : members) {
-                    if (member != null && member.getUserId() != null && !member.getUserId().equals(userId)) {
-                        incrementSessionUnread(conversationId, member.getUserId(), 1);
-                        imConversationMemberMapper.incrementUnreadCount(conversationId, member.getUserId(), 1);
+                    if (member != null && member.getUserId() != null) {
+                        redisUtil.delete(cachePrefix + member.getUserId());
                     }
                 }
             }
@@ -337,7 +381,9 @@ public class ImMessageServiceImpl implements ImMessageService {
         List<Long> targetUserIds = new ArrayList<>();
         if (members != null) {
             for (com.ruoyi.im.domain.ImConversationMember member : members) {
-                targetUserIds.add(member.getUserId());
+                if (member.getUserId() != null) {
+                    targetUserIds.add(member.getUserId());
+                }
             }
         } else {
             targetUserIds.add(userId);
@@ -707,10 +753,12 @@ public class ImMessageServiceImpl implements ImMessageService {
         history.setCreateTime(now);
         editHistoryMapper.insert(history);
 
-        // 更新消息
+        // 原子递增编辑次数
+        imMessageMapper.incrementEditCount(messageId);
+
+        // 更新消息内容
         message.setEditedContent(newContent);
         message.setIsEdited(1);
-        message.setEditCount(message.getEditCount() == null ? 1 : message.getEditCount() + 1);
         message.setEditTime(now);
         imMessageMapper.updateImMessage(message);
 
@@ -809,6 +857,11 @@ public class ImMessageServiceImpl implements ImMessageService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId) {
+        return forwardMessage(messageId, toConversationId, toUserId, content, userId, null);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Long forwardMessage(Long messageId, Long toConversationId, Long toUserId, String content, Long userId, String clientMsgId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {
             BusinessExceptionHelper.throwMessageNotFound();
@@ -830,6 +883,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         forwardMessage.setReceiverId(
             Optional.ofNullable(toUserId).orElse(originalMessage.getReceiverId()));
         forwardMessage.setMessageType(originalMessage.getMessageType()); // 转发时保留原消息类型
+        forwardMessage.setClientMsgId(clientMsgId); // 幂等性保护
 
         // 构建转发消息内容，包含原消息信息
         String forwardContent;
@@ -853,6 +907,7 @@ public class ImMessageServiceImpl implements ImMessageService {
     public void batchForward(com.ruoyi.im.dto.message.ImMessageBatchForwardRequest request, Long userId) {
         List<Long> messageIds = request.getMessageIds();
         List<Long> toConversationIds = request.getToConversationIds();
+        List<String> failures = new ArrayList<>();
 
         if (Boolean.TRUE.equals(request.getIsCombine())) {
             // 合并转发：构造摘要内容
@@ -861,14 +916,12 @@ public class ImMessageServiceImpl implements ImMessageService {
             combinedContent.append("--- ").append(title).append(" ---\n");
 
             List<ImMessage> messages = imMessageMapper.selectImMessageListByIds(messageIds);
-            // 保持原消息顺序
             messages.sort(java.util.Comparator.comparing(ImMessage::getId));
 
             for (ImMessage msg : messages) {
                 ImUser sender = imUserMapper.selectImUserById(msg.getSenderId());
                 String senderName = sender != null ? sender.getNickname() : "用户" + msg.getSenderId();
                 String text = encryptionUtil.decryptMessage(msg.getContent());
-                // 简单处理：如果是图片/文件，显示占位符
                 if (!MESSAGE_TYPE_TEXT.equalsIgnoreCase(msg.getMessageType())) {
                     text = "[" + msg.getMessageType() + "]";
                 }
@@ -876,24 +929,44 @@ public class ImMessageServiceImpl implements ImMessageService {
             }
 
             for (Long convId : toConversationIds) {
-                com.ruoyi.im.dto.message.ImMessageSendRequest sendReq = new com.ruoyi.im.dto.message.ImMessageSendRequest();
-                sendReq.setConversationId(convId);
-                sendReq.setType(MESSAGE_TYPE_COMBINE_FORWARD);
-                sendReq.setContent(combinedContent.toString());
-                this.sendMessage(sendReq, userId);
+                try {
+                    com.ruoyi.im.dto.message.ImMessageSendRequest sendReq = new com.ruoyi.im.dto.message.ImMessageSendRequest();
+                    sendReq.setConversationId(convId);
+                    sendReq.setType(MESSAGE_TYPE_COMBINE_FORWARD);
+                    sendReq.setContent(combinedContent.toString());
+                    this.sendMessage(sendReq, userId);
+                } catch (Exception e) {
+                    failures.add("会话" + convId + ": " + e.getMessage());
+                    log.warn("批量转发部分失败: convId={}", convId, e);
+                }
             }
         } else {
             // 逐条转发
             for (Long convId : toConversationIds) {
                 for (Long msgId : messageIds) {
-                    this.forwardMessage(msgId, convId, null, null, userId);
+                    try {
+                        this.forwardMessage(msgId, convId, null, null, userId);
+                    } catch (Exception e) {
+                        failures.add("消息" + msgId + "->会话" + convId + ": " + e.getMessage());
+                        log.warn("批量转发部分失败: msgId={}, convId={}", msgId, convId, e);
+                    }
                 }
             }
+        }
+
+        if (!failures.isEmpty()) {
+            log.warn("批量转发存在失败项: {}/{} 失败", failures.size(), toConversationIds.size() * messageIds.size());
         }
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long replyMessage(Long messageId, String content, Long userId) {
+        return replyMessage(messageId, content, userId, null);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public Long replyMessage(Long messageId, String content, Long userId, String clientMsgId) {
         ImMessage originalMessage = imMessageMapper.selectImMessageById(messageId);
         if (originalMessage == null) {
             BusinessExceptionHelper.throwMessageNotFound();
@@ -910,6 +983,7 @@ public class ImMessageServiceImpl implements ImMessageService {
         replyMessage.setReplyToMessageId(messageId); // 设置回复消息ID
         replyMessage.setMessageType(MESSAGE_TYPE_TEXT); // 回复消息类型为TEXT
         replyMessage.setContent(encryptionUtil.encryptMessage(content));
+        replyMessage.setClientMsgId(clientMsgId); // 幂等性保护
         replyMessage.setIsRevoked(0);
         replyMessage.setCreateTime(LocalDateTime.now());
 
@@ -1231,7 +1305,14 @@ public class ImMessageServiceImpl implements ImMessageService {
 
     @Override
     public void adminDeleteMessage(Long messageId) {
-        imMessageMapper.deleteImMessageById(messageId);
+        // 使用软删除，与用户端 deleteMessage 保持一致，避免级联引用（提及、反应、已读记录）断裂
+        ImMessage message = imMessageMapper.selectImMessageById(messageId);
+        if (message == null) {
+            return;
+        }
+        message.setIsDeleted(1);
+        message.setUpdateTime(LocalDateTime.now());
+        imMessageMapper.updateImMessage(message);
     }
 
     @Override

@@ -185,15 +185,20 @@ public class ImFileControllerTest {
      */
     @Test
     void testGetFileById_Success() {
-        ImFileVO expectedVO = createTestFileVO(1L, "test.txt");
-        when(imFileService.getFileById(1L)).thenReturn(expectedVO);
+        try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
+            mockedSecurityUtils.when(SecurityUtils::getLoginUserRole).thenReturn("ROLE_ADMIN");
 
-        Result<ImFileVO> result = imFileController.getFileById(1L);
+            ImFileVO expectedVO = createTestFileVO(1L, "test.txt");
+            when(imFileService.getFileById(1L)).thenReturn(expectedVO);
 
-        assertNotNull(result);
-        assertTrue(result.isSuccess());
-        assertEquals(1L, result.getData().getFileId());
-        verify(imFileService).getFileById(1L);
+            Result<ImFileVO> result = imFileController.getFileById(1L);
+
+            assertNotNull(result);
+            assertTrue(result.isSuccess());
+            assertEquals(1L, result.getData().getFileId());
+            verify(imFileService).getFileById(1L);
+        }
     }
 
     /**
@@ -224,14 +229,14 @@ public class ImFileControllerTest {
             mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
             List<Long> fileIds = Arrays.asList(1L, 2L, 3L);
-            doNothing().when(imFileService).deleteFile(anyLong(), eq(TEST_USER_ID));
+            doNothing().when(imFileService).batchDeleteFiles(anyList(), eq(TEST_USER_ID));
 
             Result<Void> result = imFileController.batchDeleteFiles(fileIds);
 
             assertNotNull(result);
             assertTrue(result.isSuccess());
             assertEquals("批量删除成功", result.getMsg());
-            verify(imFileService, times(3)).deleteFile(anyLong(), eq(TEST_USER_ID));
+            verify(imFileService, times(1)).batchDeleteFiles(fileIds, TEST_USER_ID);
         }
     }
 
@@ -310,7 +315,7 @@ public class ImFileControllerTest {
      * 测试下载文件 - 文件不存在
      */
     @Test
-    void testDownloadFile_NotFound() {
+    void testDownloadFile_NotFound() throws Exception {
         try (MockedStatic<SecurityUtils> mockedSecurityUtils = mockStatic(SecurityUtils.class)) {
             mockedSecurityUtils.when(SecurityUtils::getLoginUserId).thenReturn(TEST_USER_ID);
 
@@ -328,7 +333,7 @@ public class ImFileControllerTest {
      * 测试下载文件 - 成功（带token）
      */
     @Test
-    void testDownloadFile_WithToken() {
+    void testDownloadFile_WithToken() throws Exception {
         // Note: This test is incomplete due to file system dependencies
         // The controller method downloads files to HttpServletResponse which requires
         // actual file system access and cannot be easily unit tested
@@ -339,7 +344,7 @@ public class ImFileControllerTest {
      * 测试按路径下载文件 - token验证失败
      */
     @Test
-    void testDownloadFileByPath_InvalidToken() {
+    void testDownloadFileByPath_InvalidToken() throws Exception {
         String token = "invalid-token";
         when(jwtUtils.getUserIdFromToken(token)).thenReturn(null);
 

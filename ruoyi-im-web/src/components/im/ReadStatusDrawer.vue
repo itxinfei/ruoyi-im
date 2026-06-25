@@ -211,7 +211,7 @@ const formatTime = (ts) => {
 
 .title {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
 }
 
@@ -234,7 +234,7 @@ const formatTime = (ts) => {
 .completion-summary {
   display: flex;
   align-items: center;
-  padding: 24px 20px;
+  padding: 24px;
   gap: 24px;
   background: var(--dt-bg-body);
 }
@@ -253,7 +253,7 @@ const formatTime = (ts) => {
   align-items: center;
   justify-content: center;
   .percent { font-size: 16px; font-weight: 700; color: var(--dt-text-primary); line-height: 1.2; }
-  .sub { font-size: 11px; color: var(--dt-text-tertiary); }
+  .sub { font-size: 12px; color: var(--dt-text-tertiary); }
 }
 
 .summary-info {
@@ -305,8 +305,8 @@ const formatTime = (ts) => {
 .user-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 20px;
-  
+  padding: 8px 24px;
+
   &::-webkit-scrollbar { width: 4px; }
   &::-webkit-scrollbar-thumb { background: var(--dt-scrollbar-thumb-bg); border-radius: var(--dt-radius-sm); }
 }
@@ -315,7 +315,7 @@ const formatTime = (ts) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
+  padding: 12px 0;
   border-bottom: 1px solid var(--dt-border-lighter);
 }
 
@@ -331,7 +331,7 @@ const formatTime = (ts) => {
 .read-time { font-size: 12px; color: var(--dt-text-tertiary); }
 
 .action-footer {
-  padding: 16px 20px;
+  padding: 16px 24px;
   border-top: 1px solid var(--dt-border-light);
   background: var(--dt-bg-card);
 }
@@ -339,7 +339,7 @@ const formatTime = (ts) => {
 .ding-btn {
   width: 100%;
   height: 36px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   .el-icon { margin-right: 6px; }
 }
 

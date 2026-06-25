@@ -243,12 +243,12 @@ watch(() => props.modelValue, (val) => {
 <style scoped lang="scss">
 .edit-profile-dialog {
   :deep(.el-dialog__header) {
-    padding: 20px 24px 16px;
+    padding: 24px;
     border-bottom: 1px solid var(--dt-border-light);
 
     .el-dialog__title {
       font-size: 18px;
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
     }
   }
 

@@ -1,6 +1,7 @@
 package com.ruoyi.im.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -43,6 +44,12 @@ public class ImTaskServiceImpl implements ImTaskService {
 
     private static final Logger log = LoggerFactory.getLogger(ImTaskServiceImpl.class);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static String toJson(Object obj) {
+        try { return MAPPER.writeValueAsString(obj); }
+        catch (Exception e) { throw new RuntimeException("JSON序列化失败", e); }
+    }
 
     private static final String STATUS_PENDING = "PENDING";
     private static final String TASK_NUMBER_PREFIX = "TASK-";
@@ -82,7 +89,7 @@ public class ImTaskServiceImpl implements ImTaskService {
 
         // 处理关注人
         if (request.getFollowerIds() != null && !request.getFollowerIds().isEmpty()) {
-            task.setFollowers(JSON.toJSONString(request.getFollowerIds()));
+            task.setFollowers(toJson(request.getFollowerIds()));
         }
 
         // 如果是子任务，更新父任务的hasSubtask标记
@@ -166,7 +173,7 @@ public class ImTaskServiceImpl implements ImTaskService {
 
         // 处理关注人
         if (request.getFollowerIds() != null) {
-            task.setFollowers(JSON.toJSONString(request.getFollowerIds()));
+            task.setFollowers(toJson(request.getFollowerIds()));
         }
 
         task.setUpdateTime(LocalDateTime.now());
@@ -319,7 +326,8 @@ public class ImTaskServiceImpl implements ImTaskService {
         Set<Long> followers = new HashSet<>();
         if (task.getFollowers() != null && !task.getFollowers().isEmpty()) {
             try {
-                List<Long> list = JSON.parseArray(task.getFollowers(), Long.class);
+                List<Long> list = MAPPER.readValue(task.getFollowers(),
+                        MAPPER.getTypeFactory().constructCollectionType(List.class, Long.class));
                 followers = new HashSet<>(list);
             } catch (Exception e) {
                 log.warn("解析关注人失败: taskId={}", taskId);
@@ -332,7 +340,7 @@ public class ImTaskServiceImpl implements ImTaskService {
             followers.add(userId);
         }
 
-        task.setFollowers(JSON.toJSONString(followers));
+        task.setFollowers(toJson(followers));
         task.setUpdateTime(LocalDateTime.now());
         taskMapper.updateById(task);
     }
@@ -589,7 +597,8 @@ public class ImTaskServiceImpl implements ImTaskService {
         // 解析关注人
         if (task.getFollowers() != null && !task.getFollowers().isEmpty()) {
             try {
-                List<Long> followerIds = JSON.parseArray(task.getFollowers(), Long.class);
+                List<Long> followerIds = MAPPER.readValue(task.getFollowers(),
+                        MAPPER.getTypeFactory().constructCollectionType(List.class, Long.class));
                 // 设置关注人详情
             } catch (Exception e) {
                 log.warn("解析关注人失败: taskId={}", task.getId());

@@ -51,25 +51,34 @@ public class ImMessageReactionServiceImpl implements ImMessageReactionService {
             reactionMapper.deleteById(exist.getId());
             action = "REMOVE";
         } else {
-            // 不存在则新增
+            // 不存在则新增，捕获并发插入的唯一键冲突
             ImMessageReaction reaction = new ImMessageReaction();
             reaction.setMessageId(request.getMessageId());
             reaction.setUserId(userId);
             reaction.setEmoji(request.getEmoji());
-            reaction.setCreateTime(LocalDateTime.now()); // 修正 Date 到 LocalDateTime
-            reactionMapper.insert(reaction);
-            action = "ADD";
+            reaction.setCreateTime(LocalDateTime.now());
+            try {
+                reactionMapper.insert(reaction);
+                action = "ADD";
+            } catch (org.springframework.dao.DuplicateKeyException e) {
+                // 并发插入导致重复，回退为取消操作
+                exist = reactionMapper.selectOne(query);
+                if (exist != null) {
+                    reactionMapper.deleteById(exist.getId());
+                }
+                action = "REMOVE";
+            }
         }
 
         // 异步广播更新通知 (严格对齐 5 参数签名)
         broadcastService.broadcastReactionUpdate(
-            message.getConversationId(), 
-            request.getMessageId(), 
-            userId, 
-            request.getEmoji(), 
+            message.getConversationId(),
+            request.getMessageId(),
+            userId,
+            request.getEmoji(),
             action
         );
-        
+
         return new ImMessageReactionVO();
     }
 

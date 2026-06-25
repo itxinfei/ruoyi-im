@@ -1,13 +1,14 @@
 package com.ruoyi.im.listener;
 
 import com.ruoyi.im.vo.message.ImMessageVO;
-import com.ruoyi.im.websocket.ImWebSocketHandler;
+import com.ruoyi.im.websocket.ImWebSocketEndpoint;
 import com.ruoyi.im.websocket.WsFrame;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionalEventListener;
+import org.springframework.transaction.event.TransactionPhase;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,13 +19,10 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class MessageSendListener {
 
-    private final ImWebSocketHandler webSocketHandler;
-
     @Async("messageTaskExecutor")
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleMessageSendEvent(MessageSendEvent event) {
         ImMessageVO messageVO = event.getMessageVO();
         Long senderId = messageVO.getSenderId();
@@ -42,7 +40,7 @@ public class MessageSendListener {
         ackData.put("clientMsgId", messageVO.getClientMsgId());
         ackFrame.setData(ackData);
 
-        webSocketHandler.sendMessageToUser(senderId, ackFrame);
+        ImWebSocketEndpoint.sendToUser(senderId, ackFrame);
 
         // 2. 向所有接收者推送 RECEIVE
         WsFrame receiveFrame = new WsFrame();
@@ -53,7 +51,7 @@ public class MessageSendListener {
 
         for (Long targetUserId : event.getTargetUserIds()) {
             if (!targetUserId.equals(senderId)) {
-                webSocketHandler.sendMessageToUser(targetUserId, receiveFrame);
+                ImWebSocketEndpoint.sendToUser(targetUserId, receiveFrame);
             }
         }
     }

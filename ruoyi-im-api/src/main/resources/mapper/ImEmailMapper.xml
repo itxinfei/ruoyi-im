@@ -38,6 +38,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             and folder = #{folder}
         </if>
         order by create_time desc
+        limit 200
     </select>
 
     <select id="selectEmailById" parameterType="Long" resultMap="ImEmailResult">

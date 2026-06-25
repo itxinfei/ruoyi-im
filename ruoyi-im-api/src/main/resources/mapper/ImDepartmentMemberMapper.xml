@@ -88,4 +88,15 @@
         WHERE department_id = #{departmentId} AND status = 0
     </select>
 
+    <select id="countMembersByDepartmentIds" resultType="java.util.Map">
+        SELECT department_id AS departmentId, COUNT(1) AS memberCount
+        FROM im_department_member
+        WHERE department_id IN
+        <foreach item="id" collection="departmentIds" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND status = 0
+        GROUP BY department_id
+    </select>
+
 </mapper>

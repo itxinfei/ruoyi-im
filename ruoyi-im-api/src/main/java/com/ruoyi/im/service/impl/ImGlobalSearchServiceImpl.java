@@ -2,6 +2,8 @@ package com.ruoyi.im.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.im.constant.SystemConstants;
+
+import static com.ruoyi.im.constant.SystemConstants.*;
 import com.ruoyi.im.dto.search.GlobalSearchRequest;
 import com.ruoyi.im.domain.*;
 import com.ruoyi.im.mapper.*;
@@ -94,7 +96,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
 
         // 根据搜索类型决定搜索哪些内容
         String searchType = request.getSearchType();
-        if ("all".equals(searchType) || searchType == null) {
+        if (CONVERSATION_FILTER_ALL.equals(searchType) || searchType == null) {
             // 搜索所有类型
             result.setMessages(searchMessagesList(keyword, null));
             result.setContacts(searchContactsList(keyword, null));
@@ -227,7 +229,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
                     // 获取会话名称
                     ImConversation conv = conversationMap.get(msg.getConversationId());
                     if (conv != null) {
-                        result.setConversationName(conv.getType().equals("GROUP") ?
+                        result.setConversationName(conv.getType().equals(CONVERSATION_TYPE_GROUP) ?
                             conv.getName() : getPrivateConversationName(conv, userMap));
                     }
 
@@ -521,7 +523,7 @@ public class ImGlobalSearchServiceImpl implements ImGlobalSearchService {
      * 获取私聊会话名称
      */
     private String getPrivateConversationName(ImConversation conv, Map<Long, ImUser> userMap) {
-        if ("PRIVATE".equals(conv.getType())) {
+        if (CONVERSATION_TYPE_PRIVATE.equals(conv.getType())) {
             ImUser targetUser = userMap.get(conv.getTargetId());
             if (targetUser != null) {
                 return targetUser.getNickname() != null ? targetUser.getNickname() : targetUser.getUsername();

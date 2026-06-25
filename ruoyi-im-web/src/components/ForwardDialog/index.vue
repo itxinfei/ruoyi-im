@@ -134,7 +134,7 @@ const handleForward = async () => {
 
 <style scoped lang="scss">
 .premium-forward-dialog {
-  :deep(.el-dialog) { border-radius: 12px; overflow: hidden; padding: 0; box-shadow: var(--dt-shadow-3); }
+  :deep(.el-dialog) { border-radius: var(--dt-radius-lg); overflow: hidden; padding: 0; box-shadow: var(--dt-shadow-3); }
   :deep(.el-dialog__body) { padding: 0; }
   :deep(.el-dialog__header) { display: none; }
 }
@@ -146,12 +146,12 @@ const handleForward = async () => {
 // 1. 左侧预览
 .preview-aside {
   width: 240px; background: var(--dt-bg-input); border-right: 1px solid var(--dt-border-light);
-  display: flex; flex-direction: column; padding: 20px;
+  display: flex; flex-direction: column; padding: 24px;
   .aside-label { font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 12px; }
   .preview-card {
     flex: 1; background: var(--dt-bg-card); border: 1px solid var(--dt-border-light); border-radius: var(--dt-radius-lg);
-    padding: 12px; font-size: 13px; line-height: 1.6;
-    .m-sender { color: var(--dt-brand-color); font-weight: 600; margin-right: 4px; }
+    padding: 12px; font-size: 14px; line-height: 1.6;
+    .m-sender { color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); margin-right: 4px; }
     .m-text { color: var(--dt-text-secondary); }
     .m-line { margin-bottom: 8px; @include text-ellipsis; }
   }
@@ -161,10 +161,10 @@ const handleForward = async () => {
 // 2. 右侧选择
 .select-main {
   flex: 1; display: flex; flex-direction: column;
-  .select-header { padding: 16px 20px; border-bottom: 1px solid var(--dt-border-light); }
+  .select-header { padding: 16px 24px; border-bottom: 1px solid var(--dt-border-light); }
   .search-bar-v4 {
-    height: 32px; background: var(--dt-bg-input); border-radius: 16px; display: flex; align-items: center; padding: 0 12px; gap: 8px;
-    input { border: none; background: transparent; outline: none; flex: 1; font-size: 13px; color: var(--dt-text-primary); }
+    height: 32px; background: var(--dt-bg-input); border-radius: var(--dt-radius-xl); display: flex; align-items: center; padding: 0 12px; gap: 8px;
+    input { border: none; background: transparent; outline: none; flex: 1; font-size: 14px; color: var(--dt-text-primary); }
     .el-icon { color: var(--dt-text-tertiary); }
   }
 }
@@ -173,24 +173,24 @@ const handleForward = async () => {
   flex: 1; display: flex; overflow: hidden;
   .column-left, .column-right { flex: 1; padding: 12px; overflow-y: auto; }
   .column-right { background: var(--dt-bg-input); border-left: 1px solid var(--dt-border-light); }
-  .col-title { font-size: 11px; font-weight: 700; color: var(--dt-text-tertiary); margin-bottom: 12px; padding-left: 8px; }
+  .col-title { font-size: 12px; font-weight: 700; color: var(--dt-text-tertiary); margin-bottom: 12px; padding-left: 8px; }
 }
 
 .sel-item {
-  height: 44px; display: flex; align-items: center; gap: 10px; padding: 0 10px;
+  height: 48px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
   border-radius: var(--dt-radius-md); cursor: pointer; transition: var(--dt-transition-fast);
   &:hover { background: var(--dt-bg-hover); }
   &.selected { .check-box { background: var(--dt-brand-color); border-color: var(--dt-brand-color); color: var(--dt-text-white); } }
   .name { font-size: 14px; flex: 1; @include text-ellipsis; color: var(--dt-text-primary); }
-  .check-box { width: 18px; height: 18px; border: 1.5px solid var(--dt-border-color); border-radius: 50%; @include flex-center; font-size: 11px; color: transparent; }
+  .check-box { width: 18px; height: 18px; border: 1.5px solid var(--dt-border-color); border-radius: 50%; @include flex-center; font-size: 12px; color: transparent; }
 }
 
 .selected-pill {
-  height: 32px; background: var(--dt-brand-bg); border-radius: 16px; padding: 0 12px;
+  height: 32px; background: var(--dt-brand-bg); border-radius: var(--dt-radius-xl); padding: 0 12px;
   display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;
   .p-name { font-size: 12px; color: var(--dt-brand-color); font-weight: 500; }
   .p-close { font-size: 14px; color: var(--dt-text-tertiary); cursor: pointer; &:hover { color: var(--dt-error-color); } }
 }
 
-.v4-dialog-footer { padding: 12px 20px; border-top: 1px solid var(--dt-border-light); display: flex; justify-content: flex-end; gap: 12px; }
+.v4-dialog-footer { padding: 12px 24px; border-top: 1px solid var(--dt-border-light); display: flex; justify-content: flex-end; gap: 12px; }
 </style>

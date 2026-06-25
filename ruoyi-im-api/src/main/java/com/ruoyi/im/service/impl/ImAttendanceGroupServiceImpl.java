@@ -14,6 +14,8 @@ import com.ruoyi.im.mapper.ImAttendanceScheduleMapper;
 import com.ruoyi.im.mapper.ImAttendanceShiftMapper;
 import com.ruoyi.im.mapper.ImUserMapper;
 import com.ruoyi.im.service.ImAttendanceGroupService;
+
+import static com.ruoyi.im.constant.SystemConstants.*;
 import com.ruoyi.im.vo.attendance.ImAttendanceGroupVO;
 import com.ruoyi.im.vo.attendance.ImAttendanceShiftVO;
 import org.slf4j.Logger;
@@ -75,17 +77,17 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         group.setCheckMethod(request.getCheckMethod() != null ? request.getCheckMethod() : "LOCATION");
         group.setWorkStartTime(request.getWorkStartTime());
         group.setWorkEndTime(request.getWorkEndTime());
-        group.setCheckInBefore(request.getCheckInBefore() != null ? request.getCheckInBefore() : 120);
+        group.setCheckInBefore(request.getCheckInBefore() != null ? request.getCheckInBefore() : ATTENDANCE_CHECK_IN_BEFORE_DEFAULT);
         group.setLateTolerance(request.getLateTolerance() != null ? request.getLateTolerance() : 0);
         group.setEarlyTolerance(request.getEarlyTolerance() != null ? request.getEarlyTolerance() : 0);
         group.setWorkDays(request.getWorkDays() != null ? request.getWorkDays() : "1,2,3,4,5");
         group.setNeedCheckIn(true);
         group.setAllowRemote(request.getAllowRemote() != null ? request.getAllowRemote() : false);
-        group.setCheckRange(request.getCheckRange() != null ? request.getCheckRange() : 100);
+        group.setCheckRange(request.getCheckRange() != null ? request.getCheckRange() : ATTENDANCE_CHECK_RANGE_DEFAULT);
         group.setCheckLocation(request.getCheckLocation());
         group.setWifiSsid(request.getWifiSsid());
         group.setAutoAttendance(false);
-        group.setStatus("ACTIVE");
+        group.setStatus(STATUS_ACTIVE);
         group.setCreatorId(userId);
         group.setCreateTime(LocalDateTime.now());
         group.setUpdateTime(LocalDateTime.now());
@@ -99,8 +101,8 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             adminMember.setUserId(userId);
             ImUser creator = userMapper.selectImUserById(userId);
             adminMember.setUserName(creator != null ? creator.getNickname() : "");
-            adminMember.setRole("ADMIN");
-            adminMember.setStatus("ACTIVE");
+            adminMember.setRole(ROLE_ADMIN);
+            adminMember.setStatus(STATUS_ACTIVE);
             adminMember.setJoinTime(LocalDateTime.now());
             adminMember.setCreateTime(LocalDateTime.now());
             attendanceGroupMemberMapper.insert(adminMember);
@@ -258,13 +260,13 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         for (Long memberId : memberIds) {
             // 检查是否已是成员
             ImAttendanceGroupMember existMember = attendanceGroupMemberMapper.selectByGroupAndUser(groupId, memberId);
-            if (existMember != null && "ACTIVE".equals(existMember.getStatus())) {
+            if (existMember != null && STATUS_ACTIVE.equals(existMember.getStatus())) {
                 continue;
             }
 
             // 如果是重新加入，更新状态
             if (existMember != null) {
-                existMember.setStatus("ACTIVE");
+                existMember.setStatus(STATUS_ACTIVE);
                 existMember.setLeaveTime(null);
                 attendanceGroupMemberMapper.updateById(existMember);
                 continue;
@@ -276,8 +278,8 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
             member.setUserId(memberId);
             ImUser user = userMapper.selectImUserById(memberId);
             member.setUserName(user != null ? user.getNickname() : "");
-            member.setRole("MEMBER");
-            member.setStatus("ACTIVE");
+            member.setRole(ROLE_MEMBER);
+            member.setStatus(STATUS_ACTIVE);
             member.setJoinTime(LocalDateTime.now());
             member.setCreateTime(LocalDateTime.now());
             members.add(member);
@@ -311,7 +313,7 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
     public List<Long> getGroupMembers(Long groupId) {
         List<ImAttendanceGroupMember> members = attendanceGroupMemberMapper.selectByGroupId(groupId);
         return members.stream()
-                .filter(m -> "ACTIVE".equals(m.getStatus()))
+                .filter(m -> STATUS_ACTIVE.equals(m.getStatus()))
                 .map(ImAttendanceGroupMember::getUserId)
                 .collect(Collectors.toList());
     }
@@ -335,11 +337,11 @@ public class ImAttendanceGroupServiceImpl implements ImAttendanceGroupService {
         shift.setShiftType("NORMAL");
         shift.setWorkStartTime(workStartTime);
         shift.setWorkEndTime(workEndTime);
-        shift.setCheckInBefore(120);
-        shift.setCheckOutAfter(60);
+        shift.setCheckInBefore(ATTENDANCE_CHECK_IN_BEFORE_DEFAULT);
+        shift.setCheckOutAfter(ATTENDANCE_CHECK_OUT_AFTER_DEFAULT);
         shift.setLateTolerance(0);
         shift.setEarlyTolerance(0);
-        shift.setStatus("ACTIVE");
+        shift.setStatus(STATUS_ACTIVE);
         shift.setCreateTime(LocalDateTime.now());
         shift.setUpdateTime(LocalDateTime.now());
 

@@ -56,8 +56,9 @@
         </div>
         
         <div v-if="displayList.length === 0" class="empty-view">
-          <el-icon><Bell /></el-icon>
+          <el-icon class="empty-icon"><Bell /></el-icon>
           <p>暂无 DING 消息</p>
+          <p class="empty-hint">新建一条 DING 消息，确保重要通知必达</p>
         </div>
       </div>
     </main>
@@ -66,6 +67,7 @@
 
 <script setup lang="js">
 import { ref, computed, onMounted } from 'vue'
+import { ElMessage } from 'element-plus'
 import { Promotion, Bell, View, Clock, Tickets } from '@element-plus/icons-vue'
 import { getReceivedDings, getSentDings } from '@/api/im/ding'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
@@ -89,10 +91,15 @@ const loadData = async () => {
     const [r, s] = await Promise.all([getReceivedDings(), getSentDings()])
     receivedList.value = r.data || []
     sentList.value = s.data || []
+  } catch (e) {
+    ElMessage.error('加载DING消息失败')
   } finally { loading.value = false }
 }
 
 const formatTime = (t) => t ? new Date(t).toLocaleDateString() : ''
+
+const handleConfirm = (ding) => { ElMessage.info('功能开发中') }
+
 onMounted(loadData)
 </script>
 
@@ -102,7 +109,7 @@ onMounted(loadData)
 .view-header {
   height: var(--dt-header-height); padding: 0 24px; background: var(--dt-bg-card);
   border-bottom: 1px solid var(--dt-border-light); @include flex-between;
-  .view-title { font-size: 16px; font-weight: 700; color: var(--dt-text-primary); }
+  .view-title { font-size: 16px; font-weight: var(--dt-font-weight-semibold); color: var(--dt-text-primary); }
 }
 
 .view-body { flex: 1; overflow-y: auto; padding: 24px; }
@@ -115,14 +122,14 @@ onMounted(loadData)
     transition: var(--dt-transition-fast);
     &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
     .stat-icon {
-      width: 48px; height: 48px; border-radius: var(--dt-radius-lg); @include flex-center; font-size: 22px;
+      width: 48px; height: 48px; border-radius: var(--dt-radius-lg); @include flex-center; font-size: 24px;
       &.orange { background: var(--dt-warning-bg); color: var(--dt-warning-color); }
       &.blue { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
       &.green { background: var(--dt-success-bg); color: var(--dt-success-color); }
     }
     .stat-info {
       display: flex; flex-direction: column;
-      .val { font-size: 24px; font-weight: 700; color: var(--dt-text-primary); }
+      .val { font-size: var(--dt-font-size-3xl); font-weight: var(--dt-font-weight-bold); color: var(--dt-text-primary); }
       .lab { font-size: 12px; color: var(--dt-text-tertiary); margin-top: 2px; }
     }
   }
@@ -133,13 +140,13 @@ onMounted(loadData)
 }
 
 .ding-card-v2 {
-  background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: 20px; border: 1px solid var(--dt-border-light);
+  background: var(--dt-bg-card); border-radius: var(--dt-radius-lg); padding: 24px; border: 1px solid var(--dt-border-light);
   display: flex; gap: 16px; transition: var(--dt-transition-fast);
   &:hover { border-color: var(--dt-brand-light); box-shadow: var(--dt-shadow-1); }
   &.urgent { border-left: 4px solid var(--dt-error-color); }
 
   .card-main { flex: 1; min-width: 0;
-    .row-top { display: flex; justify-content: space-between; margin-bottom: 12px; .sender { font-weight: 600; font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 11px; color: var(--dt-text-tertiary); } }
+    .row-top { display: flex; justify-content: space-between; margin-bottom: 12px; .sender { font-weight: var(--dt-font-weight-semibold); font-size: 14px; color: var(--dt-text-primary); } .time { font-size: 12px; color: var(--dt-text-tertiary); } }
     .ding-body-text { font-size: 14px; color: var(--dt-text-primary); line-height: 1.6; margin-bottom: 16px; }
     .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--dt-border-light); padding-top: 12px;
       .footer-left { display: flex; align-items: center; gap: 12px; .receipt-info { font-size: 12px; color: var(--dt-text-tertiary); .el-icon { vertical-align: middle; } } }
@@ -148,8 +155,10 @@ onMounted(loadData)
 }
 
 .empty-view {
-  padding-top: 96px; text-align: center;
-  .el-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding-top: var(--dt-spacing-3xl, 48px); text-align: center;
+  .empty-icon { font-size: var(--dt-icon-size-xl); color: var(--dt-text-quaternary); margin-bottom: var(--dt-spacing-lg); }
   p { font-size: var(--dt-font-size-base); color: var(--dt-text-tertiary); margin: 0; }
+  .empty-hint { font-size: var(--dt-font-size-sm); color: var(--dt-text-quaternary); margin-top: var(--dt-spacing-sm); }
 }
 </style>

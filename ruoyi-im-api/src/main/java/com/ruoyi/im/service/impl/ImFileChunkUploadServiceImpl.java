@@ -13,6 +13,8 @@ import com.ruoyi.im.mapper.ImFileChunkUploadMapper;
 import com.ruoyi.im.service.ImFileChunkUploadService;
 import com.ruoyi.im.vo.file.ImFileChunkUploadInitVO;
 import com.ruoyi.im.vo.file.ImFileVO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.file.Files;
+import java.util.stream.Stream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.MessageDigest;
@@ -36,6 +39,8 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
+
+    private static final Logger log = LoggerFactory.getLogger(ImFileChunkUploadServiceImpl.class);
 
     @Autowired
     private ImFileChunkUploadMapper chunkUploadMapper;
@@ -67,7 +72,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     private static final String FILE_STATUS_ACTIVE = "ACTIVE";
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ImFileChunkUploadInitVO initChunkUpload(ImFileChunkUploadInitRequest request, Long userId) {
         // 检查是否可以秒传（文件MD5已存在）
         if (request.getFileMd5() != null && !request.getFileMd5().isEmpty()) {
@@ -134,7 +139,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Boolean uploadChunk(String uploadId, Integer chunkNumber, MultipartFile file, Long userId) {
         // 验证上传任务
         ImFileChunkUpload chunkUpload = chunkUploadMapper.selectByUploadId(uploadId);
@@ -185,14 +190,26 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
 
             return true;
         } catch (IOException e) {
+            // 清理上传失败的残留分片文件
+            try {
+                String chunkDir = uploadPath + CHUNK_TEMP_DIR + uploadId + "/";
+                String fullChunkPath = chunkDir + "chunk_" + chunkNumber;
+                java.io.File chunkFile = new java.io.File(fullChunkPath);
+                if (chunkFile.exists()) {
+                    chunkFile.delete();
+                }
+            } catch (Exception cleanupEx) {
+                log.warn("清理失败分片文件异常: uploadId={}, chunkNumber={}", uploadId, chunkNumber, cleanupEx);
+            }
             // 更新分片状态为失败
             chunkDetailMapper.updateChunkStatus(uploadId, chunkNumber, SystemConstants.STATUS_FAILED, null);
-            throw new BusinessException("分片上传失败: " + e.getMessage());
+            log.error("分片上传失败: uploadId={}, chunkNumber={}", uploadId, chunkNumber, e);
+            throw new BusinessException("分片上传失败");
         }
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ImFileVO mergeChunks(ImFileChunkMergeRequest request, Long userId) {
         // 验证上传任务
         ImFileChunkUpload chunkUpload = chunkUploadMapper.selectByUploadId(request.getUploadId());
@@ -284,12 +301,13 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
             return vo;
 
         } catch (IOException e) {
-            throw new BusinessException("文件合并失败: " + e.getMessage());
+            log.error("文件合并失败: uploadId={}", request.getUploadId(), e);
+            throw new BusinessException("文件合并失败");
         }
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void cancelChunkUpload(String uploadId, Long userId) {
         ImFileChunkUpload chunkUpload = chunkUploadMapper.selectByUploadId(uploadId);
         if (chunkUpload == null) {
@@ -310,7 +328,7 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void pauseChunkUpload(String uploadId, Long userId) {
         ImFileChunkUpload chunkUpload = chunkUploadMapper.selectByUploadId(uploadId);
         if (chunkUpload == null) {
@@ -376,22 +394,23 @@ public class ImFileChunkUploadServiceImpl implements ImFileChunkUploadService {
      * @param uploadId 上传ID
      */
     private void cleanupChunks(String uploadId) {
+        String chunkDir = uploadPath + CHUNK_TEMP_DIR + uploadId + "/";
         try {
-            String chunkDir = uploadPath + CHUNK_TEMP_DIR + uploadId + "/";
             Path chunkPath = Paths.get(chunkDir);
             if (Files.exists(chunkPath)) {
-                Files.walk(chunkPath)
-                        .sorted(Comparator.reverseOrder())
-                        .forEach(path -> {
-                            try {
-                                Files.deleteIfExists(path);
-                            } catch (IOException e) {
-                                // 忽略删除失败
-                            }
-                        });
+                try (Stream<Path> paths = Files.walk(chunkPath)) {
+                    paths.sorted(Comparator.reverseOrder())
+                            .forEach(path -> {
+                                try {
+                                    Files.deleteIfExists(path);
+                                } catch (IOException e) {
+                                    log.warn("清理临时分片文件失败: {}", path, e);
+                                }
+                            });
+                }
             }
         } catch (IOException e) {
-            // 忽略清理失败
+            log.warn("清理临时分片目录失败: {}", chunkDir, e);
         }
     }
 

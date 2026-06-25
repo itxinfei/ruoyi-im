@@ -11,10 +11,9 @@
     <!-- 2. 主功能区：流式切换与状态保持 -->
     <main class="dt-main-view">
       <transition :name="transitionName" mode="out-in">
-        <keep-alive>
+        <keep-alive :max="6">
           <component
             :is="activeViewComponent"
-            :key="activeModule"
             @switch-module="handleSwitchModule"
           />
         </keep-alive>

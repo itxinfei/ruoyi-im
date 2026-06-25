@@ -30,7 +30,7 @@
     </select>
 
     <select id="selectByAnnouncementIdAndUserId" resultMap="BaseResultMap">
-        SELECT *
+        SELECT id, announcement_id, user_id, read_time
         FROM im_announcement_read
         WHERE announcement_id = #{announcementId}
           AND user_id = #{userId}

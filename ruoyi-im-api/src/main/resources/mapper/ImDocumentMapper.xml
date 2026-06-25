@@ -63,4 +63,9 @@
         order by deleted_time desc
     </select>
 
+    <update id="incrementVersionWithCheck">
+        UPDATE im_document
+        SET version = version + 1, last_modified_time = NOW()
+        WHERE id = #{documentId} AND version = #{expectedVersion}
+    </update>
 </mapper>

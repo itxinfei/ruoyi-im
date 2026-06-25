@@ -132,6 +132,7 @@ const metrics = computed(() => ([
 ]))
 
 // ECharts 颜色映射 - 与 design-tokens.scss 保持同步
+// 注意: ECharts 不支持 CSS var() 语法，必须使用硬编码色值
 const chartColors = {
   light: {
     textPrimary: '#171a1d',
@@ -374,7 +375,7 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   color: var(--dt-text-primary);
-  font-size: 20px;
+  font-size: var(--dt-font-size-2xl);
 }
 
 .metric-icon.users { background: var(--dt-brand-bg); color: var(--dt-brand-color); }
@@ -390,7 +391,7 @@ onMounted(async () => {
 .metric-value {
   margin-top: var(--dt-spacing-xs);
   color: var(--dt-text-primary);
-  font-size: 28px;
+  font-size: 32px;
   font-weight: var(--dt-font-weight-bold);
 }
 

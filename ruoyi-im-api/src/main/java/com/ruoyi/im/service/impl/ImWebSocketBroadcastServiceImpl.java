@@ -25,11 +25,14 @@ import java.util.Set;
  * 通过 Redis Pub/Sub 实现跨节点消息转发
  */
 @Service
-@Transactional(rollbackFor = Exception.class)
 public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastService {
 
     private static final Logger log = LoggerFactory.getLogger(ImWebSocketBroadcastServiceImpl.class);
     private static final String IM_WS_CHANNEL = "im:ws:broadcast";
+    private static final String NODE_ID_KEY = "nodeId";
+
+    // 当前节点唯一标识，用于避免接收自身发出的 Redis 广播
+    private final String nodeId;
 
     private final ImConversationMemberMapper conversationMemberMapper;
     private final ImMessageMapper messageMapper;
@@ -51,6 +54,17 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
         this.encryptionUtil = encryptionUtil;
         this.objectMapper = objectMapper;
         this.redisTemplate = redisTemplate;
+        // 生成节点唯一标识（IP + 随机后缀），用于区分不同应用实例
+        this.nodeId = generateNodeId();
+    }
+
+    private String generateNodeId() {
+        try {
+            String host = java.net.InetAddress.getLocalHost().getHostAddress();
+            return host + "_" + System.currentTimeMillis();
+        } catch (Exception e) {
+            return "node_" + System.currentTimeMillis();
+        }
     }
 
     @Override
@@ -265,14 +279,15 @@ public class ImWebSocketBroadcastServiceImpl implements ImWebSocketBroadcastServ
             for (ImConversationMember member : members) {
                 Long tid = member.getUserId();
                 if (tid == null || tid.equals(excludeUserId)) { continue; }
-                
+
                 // 本地发送
                 sendToLocalUser(tid, messageJson);
-                
-                // 转发给 Redis 供其他节点消费
+
+                // 转发给 Redis 供其他节点消费，附带来源节点标识
                 Map<String, Object> redisPayload = new HashMap<>(16);
                 redisPayload.put("targetUserId", tid);
                 redisPayload.put("messageJson", messageJson);
+                redisPayload.put(NODE_ID_KEY, nodeId);
                 redisTemplate.convertAndSend(IM_WS_CHANNEL, redisPayload);
             }
         } catch (Exception e) {

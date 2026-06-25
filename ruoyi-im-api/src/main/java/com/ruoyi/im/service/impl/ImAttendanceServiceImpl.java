@@ -77,7 +77,12 @@ public class ImAttendanceServiceImpl implements ImAttendanceService {
             attendance.setCheckInStatus(status);
             attendance.setAttendanceType("WORK");
 
-            attendanceMapper.insertImAttendance(attendance);
+            try {
+                attendanceMapper.insertImAttendance(attendance);
+            } catch (org.springframework.dao.DuplicateKeyException e) {
+                // 并发打卡导致唯一键冲突，重新查询返回已有记录
+                attendance = attendanceMapper.selectTodayAttendance(userId, today);
+            }
         } else if (attendance.getCheckInTime() == null) {
             // 已有记录但未上班打卡
             attendance.setCheckInTime(now);

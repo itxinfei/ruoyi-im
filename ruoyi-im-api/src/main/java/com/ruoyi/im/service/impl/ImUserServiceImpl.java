@@ -90,6 +90,14 @@ public class ImUserServiceImpl implements ImUserService {
         this.broadcastService = broadcastService;
     }
 
+    /**
+     * 统一双层缓存清除：Spring Cache + Redis
+     */
+    private void evictUserCaches(Long userId) {
+        // 清除 Redis 手动缓存（Spring Cache 由 @CacheEvict 注解处理）
+        imRedisUtil.evictUserInfo(userId);
+    }
+
     @Override
     public ImLoginVO login(ImLoginRequest request) {
         ImUser user = imUserMapper.selectImUserByUsername(request.getUsername());
@@ -120,6 +128,9 @@ public class ImUserServiceImpl implements ImUserService {
 
         user.setLastOnlineTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+
+        // 清除双层缓存：Spring Cache + Redis
+        evictUserCaches(user.getId());
 
         ImLoginVO vo = new ImLoginVO();
         vo.setToken(token);
@@ -184,6 +195,7 @@ public class ImUserServiceImpl implements ImUserService {
         BeanUtils.copyProperties(request, user);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+        evictUserCaches(userId);
     }
 
     @Override
@@ -197,6 +209,7 @@ public class ImUserServiceImpl implements ImUserService {
         user.setStatus(status);
         user.setUpdateTime(LocalDateTime.now());
         imUserMapper.updateImUser(user);
+        evictUserCaches(userId);
     }
 
     @Override
@@ -214,6 +227,9 @@ public class ImUserServiceImpl implements ImUserService {
         user.setPassword(passwordEncoder.encode(newPassword));
         user.setUpdateTime(LocalDateTime.now());
         int result = imUserMapper.updateImUser(user);
+        if (result > 0) {
+            evictUserCaches(userId);
+        }
         return result > 0;
     }
 
@@ -309,6 +325,10 @@ public class ImUserServiceImpl implements ImUserService {
         }
         // 批量删除优化：使用Mapper的批量删除方法
         imUserMapper.deleteImUserByIds(userIds.toArray(new Long[0]));
+        // 清除所有被删除用户的双层缓存
+        for (Long userId : userIds) {
+            evictUserCaches(userId);
+        }
     }
 
     @Override
@@ -464,6 +484,7 @@ public class ImUserServiceImpl implements ImUserService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public BatchOperationResult batchImportUsers(ImUserBatchImportRequest request) {
         BatchOperationResult result = new BatchOperationResult();
         int successCount = 0;
@@ -492,7 +513,8 @@ public class ImUserServiceImpl implements ImUserService {
                 }
                 successCount++;
             } catch (Exception e) {
-                result.addFailedItem(null, "用户 " + item.getUsername() + " 导入失败: " + e.getMessage());
+                logger.error("用户导入失败: username={}", item.getUsername(), e);
+                result.addFailedItem(null, "用户 " + item.getUsername() + " 导入失败");
             }
         }
         result.setSuccessCount(successCount);

@@ -84,8 +84,8 @@ public class ImDingServiceImpl implements ImDingService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public DingMessageVO sendDing(DingSendRequest request, Long userId) {
-        log.debug("发送DING消息: userId={}, conversationId={}, content={}",
-                userId, request.getConversationId(), request.getContent());
+        log.debug("发送DING消息: userId={}, conversationId={}, contentLength={}",
+                userId, request.getConversationId(), request.getContent() != null ? request.getContent().length() : 0);
 
         // 1. 验证会话是否存在
         ImConversation conversation = conversationMapper.selectById(request.getConversationId());
@@ -232,18 +232,22 @@ public class ImDingServiceImpl implements ImDingService {
             return;
         }
 
-        // 创建已读记录
+        // 创建已读记录，捕获并发插入的唯一键冲突
         ImDingRead readRecord = new ImDingRead();
         readRecord.setDingId(dingId);
         readRecord.setUserId(userId);
         readRecord.setReadTime(LocalDateTime.now());
         readRecord.setDeviceType("WEB");
-        dingReadMapper.insert(readRecord);
+        try {
+            dingReadMapper.insert(readRecord);
+            // 增加已读人数
+            dingMapper.incrementReadCount(dingId);
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            // 并发插入导致重复，忽略（另一个线程已成功创建记录并递增计数）
+            log.debug("DING已读记录并发插入已存在: dingId={}, userId={}", dingId, userId);
+        }
 
-        // 增加已读人数
-        dingMapper.incrementReadCount(dingId);
-
-        log.debug("DING已读记录已创建: dingId={}, userId={}", dingId, userId);
+        log.debug("DING已读标记完成: dingId={}, userId={}", dingId, userId);
     }
 
     @Override

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.im.mapper.ImDingReceiptMapper">
+
+    <insert id="batchInsert">
+        INSERT INTO im_ding_receipt (ding_id, receiver_id, confirmed, create_time)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.dingId}, #{item.receiverId}, #{item.confirmed}, #{item.createTime})
+        </foreach>
+    </insert>
+
+</mapper>

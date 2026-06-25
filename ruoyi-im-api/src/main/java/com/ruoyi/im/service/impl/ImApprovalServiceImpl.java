@@ -565,7 +565,11 @@ public class ImApprovalServiceImpl implements ImApprovalService {
      * 检查节点是否所有人都已审批
      */
     private boolean checkAllApproved(ImApprovalNode node) {
-        String[] approverIds = node.getApproverIds().split(",");
+        String approverIdsStr = node.getApproverIds();
+        if (approverIdsStr == null || approverIdsStr.isEmpty()) {
+            return false;
+        }
+        String[] approverIds = approverIdsStr.split(",");
         List<ImApprovalRecord> records = recordMapper.selectRecordsByApprovalId(node.getApprovalId());
         long approvedCount = records.stream()
                 .filter(r -> r.getNodeId().equals(node.getId()) && ACTION_APPROVE.equals(r.getAction()))

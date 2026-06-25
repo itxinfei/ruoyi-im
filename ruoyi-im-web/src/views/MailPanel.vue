@@ -41,7 +41,10 @@
           <div class="item-preview">{{ mail.preview }}</div>
           <div v-if="!mail.read" class="unread-indicator"></div>
         </div>
-        <div v-if="displayEmails.length === 0" class="empty-view">暂无邮件</div>
+        <div v-if="displayEmails.length === 0" class="empty-state">
+          <el-icon :size="64" color="var(--dt-text-quaternary)"><Message /></el-icon>
+          <p>暂无邮件</p>
+        </div>
       </div>
     </section>
 
@@ -58,7 +61,7 @@
             </div>
             <div class="header-actions">
               <el-button-group>
-                <el-button size="small" :icon="Back" @click="handleReply">回复</el-button>
+                <el-button size="small" :icon="ArrowLeft" @click="handleReply">回复</el-button>
                 <el-button size="small" :icon="Right" @click="handleForward">转发</el-button>
                 <el-button size="small" :icon="Delete" @click="handleDeleteEmail">删除</el-button>
               </el-button-group>
@@ -76,8 +79,9 @@
 </template>
 
 <script setup lang="js">
-import { ref, computed, onMounted } from 'vue'
-import { Edit, Box, Promotion, Document, Star, Delete, Search, Message, Back, Right } from '@element-plus/icons-vue'
+import { ref, computed, onMounted, watch } from 'vue'
+import { ElMessage } from 'element-plus'
+import { Edit, Box, Promotion, Document, Star, Delete, Search, Message, ArrowLeft, Right } from '@element-plus/icons-vue'
 import { getMailList } from '@/api/im/mail'
 import DingtalkAvatar from '@/components/Common/DingtalkAvatar.vue'
 
@@ -106,6 +110,13 @@ const loadData = async () => {
 
 const handleViewEmail = (m) => { selectedEmail.value = m; m.read = true }
 
+const handleReply = () => { ElMessage.info('功能开发中') }
+const handleForward = () => { ElMessage.info('功能开发中') }
+const handleDeleteEmail = () => { ElMessage.info('功能开发中') }
+const handleSearch = () => { ElMessage.info('功能开发中') }
+
+watch(activeFolder, () => { loadData() })
+
 onMounted(loadData)
 </script>
 
@@ -115,15 +126,15 @@ onMounted(loadData)
 .mail-sidebar {
   width: var(--dt-contact-panel-width); background: var(--dt-bg-body); border-right: 1px solid var(--dt-border-light);
   display: flex; flex-direction: column;
-  .sidebar-header { padding: 16px 16px 12px; .compose-btn { width: 100%; height: 36px; font-weight: 600; border-radius: var(--dt-radius-md); } }
+  .sidebar-header { padding: 16px 16px 12px; .compose-btn { width: 100%; height: 36px; font-weight: var(--dt-font-weight-semibold); border-radius: var(--dt-radius-md); } }
   .folder-list {
     flex: 1; padding: 0 8px;
     .folder-item {
       height: 40px; display: flex; align-items: center; gap: 12px; padding: 0 12px;
       border-radius: var(--dt-radius-lg); cursor: pointer; color: var(--dt-text-secondary); font-size: 14px;
       &:hover { background: var(--dt-bg-hover); }
-      &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: 600; }
-      .badge { margin-left: auto; font-size: 11px; opacity: 0.7; }
+      &.active { background: var(--dt-brand-bg); color: var(--dt-brand-color); font-weight: var(--dt-font-weight-semibold); }
+      .badge { margin-left: auto; font-size: 12px; opacity: 0.7; }
     }
   }
 }
@@ -135,14 +146,21 @@ onMounted(loadData)
       input { border: none; background: transparent; outline: none; font-size: 12px; margin-left: 8px; flex: 1; }
     }
   }
-  .list-body { flex: 1; overflow-y: auto; }
+  .list-body {
+    flex: 1; overflow-y: auto;
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      height: 100%; gap: var(--dt-spacing-lg);
+      p { color: var(--dt-text-tertiary); font-size: var(--dt-font-size-base); margin: 0; }
+    }
+  }
 }
 
 .mail-item {
   padding: 16px; border-bottom: 1px solid var(--dt-border-lighter); cursor: pointer; position: relative; transition: var(--dt-transition-fast);
   &:hover { background: var(--dt-bg-hover); }
   &.active { background: var(--dt-brand-bg); }
-  &.unread { .item-subject { font-weight: 700; color: var(--dt-text-primary); } }
+  &.unread { .item-subject { font-weight: var(--dt-font-weight-bold); color: var(--dt-text-primary); } }
   
   .item-top { display: flex; justify-content: space-between; font-size: 12px; color: var(--dt-text-tertiary); margin-bottom: 6px; }
   .item-subject { font-size: 14px; color: var(--dt-text-secondary); @include text-ellipsis; margin-bottom: 4px; }
@@ -153,12 +171,12 @@ onMounted(loadData)
 .mail-reader { flex: 1; background: var(--dt-bg-card); position: relative; }
 .reader-container { height: 100%; display: flex; flex-direction: column;
   .reader-header { padding: 32px 40px; border-bottom: 1px solid var(--dt-border-light);
-    .mail-subject-full { font-size: 22px; font-weight: 700; margin: 0 0 20px; color: var(--dt-text-primary); }
+    .mail-subject-full { font-size: 24px; font-weight: var(--dt-font-weight-bold); margin: 0 0 20px; color: var(--dt-text-primary); }
     .mail-meta-full { display: flex; align-items: center; gap: 12px;
-      .meta-info { flex: 1; display: flex; flex-direction: column; .sender-name { font-weight: 600; font-size: 14px; } .time-full { font-size: 12px; color: var(--dt-text-tertiary); } }
+      .meta-info { flex: 1; display: flex; flex-direction: column; .sender-name { font-weight: var(--dt-font-weight-semibold); font-size: 14px; } .time-full { font-size: 12px; color: var(--dt-text-tertiary); } }
     }
   }
-  .mail-body { flex: 1; overflow-y: auto; padding: 40px; font-size: 15px; line-height: 1.8; color: var(--dt-text-primary); }
+  .mail-body { flex: 1; overflow-y: auto; padding: 40px; font-size: 16px; line-height: 1.8; color: var(--dt-text-primary); }
 }
 
 .reader-empty {

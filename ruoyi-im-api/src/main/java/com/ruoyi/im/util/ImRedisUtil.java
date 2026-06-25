@@ -388,9 +388,15 @@ public class ImRedisUtil {
         if (redisTemplate == null) {
             return;
         }
-        Set<String> keys = redisTemplate.keys(buildSimpleKey(pattern));
-        if (keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
+        org.springframework.data.redis.core.ScanOptions options =
+                org.springframework.data.redis.core.ScanOptions.scanOptions()
+                        .match(buildSimpleKey(pattern)).count(100).build();
+        try (org.springframework.data.redis.core.Cursor<String> cursor = redisTemplate.scan(options)) {
+            java.util.List<String> keys = new java.util.ArrayList<>();
+            cursor.forEachRemaining(keys::add);
+            if (!keys.isEmpty()) {
+                redisTemplate.delete(keys);
+            }
         }
     }
 

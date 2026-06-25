@@ -32,4 +32,13 @@ public interface ImDingMessageMapper extends BaseMapper<ImDingMessage> {
             "WHERE d.sender_id = #{userId} " +
             "ORDER BY d.send_time DESC")
     List<ImDingMessage> selectSentDingList(@Param("userId") Long userId);
+
+    /**
+     * 原子递增已读计数
+     *
+     * @param id DING消息ID
+     * @return 更新行数
+     */
+    @org.apache.ibatis.annotations.Update("UPDATE im_ding_message SET read_count = read_count + 1 WHERE id = #{id}")
+    int incrementReadCount(@Param("id") Long id);
 }

@@ -49,6 +49,11 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
                 return t;
             });
 
+    @javax.annotation.PreDestroy
+    public void destroy() {
+        retryExecutor.shutdownNow();
+    }
+
     @Override
     public void recordSendFailure(String clientMsgId, ImMessageSendRequest request, Long userId, String errorMessage) {
         if (clientMsgId == null || clientMsgId.isEmpty()) {
@@ -56,14 +61,18 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
         }
 
         try {
-            // 增加重试计数
+            // 使用 Redis INCR 原子递增重试计数，避免并发丢失
             String countKey = RETRY_COUNT_PREFIX + clientMsgId;
-            Object countObj = redisUtil.get(countKey);
-            int currentCount = countObj != null ? Integer.parseInt(countObj.toString()) : 0;
+            Long newCount = redisUtil.increment(countKey);
+            if (newCount == null) {
+                return;
+            }
+            // 设置过期时间（仅在首次创建时设置，后续 INCR 不影响 TTL）
+            if (newCount == 1) {
+                redisUtil.expire(countKey, RETRY_EXPIRE_HOURS, TimeUnit.HOURS);
+            }
 
-            if (currentCount < MAX_RETRY_COUNT) {
-                redisUtil.set(countKey, String.valueOf(currentCount + 1), RETRY_EXPIRE_HOURS, TimeUnit.HOURS);
-
+            if (newCount <= MAX_RETRY_COUNT) {
                 // 存储失败消息数据
                 String dataKey = RETRY_DATA_PREFIX + clientMsgId;
                 FailureData data = new FailureData();
@@ -81,7 +90,7 @@ public class ImMessageRetryServiceImpl implements ImMessageRetryService {
                 redisUtil.set(retryKey, "1", RETRY_EXPIRE_HOURS, TimeUnit.HOURS);
 
                 log.warn("记录消息发送失败: clientMsgId={}, retryCount={}, error={}",
-                        clientMsgId, currentCount + 1, errorMessage);
+                        clientMsgId, newCount, errorMessage);
             } else {
                 log.error("消息已达最大重试次数: clientMsgId={}, maxRetry={}", clientMsgId, MAX_RETRY_COUNT);
             }

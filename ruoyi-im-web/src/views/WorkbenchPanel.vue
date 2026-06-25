@@ -231,7 +231,7 @@ const handleActionClick = (action) => {
     @include flex-center;
     justify-content: flex-start;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: var(--dt-font-weight-bold);
     color: var(--dt-text-primary);
     border-bottom: 1px solid var(--dt-border-light);
   }
@@ -242,7 +242,7 @@ const handleActionClick = (action) => {
       padding: 0 14px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       border-radius: var(--dt-radius-md);
       cursor: pointer;
       color: var(--dt-text-secondary);
@@ -251,7 +251,7 @@ const handleActionClick = (action) => {
       &.active {
         background: var(--dt-brand-bg);
         color: var(--dt-brand-color);
-        font-weight: 600;
+        font-weight: var(--dt-font-weight-semibold);
       }
       &:hover:not(.active) {
         background: var(--dt-bg-hover);
@@ -291,7 +291,7 @@ const handleActionClick = (action) => {
     right: -10%;
     width: 300px;
     height: 300px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--dt-nav-hover);
     border-radius: 50%;
   }
 
@@ -312,8 +312,8 @@ const handleActionClick = (action) => {
   }
 
   .greeting {
-    font-size: 26px;
-    font-weight: 700;
+    font-size: 24px;
+    font-weight: var(--dt-font-weight-bold);
     margin-bottom: 8px;
     color: var(--dt-text-white);
   }
@@ -339,8 +339,8 @@ const handleActionClick = (action) => {
       transition: opacity var(--dt-transition-fast);
       &:hover { opacity: 0.85; }
       .num {
-        font-size: 28px;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: var(--dt-font-weight-bold);
         display: block;
         color: var(--dt-text-white);
       }
@@ -359,8 +359,8 @@ const handleActionClick = (action) => {
 }
 
 .section-title {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-primary);
   margin-bottom: 16px;
 }
@@ -372,7 +372,7 @@ const handleActionClick = (action) => {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     cursor: pointer;
     .app-icon-circle {
       width: 52px;
@@ -380,17 +380,17 @@ const handleActionClick = (action) => {
       border-radius: var(--dt-radius-lg);
       @include flex-center;
       color: var(--dt-text-white);
-      font-size: 24px;
+      font-size: var(--dt-font-size-3xl);
       transition: var(--dt-transition-fast);
       &:hover { box-shadow: var(--dt-shadow-2); }
     }
-    .app-name { font-size: 12px; color: var(--dt-text-secondary); font-weight: 500; }
+    .app-name { font-size: 12px; color: var(--dt-text-secondary); font-weight: var(--dt-font-weight-medium); }
   }
 }
 
 .group-header {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-secondary);
   margin-bottom: 16px;
   padding-left: 2px;
@@ -403,7 +403,7 @@ const handleActionClick = (action) => {
 }
 .app-card-v3 {
   background: var(--dt-bg-card);
-  padding: 18px 20px;
+  padding: 16px 24px;
   border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   display: flex;
@@ -421,13 +421,13 @@ const handleActionClick = (action) => {
     height: 48px;
     border-radius: var(--dt-radius-lg);
     @include flex-center;
-    font-size: 22px;
+    font-size: 24px;
     flex-shrink: 0;
   }
   .card-info {
     .name {
       font-size: 14px;
-      font-weight: 600;
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-primary);
     }
     .desc {
@@ -443,7 +443,7 @@ const handleActionClick = (action) => {
   margin-bottom: 24px;
   .section-title {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
     margin-bottom: 12px;
   }
@@ -471,7 +471,7 @@ const handleActionClick = (action) => {
   height: 48px;
   border-radius: var(--dt-radius-lg);
   @include flex-center;
-  font-size: 20px;
+  font-size: var(--dt-font-size-2xl);
 }
 .action-name {
   font-size: 12px;
@@ -487,7 +487,7 @@ const handleActionClick = (action) => {
   }
   .g-title {
     font-size: 14px;
-    font-weight: 600;
+    font-weight: var(--dt-font-weight-semibold);
     color: var(--dt-text-primary);
   }
 }
@@ -498,7 +498,7 @@ const handleActionClick = (action) => {
 }
 .overview-card {
   background: var(--dt-bg-card);
-  padding: 20px;
+  padding: 24px;
   border-radius: var(--dt-radius-lg);
   border: 1px solid var(--dt-border-light);
   display: flex;
@@ -510,7 +510,7 @@ const handleActionClick = (action) => {
   height: 48px;
   border-radius: var(--dt-radius-lg);
   @include flex-center;
-  font-size: 20px;
+  font-size: var(--dt-font-size-2xl);
   flex-shrink: 0;
 }
 .overview-info {
@@ -519,8 +519,8 @@ const handleActionClick = (action) => {
   gap: 4px;
 }
 .overview-value {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: var(--dt-font-size-3xl);
+  font-weight: var(--dt-font-weight-bold);
   color: var(--dt-text-primary);
   line-height: 1;
 }

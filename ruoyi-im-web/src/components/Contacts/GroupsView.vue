@@ -129,7 +129,7 @@ onMounted(() => {
 
 .view-title {
   font-size: 18px;
-  font-weight: 600;
+  font-weight: var(--dt-font-weight-semibold);
   color: var(--dt-text-primary);
   margin: 0;
 }
@@ -197,14 +197,14 @@ onMounted(() => {
 }
 
 .group-name {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
   color: var(--dt-text-primary);
   margin-bottom: 4px;
 }
 
 .group-desc {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--dt-text-secondary);
   white-space: nowrap;
   overflow: hidden;

@@ -41,15 +41,15 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     private static final String CALL_CACHE_KEY = "im:video_call:";
     private static final String USER_CALL_KEY = "im:user_call:";
     private static final int CALL_TIMEOUT_SECONDS = 60;
-    private static final String CALL_STATUS_CALLING = CALL_STATUS_CALLING;
-    private static final String CALL_STATUS_CONNECTED = CALL_STATUS_CONNECTED;
-    private static final String CALL_STATUS_REJECTED = CALL_STATUS_REJECTED;
-    private static final String CALL_STATUS_ENDED = CALL_STATUS_ENDED;
-    private static final String CALL_STATUS_TIMEOUT = CALL_STATUS_TIMEOUT;
-    private static final String CALL_MODE_GROUP = CALL_MODE_GROUP;
-    private static final String PARTICIPANT_STATUS_JOINED = PARTICIPANT_STATUS_JOINED;
-    private static final String PARTICIPANT_STATUS_INVITED = PARTICIPANT_STATUS_INVITED;
-    private static final String PARTICIPANT_STATUS_LEFT = PARTICIPANT_STATUS_LEFT;
+    private static final String CALL_STATUS_CALLING = "CALLING";
+    private static final String CALL_STATUS_CONNECTED = "CONNECTED";
+    private static final String CALL_STATUS_REJECTED = "REJECTED";
+    private static final String CALL_STATUS_ENDED = "ENDED";
+    private static final String CALL_STATUS_TIMEOUT = "TIMEOUT";
+    private static final String CALL_MODE_GROUP = "GROUP";
+    private static final String PARTICIPANT_STATUS_JOINED = "JOINED";
+    private static final String PARTICIPANT_STATUS_INVITED = "INVITED";
+    private static final String PARTICIPANT_STATUS_LEFT = "LEFT";
     private static final String ROOM_ID_PREFIX = "call_";
     private static final long CALL_CONNECTED_TTL_SECONDS = 3600L;
 
@@ -65,47 +65,53 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    @Autowired
+    private ImRedisUtil imRedisUtil;
+
     @Override
     public Long initiateCall(Long callerId, Long calleeId, Long conversationId, String callType) {
         // 检查接收者是否在线
-        String onlineKey = "im:online:" + calleeId;
-        Boolean isOnline = redisTemplate.hasKey(onlineKey);
-
-        if (Boolean.FALSE.equals(isOnline)) {
+        if (!imRedisUtil.isOnlineUser(calleeId)) {
             throw new BusinessException(ImErrorCode.CALL_USER_OFFLINE, "对方不在线");
         }
 
-        // 检查接收者是否正在通话中
-        String userCallKey = USER_CALL_KEY + calleeId;
-        Boolean isInCall = redisTemplate.hasKey(userCallKey);
-        if (Boolean.TRUE.equals(isInCall)) {
+        // 使用 SETNX 原子检查并锁定接收者通话状态，防止并发发起通话
+        String calleeCallKey = USER_CALL_KEY + calleeId;
+        Boolean locked = redisTemplate.opsForValue().setIfAbsent(calleeCallKey, "pending", CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        if (!Boolean.TRUE.equals(locked)) {
             throw new BusinessException(ImErrorCode.CALL_USER_BUSY, "对方正在通话中");
         }
 
-        // 创建通话记录
-        ImVideoCall call = new ImVideoCall();
-        call.setCallerId(callerId);
-        call.setCalleeId(calleeId);
-        call.setConversationId(conversationId);
-        call.setCallType(callType);
-        call.setStatus(CALL_STATUS_CALLING);
-        call.setStartTime(LocalDateTime.now());
+        try {
+            // 创建通话记录
+            ImVideoCall call = new ImVideoCall();
+            call.setCallerId(callerId);
+            call.setCalleeId(calleeId);
+            call.setConversationId(conversationId);
+            call.setCallType(callType);
+            call.setStatus(CALL_STATUS_CALLING);
+            call.setStartTime(LocalDateTime.now());
 
-        videoCallMapper.insertImVideoCall(call);
+            videoCallMapper.insertImVideoCall(call);
 
-        // 缓存通话信息
-        String callKey = CALL_CACHE_KEY + call.getId();
-        redisTemplate.opsForValue().set(callKey, call, CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            // 更新 Redis 中的通话信息
+            String callKey = CALL_CACHE_KEY + call.getId();
+            redisTemplate.opsForValue().set(callKey, call, CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        // 设置用户通话状态
-        redisTemplate.opsForValue().set(USER_CALL_KEY + callerId, call.getId(), CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            // 锁定发起者通话状态
+            redisTemplate.opsForValue().set(USER_CALL_KEY + callerId, call.getId(), CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS);
 
-        log.info("发起通话: callId={}, caller={}, callee={}, type={}", call.getId(), callerId, calleeId, callType);
+            log.info("发起通话: callId={}, caller={}, callee={}, type={}", call.getId(), callerId, calleeId, callType);
 
-        // 发送通知给接收者
-        ImWebSocketEndpoint.sendCallNotification(calleeId, call.getId(), callType, callerId);
+            // 发送通知给接收者
+            ImWebSocketEndpoint.sendCallNotification(calleeId, call.getId(), callType, callerId);
 
-        return call.getId();
+            return call.getId();
+        } catch (Exception e) {
+            // 创建失败时释放接收者锁
+            redisTemplate.delete(calleeCallKey);
+            throw e;
+        }
     }
 
     @Override
@@ -435,9 +441,8 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             addParticipant(callId, userId, PARTICIPANT_STATUS_JOINED);
         }
 
-        // 更新当前参与者数
-        call.setCurrentParticipants(currentCount + 1);
-        videoCallMapper.updateImVideoCall(call);
+        // 原子递增参与者数
+        videoCallMapper.adjustParticipants(callId, 1);
 
         // 设置用户通话状态
         redisTemplate.opsForValue().set(USER_CALL_KEY + userId, callId, CALL_CONNECTED_TTL_SECONDS, TimeUnit.SECONDS);
@@ -464,12 +469,8 @@ public class ImVideoCallServiceImpl implements ImVideoCallService {
             participant.setLeaveTime(LocalDateTime.now());
             participantMapper.updateById(participant);
 
-            // 更新当前参与者数
-            Integer currentCount = call.getCurrentParticipants();
-            if (currentCount != null && currentCount > 0) {
-                call.setCurrentParticipants(currentCount - 1);
-                videoCallMapper.updateImVideoCall(call);
-            }
+            // 原子递减参与者数
+            videoCallMapper.adjustParticipants(callId, -1);
         }
 
         // 清除用户通话状态
