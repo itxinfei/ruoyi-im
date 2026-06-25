@@ -986,8 +986,7 @@ public class ImConversationServiceImpl implements ImConversationService {
 
     @Override
     public int getUserConversationCount(Long userId) {
-        List<ImConversation> conversations = imConversationMapper.selectByUserId(userId);
-        return conversations == null ? 0 : conversations.size();
+        return imConversationMapper.countByUserId(userId);
     }
 
     private void assertConversationAccess(Long conversationId, Long userId) {

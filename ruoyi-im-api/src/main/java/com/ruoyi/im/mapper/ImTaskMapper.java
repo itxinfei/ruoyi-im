@@ -78,4 +78,23 @@ public interface ImTaskMapper extends BaseMapper<ImTask> {
      * @return 逾期任务列表
      */
     List<ImTask> selectOverdueTasks(@Param("currentDate") String currentDate);
+
+    /**
+     * 统计指定状态的任务数量
+     *
+     * @param assigneeId 负责人ID
+     * @param status 任务状态
+     * @return 任务数量
+     */
+    @Select("SELECT COUNT(*) FROM im_task WHERE assignee_id = #{assigneeId} AND status = #{status} AND is_deleted = 0")
+    int countByAssigneeAndStatus(@Param("assigneeId") Long assigneeId, @Param("status") String status);
+
+    /**
+     * 统计指定创建者的任务数量
+     *
+     * @param creatorId 创建者ID
+     * @return 任务数量
+     */
+    @Select("SELECT COUNT(*) FROM im_task WHERE creator_id = #{creatorId} AND is_deleted = 0")
+    int countByCreatorId(@Param("creatorId") Long creatorId);
 }

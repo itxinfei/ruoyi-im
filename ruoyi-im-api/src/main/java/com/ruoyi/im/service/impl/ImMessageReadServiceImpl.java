@@ -493,7 +493,6 @@ public class ImMessageReadServiceImpl implements ImMessageReadService {
             ImMessageReadStatusVO status = new ImMessageReadStatusVO();
             status.setMessageId(message.getId());
             status.setConversationId(conversationId);
-            status.setSenderId(userId);
             status.setTotalCount(totalCount);
             status.setReadCount(readCountMap.getOrDefault(message.getId(), 0));
             status.setUnreadCount(totalCount - status.getReadCount());

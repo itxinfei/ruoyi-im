@@ -61,4 +61,28 @@ public interface ImBackupMapper extends BaseMapper<ImBackup> {
     int updateCompleteInfo(@Param("id") Long id,
                            @Param("filePath") String filePath,
                            @Param("fileSize") Long fileSize);
+
+    /**
+     * 统计备份总数和总大小
+     *
+     * @return 包含 total_count 和 total_size 的 Map
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COUNT(*) AS total_count, COALESCE(SUM(file_size), 0) AS total_size FROM im_backup")
+    java.util.Map<String, Object> countAndSumSize();
+
+    /**
+     * 统计已完成备份数量
+     *
+     * @return 已完成备份数量
+     */
+    @org.apache.ibatis.annotations.Select("SELECT COUNT(*) FROM im_backup WHERE status = #{status}")
+    int countByStatus(@Param("status") String status);
+
+    /**
+     * 获取最新完成的备份
+     *
+     * @return 最新备份记录
+     */
+    @org.apache.ibatis.annotations.Select("SELECT * FROM im_backup WHERE status = #{status} ORDER BY create_time DESC LIMIT 1")
+    ImBackup selectLatestByStatus(@Param("status") String status);
 }

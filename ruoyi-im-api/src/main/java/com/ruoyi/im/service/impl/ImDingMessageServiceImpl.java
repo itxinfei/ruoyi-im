@@ -43,6 +43,7 @@ import java.util.*;
 public class ImDingMessageServiceImpl implements ImDingMessageService {
 
     private static final Logger log = LoggerFactory.getLogger(ImDingMessageServiceImpl.class);
+    private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER = new com.fasterxml.jackson.databind.ObjectMapper();
 
     @Autowired
     private ImDingMessageMapper dingMessageMapper;
@@ -332,7 +333,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             dingMessage.put("timestamp", System.currentTimeMillis());
 
             // 转换为JSON
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             String messageJson = mapper.writeValueAsString(dingMessage);
 
             // 发送给接收者
@@ -370,7 +371,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             message.put("payload", payload);
             message.put("timestamp", System.currentTimeMillis());
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             String messageJson = mapper.writeValueAsString(message);
 
             // 广播给所有在线用户
@@ -400,7 +401,7 @@ public class ImDingMessageServiceImpl implements ImDingMessageService {
             message.put("payload", payload);
             message.put("timestamp", System.currentTimeMillis());
 
-            ObjectMapper mapper = new ObjectMapper();
+            ObjectMapper mapper = MAPPER;
             String messageJson = mapper.writeValueAsString(message);
 
             // 广播给所有在线用户

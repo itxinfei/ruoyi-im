@@ -26,6 +26,7 @@ import com.ruoyi.im.service.ImCloudDriveService;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import com.ruoyi.im.util.BusinessExceptionHelper;
 import com.ruoyi.im.util.FileUtils;
@@ -610,20 +611,20 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
     @Override
     public List<ImCloudFileVO> getFileList(Long folderId, Long userId) {
         List<ImCloudFile> files = cloudFileMapper.selectByFolderId(folderId, userId);
-        return files.stream().map(f -> convertToVO(f, userId)).collect(Collectors.toList());
+        return batchConvertToVO(files, userId);
     }
 
     @Override
     public List<ImCloudFileVO> searchFiles(String keyword, String fileType, Long userId) {
         List<ImCloudFile> files = cloudFileMapper.searchFiles(userId, keyword, fileType);
-        return files.stream().map(f -> convertToVO(f, userId)).collect(Collectors.toList());
+        return batchConvertToVO(files, userId);
     }
 
     @Override
     public List<ImCloudFileVO> getRecentFiles(Long userId, Integer limit) {
         int queryLimit = limit != null && limit > 0 ? limit : 10;
         List<ImCloudFile> files = cloudFileMapper.selectRecentFiles(userId, queryLimit);
-        return files.stream().map(f -> convertToVO(f, userId)).collect(Collectors.toList());
+        return batchConvertToVO(files, userId);
     }
 
     @Override
@@ -806,6 +807,64 @@ public class ImCloudDriveServiceImpl implements ImCloudDriveService {
         vo.setAvailableCapacityFormat(formatFileSize(availableCapacity));
 
         return vo;
+    }
+
+    /**
+     * 批量转换文件列表为VO，预加载关联数据避免N+1
+     */
+    private List<ImCloudFileVO> batchConvertToVO(List<ImCloudFile> cloudFiles, Long currentUserId) {
+        if (CollUtil.isEmpty(cloudFiles)) {
+            return new ArrayList<>();
+        }
+
+        // 批量加载 FileAsset
+        List<Long> assetIds = cloudFiles.stream().map(ImCloudFile::getFileAssetId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        Map<Long, ImFileAsset> assetMap = new HashMap<>();
+        if (!assetIds.isEmpty()) {
+            List<ImFileAsset> assets = fileAssetMapper.selectBatchIds(assetIds);
+            for (ImFileAsset asset : assets) {
+                assetMap.put(asset.getId(), asset);
+            }
+        }
+
+        // 批量加载上传者
+        List<Long> uploaderIds = cloudFiles.stream().map(ImCloudFile::getUploaderId).filter(Objects::nonNull).distinct().collect(Collectors.toList());
+        Map<Long, ImUser> uploaderMap = new HashMap<>();
+        if (!uploaderIds.isEmpty()) {
+            List<ImUser> uploaders = userMapper.selectImUserListByIds(uploaderIds);
+            for (ImUser uploader : uploaders) {
+                uploaderMap.put(uploader.getId(), uploader);
+            }
+        }
+
+        return cloudFiles.stream().map(f -> {
+            ImCloudFileVO vo = new ImCloudFileVO();
+            BeanUtils.copyProperties(f, vo);
+            vo.setFileSizeFormat(formatFileSize(f.getFileSize()));
+
+            if (f.getFileAssetId() != null) {
+                ImFileAsset asset = assetMap.get(f.getFileAssetId());
+                if (asset != null) {
+                    vo.setFileUrl(urlPrefix + asset.getFilePath());
+                }
+            }
+
+            ImUser uploader = uploaderMap.get(f.getUploaderId());
+            if (uploader != null) {
+                vo.setUploaderName(uploader.getNickname());
+                vo.setUploaderAvatar(uploader.getAvatar());
+            }
+
+            vo.setCanEdit(f.getUploaderId().equals(currentUserId));
+            vo.setCanDelete(f.getUploaderId().equals(currentUserId));
+            vo.setCanDownload(true);
+            vo.setCanShare(f.getUploaderId().equals(currentUserId));
+
+            ImCloudFileVersion latestVersion = cloudFileVersionMapper.selectLatestVersion(f.getId());
+            vo.setLatestVersion(latestVersion != null ? latestVersion.getVersionNumber() : 1);
+
+            return vo;
+        }).collect(Collectors.toList());
     }
 
     /**

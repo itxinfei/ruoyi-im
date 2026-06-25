@@ -444,30 +444,15 @@ public class ImTaskServiceImpl implements ImTaskService {
     public Map<String, Object> getTaskStatistics(Long userId) {
         Map<String, Object> stats = new HashMap<>();
 
-        // 待办任务数
-        int pendingCount = taskMapper.selectByAssigneeId(userId, STATUS_PENDING).size();
-        stats.put("pendingCount", pendingCount);
+        // 使用 COUNT 查询替代加载全表
+        stats.put("pendingCount", taskMapper.countByAssigneeAndStatus(userId, STATUS_PENDING));
+        stats.put("inProgressCount", taskMapper.countByAssigneeAndStatus(userId, SystemConstants.STATUS_IN_PROGRESS));
+        stats.put("completedCount", taskMapper.countByAssigneeAndStatus(userId, SystemConstants.STATUS_COMPLETED));
+        stats.put("uncompletedCount", taskMapper.countUncompletedByAssignee(userId));
 
-        // 进行中任务数
-        int inProgressCount = taskMapper.selectByAssigneeId(userId, SystemConstants.STATUS_IN_PROGRESS).size();
-        stats.put("inProgressCount", inProgressCount);
-
-        // 已完成任务数
-        int completedCount = taskMapper.selectByAssigneeId(userId, SystemConstants.STATUS_COMPLETED).size();
-        stats.put("completedCount", completedCount);
-
-        // 未完成任务总数
-        int uncompletedCount = taskMapper.countUncompletedByAssignee(userId);
-        stats.put("uncompletedCount", uncompletedCount);
-
-        // 逾期任务数
         String currentDate = LocalDate.now().format(DATE_FORMATTER);
-        int overdueCount = taskMapper.countOverdueByAssignee(userId, currentDate);
-        stats.put("overdueCount", overdueCount);
-
-        // 我创建的任务数
-        int myCreatedCount = taskMapper.selectByCreatorId(userId).size();
-        stats.put("myCreatedCount", myCreatedCount);
+        stats.put("overdueCount", taskMapper.countOverdueByAssignee(userId, currentDate));
+        stats.put("myCreatedCount", taskMapper.countByCreatorId(userId));
 
         return stats;
     }

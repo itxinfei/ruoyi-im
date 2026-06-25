@@ -276,23 +276,18 @@ public class ImBackupServiceImpl implements ImBackupService {
     public Map<String, Object> getBackupStatistics() {
         Map<String, Object> stats = new HashMap<>();
 
-        List<ImBackup> backups = imBackupMapper.selectAllOrderByCreateTime();
+        // 使用 SQL 聚合替代加载全表
+        java.util.Map<String, Object> countResult = imBackupMapper.countAndSumSize();
+        stats.put("totalBackups", countResult.get("total_count"));
+        stats.put("totalSize", countResult.get("total_size"));
 
-        stats.put("totalBackups", backups.size());
-        stats.put("totalSize", backups.stream().mapToLong(b -> b.getFileSize() != null ? b.getFileSize() : 0L).sum());
+        stats.put("completedCount", imBackupMapper.countByStatus(SystemConstants.STATUS_COMPLETED));
 
-        long completedCount = backups.stream().filter(b -> SystemConstants.STATUS_COMPLETED.equals(b.getStatus())).count();
-        stats.put("completedCount", completedCount);
-
-        if (!backups.isEmpty()) {
-            Optional<ImBackup> latestBackup = backups.stream()
-                    .filter(b -> SystemConstants.STATUS_COMPLETED.equals(b.getStatus()))
-                    .max(Comparator.comparing(ImBackup::getCreateTime));
-            latestBackup.ifPresent(backup -> {
-                stats.put("lastBackupTime", backup.getCreateTime());
-                stats.put("lastBackupId", backup.getId());
-                stats.put("lastBackupFile", backup.getFileName());
-            });
+        ImBackup latestBackup = imBackupMapper.selectLatestByStatus(SystemConstants.STATUS_COMPLETED);
+        if (latestBackup != null) {
+            stats.put("lastBackupTime", latestBackup.getCreateTime());
+            stats.put("lastBackupId", latestBackup.getId());
+            stats.put("lastBackupFile", latestBackup.getFileName());
         }
 
         return stats;
