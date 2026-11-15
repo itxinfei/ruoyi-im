@@ -108,13 +108,13 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .chat-msg-wrap.self .chat-msg-body{display:flex;flex-direction:column;align-items:flex-end}
 /* 块化的气泡需显式右对齐，短气泡贴 body 右缘 */
 .chat-msg-wrap.self .chat-msg-bubble{align-self:flex-end;max-width:100%}
-.chat-msg-bubble{display:inline-block;max-width:100%;padding:9px 12px;border-radius:var(--dt-bubble-radius);font-size:15px;line-height:1.55;word-break:break-word;overflow-wrap:break-word}
+.chat-msg-bubble{display:inline-block;max-width:100%;padding:9px 12px;border-radius:var(--dt-bubble-radius);font-size:14px;line-height:1.5;word-break:break-word;overflow-wrap:break-word}
 /* 非自己：白底深字，尖角在靠头像的左上 */
 .chat-msg-wrap:not(.self) .chat-msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
 /* 自己：品牌蓝实色 + 白字，尖角在靠头像的右上 */
 .chat-msg-wrap.self .chat-msg-bubble{background:var(--dt-brand);color:var(--dt-bg-panel);border-top-right-radius:4px}
-.chat-msg-sender{font-size:11px;color:var(--dt-text-secondary);margin-bottom:3px}
-.chat-msg-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
+.chat-msg-sender{font-size:12px;color:var(--dt-text-secondary);margin-bottom:3px}
+.chat-msg-meta{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
 .chat-msg-wrap.self .chat-msg-meta{justify-content:flex-end}
 .read-status{color:var(--dt-brand)}
 /* @提及：他人消息里用品牌蓝；自己发的蓝气泡里转白 + 下划线 */
