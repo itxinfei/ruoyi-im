@@ -1,0 +1,41 @@
+{
+  "name": "xinfei-im",
+  "version": "1.0.0",
+  "private": true,
+  "description": "XinFei IM - Windows 桌面客户端",
+  "main": "electron/main.js",
+  "scripts": {
+    "lint:md": "npm --prefix docs run lint:md",
+    "check:links": "npm --prefix docs run check:links",
+    "check:snippets": "npm --prefix docs run check:snippets",
+    "build:search": "npm --prefix docs run build:search",
+    "build:pdf": "npm --prefix docs run build:pdf",
+    "qa": "npm run lint:md && npm run check:links && npm run check:snippets && npm run build:search && npm run build:pdf",
+    "electron:dev": "electron .",
+    "electron:build": "electron-builder"
+  },
+  "devDependencies": {
+    "electron": "^31.7.7",
+    "electron-builder": "^24.13.3",
+    "markdownlint-cli2": "^0.18.1",
+    "pdfkit": "^0.16.0",
+    "yaml": "^2.8.1"
+  },
+  "build": {
+    "appId": "com.xinfei.im",
+    "productName": "XinFei IM",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "electron/icon.png"
+    },
+    "files": [
+      "electron/**/*",
+      "prototype/**/*",
+      "!**/*.md",
+      "!**/sql/**"
+    ]
+  }
+}
