@@ -104,3 +104,8 @@ docs/dist/
 /_bmad/
 /_bmad-output/
 /BMAD-METHOD/
+
+# 原型工具产物（技能缓存 / 会话记录 / 恢复脚本）
+prototype/.impeccable/
+prototype/_work/
+prototype/_restore.ps1

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>心飞IM · 原型总览</title>
+<link rel="stylesheet" href="shared.css">
+<script>
+if(window.isElectron||window.electronAPI){document.body.classList.add('electron');}
+window.electronAPI?.onMenu((msg)=>{if(msg==='menu-new-chat')location.href='dingtalk-mockup.html';});
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body.electron{padding:0}
+.electron-titlebar{height:36px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);display:flex;align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none;display:none}
+body.electron .electron-titlebar{display:flex}
+.electron-titlebar .title{font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px}
+.electron-titlebar .controls{display:flex;gap:0;-webkit-app-region:no-drag;height:100%}
+.electron-titlebar .ctrl-btn{width:36px;height:100%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);font-size:14px;font-weight:300}
+.electron-titlebar .ctrl-btn:hover{background:var(--dt-bg-body)}
+.electron-titlebar .ctrl-btn.close:hover{background:var(--dt-danger);color:var(--dt-bg-card)}
+</style>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);padding:40px}
+.header{text-align:center;margin-bottom:40px}
+.header h1{font-size:28px;font-weight:700;margin-bottom:8px;color:var(--dt-text-primary)}
+.header p{color:var(--dt-text-secondary);font-size:15px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;max-width:1200px;margin:0 auto}
+.card{background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:12px;padding:24px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit;display:block;position:relative}
+.card:hover{border-color:var(--dt-brand);}
+.card-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:12px}
+.card-title{font-size:16px;font-weight:500;margin-bottom:6px;color:var(--dt-text-primary)}
+.card-desc{font-size:13px;color:var(--dt-text-secondary);line-height:1.5}
+/* 完成标记放右上角：原来写在 .done .card-icon 上，会被每张卡的 inline 背景色覆盖而失效 */
+.card.done::after{content:'已完成';position:absolute;top:16px;right:16px;font-size:11px;font-weight:500;color:var(--dt-success);background:var(--dt-success-light);padding:2px 8px;border-radius:var(--dt-radius-lg);line-height:1.6}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
+<!-- Electron 原生标题栏 -->
+<div class="electron-titlebar" id="electronTitleBar">
+  <div class="title">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>心飞IM</span>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="window.electronAPI?.minimize()">─</button>
+    <button class="ctrl-btn" onclick="window.electronAPI?.maximize()">□</button>
+    <button class="ctrl-btn close" aria-label="关闭窗口" onclick="window.electronAPI?.close()"><svg class="ic"><use href="#i-x"/></svg></button>
+  </div>
+</div>
+<div class="header">
+  <h1>心飞IM · 高保真原型</h1>
+  <p>全套高保真原型 · 9 个页面模块 · 心飞多维表格 + 知识库已整合</p>
+</div>
+<div class="grid">
+  <a class="card done" href="dingtalk-h5.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-brand-light);color:var(--dt-brand)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2.5"/><line x1="11" y1="18" x2="13" y2="18"/></svg></div>
+    <div class="card-title">H5 手机端原型（完整）</div>
+    <div class="card-desc">iPhone 手机壳仿真 · 5个Tab页（消息/工作台/DING/通讯录/我的）· 聊天页+会话列表 · 输入工具栏 · 状态栏</div>
+  </a>
+  <a class="card done" href="dingtalk-mockup.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-brand-light);color:var(--dt-brand)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.9 8.9 0 0 1-3.9-.9L3 20.5l1.5-4.2A8.4 8.4 0 0 1 12 3.5a8.4 8.4 0 0 1 9 8z"/></svg></div>
+    <div class="card-title">聊天主区（完整三栏）</div>
+    <div class="card-desc">L1/L2/L3 三栏布局 · 8种消息类型 · 输入框+工具栏+附件+@提及 · DING弹窗 · 群信息面板</div>
+  </a>
+  <a class="card done" href="dingtalk-call.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-success-light);color:var(--dt-success)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 22a15.5 15.5 0 0 1-13.9-13.9 2 2 0 0 1 1.9-2.2l3.4-.3a1.5 1.5 0 0 1 1.6 1.2l.7 3.2a1.5 1.5 0 0 1-.6 1.5l-1.9 1.4a12 12 0 0 0 5 5l1.4-1.9a1.5 1.5 0 0 1 1.5-.6l3.2.7a1.5 1.5 0 0 1 1.2 1.6l-.3 3.4a2 2 0 0 1-2.2 1.9z"/></svg></div>
+    <div class="card-title">音视频通话</div>
+    <div class="card-desc">视频通话全屏UI · 语音波纹动画 · 控制栏（静音/扬声器/挂断/屏幕共享）· 通话记录列表</div>
+  </a>
+  <a class="card done" href="dingtalk-contacts.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-purple-light);color:var(--dt-purple)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/><path d="M16 3.1a4 4 0 0 1 0 7.8"/></svg></div>
+    <div class="card-title">通讯录 / 组织架构</div>
+    <div class="card-desc">组织架构树（可展开）· 个人名片（手机/邮箱/工位/汇报给）· 好友请求面板（通过/拒绝）</div>
+  </a>
+  <a class="card done" href="dingtalk-calendar.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-success-light);color:var(--dt-success)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+    <div class="card-title">日历 / 日程</div>
+    <div class="card-desc">迷你日历（标识事件）· 今日日程列表 · 月视图5行7列 · 创建日程弹窗 · 颜色分类</div>
+  </a>
+  <a class="card done" href="dingtalk-approval.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-ic-blue);color:var(--dt-ic-blue-fg)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="8.5 15.5 11 18 15.5 13"/></svg></div>
+    <div class="card-title">审批面板</div>
+    <div class="card-desc">待我审批/我已发起/我已审批 · 审批详情 · 流程节点（已通过/审批中/等待）· 通过/拒绝/转交</div>
+  </a>
+  <a class="card done" href="dingtalk-docs.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-app-brown);color:var(--dt-av-brown)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
+    <div class="card-title">云文档 / 知识库</div>
+    <div class="card-desc">知识库目录树 · 文件卡片网格（doc/sheet/slide/folder）· 协作人头像 · 最近使用列表</div>
+  </a>
+  <a class="card done" href="dingtalk-mockup.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-app-pink);color:var(--dt-ic-pink-fg)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+    <div class="card-title">全局搜索 <span style="font-size:11px;color:var(--dt-text-secondary);font-weight:400">已合并至聊天弹窗</span></div>
+    <div class="card-desc">聊天页顶部搜索框或L1"搜索"图标触发模态弹窗 · 6个筛选Tab · 联系人/群组/消息/文件结果 · 关键词高亮 · Esc关闭</div>
+  </a>
+  <a class="card done" href="dingtalk-workbench.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-ic-blue);color:var(--dt-ic-navy-fg)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+    <div class="card-title">工作台首页</div>
+    <div class="card-desc">8个快捷操作 · 待办事项/待审批双卡片 · 12个应用入口（日志/多维表格/邮箱/云盘等）</div>
+  </a>
+  <a class="card done" href="dingtalk-mockup.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-bg-body);color:var(--dt-text-regular)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.2-2.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10 4.6a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4z"/></svg></div>
+    <div class="card-title">设置中心 <span style="font-size:11px;color:var(--dt-text-secondary);font-weight:400">已合并至聊天弹窗</span></div>
+    <div class="card-desc">L1底部"设置"图标触发模态弹窗 · 个人资料 · 消息通知 · 主题色切换 · 退出登录 · Esc关闭</div>
+  </a>
+  <a class="card done" href="dingtalk-admin.html" target="_blank">
+    <div class="card-icon" style="background:var(--dt-ic-gray);color:var(--dt-bg-card)"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>
+    <div class="card-title">管理后台</div>
+    <div class="card-desc">12个模块开关 · 每个模块可展开子项 · 保存/取消操作栏 · 完整后台导航</div>
+  </a>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

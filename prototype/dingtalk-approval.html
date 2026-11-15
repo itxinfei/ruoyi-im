@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>心飞IM · 审批</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* 审批专属 CSS */
+
+.l2-tabs{display:flex;border-bottom:0.5px solid var(--dt-border-light)}
+.l2-tab{flex:1;padding:12px 4px;text-align:center;font-size:13px;cursor:pointer;color:var(--dt-text-secondary);position:relative;white-space:nowrap}
+.l2-tab.active{color:var(--dt-brand);font-weight:500}
+.l2-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--dt-brand);border-radius:1px}
+.l2-search{flex:1;height:32px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--dt-text-secondary);font-size:13px}
+.approval-list{flex:1;overflow-y:auto}
+.approval-item{padding:16px 16px;cursor:pointer;border-bottom:0.5px solid var(--dt-bg-body)}
+.approval-item:hover{background:var(--dt-bg-hover)}
+.approval-item.active{background:var(--dt-brand-light)}
+.ai-header{display:flex;justify-content:space-between;margin-bottom:8px}
+.ai-type{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
+.ai-status{font-size:12px;padding:2px 8px;border-radius:var(--dt-radius-lg);font-weight:500}
+.ai-status.pending{background:var(--dt-warning-light);color:var(--dt-warning)}
+.ai-status.approved{background:var(--dt-success-light);color:var(--dt-success)}
+.ai-status.rejected{background:var(--dt-danger-light);color:var(--dt-danger)}
+.ai-applicant{font-size:13px;color:var(--dt-text-regular);margin-bottom:4px}
+.ai-desc{font-size:12px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
+.ai-time{font-size:11px;color:var(--dt-text-placeholder)}
+
+.l3{flex:1;display:flex;flex-direction:column;background:var(--dt-bg-panel)}
+.l3-hdr{height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border-light)}
+.l3-hdr .title{font-size:16px;font-weight:500}
+.l3-body{flex:1;overflow-y:auto;padding:24px}
+.detail-card{border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-xl);padding:24px;max-width:600px;margin:0 auto}
+.dc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:0.5px solid var(--dt-border-light)}
+.dc-type{font-size:18px;font-weight:500;margin-bottom:4px}
+.dc-sn{font-size:12px;color:var(--dt-text-secondary)}
+.dc-row{display:flex;padding:12px 0;border-bottom:0.5px solid var(--dt-border-light)}
+.dc-label{width:100px;font-size:13px;color:var(--dt-text-secondary);flex-shrink:0}
+.dc-value{flex:1;font-size:13px;color:var(--dt-text-primary)}
+.dc-approvers{margin-top:24px;border-top:0.5px solid var(--dt-border-light);padding-top:16px}
+.dc-appr-title{font-size:13px;font-weight:500;color:var(--dt-text-regular);margin-bottom:12px}
+.flow-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
+.fs-indicator{flex-shrink:0}
+.fs-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.fs-circle.done{background:var(--dt-success);color:var(--dt-bg-card)}
+.fs-circle.current{background:var(--dt-brand);color:var(--dt-bg-card)}
+.fs-circle.wait{background:var(--dt-border-light);color:var(--dt-text-secondary)}
+.fs-line{width:2px;height:24px;background:var(--dt-border);margin:4px auto 0}
+.fs-info{padding-top:4px}
+.fs-name{font-size:13px;font-weight:500}
+.fs-status{font-size:12px;margin-top:2px}
+.fs-status.done{color:var(--dt-success)}
+.fs-status.current{color:var(--dt-brand)}
+.fs-status.wait{color:var(--dt-text-secondary)}
+.fs-time{font-size:11px;color:var(--dt-text-placeholder);margin-top:2px}
+
+.dc-actions{display:flex;gap:12px;margin-top:24px;justify-content:center}
+.dc-btn{padding:8px 28px;border-radius:var(--dt-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.dc-btn.primary{background:var(--dt-brand);color:var(--dt-bg-card);border:none}
+.dc-btn.reject{background:var(--dt-bg-panel);color:var(--dt-danger);border:0.5px solid var(--dt-danger)}
+.dc-btn.ghost{background:var(--dt-bg-panel);color:var(--dt-text-regular);border:0.5px solid var(--dt-border)}
+
+.approval-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center}
+.approval-overlay.show{display:flex}
+.approval-detail{background:var(--dt-bg-card);border-radius:var(--dt-radius-xl);width:420px;max-height:80vh;overflow-y:auto;}
+.approval-header{padding:16px 24px;border-bottom:0.5px solid var(--dt-border-light);font-size:15px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
+.approval-close{width:24px;height:24px;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-tertiary)}
+.approval-body{padding:24px}
+.approval-flow{padding:16px 0;border-bottom:0.5px solid var(--dt-border-light)}
+.approval-actions{display:flex;gap:8px;padding:16px 0}
+.approval-actions button{flex:1;height:36px;border-radius:var(--dt-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.approval-pass{background:var(--dt-brand);color:var(--dt-bg-card);border:none}
+.approval-reject{background:var(--dt-bg-card);color:var(--dt-danger);border:0.5px solid var(--dt-danger)}
+.approval-transfer{background:var(--dt-bg-card);color:var(--dt-text-regular);border:0.5px solid var(--dt-border)}
+.approval-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:14px;z-index:300;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.approval-toast.show{opacity:1}
+/* 新增发起审批弹窗 */
+.approval-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 200;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.approval-modal-overlay.show { display: flex; }
+.approval-modal {
+  background: var(--dt-bg-card);
+  border-radius: var(--dt-radius-xl);
+  width: 560px;
+  max-height: 85vh;
+  overflow-y: auto;
+  
+}
+.am-header {
+  padding: 16px 24px;
+  border-bottom: 0.5px solid var(--dt-border-light);
+  font-size: 16px;
+  font-weight: 500;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.am-close {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+  color: var(--dt-text-secondary);
+  border-radius: var(--dt-radius-sm);
+}
+.am-close:hover { background: var(--dt-bg-body); color: var(--dt-text-regular); }
+.am-body { padding: 24px; }
+.am-form-group { margin-bottom: 16px; }
+.am-label { font-size: 13px; color: var(--dt-text-regular); margin-bottom: 6px; display: block; }
+.am-label.required::after { content: '*'; color: var(--dt-danger); margin-left: 4px; }
+.am-input {
+  width: 100%;
+  height: 36px;
+  border: 0.5px solid var(--dt-border);
+  border-radius: var(--dt-radius-md);
+  padding: 0 12px;
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.am-input:focus { border-color: var(--dt-brand); outline: none; }
+.am-textarea {
+  width: 100%;
+  height: 80px;
+  border: 0.5px solid var(--dt-border);
+  border-radius: var(--dt-radius-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+.am-textarea:focus { border-color: var(--dt-brand); outline: none; }
+.am-select {
+  width: 100%;
+  height: 36px;
+  border: 0.5px solid var(--dt-border);
+  border-radius: var(--dt-radius-md);
+  padding: 0 12px;
+  font-size: 13px;
+  background: var(--dt-bg-card);
+  cursor: pointer;
+}
+.am-select:focus { border-color: var(--dt-brand); outline: none; }
+.am-time-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.am-file-upload {
+  border: 1px dashed var(--dt-border);
+  border-radius: var(--dt-radius-md);
+  padding: 16px;
+  text-align: center;
+  color: var(--dt-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+.am-file-upload:hover { border-color: var(--dt-brand); color: var(--dt-brand); }
+.am-footer {
+  padding: 16px 24px;
+  border-top: 0.5px solid var(--dt-border-light);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.am-btn {
+  padding: 8px 24px;
+  border-radius: var(--dt-radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.am-btn.cancel {
+  background: var(--dt-bg-card);
+  color: var(--dt-text-regular);
+  border: 0.5px solid var(--dt-border);
+}
+.am-btn.submit {
+  background: var(--dt-brand);
+  color: var(--dt-bg-card);
+  border: none;
+}
+.my-approval-item .ai-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.ai-action-btn {
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 0.5px solid var(--dt-border);
+  background: var(--dt-bg-card);
+}
+.ai-action-btn.revoke { color: var(--dt-danger); }
+.approval-error {
+  color: var(--dt-danger);
+  font-size: 11px;
+  margin-top: 4px;
+  display: none;
+}
+.approval-error.show { display: block; }
+.l2-add-btn {
+  background: var(--dt-brand);
+  color: var(--dt-bg-card);
+  border: none;
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+  border-radius: var(--dt-radius-sm);
+  font-size: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+/* L3 状态微标 */
+.l3-badge{font-size:12px;padding:4px 12px;border-radius:var(--dt-radius-xl);font-weight:500}
+.l3-badge.pending{background:var(--dt-warning-light);color:var(--dt-warning)}
+.l3-badge.mine{background:var(--dt-brand-light);color:var(--dt-brand)}
+.l3-badge.done{background:var(--dt-success-light);color:var(--dt-success)}
+.l3-badge.cc{background:var(--dt-bg-body);color:var(--dt-text-secondary)}
+.dc-empty{padding:48px 16px;text-align:center;color:var(--dt-text-tertiary);font-size:14px}
+</style>
+</head>
+<body>
+<!-- Electron 原生标题栏 -->
+<div class="electron-titlebar" style="height:36px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none">
+  <div style="font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>心飞IM</span>
+  </div>
+  <div style="display:flex;gap:0;-webkit-app-region:no-drag;height:100%">
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.minimize()">─</button>
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.maximize()">□</button>
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary);transition:background 0.15s" onmouseover="this.style.background='var(--dt-danger)';this.style.color='var(--dt-bg-card)'" onmouseout="this.style.background='transparent';this.style.color='var(--dt-text-secondary)'" onclick="window.electronAPI?.close()">✕</button>
+  </div>
+</div>
+<script>
+if(window.isElectron||window.electronAPI){
+  document.body.classList.add('electron');
+  document.body.style.padding='0';
+}
+</script><style>.electron-titlebar{display:none}body.electron{flex-direction:column}body.electron .electron-titlebar{display:flex;flex:none;width:100%}</style>
+<!-- L1 左侧导航栏 · 统一组件 -->
+<nav class="l1-nav">
+  <div class="l1-avatar" onclick="location.href='index.html'">我</div>
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="消息" aria-label="消息">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>消息</span>
+    <div class="l1-badge">24</div>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-contacts.html'" title="通讯录" aria-label="通讯录">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>通讯录</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-calendar.html'" title="日历" aria-label="日历">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>日历</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-docs.html'" title="文档" aria-label="文档">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>文档</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-workbench.html'" title="工作台" aria-label="工作台">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>工作台</span>
+  </div>
+  <div class="l1-item active" onclick="location.href='dingtalk-approval.html'" title="审批" aria-label="审批">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>审批</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-mail.html'" title="邮箱" aria-label="邮箱">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <span>邮箱</span>
+  </div>
+
+
+  <div class="l1-bottom">
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="搜索" aria-label="搜索">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>搜索</span>
+    </div>
+    <div class="l1-item" onclick="location.href='dingtalk-admin.html'" title="设置" aria-label="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
+      <span>设置</span>
+    </div>
+  </div>
+</nav>
+
+<!-- L2 审批列表 -->
+<div class="l2-panel">
+  <div class="l2-header">
+    <button class="l2-search"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索审批</button>
+    <button class="l2-add-btn" id="openCreateApproval">+ 发起审批</button>
+  </div>
+  <div class="l2-tabs">
+    <div class="l2-tab active" data-tab="pending">待我审批 <span style="color:var(--dt-danger);">2</span></div>
+    <div class="l2-tab" data-tab="mine">我已发起</div>
+    <div class="l2-tab" data-tab="done">我已审批</div>
+    <div class="l2-tab" data-tab="cc">抄送我的</div>
+  </div>
+  <div class="approval-list">
+    <div class="approval-item active" data-id="1" data-tab="pending">
+      <div class="ai-header">
+        <div class="ai-type"><span style="color:var(--dt-warning);">📋</span> 请假申请</div>
+        <div class="ai-status pending">待审批</div>
+      </div>
+      <div class="ai-applicant">李四 · 前端组</div>
+      <div class="ai-desc">事假 2天（10-29至10-30） - 家中有事需处理</div>
+      <div class="ai-time">今天 09:15</div>
+    </div>
+    <div class="approval-item" data-id="2" data-tab="pending">
+      <div class="ai-header">
+        <div class="ai-type"><span style="color:var(--dt-brand);">✈️</span> 出差申请</div>
+        <div class="ai-status pending">待审批</div>
+      </div>
+      <div class="ai-applicant">王五 · 设计组</div>
+      <div class="ai-desc">上海出差 3天（11-02至11-04） - 参与客户沟通会</div>
+      <div class="ai-time">昨天 16:40</div>
+    </div>
+    <div class="approval-item my-approval-item" data-id="3" data-tab="mine">
+      <div class="ai-header">
+        <div class="ai-type"><span style="color:var(--dt-brand);">💰</span> 报销申请</div>
+        <div class="ai-status approved">审批中</div>
+      </div>
+      <div class="ai-applicant">你 · 架构组</div>
+      <div class="ai-desc">差旅报销 ¥2,350.00（10-25） - 上海出差交通住宿费用</div>
+      <div class="ai-time">10-26 10:30</div>
+    </div>
+  </div>
+</div>
+
+<!-- L3 审批详情 -->
+<div class="l3">
+  <div class="l3-hdr">
+    <div class="title">请假审批详情</div>
+    <div style="display:flex;gap:8px">
+      <div class="l3-badge pending" id="l3StatusBadge">待你审批</div>
+    </div>
+  </div>
+  <div class="l3-body">
+    <div class="detail-card" id="approvalDetailCard"></div>
+  </div>
+</div>
+
+<div class="approval-toast" id="approvalToast"></div>
+
+<!-- 发起审批弹窗 -->
+<div class="approval-modal-overlay" id="approvalModal">
+  <div class="approval-modal">
+    <div class="am-header">发起审批<button class="am-close" aria-label="关闭发起审批" onclick="document.getElementById('approvalModal').classList.remove('show')">✕</button></div>
+    <div class="am-body">
+      <div class="am-form-group">
+        <label class="am-label required">审批标题</label>
+        <input type="text" class="am-input" id="amTitle" placeholder="请输入审批标题（20字以内）" maxlength="20">
+        <div class="approval-error" id="errTitle">请输入审批标题</div>
+      </div>
+      <div class="am-form-group">
+        <label class="am-label required">审批类型</label>
+        <select class="am-select" id="amType">
+          <option value="">请选择审批类型</option>
+          <option value="leave">请假申请</option>
+          <option value="expense">报销申请</option>
+          <option value="travel">出差申请</option>
+          <option value="overtime">加班申请</option>
+          <option value="other">其他申请</option>
+        </select>
+        <div class="approval-error" id="errType">请选择审批类型</div>
+      </div>
+      <div class="am-form-group">
+        <label class="am-label required" id="timeLabel">开始时间</label>
+        <div class="am-time-group">
+          <input type="datetime-local" class="am-input" id="amStartTime">
+          <input type="datetime-local" class="am-input" id="amEndTime">
+        </div>
+        <div class="approval-error" id="errTime">请选择完整的时间段</div>
+      </div>
+      <div class="am-form-group">
+        <label class="am-label">天数</label>
+        <input type="number" class="am-input" id="amDays" placeholder="默认为1天" min="0.5" step="0.5" value="1">
+      </div>
+      <div class="am-form-group">
+        <label class="am-label required">事由说明</label>
+        <textarea class="am-textarea" id="amReason" placeholder="请输入申请事由，至少10个字" minlength="10"></textarea>
+        <div class="approval-error" id="errReason">请输入至少10个字的申请事由</div>
+      </div>
+      <div class="am-form-group">
+        <label class="am-label">附件材料</label>
+        <div class="am-file-upload" onclick="showApprovalToast('文件上传功能暂未开放')">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <div style="margin-top:6px">点击上传附件（支持图片、PDF、文档，最大10MB）</div>
+        </div>
+      </div>
+      <div class="am-form-group">
+        <label class="am-label required">审批人</label>
+        <select class="am-select" id="amApprover">
+          <option value="">请选择审批人</option>
+          <option value="zhangsan">张三（直属主管）</option>
+          <option value="lisi">李四（部门经理）</option>
+          <option value="wangwu">王五（HR专员）</option>
+        </select>
+        <div class="approval-error" id="errApprover">请选择审批人</div>
+      </div>
+    </div>
+    <div class="am-footer">
+      <button class="am-btn cancel" onclick="document.getElementById('approvalModal').classList.remove('show')">取消</button>
+      <button class="am-btn submit" id="submitApproval" data-lock="1500">提交申请</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function showApprovalToast(msg){
+  var t=document.getElementById('approvalToast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},1500);
+}
+
+// ===== 打开发起审批弹窗 =====
+document.getElementById('openCreateApproval').addEventListener('click', function() {
+  document.getElementById('amTitle').value = '';
+  document.getElementById('amType').value = '';
+  document.getElementById('amStartTime').value = '';
+  document.getElementById('amEndTime').value = '';
+  document.getElementById('amDays').value = '1';
+  document.getElementById('amReason').value = '';
+  document.getElementById('amApprover').value = '';
+  document.querySelectorAll('.approval-error').forEach(function(el) { el.classList.remove('show'); });
+  document.getElementById('approvalModal').classList.add('show');
+});
+document.getElementById('approvalModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
+document.getElementById('amType').addEventListener('change', function() {
+  var label = document.getElementById('timeLabel');
+  var val = this.value;
+  if (val === 'travel') label.textContent = '出差时间';
+  else if (val === 'overtime') label.textContent = '加班时间';
+  else if (val === 'expense') label.textContent = '报销周期';
+  else label.textContent = '开始时间';
+});
+document.getElementById('submitApproval').addEventListener('click', function() {
+  var title = document.getElementById('amTitle').value.trim();
+  var type = document.getElementById('amType').value;
+  var startTime = document.getElementById('amStartTime').value;
+  var endTime = document.getElementById('amEndTime').value;
+  var reason = document.getElementById('amReason').value.trim();
+  var approver = document.getElementById('amApprover').value;
+  var isValid = true;
+  if (!title) { document.getElementById('errTitle').classList.add('show'); isValid = false; }
+  else { document.getElementById('errTitle').classList.remove('show'); }
+  if (!type) { document.getElementById('errType').classList.add('show'); isValid = false; }
+  else { document.getElementById('errType').classList.remove('show'); }
+  if (!startTime || !endTime) { document.getElementById('errTime').classList.add('show'); isValid = false; }
+  else if (new Date(endTime) <= new Date(startTime)) { document.getElementById('errTime').textContent = '结束时间必须晚于开始时间'; document.getElementById('errTime').classList.add('show'); isValid = false; }
+  else { document.getElementById('errTime').classList.remove('show'); document.getElementById('errTime').textContent = '请选择完整的时间段'; }
+  if (reason.length < 10) { document.getElementById('errReason').classList.add('show'); isValid = false; }
+  else { document.getElementById('errReason').classList.remove('show'); }
+  if (!approver) { document.getElementById('errApprover').classList.add('show'); isValid = false; }
+  else { document.getElementById('errApprover').classList.remove('show'); }
+  if (isValid) {
+    document.getElementById('approvalModal').classList.remove('show');
+    showApprovalToast('审批申请已提交，等待审批人处理');
+  }
+});
+
+// ===== 我发起的：撤销 / 详情 =====
+document.addEventListener('DOMContentLoaded', function() {
+  var myApprovalItems = document.querySelectorAll('.approval-item.my-approval-item');
+  myApprovalItems.forEach(function(item) {
+    if (!item.querySelector('.ai-actions')) {
+      var actions = document.createElement('div');
+      actions.className = 'ai-actions';
+      actions.innerHTML = '<button class="ai-action-btn detail">查看详情</button><button class="ai-action-btn revoke">撤销申请</button>';
+      item.querySelector('.ai-applicant').after(actions);
+      actions.querySelector('.revoke').addEventListener('click', function(e) {
+        e.stopPropagation();
+        xfConfirm({
+          title:'撤销申请',
+          body:'确定要撤销该审批申请吗？',
+          hint:'撤销后审批流程立即终止，不可恢复。',
+          confirmText:'撤销',
+          danger:true,
+          onConfirm:function(){
+            showApprovalToast('申请已撤销');
+            item.setAttribute('data-removed','1');
+            item.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+});
+
+// ===== 审批数据 =====
+var approvalData = {
+  '1': {
+    type: '请假申请',
+    sn: '编号：LV20261028001',
+    applicant: '李四',
+    dept: '前端组 / 前端工程师',
+    rows: [
+      { label: '请假类型', value: '事假' },
+      { label: '开始日期', value: '2026-10-29 09:00' },
+      { label: '结束日期', value: '2026-10-30 18:00' },
+      { label: '请假天数', value: '2天' },
+      { label: '请假事由', value: '家中有事需处理' },
+      { label: '工作交接', value: '王五（前端工程师）' },
+      { label: '申请时间', value: '2026-10-28 09:15:00' }
+    ],
+    flow: [
+      { name: '发起人', status: 'done', text: '已提交 · 李四 · 10-28 09:15' },
+      { name: '直属主管审批', status: 'current', text: '审批中 · 等待张三审批' },
+      { name: 'HR 备案', status: 'wait', text: '等待处理' }
+    ],
+    badge: { cls: 'pending', text: '待你审批' },
+    actions: ['reject', 'transfer', 'pass']
+  },
+  '2': {
+    type: '出差申请',
+    sn: '编号：LV20261027003',
+    applicant: '王五',
+    dept: '设计组 / UI设计师',
+    rows: [
+      { label: '出差地点', value: '上海 · 客户现场' },
+      { label: '开始日期', value: '2026-11-02 09:00' },
+      { label: '结束日期', value: '2026-11-04 18:00' },
+      { label: '出差天数', value: '3天' },
+      { label: '出差事由', value: '参与客户沟通会，确认设计方案' },
+      { label: '预计费用', value: '¥4,500（含机票住宿）' },
+      { label: '申请时间', value: '2026-10-27 16:40:00' }
+    ],
+    flow: [
+      { name: '发起人', status: 'done', text: '已提交 · 王五 · 10-27 16:40' },
+      { name: '部门主管审批', status: 'current', text: '审批中 · 等待赵六审批' },
+      { name: '行政备案', status: 'wait', text: '等待处理' }
+    ],
+    badge: { cls: 'pending', text: '待你审批' },
+    actions: ['reject', 'transfer', 'pass']
+  },
+  '3': {
+    type: '报销申请',
+    sn: '编号：EX20261026012',
+    applicant: '你',
+    dept: '架构组 / 架构师',
+    rows: [
+      { label: '报销类型', value: '差旅报销' },
+      { label: '报销金额', value: '¥2,350.00' },
+      { label: '费用周期', value: '2026-10-25' },
+      { label: '费用说明', value: '上海出差交通住宿费用，共3天' },
+      { label: '发票数量', value: '4张' },
+      { label: '收款账户', value: '招商银行 **** 1234' },
+      { label: '申请时间', value: '2026-10-26 10:30:00' }
+    ],
+    flow: [
+      { name: '发起人', status: 'done', text: '已提交 · 你 · 10-26 10:30' },
+      { name: '直属主管审批', status: 'current', text: '审批中 · 等待张三审批' },
+      { name: '财务审核', status: 'wait', text: '等待处理' },
+      { name: '财务复核', status: 'wait', text: '等待处理' }
+    ],
+    badge: { cls: 'mine', text: '审批中' },
+    actions: ['revoke', 'urge']
+  }
+};
+
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+/* 按数据渲染 L3 */
+function renderApprovalDetail(id){
+  var data=approvalData[id];
+  var card=document.getElementById('approvalDetailCard');
+  var badge=document.getElementById('l3StatusBadge');
+  var title=document.querySelector('.l3-hdr .title');
+  if(!card)return;
+  if(!data){
+    if(title)title.textContent='审批详情';
+    if(badge){badge.className='l3-badge cc';badge.textContent='已失效';}
+    card.innerHTML='<div class="dc-empty">未找到该申请，可能已被撤销</div>';
+    return;
+  }
+  if(title)title.textContent=data.type+'详情';
+  if(badge){badge.className='l3-badge '+(data.badge?data.badge.cls:'cc');badge.textContent=data.badge?data.badge.text:'';}
+  var html='<div class="dc-hdr"><div><div class="dc-type">'+esc(data.type)+'</div><div class="dc-sn">'+esc(data.sn)+'</div></div>'+
+    '<div style="text-align:right"><div style="font-size:13px;color:var(--dt-text-regular);">'+esc(data.applicant)+'</div>'+
+    '<div style="font-size:12px;color:var(--dt-text-secondary);">'+esc(data.dept)+'</div></div></div>';
+  for(var i=0;i<data.rows.length;i++){
+    html+='<div class="dc-row"><div class="dc-label">'+esc(data.rows[i].label)+'</div><div class="dc-value">'+esc(data.rows[i].value)+'</div></div>';
+  }
+  html+='<div class="dc-approvers"><div class="dc-appr-title">审批流程</div>';
+  for(var s=0;s<data.flow.length;s++){
+    var st=data.flow[s];
+    var circle=(st.status==='done')?'✓':(s+1);
+    var line=(s<data.flow.length-1)?'<div class="fs-line"></div>':'';
+    html+='<div class="flow-step"><div class="fs-indicator"><div class="fs-circle '+st.status+'">'+circle+'</div>'+line+'</div>'+
+      '<div class="fs-info"><div class="fs-name">'+esc(st.name)+'</div><div class="fs-status '+st.status+'">'+esc(st.text)+'</div></div></div>';
+  }
+  var acts=data.actions||[];
+  if(acts.length){
+    html+='<div class="dc-actions">';
+    for(var a=0;a<acts.length;a++){
+      if(acts[a]==='reject')html+='<button class="dc-btn reject" onclick="approveItem(\'reject\')">拒绝</button>';
+      else if(acts[a]==='transfer')html+='<button class="dc-btn ghost" onclick="showApprovalToast(\'转交功能暂未开放\')">转交</button>';
+      else if(acts[a]==='pass')html+='<button class="dc-btn primary" onclick="approveItem(\'pass\')">通过</button>';
+      else if(acts[a]==='revoke')html+='<button class="dc-btn reject" onclick="revokeApproval()">撤销申请</button>';
+      else if(acts[a]==='urge')html+='<button class="dc-btn ghost" onclick="showApprovalToast(\'已发送催办提醒\')">催办</button>';
+    }
+    html+='</div>';
+  }
+  html+='</div>';
+  card.innerHTML=html;
+}
+
+/* 撤销申请 */
+function revokeApproval(){
+  var active=document.querySelector('.approval-item.active');
+  if(!active)return;
+  var item=active;
+  xfConfirm({
+    title:'撤销申请',
+    body:'确定要撤销该审批申请吗？',
+    hint:'撤销后审批流程立即终止，不可恢复。',
+    confirmText:'撤销',
+    danger:true,
+    onConfirm:function(){
+      item.setAttribute('data-removed','1');
+      item.style.display='none';
+      showApprovalToast('申请已撤销');
+      var list=document.querySelectorAll('.approval-item');
+      var next=null;
+      for(var i=0;i<list.length;i++){
+        if(list[i]!==item&&list[i].getAttribute('data-removed')!=='1'&&list[i].style.display!=='none'){next=list[i];break;}
+      }
+      if(next){
+        for(var j=0;j<list.length;j++)list[j].classList.remove('active');
+        next.classList.add('active');
+        renderApprovalDetail(next.getAttribute('data-id'));
+      }else{
+        renderApprovalDetail(null);
+      }
+    }
+  });
+}
+
+// ===== 条目点击渲染 L3 =====
+var apprItems=document.querySelectorAll('.approval-item');
+for(var i=0;i<apprItems.length;i++){
+  (function(idx){
+    apprItems[idx].addEventListener('click',function(){
+      for(var j=0;j<apprItems.length;j++)apprItems[j].classList.remove('active');
+      this.classList.add('active');
+      var id=this.getAttribute('data-id');
+      renderApprovalDetail(id);
+    });
+  })(i);
+}
+
+// ===== 审批操作 =====
+function approveItem(action){
+  var active=document.querySelector('.approval-item.active');
+  if(!active)return;
+  active.style.display='none';
+  active.setAttribute('data-removed','1');
+  showApprovalToast(action==='pass'?'审批已通过':'审批已拒绝');
+  var items=document.querySelectorAll('.approval-item');
+  for(var i=0;i<items.length;i++){
+    if(items[i].style.display!=='none'&&!items[i].getAttribute('data-removed')){
+      items[i].classList.add('active');
+      renderApprovalDetail(items[i].getAttribute('data-id'));
+      break;
+    }
+  }
+}
+
+renderApprovalDetail('1');
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

@@ -1,0 +1,2731 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>心飞IM · 管理后台</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* 管理后台专属 CSS */
+:root {
+  --dt-l2-width: 240px;
+  --admin-sidebar-bg: var(--dt-nav-dark);
+  --admin-sidebar-text: rgba(255,255,255,0.65);
+  --admin-sidebar-text-hover: var(--dt-bg-card);
+  --admin-sidebar-active: var(--dt-brand);
+  --admin-card-bg: var(--dt-bg-card);
+  --admin-card-border: var(--dt-border);
+  --admin-card-radius: var(--dt-radius-xl);
+  --admin-gap: 24px;
+}
+
+.admin-layout{display:flex;flex:1;min-width:0}
+
+/* 左侧侧边栏 */
+.admin-sidebar{width:var(--dt-l2-width);background:var(--admin-sidebar-bg);display:flex;flex-direction:column;flex-shrink:0;border-right:0.5px solid rgba(255,255,255,0.06)}
+.as-brand{height:var(--dt-header-height);display:flex;align-items:center;gap:12px;padding:0 24px;color:var(--dt-bg-card);font-size:16px;font-weight:600;border-bottom:0.5px solid rgba(255,255,255,0.08)}
+.as-brand svg{width:20px;height:20px;opacity:0.9}
+.as-nav{flex:1;padding:12px 0;overflow-y:auto}
+.as-group-title{padding:16px 24px 6px;font-size:11px;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;font-weight:500}
+.as-nav-item{display:flex;align-items:center;gap:12px;padding:0 12px;height:40px;font-size:14px;color:var(--admin-sidebar-text);cursor:pointer;transition:background 0.15s;border-left:3px solid transparent;margin:0 8px;border-radius:0 var(--dt-radius-md) var(--dt-radius-md) 0}
+.as-nav-item:hover{background:rgba(255,255,255,0.06);color:var(--admin-sidebar-text-hover)}
+.as-nav-item.active{background:rgba(255,255,255,0.12);color:var(--dt-bg-card);border-left-color:var(--dt-brand);font-weight:500}
+.as-nav-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.8}
+.as-nav-item.active svg{opacity:1}
+
+/* 主内容区 */
+.admin-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;background:var(--dt-bg-body)}
+.am-header{height:var(--dt-header-height);background:var(--dt-bg-card);border-bottom:0.5px solid var(--admin-card-border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.am-title{font-size:16px;font-weight:600;color:var(--dt-text-primary)}
+.am-breadcrumb{font-size:12px;color:var(--dt-text-secondary);margin-top:2px}
+.am-user{display:flex;align-items:center;gap:12px}
+.am-avatar{width:34px;height:34px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);font-size:13px;display:flex;align-items:center;justify-content:center;font-weight:600}
+
+.am-content{flex:1;overflow-y:auto;padding:24px 24px 80px}
+
+/* 搜索栏 */
+.am-search-bar{display:flex;gap:12px;margin-bottom:24px;align-items:center}
+.am-search{flex:1;max-width:360px;height:36px;border:0.5px solid var(--admin-card-border);border-radius:var(--dt-radius-lg);padding:0 16px;font-size:13px;outline:none;transition:border-color 0.15s}
+.am-search:focus{border-color:var(--dt-brand)}
+.am-filter{display:flex;gap:4px;background:var(--dt-bg-body);padding:3px;border-radius:var(--dt-radius-lg)}
+.am-filter-btn{height:28px;padding:0 16px;border:none;background:transparent;border-radius:var(--dt-radius-md);font-size:12.5px;cursor:pointer;color:var(--dt-text-regular);transition:all 0.15s}
+.am-filter-btn.active{background:var(--dt-bg-card);color:var(--dt-brand);font-weight:500}
+
+/* 功能开关卡片 */
+.module-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:var(--admin-gap)}
+.module-card{background:var(--admin-card-bg);border:0.5px solid var(--admin-card-border);border-radius:var(--admin-card-radius);padding:24px;transition:all 0.2s}
+.module-card:hover{border-color:var(--dt-brand)}
+.module-card.disabled{opacity:0.6}
+.mc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
+.mc-left{display:flex;align-items:flex-start;gap:16px;flex:1;min-width:0}
+.mc-icon{width:44px;height:44px;border-radius:var(--dt-radius-lg);display:flex;align-items:center;justify-content:center;flex-shrink:0;background:var(--dt-brand-light);color:var(--dt-brand)}
+.mc-name{font-size:15px;font-weight:600;color:var(--dt-text-primary)}
+.mc-tag{margin-left:6px;padding:1px 6px;border-radius:var(--dt-radius-sm);font-size:11px;font-weight:400;background:var(--dt-bg-body);color:var(--dt-text-tertiary);vertical-align:1px}
+.mc-tag.closed{background:var(--dt-danger-light);color:var(--dt-danger)}
+.mc-desc{font-size:12.5px;color:var(--dt-text-secondary);margin-top:3px}
+
+/* 开关组件 */
+.toggle-switch{width:46px;height:26px;background:var(--dt-text-placeholder);border-radius:var(--dt-radius-full);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.toggle-switch.on{background:var(--dt-brand)}
+.toggle-switch::after{content:'';width:22px;height:22px;background:var(--dt-bg-card);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform 0.2s;}
+.toggle-switch.on::after{transform:translateX(20px)}
+.toggle-switch.disabled{opacity:0.4;cursor:not-allowed}
+
+.mc-options{margin-top:16px;padding-top:16px;border-top:0.5px solid var(--dt-bg-body);display:none}
+.module-card.expanded .mc-options{display:block}
+.mc-option{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:13.5px;color:var(--dt-text-regular)}
+.mc-option .toggle-switch{width:38px;height:22px}
+.mc-option .toggle-switch::after{width:18px;height:18px;top:2px;left:2px}
+.mc-option .toggle-switch.on::after{transform:translateX(16px)}
+
+.mc-expand{width:100%;padding:12px 0;background:none;border:none;border-top:0.5px solid var(--dt-bg-body);font-size:12.5px;color:var(--dt-brand);cursor:pointer;margin-top:12px;text-align:center;border-radius:0 0 10px 10px;transition:background 0.15s}
+.mc-expand:hover{background:var(--dt-bg-hover)}
+
+/* 保存栏 */
+.save-bar{height:64px;background:var(--dt-bg-card);border-top:0.5px solid var(--admin-card-border);display:flex;align-items:center;justify-content:flex-end;padding:0 24px;gap:12px;flex-shrink:0}
+.save-bar button{height:36px;padding:0 24px;border-radius:var(--dt-radius-lg);font-size:13.5px;cursor:pointer;transition:all 0.15s;font-weight:500}
+.btn-cancel{background:var(--dt-bg-card);border:0.5px solid var(--admin-card-border);color:var(--dt-text-regular)}
+.btn-cancel:hover{background:var(--dt-bg-hover);border-color:var(--dt-text-placeholder)}
+.btn-save{background:var(--dt-brand);color:var(--dt-bg-card);border:none}
+.btn-save:hover{background:var(--dt-brand-hover)}
+.btn-save:disabled{opacity:0.6;cursor:not-allowed;box-shadow:none}
+.status-msg{font-size:12.5px;color:var(--dt-success);margin-right:auto}
+.status-msg.dirty{color:var(--dt-warning)}
+
+/* Toast */
+.admin-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.75);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:13.5px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none;}
+.admin-toast.show{opacity:1}
+
+/* 确认弹窗 */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;z-index:100}
+.confirm-overlay.show{display:flex}
+.confirm-box{width:380px;background:var(--dt-bg-card);border-radius:var(--dt-radius-xl);padding:28px;}
+.confirm-title{font-size:17px;font-weight:600;margin-bottom:12px;color:var(--dt-text-primary)}
+.confirm-desc{font-size:13.5px;color:var(--dt-text-regular);line-height:1.6;margin-bottom:24px}
+.confirm-actions{display:flex;gap:12px;justify-content:flex-end}
+.confirm-actions button{height:36px;padding:0 24px;border-radius:var(--dt-radius-lg);font-size:13.5px;cursor:pointer;font-weight:500}
+.confirm-cancel{background:var(--dt-bg-card);border:0.5px solid var(--admin-card-border);color:var(--dt-text-regular)}
+.confirm-ok{background:var(--dt-danger);color:var(--dt-bg-card);border:none;}
+
+/* 空页面占位 */
+.page-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px;color:var(--dt-text-placeholder)}
+.page-placeholder .icon{font-size:56px;margin-bottom:24px;opacity:0.5}
+.page-placeholder h3{font-size:17px;color:var(--dt-text-secondary);margin-bottom:8px;font-weight:500}
+.page-placeholder p{font-size:13.5px;color:var(--dt-text-placeholder)}
+
+/* 开关高亮联动 */
+.table-row.highlight,.group-row.highlight{background:var(--dt-warning-light) !important;transition:background 0.3s}
+.table-row.highlight td,.group-row.highlight td{color:var(--dt-warning) !important}
+.table-header{display:grid;grid-template-columns:40px 2fr 1fr 1fr 1fr 80px 120px;background:var(--dt-bg-hover);padding:12px 16px;border-bottom:0.5px solid var(--dt-border)}
+.table-row{display:grid;grid-template-columns:40px 2fr 1fr 1fr 1fr 80px 120px;padding:16px 16px;border-bottom:0.5px solid var(--dt-bg-body);align-items:center;transition:background 0.15s}
+.table-row:hover{background:var(--dt-bg-hover)}
+.table-row:last-child{border-bottom:none}
+.th{font-size:13px;font-weight:500;color:var(--dt-text-regular)}
+.td{font-size:13.5px;color:var(--dt-text-primary)}
+</style>
+</head>
+<body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
+
+<!-- Electron 原生标题栏 -->
+<div class="electron-titlebar" style="height:36px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none">
+  <div style="font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>心飞IM</span>
+  </div>
+  <div style="display:flex;gap:0;-webkit-app-region:no-drag;height:100%">
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-regular)" onclick="window.electronAPI?.minimize()">─</button>
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-regular)" onclick="window.electronAPI?.maximize()">□</button>
+    <button aria-label="关闭窗口" style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-regular);transition:background 0.15s" onmouseover="this.style.background='var(--dt-danger)';this.style.color='var(--dt-bg-card)'" onmouseout="this.style.background='transparent';this.style.color='var(--dt-text-regular)'" onclick="window.electronAPI?.close()"><svg class="ic"><use href="#i-x"/></svg></button>
+  </div>
+</div>
+<script>
+if(window.isElectron||window.electronAPI){
+  document.body.classList.add('electron');
+  document.body.style.padding='0';
+}
+</script><style>
+.electron-titlebar{display:none}
+body.electron{flex-direction:column}
+body.electron .electron-titlebar{display:flex;flex:none;width:100%}
+</style>
+
+<div class="admin-layout">
+  <!-- 后台侧栏 -->
+  <div class="admin-sidebar">
+    <div class="as-brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> 管理后台</div>
+    <div class="as-nav">
+      <div class="as-group-title">基本功能</div>
+      <div class="as-nav-item" data-page="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>首页</div>
+      <div class="as-nav-item active" data-page="features"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>功能开关</div>
+      <div class="as-group-title">用户管理</div>
+      <div class="as-nav-item" data-page="users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>用户列表</div>
+      <div class="as-nav-item" data-page="org"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>组织架构</div>
+      <div class="as-nav-item" data-page="roles"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>角色权限</div>
+      <div class="as-nav-item" data-page="admins"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 11h-6"/><path d="M19 8v6"/></svg>管理员管理</div>
+      <div class="as-nav-item" data-page="chats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>群聊管理</div>
+      <div class="as-group-title">业务配置</div>
+      <div class="as-nav-item" data-page="approval"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>审批流程</div>
+      <div class="as-nav-item" data-page="attendance"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>考勤规则</div>
+      <div class="as-nav-item" data-page="call"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>通话配置</div>
+      <div class="as-group-title">系统</div>
+      <div class="as-nav-item" data-page="system"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>系统配置</div>
+      <div class="as-nav-item" data-page="logs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>操作日志</div>
+    </div>
+  </div>
+
+  <!-- 后台主区 -->
+  <div class="admin-main">
+    <div class="am-header">
+      <div>
+        <div class="am-title" id="pageTitle">功能开关</div>
+        <div class="am-breadcrumb" id="pageBreadcrumb">管理后台 / 功能开关</div>
+      </div>
+      <div class="am-user">
+        <span style="font-size:13px;color:var(--dt-text-regular)">超级管理员</span>
+        <div class="am-avatar">管</div>
+      </div>
+    </div>
+
+    <!-- 功能开关页面 -->
+    <div class="am-content" id="featuresPage">
+      <!-- 统计卡片 -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+          <div style="font-size:12.5px;color:var(--dt-text-secondary)">功能模块总数</div>
+          <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">12</div>
+          <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">涵盖IM全部功能</div>
+        </div>
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+          <div style="font-size:12.5px;color:var(--dt-text-secondary)">已开启模块</div>
+          <div style="font-size:24px;font-weight:600;color:var(--dt-success);margin-top:4px">10</div>
+          <div style="font-size:12px;color:var(--dt-success);margin-top:4px">覆盖率 83.3%</div>
+        </div>
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+          <div style="font-size:12.5px;color:var(--dt-text-secondary)">已关闭模块</div>
+          <div style="font-size:24px;font-weight:600;color:var(--dt-danger);margin-top:4px">2</div>
+          <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">需要手动开启</div>
+        </div>
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+          <div style="font-size:12.5px;color:var(--dt-text-secondary)">子功能开关</div>
+          <div style="font-size:24px;font-weight:600;color:var(--dt-brand);margin-top:4px">48</div>
+          <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">精细控制每个子功能</div>
+        </div>
+      </div>
+
+      <div class="am-search-bar">
+        <input type="text" class="am-search" id="searchInput" placeholder="搜索功能模块...">
+        <div class="am-filter">
+          <button class="am-filter-btn active" data-filter="all">全部</button>
+          <button class="am-filter-btn" data-filter="on">已开启</button>
+          <button class="am-filter-btn" data-filter="off">已关闭</button>
+        </div>
+      </div>
+
+      <div class="module-grid" id="moduleGrid">
+        <!-- IM核心 -->
+        <div class="module-card expanded" data-module="im" data-confirm="true">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon" style="background:var(--dt-brand-light);color:var(--dt-brand)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+              <div><div class="mc-name">IM 核心消息</div><div class="mc-desc">文字/图片/文件/语音消息</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>文字消息</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>图片消息</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>文件消息</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>语音消息（最长60秒）</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>消息撤回（2分钟内）</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>消息编辑（5分钟内）</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>已读回执</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>消息表情回复</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">收起选项 ▲</button>
+        </div>
+
+        <!-- DING强提醒 -->
+        <div class="module-card" data-module="ding">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon" style="background:var(--dt-warning-light);color:var(--dt-warning)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 8.26L22 9.27"/><path d="M12 22a10 10 0 0 1 0-20"/></svg></div>
+              <div><div class="mc-name">DING 强提醒</div><div class="mc-desc">电话/短信/应用内通知</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>应用内通知</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>短信通知</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>电话通知</span><div class="toggle-switch" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 音视频通话 -->
+        <div class="module-card" data-module="call" data-confirm="true">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon" style="background:var(--dt-success-light);color:var(--dt-success)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div>
+              <div><div class="mc-name">音视频通话</div><div class="mc-desc">一对一/群组/屏幕共享</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>一对一通话</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>群组通话</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>屏幕共享</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 日历日程 -->
+        <div class="module-card" data-module="calendar">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon" style="background:var(--dt-purple-light);color:var(--dt-purple)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <div><div class="mc-name">日历 / 日程</div><div class="mc-desc">个人日程/团队日程/会议</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>个人日程</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>团队日程</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>会议室预定</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 审批 -->
+        <div class="module-card" data-module="approval" data-confirm="true">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon" style="background:var(--dt-danger-light);color:var(--dt-danger)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <div><div class="mc-name">审批流程</div><div class="mc-desc">请假/出差/报销/权限</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>请假审批</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>出差审批</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>报销审批</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 云文档 -->
+        <div class="module-card" data-module="docs">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12"/><polyline points="14 2 14 8 20 8"/></svg></div>
+              <div><div class="mc-name">云文档 / 知识库</div><div class="mc-desc">多人协作/版本历史</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>在线文档</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>知识库</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 多维表格 -->
+        <div class="module-card" data-module="bitable">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg></div>
+              <div><div class="mc-name">多维表格</div><div class="mc-desc">心飞整合·看板/甘特图/日历</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 考勤 -->
+        <div class="module-card" data-module="attendance">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+              <div><div class="mc-name">考勤打卡</div><div class="mc-desc">WiFi/GPS/人脸识别打卡</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <div class="mc-options">
+            <div class="mc-option"><span>WiFi打卡</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>GPS打卡</span><div class="toggle-switch on" onclick="onSubToggle(this)"></div></div>
+            <div class="mc-option"><span>人脸识别</span><div class="toggle-switch" onclick="onSubToggle(this)"></div></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- AI 助手 -->
+        <div class="module-card" data-module="ai">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+              <div><div class="mc-name">AI 助手<span class="mc-tag closed">未开通</span></div><div class="mc-desc">智能问答/翻译/总结</div></div>
+            </div>
+            <div class="toggle-switch" onclick="onMainToggle(this)"></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 邮箱 -->
+        <div class="module-card" data-module="mail">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4a2 2 0 0 1-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div><div class="mc-name">企业邮箱<span class="mc-tag closed">未开通</span></div><div class="mc-desc">收发邮件/附件/抄送</div></div>
+            </div>
+            <div class="toggle-switch" onclick="onMainToggle(this)"></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 工作报告 -->
+        <div class="module-card" data-module="report">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></div>
+              <div><div class="mc-name">工作报告</div><div class="mc-desc">日报/周报/月报</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+
+        <!-- 群接龙 -->
+        <div class="module-card" data-module="group">
+          <div class="mc-header">
+            <div class="mc-left">
+              <div class="mc-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></div>
+              <div><div class="mc-name">群接龙</div><div class="mc-desc">投票/报名/信息收集</div></div>
+            </div>
+            <div class="toggle-switch on" onclick="onMainToggle(this)"></div>
+          </div>
+          <button class="mc-expand" onclick="toggleExpand(this)">展开选项 ▼</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 其他页面占位 -->
+    <div class="am-content" id="otherPage" style="display:none">
+      <!-- 用户列表页面 -->
+      <div id="usersPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">用户总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">248</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 5 本月新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">在线用户</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success);margin-top:4px">156</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">在线率 62.9%</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">今日活跃</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">189</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 8% 较昨日</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">禁用用户</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-danger);margin-top:4px">3</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">需要人工审核</div>
+          </div>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px;margin-bottom:16px">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">用户名称：</span>
+              <input type="text" placeholder="请输入用户名称" style="width:160px;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">手机号：</span>
+              <input type="text" placeholder="请输入手机号" style="width:140px;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">状态：</span>
+              <select style="width:100px;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none;background:var(--dt-bg-card)">
+                <option>全部</option>
+                <option>在线</option>
+                <option>离线</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">创建时间：</span>
+              <input type="date" style="height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+              <span style="font-size:13px;color:var(--dt-text-secondary)">至</span>
+              <input type="date" style="height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <button style="height:32px;padding:0 16px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer">搜索</button>
+              <button style="height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">重置</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 工具栏 -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <button style="height:32px;padding:0 12px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer">+ 新增用户</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">编辑</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-danger)">批量删除</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">批量禁用</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">批量启用</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">重置密码</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">导入</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">导出</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular);margin-left:auto">刷新</button>
+        </div>
+
+        <!-- 批量操作栏（选中后显示） -->
+        <div id="batchBar" style="display:none;background:var(--dt-brand-light);border:0.5px solid var(--dt-brand);border-radius:var(--dt-radius-lg);padding:12px 16px;margin-bottom:16px;align-items:center;justify-content:space-between">
+          <div style="font-size:13.5px;color:var(--dt-brand)">已选中 <span id="selectedCount">0</span> 个用户</div>
+          <div style="display:flex;gap:12px">
+            <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:13px">批量删除</button>
+            <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:13px">批量调整部门</button>
+            <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:13px">批量重置密码</button>
+          </div>
+        </div>
+
+        <!-- 左右布局：组织架构 + 用户列表 -->
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <!-- 左侧组织架构树 -->
+          <div style="width:180px;background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px;flex-shrink:0">
+            <div style="font-size:14px;font-weight:600;color:var(--dt-text-primary);margin-bottom:12px">组织架构</div>
+            
+            <!-- 公司 -->
+            <div style="margin-bottom:8px">
+              <div class="org-tree-item" style="display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-md);cursor:pointer;font-size:13.5px;font-weight:500">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                心飞科技（全部）
+              </div>
+            </div>
+
+            <!-- 产品部 -->
+            <div style="margin-left:16px;margin-bottom:4px">
+              <div class="org-tree-item" style="display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md)">
+                <svg class="org-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.15s"><path d="M6 9l6 6 6-6"/></svg>
+                产品部
+                <span style="margin-left:auto;font-size:12px;color:var(--dt-text-secondary)">5</span>
+              </div>
+            </div>
+
+            <!-- 研发部 -->
+            <div style="margin-left:16px;margin-bottom:4px">
+              <div class="org-tree-item" style="display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md)">
+                <svg class="org-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.15s"><path d="M6 9l6 6 6-6"/></svg>
+                研发部
+                <span style="margin-left:auto;font-size:12px;color:var(--dt-text-secondary)">12</span>
+              </div>
+              <!-- 子部门 -->
+              <div class="org-children" id="devChildren" style="margin-left:24px">
+                <div style="padding:6px 12px;font-size:13px;color:var(--dt-text-secondary);cursor:pointer;border-radius:var(--dt-radius-sm)">前端组</div>
+                <div style="padding:6px 12px;font-size:13px;color:var(--dt-text-secondary);cursor:pointer;border-radius:var(--dt-radius-sm)">后端组</div>
+              </div>
+            </div>
+
+            <!-- 设计部 -->
+            <div style="margin-left:16px;margin-bottom:4px">
+              <div class="org-tree-item" style="display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md)">
+                <svg class="org-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.15s;transform:rotate(-90deg)"><path d="M6 9l6 6 6-6"/></svg>
+                设计部
+                <span style="margin-left:auto;font-size:12px;color:var(--dt-text-secondary)">3</span>
+              </div>
+            </div>
+
+            <!-- 市场部 -->
+            <div style="margin-left:16px;margin-bottom:4px">
+              <div class="org-tree-item" style="display:flex;align-items:center;gap:6px;padding:8px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md)">
+                <svg class="org-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="transition:transform 0.15s;transform:rotate(-90deg)"><path d="M6 9l6 6 6-6"/></svg>
+                市场部
+                <span style="margin-left:auto;font-size:12px;color:var(--dt-text-secondary)">4</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧用户列表 -->
+          <div style="flex:1;min-width:0">
+            <!-- 用户表格 -->
+            <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);overflow:hidden">
+              <div class="table-header" style="display:grid;grid-template-columns:36px 2.5fr 0.8fr 1fr 0.7fr 0.8fr 1fr;padding:12px 16px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);font-size:13px;font-weight:500;color:var(--dt-text-regular)">
+                <div><input type="checkbox"></div>
+                <div>用户名称</div>
+                <div>手机号</div>
+                <div>角色</div>
+                <div>状态</div>
+                <div>最后登录</div>
+                <div>操作</div>
+              </div>
+              <div style="padding:0 16px">
+                <div class="table-row" style="display:grid;grid-template-columns:36px 2.5fr 0.8fr 1fr 0.7fr 0.8fr 1.2fr;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body);align-items:center;font-size:13px;color:var(--dt-text-regular);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                  <div><input type="checkbox"></div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">张</div>
+                    <div>
+                      <div style="color:var(--dt-text-primary);font-weight:500">张三 <span style="font-size:12px;color:var(--dt-text-secondary);font-weight:normal">· 产品部</span></div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary)">zhangsan@xinfei.com</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12.5px">138****1234</div>
+                  <div><span style="padding:2px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:12px">管理员</span></div>
+                  <div><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px"><span style="width:6px;height:6px;background:var(--dt-success);border-radius:50%"></span>在线</span></div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">10分钟前</div>
+                  <div style="white-space:nowrap">
+                    <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:6px">详情</button>
+                    <button style="background:none;border:none;color:var(--dt-text-regular);cursor:pointer;font-size:12px;margin-right:6px">重置密码</button>
+                    <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:6px">编辑</button>
+                    <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">删除</button>
+                  </div>
+                </div>
+                <div class="table-row" style="display:grid;grid-template-columns:36px 2.5fr 0.8fr 1fr 0.7fr 0.8fr 1.2fr;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body);align-items:center;font-size:13px;color:var(--dt-text-regular);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                  <div><input type="checkbox"></div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">李</div>
+                    <div>
+                      <div style="color:var(--dt-text-primary);font-weight:500">李四 <span style="font-size:12px;color:var(--dt-text-secondary);font-weight:normal">· 设计部</span></div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary)">lisi@xinfei.com</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12.5px">139****5678</div>
+                  <div><span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px">普通用户</span></div>
+                  <div><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px"><span style="width:6px;height:6px;background:var(--dt-success);border-radius:50%"></span>在线</span></div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">30分钟前</div>
+                  <div style="white-space:nowrap">
+                    <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:6px">详情</button>
+                    <button style="background:none;border:none;color:var(--dt-text-regular);cursor:pointer;font-size:12px;margin-right:6px">重置密码</button>
+                    <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:6px">编辑</button>
+                    <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">删除</button>
+                  </div>
+                </div>
+                <div class="table-row" style="display:grid;grid-template-columns:36px 2.5fr 0.8fr 1fr 0.7fr 0.8fr 1.2fr;padding:12px 0;align-items:center;font-size:13px;color:var(--dt-text-regular);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                  <div><input type="checkbox"></div>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-warning);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0">王</div>
+                    <div>
+                      <div style="color:var(--dt-text-primary);font-weight:500">王五 <span style="font-size:12px;color:var(--dt-text-secondary);font-weight:normal">· 研发部</span></div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary)">wangwu@xinfei.com</div>
+                    </div>
+                  </div>
+                  <div style="font-size:12.5px">137****9012</div>
+                  <div><span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px">普通用户</span></div>
+                  <div><span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--dt-bg-body);color:var(--dt-text-secondary);border-radius:var(--dt-radius-sm);font-size:12px"><span style="width:6px;height:6px;background:var(--dt-text-placeholder);border-radius:50%"></span>离线</span></div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">2小时前</div>
+                  <div style="white-space:nowrap">
+                    <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:6px">详情</button>
+                    <button style="background:none;border:none;color:var(--dt-text-regular);cursor:pointer;font-size:12px;margin-right:6px">重置密码</button>
+                    <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:6px">编辑</button>
+                    <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">删除</button>
+                  </div>
+                </div>
+              </div>
+              <!-- 分页 -->
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:0.5px solid var(--dt-bg-body)">
+                <span style="font-size:12px;color:var(--dt-text-secondary)">共 24 条记录</span>
+                <div style="display:flex;gap:4px">
+                  <button style="height:28px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer;color:var(--dt-text-regular)">上一页</button>
+                  <button style="height:28px;padding:0 12px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px">1</button>
+                  <button style="height:28px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer;color:var(--dt-text-regular)">2</button>
+                  <button style="height:28px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer;color:var(--dt-text-regular)">3</button>
+                  <button style="height:28px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer;color:var(--dt-text-regular)">下一页</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 首页（数据概览） -->
+      <div id="homePage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:8px">总用户数</div>
+            <div style="font-size:28px;font-weight:600;color:var(--dt-text-primary)">248</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 12 本月新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:8px">今日活跃</div>
+            <div style="font-size:28px;font-weight:600;color:var(--dt-text-primary)">186</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 8.2% 较昨日</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:8px">群组数量</div>
+            <div style="font-size:28px;font-weight:600;color:var(--dt-text-primary)">56</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">→ 与上周持平</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px;cursor:pointer" onclick="document.querySelector('[data-page=\'approval\']').click()">
+            <div style="font-size:13px;color:var(--dt-text-secondary);margin-bottom:8px">待审批数</div>
+            <div style="font-size:28px;font-weight:600;color:var(--dt-danger)">7</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">↑ 点击查看详情</div>
+          </div>
+        </div>
+
+        <!-- 趋势图区域 -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px">
+          <!-- 用户活跃趋势 -->
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">用户活跃趋势（近7天）</div>
+              <div style="display:flex;gap:12px;font-size:12px;color:var(--dt-text-secondary)">
+                <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--dt-brand)"></span>活跃用户</span>
+              </div>
+            </div>
+            <!-- 柱状图 -->
+            <div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:0 8px">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:60%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周一</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:75%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周二</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand);border-radius:var(--dt-radius-sm) 4px 0 0;height:65%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周三</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand);border-radius:var(--dt-radius-sm) 4px 0 0;height:80%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周四</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand);border-radius:var(--dt-radius-sm) 4px 0 0;height:90%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周五</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:45%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周六</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-brand-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:40%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周日</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 消息量趋势 -->
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">消息量趋势（近7天）</div>
+              <div style="display:flex;gap:12px;font-size:12px;color:var(--dt-text-secondary)">
+                <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--dt-success)"></span>消息量</span>
+              </div>
+            </div>
+            <!-- 柱状图 -->
+            <div style="display:flex;align-items:flex-end;gap:8px;height:160px;padding:0 8px">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:50%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周一</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:65%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周二</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success);border-radius:var(--dt-radius-sm) 4px 0 0;height:70%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周三</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success);border-radius:var(--dt-radius-sm) 4px 0 0;height:85%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周四</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success);border-radius:var(--dt-radius-sm) 4px 0 0;height:95%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周五</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:35%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周六</div>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">
+                <div style="width:100%;background:var(--dt-success-light);border-radius:var(--dt-radius-sm) 4px 0 0;height:30%"></div>
+                <div style="font-size:11px;color:var(--dt-text-secondary)">周日</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 第三行：三栏布局 -->
+        <div style="display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:16px">
+          <!-- 左栏：最近动态 -->
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">最近动态</div>
+              <span style="font-size:12px;color:var(--dt-brand);cursor:pointer">查看全部 →</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">张</div>
+                <div style="flex:1">
+                  <div style="font-size:13px;color:var(--dt-text-primary)">张三 加入了产品部群组</div>
+                  <div style="font-size:11px;color:var(--dt-text-secondary);margin-top:1px">10分钟前</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">李</div>
+                <div style="flex:1">
+                  <div style="font-size:13px;color:var(--dt-text-primary)">李四 提交了请假审批申请</div>
+                  <div style="font-size:11px;color:var(--dt-text-secondary);margin-top:1px">30分钟前</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">王</div>
+                <div style="flex:1">
+                  <div style="font-size:13px;color:var(--dt-text-primary)">王五 创建了新群组「项目组」</div>
+                  <div style="font-size:11px;color:var(--dt-text-secondary);margin-top:1px">1小时前</div>
+                </div>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px">
+                <div style="width:28px;height:28px;border-radius:50%;background:var(--dt-warning);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">赵</div>
+                <div style="flex:1">
+                  <div style="font-size:13px;color:var(--dt-text-primary)">赵六 完成了入职流程</div>
+                  <div style="font-size:11px;color:var(--dt-text-secondary);margin-top:1px">2小时前</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 中栏：消息类型分布 + 快捷操作 -->
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <!-- 消息类型分布 -->
+            <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:12px">消息类型分布</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dt-text-regular);margin-bottom:3px">
+                    <span>文本消息</span><span>65%</span>
+                  </div>
+                  <div style="height:5px;background:var(--dt-bg-body);border-radius:3px;overflow:hidden">
+                    <div style="width:65%;height:100%;background:var(--dt-brand);border-radius:3px"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dt-text-regular);margin-bottom:3px">
+                    <span>图片消息</span><span>20%</span>
+                  </div>
+                  <div style="height:5px;background:var(--dt-bg-body);border-radius:3px;overflow:hidden">
+                    <div style="width:20%;height:100%;background:var(--dt-success);border-radius:3px"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dt-text-regular);margin-bottom:3px">
+                    <span>文件消息</span><span>10%</span>
+                  </div>
+                  <div style="height:5px;background:var(--dt-bg-body);border-radius:3px;overflow:hidden">
+                    <div style="width:10%;height:100%;background:var(--dt-warning);border-radius:3px"></div>
+                  </div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--dt-text-regular);margin-bottom:3px">
+                    <span>语音/视频</span><span>5%</span>
+                  </div>
+                  <div style="height:5px;background:var(--dt-bg-body);border-radius:3px;overflow:hidden">
+                    <div style="width:5%;height:100%;background:var(--dt-danger);border-radius:3px"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 快捷操作 -->
+            <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:12px">快捷操作</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                <div style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px;border-radius:var(--dt-radius-sm);hover:background:var(--dt-bg-hover)">
+                  <div style="width:24px;height:24px;border-radius:var(--dt-radius-sm);background:var(--dt-brand-light);color:var(--dt-brand);display:flex;align-items:center;justify-content:center;font-size:13px">+</div>
+                  <span style="font-size:12px;color:var(--dt-text-regular)">添加用户</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px;border-radius:var(--dt-radius-sm);hover:background:var(--dt-bg-hover)">
+                  <div style="width:24px;height:24px;border-radius:var(--dt-radius-sm);background:var(--dt-success-light);color:var(--dt-success);display:flex;align-items:center;justify-content:center;font-size:13px">⇪</div>
+                  <span style="font-size:12px;color:var(--dt-text-regular)">导入用户</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px;border-radius:var(--dt-radius-sm);hover:background:var(--dt-bg-hover)">
+                  <div style="width:24px;height:24px;border-radius:var(--dt-radius-sm);background:var(--dt-warning-light);color:var(--dt-warning);display:flex;align-items:center;justify-content:center;font-size:13px"><svg class="ic"><use href="#i-gear"/></svg></div>
+                  <span style="font-size:12px;color:var(--dt-text-regular)">系统配置</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;cursor:pointer;padding:4px;border-radius:var(--dt-radius-sm);hover:background:var(--dt-bg-hover)">
+                  <div style="width:24px;height:24px;border-radius:var(--dt-radius-sm);background:var(--dt-danger-light);color:var(--dt-danger);display:flex;align-items:center;justify-content:center;font-size:13px"><svg class="ic"><use href="#i-shield"/></svg></div>
+                  <span style="font-size:12px;color:var(--dt-text-regular)">账号安全</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右栏：待办事项 + 系统状态 -->
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <!-- 待办事项 -->
+            <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">待办事项</div>
+                <span style="background:var(--dt-danger);color:var(--dt-bg-card);font-size:11px;padding:1px 6px;border-radius:var(--dt-radius-lg)">5</span>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dt-text-regular)">
+                  <span style="width:5px;height:5px;border-radius:50%;background:var(--dt-warning);flex-shrink:0"></span>
+                  3条审批待处理
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--dt-text-regular)">
+                  <span style="width:5px;height:5px;border-radius:50%;background:var(--dt-danger);flex-shrink:0"></span>
+                  2条异常登录告警
+                </div>
+              </div>
+            </div>
+
+            <!-- 系统状态 -->
+            <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:12px">系统状态</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px">
+                  <span style="color:var(--dt-text-regular)">服务器状态</span>
+                  <span style="color:var(--dt-success)">● 正常</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px">
+                  <span style="color:var(--dt-text-regular)">存储用量</span>
+                  <span style="color:var(--dt-text-regular)">3.2GB / 10GB</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px">
+                  <span style="color:var(--dt-text-regular)">消息队列</span>
+                  <span style="color:var(--dt-success)">● 正常</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between;font-size:12.5px">
+                  <span style="color:var(--dt-text-regular)">数据库</span>
+                  <span style="color:var(--dt-success)">● 正常</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 组织架构页面 -->
+      <div id="orgPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">部门总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">6</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 1 本月新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">员工总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">30</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 3 本月入职</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">部门负责人</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">5</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary)">各部门均已配置</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">本月部门变动</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">2</div>
+            <div style="font-size:12px;color:var(--dt-warning);margin-top:4px">1 次部门调整</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <!-- 左侧部门树 -->
+          <div style="width:260px;background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px;flex-shrink:0">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">部门列表</div>
+              <button style="height:28px;padding:0 12px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:12px;cursor:pointer">+ 新建部门</button>
+            </div>
+            <!-- 搜索框 -->
+            <input type="text" placeholder="搜索部门..." style="width:100%;height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px;margin-bottom:12px;box-sizing:border-box;outline:none">
+            
+            <div style="padding:8px 12px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-md);font-size:13.5px;margin-bottom:4px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+              <span>产品部</span>
+              <span style="font-size:12px;color:var(--dt-text-secondary)">5人</span>
+            </div>
+            <div style="padding:8px 12px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer;border-radius:var(--dt-radius-md);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
+              <span>研发部</span>
+              <span style="font-size:12px;color:var(--dt-text-secondary)">12人</span>
+            </div>
+            <div style="padding:8px 12px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer;border-radius:var(--dt-radius-md);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
+              <span>设计部</span>
+              <span style="font-size:12px;color:var(--dt-text-secondary)">3人</span>
+            </div>
+            <div style="padding:8px 12px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer;border-radius:var(--dt-radius-md);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
+              <span>市场部</span>
+              <span style="font-size:12px;color:var(--dt-text-secondary)">4人</span>
+            </div>
+            <div style="padding:8px 12px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer;border-radius:var(--dt-radius-md);margin-bottom:2px;display:flex;justify-content:space-between;align-items:center">
+              <span>财务部</span>
+              <span style="font-size:12px;color:var(--dt-text-secondary)">2人</span>
+            </div>
+
+            <!-- 底部操作 -->
+            <div style="margin-top:16px;padding-top:12px;border-top:0.5px solid var(--dt-bg-body);display:flex;gap:8px">
+              <button style="flex:1;height:28px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:12px;cursor:pointer;color:var(--dt-text-regular)">导入部门</button>
+              <button style="flex:1;height:28px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:12px;cursor:pointer;color:var(--dt-text-regular)">导出部门</button>
+            </div>
+          </div>
+
+          <!-- 右侧部门详情 -->
+          <div style="flex:1;background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+              <div>
+                <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">产品部</div>
+                <div style="font-size:13px;color:var(--dt-text-secondary);margin-top:4px">5 名成员 · 创建于 2024-01-15 · 部门负责人：张三</div>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button style="height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">编辑部门</button>
+                <button style="height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-danger)">删除部门</button>
+                <button style="height:32px;padding:0 16px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">+ 添加成员</button>
+              </div>
+            </div>
+
+            <!-- 成员列表工具栏 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" placeholder="搜索成员..." style="height:30px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:12.5px;width:160px;outline:none">
+                <select style="height:30px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:12.5px;background:var(--dt-bg-card)">
+                  <option>全部职位</option>
+                  <option>部门负责人</option>
+                  <option>产品经理</option>
+                  <option>产品助理</option>
+                </select>
+              </div>
+              <div style="display:flex;gap:8px">
+                <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:12.5px;cursor:pointer;color:var(--dt-text-regular)">批量移除</button>
+                <button style="height:30px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:12.5px;cursor:pointer;color:var(--dt-text-regular)">批量调岗</button>
+              </div>
+            </div>
+
+            <!-- 成员列表表头 -->
+            <div style="display:grid;grid-template-columns:36px 1.5fr 1fr 1fr 120px;padding:12px 12px;background:var(--dt-bg-hover);border-radius:var(--dt-radius-md);font-size:12.5px;font-weight:600;color:var(--dt-text-regular);margin-bottom:8px">
+              <div><input type="checkbox"></div>
+              <div>成员</div>
+              <div>职位</div>
+              <div>入职时间</div>
+              <div style="text-align:right">操作</div>
+            </div>
+
+            <!-- 成员列表 -->
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:grid;grid-template-columns:36px 1.5fr 1fr 1fr 120px;padding:12px 12px;align-items:center;border:0.5px solid var(--dt-bg-body);border-radius:var(--dt-radius-md);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                <div><input type="checkbox"></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0">张</div>
+                  <div>
+                    <div style="font-size:13.5px;font-weight:500;color:var(--dt-text-primary)">张三</div>
+                    <div style="font-size:11.5px;color:var(--dt-text-secondary)">zhangsan@xinfei.com</div>
+                  </div>
+                </div>
+                <div>
+                  <span style="padding:2px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:11.5px">部门负责人</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--dt-text-regular)">2024-01-15</div>
+                <div style="text-align:right;white-space:nowrap">
+                  <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:8px">编辑</button>
+                  <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">移除</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:36px 1.5fr 1fr 1fr 120px;padding:12px 12px;align-items:center;border:0.5px solid var(--dt-bg-body);border-radius:var(--dt-radius-md);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                <div><input type="checkbox"></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0">我</div>
+                  <div>
+                    <div style="font-size:13.5px;font-weight:500;color:var(--dt-text-primary)">我</div>
+                    <div style="font-size:11.5px;color:var(--dt-text-secondary)">wo@xinfei.com</div>
+                  </div>
+                </div>
+                <div>
+                  <span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:11.5px">产品助理</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--dt-text-regular)">2024-03-20</div>
+                <div style="text-align:right;white-space:nowrap">
+                  <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:8px">编辑</button>
+                  <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">移除</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:36px 1.5fr 1fr 1fr 120px;padding:12px 12px;align-items:center;border:0.5px solid var(--dt-bg-body);border-radius:var(--dt-radius-md);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                <div><input type="checkbox"></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-warning);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0">李</div>
+                  <div>
+                    <div style="font-size:13.5px;font-weight:500;color:var(--dt-text-primary)">李四</div>
+                    <div style="font-size:11.5px;color:var(--dt-text-secondary)">lisi@xinfei.com</div>
+                  </div>
+                </div>
+                <div>
+                  <span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:11.5px">产品经理</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--dt-text-regular)">2024-06-10</div>
+                <div style="text-align:right;white-space:nowrap">
+                  <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:8px">编辑</button>
+                  <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">移除</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:36px 1.5fr 1fr 1fr 120px;padding:12px 12px;align-items:center;border:0.5px solid var(--dt-bg-body);border-radius:var(--dt-radius-md);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                <div><input type="checkbox"></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0">王</div>
+                  <div>
+                    <div style="font-size:13.5px;font-weight:500;color:var(--dt-text-primary)">王五</div>
+                    <div style="font-size:11.5px;color:var(--dt-text-secondary)">wangwu@xinfei.com</div>
+                  </div>
+                </div>
+                <div>
+                  <span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:11.5px">产品经理</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--dt-text-regular)">2024-09-01</div>
+                <div style="text-align:right;white-space:nowrap">
+                  <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:8px">编辑</button>
+                  <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">移除</button>
+                </div>
+              </div>
+              <div style="display:grid;grid-template-columns:36px 1.5fr 1fr 1fr 120px;padding:12px 12px;align-items:center;border:0.5px solid var(--dt-bg-body);border-radius:var(--dt-radius-md);transition:background 0.15s" onmouseover="this.style.background='var(--dt-bg-hover)'" onmouseout="this.style.background=''">
+                <div><input type="checkbox"></div>
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-danger);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0">赵</div>
+                  <div>
+                    <div style="font-size:13.5px;font-weight:500;color:var(--dt-text-primary)">赵六</div>
+                    <div style="font-size:11.5px;color:var(--dt-text-secondary)">zhaoliu@xinfei.com</div>
+                  </div>
+                </div>
+                <div>
+                  <span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:11.5px">产品助理</span>
+                </div>
+                <div style="font-size:12.5px;color:var(--dt-text-regular)">2025-03-15</div>
+                <div style="text-align:right;white-space:nowrap">
+                  <button style="background:none;border:none;color:var(--dt-brand);cursor:pointer;font-size:12px;margin-right:8px">编辑</button>
+                  <button style="background:none;border:none;color:var(--dt-danger);cursor:pointer;font-size:12px">移除</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 角色权限页面 -->
+      <div id="rolesPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">角色总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">3</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 1 本月新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">角色成员总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">248</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">覆盖全部用户</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">权限点数量</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">48</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">菜单权限 + 操作权限</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">数据权限类型</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">4</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">全部/本部门/本部门及以下/仅本人</div>
+          </div>
+        </div>
+
+        <!-- 工具栏 -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;align-items:center">
+          <input type="text" placeholder="搜索角色名称..." style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px;width:200px;outline:none">
+          <button style="height:32px;padding:0 12px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">+ 新增角色</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">复制角色</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">导出权限</button>
+          <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-danger)">删除角色</button>
+        </div>
+
+        <!-- 左右布局：角色列表 + 权限配置 -->
+        <div style="display:flex;gap:16px;align-items:flex-start">
+          <!-- 左侧角色列表 -->
+          <div style="width:280px;background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);flex-shrink:0">
+            <div style="padding:12px 16px;border-bottom:0.5px solid var(--dt-bg-body);font-size:14px;font-weight:600;color:var(--dt-text-primary)">角色列表</div>
+            <div style="padding:8px">
+              <div style="padding:12px 12px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-md);cursor:pointer;font-size:13.5px;margin-bottom:4px">
+                <div style="font-weight:500;display:flex;justify-content:space-between;align-items:center">
+                  <span>超级管理员</span>
+                  <span style="font-size:11px;background:var(--dt-brand);color:var(--dt-bg-card);padding:1px 6px;border-radius:var(--dt-radius-sm)">内置</span>
+                </div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">拥有全部权限 · 2人</div>
+              </div>
+              <div style="padding:12px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md);margin-bottom:4px">
+                <div style="font-weight:500;display:flex;justify-content:space-between;align-items:center">
+                  <span>管理员</span>
+                </div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">用户管理、功能配置 · 5人</div>
+              </div>
+              <div style="padding:12px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md);margin-bottom:4px">
+                <div style="font-weight:500;display:flex;justify-content:space-between;align-items:center">
+                  <span>普通用户</span>
+                  <span style="font-size:11px;background:var(--dt-success-light);color:var(--dt-success);padding:1px 6px;border-radius:var(--dt-radius-sm)">默认</span>
+                </div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">基础聊天、文档功能 · 241人</div>
+              </div>
+              <div style="padding:12px 12px;cursor:pointer;font-size:13.5px;color:var(--dt-text-regular);border-radius:var(--dt-radius-md)">
+                <div style="font-weight:500;display:flex;justify-content:space-between;align-items:center">
+                  <span>审计员</span>
+                </div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">日志查看、数据导出 · 0人</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 右侧权限配置 -->
+          <div style="flex:1;background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <!-- Tab切换 -->
+            <div style="display:flex;gap:0;border-bottom:0.5px solid var(--dt-bg-body);margin-bottom:24px">
+              <div style="padding:8px 16px;font-size:13.5px;color:var(--dt-brand);border-bottom:2px solid var(--dt-brand);font-weight:500;cursor:pointer">权限配置</div>
+              <div style="padding:8px 16px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">角色成员（2）</div>
+              <div style="padding:8px 16px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">角色说明</div>
+            </div>
+
+            <div style="font-size:15px;font-weight:600;color:var(--dt-text-primary);margin-bottom:4px">权限配置 - 超级管理员</div>
+            <div style="font-size:12.5px;color:var(--dt-text-secondary);margin-bottom:24px">配置该角色可以访问的菜单和操作的权限</div>
+
+            <!-- 菜单权限树 -->
+            <div style="margin-bottom:24px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <div style="font-size:13.5px;font-weight:600;color:var(--dt-text-primary)">菜单权限</div>
+                <div style="display:flex;gap:8px">
+                  <button style="background:none;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:2px 8px;font-size:12px;cursor:pointer;color:var(--dt-text-regular)">全选</button>
+                  <button style="background:none;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:2px 8px;font-size:12px;cursor:pointer;color:var(--dt-text-regular)">全不选</button>
+                </div>
+              </div>
+              <div style="padding-left:8px">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:8px;cursor:pointer">
+                  <input type="checkbox" checked> 基本功能
+                </label>
+                <div style="padding-left:24px;margin-bottom:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                    <input type="checkbox" checked> 首页
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                    <input type="checkbox" checked> 功能开关
+                  </label>
+                </div>
+
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:8px;cursor:pointer">
+                  <input type="checkbox" checked> 用户管理
+                </label>
+                <div style="padding-left:24px;margin-bottom:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                    <input type="checkbox" checked> 用户列表
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                    <input type="checkbox" checked> 组织架构
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                    <input type="checkbox" checked> 角色权限
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                    <input type="checkbox" checked> 管理员管理
+                  </label>
+                </div>
+
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:8px;cursor:pointer">
+                  <input type="checkbox" checked> 业务配置
+                </label>
+                <div style="padding-left:24px;margin-bottom:8px">
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                    <input type="checkbox" checked> 审批流程
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                    <input type="checkbox" checked> 考勤规则
+                  </label>
+                  <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                    <input type="checkbox" checked> 通话配置
+                  </label>
+                </div>
+
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 系统管理
+                </label>
+              </div>
+            </div>
+
+            <!-- 操作权限 -->
+            <div style="margin-bottom:24px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <div style="font-size:13.5px;font-weight:600;color:var(--dt-text-primary)">操作权限</div>
+                <div style="display:flex;gap:8px">
+                  <button style="background:none;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:2px 8px;font-size:12px;cursor:pointer;color:var(--dt-text-regular)">全选</button>
+                  <button style="background:none;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:2px 8px;font-size:12px;cursor:pointer;color:var(--dt-text-regular)">全不选</button>
+                </div>
+              </div>
+              <div style="padding-left:8px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 新增
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 编辑
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 删除
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 导出
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 导入
+                </label>
+                <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="checkbox" checked> 审核
+                </label>
+              </div>
+            </div>
+
+            <!-- 数据权限 -->
+            <div style="margin-bottom:24px">
+              <div style="font-size:13.5px;font-weight:600;color:var(--dt-text-primary);margin-bottom:12px">数据权限</div>
+              <div style="padding-left:8px">
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                  <input type="radio" name="dataScope" checked> 全部数据权限
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                  <input type="radio" name="dataScope"> 本部门数据权限
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);margin-bottom:6px;cursor:pointer">
+                  <input type="radio" name="dataScope"> 本部门及以下数据权限
+                </label>
+                <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                  <input type="radio" name="dataScope"> 仅本人数据权限
+                </label>
+              </div>
+            </div>
+
+            <!-- 保存按钮 -->
+            <div style="display:flex;gap:12px">
+              <button style="height:36px;padding:0 24px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">取消</button>
+              <button style="height:36px;padding:0 24px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">保存配置</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 管理员管理页面 -->
+      <div id="adminsPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">子管理员总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">5</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">超级管理员 1人 · 子管理员 4人</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">在线管理员</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success)">3</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">今日活跃管理员 3人</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">今日操作次数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">128</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 23% 较昨日</div>
+          </div>
+        </div>
+
+        <!-- 工具栏 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <input type="text" placeholder="搜索管理员名称..." style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px;width:200px">
+              <select style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px">
+                <option>全部角色</option>
+                <option>超级管理员</option>
+                <option>人事管理员</option>
+                <option>IT管理员</option>
+                <option>财务管理员</option>
+              </select>
+            </div>
+            <button style="height:32px;padding:0 16px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">+ 添加管理员</button>
+          </div>
+        </div>
+
+        <!-- 管理员列表 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);overflow:hidden">
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed">
+            <thead>
+              <tr style="background:var(--dt-bg-hover)">
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:32%">管理员</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:28%">角色权限</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:12%">状态</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:18%">最后登录</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:10%">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-danger);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">管</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">系统管理员</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">admin@xinfei.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px">
+                  <div style="margin-bottom:3px">
+                    <span style="display:inline-block;padding:1px 8px;background:var(--dt-danger-light);color:var(--dt-danger);border-radius:var(--dt-radius-sm);font-size:12px">超级管理员</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">全部权限</div>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>在线
+                  </span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-29 09:30</td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer">编辑</span>
+                </td>
+              </tr>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">张</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">张三</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">zhang@xinfei.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px">
+                  <div style="margin-bottom:3px">
+                    <span style="display:inline-block;padding:1px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:12px">人事管理员</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">用户管理、审批管理</div>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>在线
+                  </span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-29 10:15</td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">编辑</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">删除</span>
+                </td>
+              </tr>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">李</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">李四</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">li@xinfei.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px">
+                  <div style="margin-bottom:3px">
+                    <span style="display:inline-block;padding:1px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px">IT管理员</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">系统配置、日志管理</div>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>在线
+                  </span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-29 11:00</td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">编辑</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">删除</span>
+                </td>
+              </tr>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-warning);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">王</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">王五</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">wang@xinfei.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px">
+                  <div style="margin-bottom:3px">
+                    <span style="display:inline-block;padding:1px 8px;background:var(--dt-warning-light);color:var(--dt-warning);border-radius:var(--dt-radius-sm);font-size:12px">财务管理员</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">考勤管理、报表查看</div>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-text-secondary)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-text-placeholder)"></span>离线
+                  </span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-28 17:30</td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">编辑</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">删除</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">赵</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">赵六</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">zhao@xinfei.com</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px">
+                  <div style="margin-bottom:3px">
+                    <span style="display:inline-block;padding:1px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:12px">群组管理员</span>
+                  </div>
+                  <div style="font-size:12px;color:var(--dt-text-secondary)">群组管理、消息审计</div>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-text-secondary)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-text-placeholder)"></span>离线
+                  </span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-27 14:20</td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">编辑</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">删除</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 群聊管理页面 -->
+      <div id="chatsPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">群组总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">56</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 3 本周新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">今日活跃群</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">42</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">活跃率 75%</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">群成员总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">1,286</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 56 本月新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:6px">今日群消息</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">8,642</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 12% 较昨日</div>
+          </div>
+        </div>
+
+        <!-- 工具栏 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px;margin-bottom:16px">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="display:flex;gap:12px;align-items:center">
+              <input type="text" placeholder="搜索群名称..." style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px;width:180px">
+              <select style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px">
+                <option>全部群类型</option>
+                <option>部门群</option>
+                <option>项目群</option>
+                <option>外部群</option>
+              </select>
+              <select style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);font-size:13px">
+                <option>全部状态</option>
+                <option>正常</option>
+                <option>禁言中</option>
+                <option>已解散</option>
+              </select>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">批量禁言</button>
+              <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-danger)">批量解散</button>
+              <button style="height:32px;padding:0 16px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">+ 创建群组</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 群组列表 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);overflow:hidden">
+          <table style="width:100%;border-collapse:collapse;table-layout:fixed">
+            <thead>
+              <tr style="background:var(--dt-bg-hover)">
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:5%">
+                  <input type="checkbox">
+                </th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:26%">群组</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:12%">群主</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:8%">成员数</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:10%">类型</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:12%">创建时间</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:8%">状态</th>
+                <th style="padding:12px 16px;text-align:left;font-size:13px;font-weight:600;color:var(--dt-text-regular);border-bottom:0.5px solid var(--dt-border);width:19%">操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px"><input type="checkbox"></td>
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:var(--dt-radius-lg);background:var(--dt-brand-light);color:var(--dt-brand);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">产</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">产品部交流群</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">产品部官方群</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">张三</td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">12人</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-block;padding:1px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:12px">部门群</span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-09-01</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>正常
+                  </span>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">详情</span>
+                  <span style="font-size:12px;color:var(--dt-warning);cursor:pointer;margin-right:12px">禁言</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">解散</span>
+                </td>
+              </tr>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px"><input type="checkbox"></td>
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:var(--dt-radius-lg);background:var(--dt-success-light);color:var(--dt-success);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">研</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">研发部技术群</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">前端组 · 后端组</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">李四</td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">18人</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-block;padding:1px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:12px">部门群</span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-09-01</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>正常
+                  </span>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">详情</span>
+                  <span style="font-size:12px;color:var(--dt-warning);cursor:pointer;margin-right:12px">禁言</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">解散</span>
+                </td>
+              </tr>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px"><input type="checkbox"></td>
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:var(--dt-radius-lg);background:var(--dt-warning-light);color:var(--dt-warning);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">项</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">心飞IM项目组</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">核心开发团队</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">王五</td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">8人</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-block;padding:1px 8px;background:var(--dt-warning-light);color:var(--dt-warning);border-radius:var(--dt-radius-sm);font-size:12px">项目群</span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-15</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>正常
+                  </span>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">详情</span>
+                  <span style="font-size:12px;color:var(--dt-warning);cursor:pointer;margin-right:12px">禁言</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">解散</span>
+                </td>
+              </tr>
+              <tr style="border-bottom:0.5px solid var(--dt-bg-body)">
+                <td style="padding:16px 16px"><input type="checkbox"></td>
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:var(--dt-radius-lg);background:var(--dt-danger-light);color:var(--dt-danger);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">市</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">市场部推广群</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">市场部官方群</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">赵六</td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">6人</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-block;padding:1px 8px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:var(--dt-radius-sm);font-size:12px">部门群</span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-09-15</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-warning)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-warning)"></span>禁言中
+                  </span>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">详情</span>
+                  <span style="font-size:12px;color:var(--dt-success);cursor:pointer;margin-right:12px">解禁</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">解散</span>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:16px 16px"><input type="checkbox"></td>
+                <td style="padding:16px 16px">
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <div style="width:36px;height:36px;border-radius:var(--dt-radius-lg);background:var(--dt-purple-light);color:var(--dt-purple);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">客</div>
+                    <div>
+                      <div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">客户交流群</div>
+                      <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:1px">外部客户群</div>
+                    </div>
+                  </div>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">张三</td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">24人</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-block;padding:1px 8px;background:var(--dt-purple-light);color:var(--dt-purple);border-radius:var(--dt-radius-sm);font-size:12px">外部群</span>
+                </td>
+                <td style="padding:16px 16px;font-size:13px;color:var(--dt-text-regular)">2026-10-01</td>
+                <td style="padding:16px 16px">
+                  <span style="display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--dt-success)">
+                    <span style="width:7px;height:7px;border-radius:50%;background:var(--dt-success)"></span>正常
+                  </span>
+                </td>
+                <td style="padding:16px 16px">
+                  <span style="font-size:12px;color:var(--dt-brand);cursor:pointer;margin-right:12px">详情</span>
+                  <span style="font-size:12px;color:var(--dt-warning);cursor:pointer;margin-right:12px">禁言</span>
+                  <span style="font-size:12px;color:var(--dt-danger);cursor:pointer">解散</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 审批流程页面 -->
+      <div id="approvalPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">审批流程模板</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">8</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 2 本月新增</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">本月审批总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">128</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 15% 较上月</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">待我审批</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-brand);margin-top:4px">5</div>
+            <div style="font-size:12px;color:var(--dt-warning);margin-top:4px">需要尽快处理</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">审批通过率</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success);margin-top:4px">92.3%</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">平均审批时长 2.5小时</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">审批流程模板</div>
+          <div style="display:flex;gap:8px">
+            <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">导入模板</button>
+            <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">导出模板</button>
+            <button style="height:32px;padding:0 16px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">+ 新建流程</button>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div style="width:40px;height:40px;border-radius:var(--dt-radius-lg);background:var(--dt-brand-light);color:var(--dt-brand);display:flex;align-items:center;justify-content:center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--dt-text-primary)">请假审批</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">3步流程 · 已启用</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--dt-text-regular);line-height:1.6">
+              申请人 → 直属主管 → HR审批
+            </div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div style="width:40px;height:40px;border-radius:var(--dt-radius-lg);background:var(--dt-success-light);color:var(--dt-success);display:flex;align-items:center;justify-content:center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--dt-text-primary)">出差审批</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">4步流程 · 已启用</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--dt-text-regular);line-height:1.6">
+              申请人 → 部门主管 → 财务 → 总经理
+            </div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
+              <div style="width:40px;height:40px;border-radius:var(--dt-radius-lg);background:var(--dt-warning-light);color:var(--dt-warning);display:flex;align-items:center;justify-content:center">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+              </div>
+              <div>
+                <div style="font-size:14px;font-weight:600;color:var(--dt-text-primary)">报销审批</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">3步流程 · 已启用</div>
+              </div>
+            </div>
+            <div style="font-size:12px;color:var(--dt-text-regular);line-height:1.6">
+              申请人 → 部门主管 → 财务审批
+            </div>
+          </div>
+        </div>
+
+        <!-- 审批统计 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">本月审批总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">128</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">待我审批</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-brand)">5</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">我已审批</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success)">42</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">平均审批时长</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-warning)">2.5小时</div>
+          </div>
+        </div>
+
+        <!-- 最近审批记录 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px;margin-top:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:16px">最近审批记录</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">张</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">张三 提交了请假申请</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">今天 09:30 · 1天年假</div>
+              </div>
+              <span style="padding:2px 8px;background:var(--dt-warning-light);color:var(--dt-warning);border-radius:var(--dt-radius-sm);font-size:12px">待审批</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">李</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">李四 提交了出差申请</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">昨天 14:20 · 北京 · 3天</div>
+              </div>
+              <span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px">已通过</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">王</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">王五 提交了报销申请</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">昨天 10:15 · ¥ 1,280.00</div>
+              </div>
+              <span style="padding:2px 8px;background:var(--dt-success-light);color:var(--dt-success);border-radius:var(--dt-radius-sm);font-size:12px">已通过</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 考勤规则页面 -->
+      <div id="attendancePage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">应出勤人数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">260</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">本月应出勤天数 22天</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">实际出勤</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success);margin-top:4px">248</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">出勤率 95.4%</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">迟到人数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-warning);margin-top:4px">12</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">平均迟到 8.5分钟</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">缺勤人数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-danger);margin-top:4px">5</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">需要人工审核</div>
+          </div>
+        </div>
+
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px">
+            <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary)">考勤规则配置</div>
+            <button style="height:32px;padding:0 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">导入规则</button>
+          </div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+            <div>
+              <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">上班时间</div>
+              <input type="time" value="09:00" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--dt-text-regular);margin-bottom:8px">下班时间</div>
+              <input type="time" value="18:00" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+          </div>
+
+          <div style="margin-bottom:24px">
+            <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">允许迟到时间（分钟）</div>
+            <input type="number" value="15" style="width:200px;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+          </div>
+
+          <div style="margin-bottom:24px">
+            <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:12px">打卡方式</div>
+            <div style="display:flex;gap:24px">
+              <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                <input type="checkbox" checked> WiFi打卡
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                <input type="checkbox" checked> GPS打卡
+              </label>
+              <label style="display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--dt-text-regular);cursor:pointer">
+                <input type="checkbox"> 人脸识别
+              </label>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px">
+            <button style="height:36px;padding:0 24px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">取消</button>
+            <button style="height:36px;padding:0 24px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">保存配置</button>
+          </div>
+        </div>
+
+        <!-- 今日打卡记录 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px;margin-top:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:16px">今日打卡记录</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">张</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">张三</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">产品部 · WiFi打卡</div>
+              </div>
+              <span style="font-size:12px;color:var(--dt-success)">08:52 上班打卡</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">李</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">李四</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">设计部 · GPS打卡</div>
+              </div>
+              <span style="font-size:12px;color:var(--dt-warning)">09:05 迟到</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">王</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">王五</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">研发部 · 未打卡</div>
+              </div>
+              <span style="font-size:12px;color:var(--dt-danger)">缺勤</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 通话配置页面 -->
+      <div id="callPage" style="display:none">
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:24px">通话配置</div>
+          
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+            <div>
+              <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary)">一对一通话</div>
+              <div style="font-size:12.5px;color:var(--dt-text-secondary);margin-top:2px">用户之间可以发起一对一音视频通话</div>
+            </div>
+            <div class="toggle-switch on"></div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+            <div>
+              <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary)">群组通话</div>
+              <div style="font-size:12.5px;color:var(--dt-text-secondary);margin-top:2px">群组内可以发起多人音视频通话</div>
+            </div>
+            <div class="toggle-switch on"></div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+            <div>
+              <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary)">屏幕共享</div>
+              <div style="font-size:12.5px;color:var(--dt-text-secondary);margin-top:2px">通话中可以共享屏幕内容</div>
+            </div>
+            <div class="toggle-switch on"></div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 0">
+            <div>
+              <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary)">通话录制</div>
+              <div style="font-size:12.5px;color:var(--dt-text-secondary);margin-top:2px">自动录制通话内容并保存</div>
+            </div>
+            <div class="toggle-switch"></div>
+          </div>
+        </div>
+
+        <!-- 通话统计 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">今日通话次数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary)">86</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">一对一通话</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-brand)">62</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">群组通话</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success)">24</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px">
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-bottom:4px">总通话时长</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-warning)">12.5小时</div>
+          </div>
+        </div>
+
+        <!-- 最近通话记录 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px;margin-top:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:16px">最近通话记录</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-purple);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">张</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">张三 ↔ 李四</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">一对一视频通话 · 今天 10:30</div>
+              </div>
+              <span style="font-size:12px;color:var(--dt-text-regular)">15分钟</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body)">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-success);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">研</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">研发部群组</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">群组语音通话 · 昨天 16:20</div>
+              </div>
+              <span style="font-size:12px;color:var(--dt-text-regular)">42分钟</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;padding:12px 0">
+              <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:12px">王</div>
+              <div style="flex:1">
+                <div style="font-size:13.5px;color:var(--dt-text-primary)">王五 ↔ 赵六</div>
+                <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">一对一语音通话 · 昨天 14:10</div>
+              </div>
+              <span style="font-size:12px;color:var(--dt-text-regular)">8分钟</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 系统配置页面 -->
+      <div id="systemPage" style="display:none">
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:24px">系统配置</div>
+          
+          <div style="margin-bottom:16px">
+            <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">系统名称</div>
+            <input type="text" value="心飞IM" style="width:300px;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+          </div>
+
+          <div style="margin-bottom:16px">
+            <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">系统Logo</div>
+            <div style="display:flex;align-items:center;gap:12px">
+              <div style="width:40px;height:40px;border-radius:var(--dt-radius-lg);background:var(--dt-brand);color:var(--dt-bg-card);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600">心</div>
+              <button style="height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">上传Logo</button>
+            </div>
+          </div>
+
+          <div style="margin-bottom:24px">
+            <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">主色调</div>
+            <div style="display:flex;gap:8px">
+              <div style="width:32px;height:32px;border-radius:var(--dt-radius-md);background:var(--dt-brand);cursor:pointer;border:2px solid var(--dt-text-primary)"></div>
+              <div style="width:32px;height:32px;border-radius:var(--dt-radius-md);background:var(--dt-success);cursor:pointer"></div>
+              <div style="width:32px;height:32px;border-radius:var(--dt-radius-md);background:var(--dt-purple);cursor:pointer"></div>
+              <div style="width:32px;height:32px;border-radius:var(--dt-radius-md);background:var(--dt-warning);cursor:pointer"></div>
+              <div style="width:32px;height:32px;border-radius:var(--dt-radius-md);background:var(--dt-danger);cursor:pointer"></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:12px">
+            <button style="height:36px;padding:0 24px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">取消</button>
+            <button style="height:36px;padding:0 24px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">保存配置</button>
+          </div>
+        </div>
+
+        <!-- 安全配置 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px;margin-top:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:24px">安全配置</div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:16px">
+            <div>
+              <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">密码最小长度</div>
+              <input type="number" value="6" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--dt-text-regular);margin-bottom:8px">密码过期时间（天）</div>
+              <input type="number" value="90" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+            <div>
+              <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">登录失败锁定次数</div>
+              <input type="number" value="5" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--dt-text-regular);margin-bottom:8px">账号锁定时间（分钟）</div>
+              <input type="number" value="30" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+          </div>
+        </div>
+
+        <!-- 存储配置 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:24px;margin-top:24px">
+          <div style="font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:24px">存储配置</div>
+          
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:16px">
+            <div>
+              <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:8px">文件大小限制（MB）</div>
+              <input type="number" value="100" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div>
+              <div style="font-size:13px;color:var(--dt-text-regular);margin-bottom:8px">图片大小限制（MB）</div>
+              <input type="number" value="10" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:13px;color:var(--dt-text-regular);margin-bottom:8px">文件存储路径</div>
+            <input type="text" value="/data/upload" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none">
+          </div>
+        </div>
+      </div>
+
+      <!-- 操作日志页面 -->
+      <div id="logsPage" style="display:none">
+        <!-- 统计卡片 -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px">
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">今日操作总数</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-text-primary);margin-top:4px">156</div>
+            <div style="font-size:12px;color:var(--dt-success);margin-top:4px">↑ 12% 较昨日</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">操作成功</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-success);margin-top:4px">152</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">成功率 97.4%</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">操作失败</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-danger);margin-top:4px">4</div>
+            <div style="font-size:12px;color:var(--dt-warning);margin-top:4px">需要关注</div>
+          </div>
+          <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px 24px">
+            <div style="font-size:12.5px;color:var(--dt-text-secondary)">活跃管理员</div>
+            <div style="font-size:24px;font-weight:600;color:var(--dt-brand);margin-top:4px">3</div>
+            <div style="font-size:12px;color:var(--dt-text-secondary);margin-top:4px">今日有操作的管理员</div>
+          </div>
+        </div>
+
+        <!-- 搜索栏 -->
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);padding:16px;margin-bottom:16px">
+          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">操作人：</span>
+              <input type="text" placeholder="请输入操作人" style="width:140px;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">操作类型：</span>
+              <select style="width:100px;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none;background:var(--dt-bg-card)">
+                <option>全部</option>
+                <option>新增</option>
+                <option>修改</option>
+                <option>删除</option>
+                <option>导出</option>
+              </select>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+              <span style="font-size:12px;color:var(--dt-text-regular)">时间范围：</span>
+              <input type="date" style="height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+              <span style="font-size:13px;color:var(--dt-text-secondary)">至</span>
+              <input type="date" style="height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);padding:0 12px;font-size:13px;outline:none">
+            </div>
+            <div style="display:flex;gap:8px;margin-left:auto">
+              <button style="height:32px;padding:0 16px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer">搜索</button>
+              <button style="height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:13px;cursor:pointer;color:var(--dt-text-regular)">重置</button>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);overflow:hidden">
+          <div style="padding:16px 24px;border-bottom:0.5px solid var(--dt-bg-body);display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:15px;font-weight:600;color:var(--dt-text-primary)">操作日志</div>
+            <button style="height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer">导出日志</button>
+          </div>
+          
+          <div style="padding:0 24px">
+            <div style="display:grid;grid-template-columns:100px 1fr 1fr 150px 100px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body);font-size:13px;font-weight:500;color:var(--dt-text-regular)">
+              <div>时间</div>
+              <div>操作人</div>
+              <div>操作内容</div>
+              <div>IP地址</div>
+              <div>状态</div>
+            </div>
+            <div style="display:grid;grid-template-columns:100px 1fr 1fr 150px 100px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body);font-size:13px;color:var(--dt-text-regular)">
+              <div style="color:var(--dt-text-secondary)">10:30:25</div>
+              <div>张三（管理员）</div>
+              <div>修改了功能开关配置</div>
+              <div style="color:var(--dt-text-secondary)">192.168.1.100</div>
+              <div><span style="color:var(--dt-success)">成功</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:100px 1fr 1fr 150px 100px;padding:12px 0;border-bottom:0.5px solid var(--dt-bg-body);font-size:13px;color:var(--dt-text-regular)">
+              <div style="color:var(--dt-text-secondary)">10:15:08</div>
+              <div>我（超级管理员）</div>
+              <div>添加了新用户：赵六</div>
+              <div style="color:var(--dt-text-secondary)">192.168.1.101</div>
+              <div><span style="color:var(--dt-success)">成功</span></div>
+            </div>
+            <div style="display:grid;grid-template-columns:100px 1fr 1fr 150px 100px;padding:12px 0;font-size:13px;color:var(--dt-text-regular)">
+              <div style="color:var(--dt-text-secondary)">09:45:33</div>
+              <div>李四（管理员）</div>
+              <div>尝试删除用户（权限不足）</div>
+              <div style="color:var(--dt-text-secondary)">192.168.1.102</div>
+              <div><span style="color:var(--dt-danger)">失败</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 其他页面占位 -->
+      <div class="page-placeholder" id="defaultPage">
+        <div class="icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.6"/></svg></div>
+        <h3 id="otherPageTitle">该模块原型未实现</h3>
+        <p>此导航项仅作结构占位，未纳入本轮原型交付范围</p>
+      </div>
+    </div>
+
+    <!-- 保存栏 -->
+    <div class="save-bar">
+      <span class="status-msg" id="saveMsg"></span>
+      <button class="btn-cancel" onclick="onCancel()">取消</button>
+      <button class="btn-save" id="saveBtn" onclick="onSave()">保存更改</button>
+    </div>
+  </div>
+</div>
+
+<!-- 确认弹窗 -->
+<div class="confirm-overlay" id="confirmOverlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirmTitle">确认关闭功能？</div>
+    <div class="confirm-desc" id="confirmDesc">关闭后，所有用户将无法使用该功能。此操作需要管理员权限确认。</div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeConfirm()">取消</button>
+      <button class="confirm-ok" onclick="confirmOk()">确认关闭</button>
+    </div>
+  </div>
+</div>
+
+<!-- 添加/编辑用户弹窗 -->
+<div class="confirm-overlay" id="userModal">
+  <div class="confirm-box" style="width:480px">
+    <div class="confirm-title" id="userModalTitle">添加用户</div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:6px">姓名 *</div>
+      <input type="text" id="userName" placeholder="请输入姓名" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:6px">手机号 *</div>
+      <input type="text" id="userPhone" placeholder="请输入手机号" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:6px">邮箱</div>
+      <input type="text" id="userEmail" placeholder="请输入邮箱" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none;box-sizing:border-box">
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+      <div>
+        <div style="font-size:12px;color:var(--dt-text-regular);margin-bottom:6px">部门</div>
+        <select id="userDept" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none;background:var(--dt-bg-card)">
+          <option>产品部</option>
+          <option>研发部</option>
+          <option>设计部</option>
+          <option>市场部</option>
+        </select>
+      </div>
+      <div>
+        <div style="font-size:13px;color:var(--dt-text-regular);margin-bottom:6px">职位</div>
+        <input type="text" id="userPosition" placeholder="请输入职位" style="width:100%;height:36px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none;box-sizing:border-box">
+      </div>
+    </div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="closeUserModal()">取消</button>
+      <button class="confirm-ok" style="background:var(--dt-brand);" onclick="saveUser()">保存</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="adminToast" class="admin-toast"></div>
+
+<script>
+// 保存初始状态用于取消恢复
+var initialState = {};
+var isDirty = false;
+var pendingToggle = null;
+
+// 初始化：记录所有开关初始状态
+function initState() {
+  document.querySelectorAll('.module-card').forEach(function(card, idx) {
+    var mainSwitch = card.querySelector('.toggle-switch');
+    var subSwitches = card.querySelectorAll('.mc-option .toggle-switch');
+    initialState[idx] = {
+      main: mainSwitch.classList.contains('on'),
+      subs: Array.from(subSwitches).map(function(s) { return s.classList.contains('on'); })
+    };
+  });
+}
+initState();
+
+// 标记为已修改
+function markDirty() {
+  isDirty = true;
+  var msg = document.getElementById('saveMsg');
+  msg.textContent = '● 有未保存的更改';
+  msg.className = 'status-msg dirty';
+}
+
+// === 开关切换联动表格行高亮 ===
+function highlightRelatedRows(keyword) {
+  var allRows = document.querySelectorAll('.table-row, .group-row');
+  allRows.forEach(function(row) {
+    if (row.textContent.indexOf(keyword) >= 0) {
+      row.classList.add('highlight');
+      setTimeout(function() { row.classList.remove('highlight'); }, 1500);
+    }
+  });
+}
+
+// 主开关点击
+function onMainToggle(el) {
+  var card = el.closest('.module-card');
+  var moduleName = card.querySelector('.mc-name').textContent.trim();
+  var willTurnOn = !el.classList.contains('on');
+  var needConfirm = card.getAttribute('data-confirm') === 'true';
+  
+  // 如果是关闭核心功能，需要确认
+  if (!willTurnOn && needConfirm) {
+    pendingToggle = el;
+    document.getElementById('confirmDesc').textContent = '关闭「' + moduleName + '」后，所有用户将无法使用该功能。此操作需要管理员权限确认。';
+    document.getElementById('confirmOverlay').classList.add('show');
+    return;
+  }
+  
+  // 切换主开关
+  el.classList.toggle('on');
+  
+  // 联动表格行高亮
+  var keyword = card.getAttribute('data-module') || '';
+  var moduleMap = {im:'消息',ding:'提醒',call:'通话',calendar:'日历',approval:'审批',docs:'文档',attendance:'考勤',mail:'邮箱',report:'报告',group:'群',ai:'AI'};
+  if (moduleMap[keyword]) highlightRelatedRows(moduleMap[keyword]);
+  
+  // 联动子选项
+  var subSwitches = card.querySelectorAll('.mc-option .toggle-switch');
+  if (el.classList.contains('on')) {
+    // 主开关开 → 子选项恢复可操作
+    subSwitches.forEach(function(s) { s.classList.remove('disabled'); });
+    card.classList.remove('disabled');
+  } else {
+    // 主开关关 → 子选项全部禁用
+    subSwitches.forEach(function(s) { s.classList.add('disabled'); });
+    card.classList.add('disabled');
+  }
+  
+  markDirty();
+}
+
+// 子开关点击
+function onSubToggle(el) {
+  el.classList.toggle('on');
+  markDirty();
+}
+
+// 确认弹窗
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('show');
+  pendingToggle = null;
+}
+function confirmOk() {
+  if (pendingToggle) {
+    pendingToggle.classList.remove('on');
+    var card = pendingToggle.closest('.module-card');
+    var subSwitches = card.querySelectorAll('.mc-option .toggle-switch');
+    subSwitches.forEach(function(s) { s.classList.add('disabled'); });
+    card.classList.add('disabled');
+    markDirty();
+  }
+  closeConfirm();
+}
+
+// 展开/收起
+function toggleExpand(btn) {
+  var card = btn.closest('.module-card');
+  card.classList.toggle('expanded');
+  if (card.classList.contains('expanded')) {
+    btn.textContent = '收起选项 ▲';
+  } else {
+    btn.textContent = '展开选项 ▼';
+  }
+}
+
+// 取消按钮
+function onCancel() {
+  // 恢复所有开关到初始状态
+  document.querySelectorAll('.module-card').forEach(function(card, idx) {
+    var state = initialState[idx];
+    if (!state) return;
+    var mainSwitch = card.querySelector('.toggle-switch');
+    if (state.main) mainSwitch.classList.add('on');
+    else mainSwitch.classList.remove('on');
+    
+    var subSwitches = card.querySelectorAll('.mc-option .toggle-switch');
+    subSwitches.forEach(function(s, i) {
+      if (state.subs[i]) s.classList.add('on');
+      else s.classList.remove('on');
+    });
+    
+    // 恢复禁用状态
+    if (!state.main) {
+      subSwitches.forEach(function(s) { s.classList.add('disabled'); });
+      card.classList.add('disabled');
+    } else {
+      subSwitches.forEach(function(s) { s.classList.remove('disabled'); });
+      card.classList.remove('disabled');
+    }
+  });
+  
+  isDirty = false;
+  document.getElementById('saveMsg').textContent = '';
+  document.getElementById('saveMsg').className = 'status-msg';
+  showToast('已取消修改');
+}
+
+// 保存按钮
+function onSave() {
+  var btn = document.getElementById('saveBtn');
+  btn.disabled = true;
+  btn.textContent = '保存中...';
+  
+  setTimeout(function() {
+    btn.disabled = false;
+    btn.textContent = '保存更改';
+    isDirty = false;
+    document.getElementById('saveMsg').textContent = '✓ 已保存 · ' + new Date().toLocaleTimeString();
+    document.getElementById('saveMsg').className = 'status-msg';
+    // 更新初始状态
+    initState();
+    showToast('设置已保存');
+  }, 800);
+}
+
+// Toast
+function showToast(msg) {
+  var t = document.getElementById('adminToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 1500);
+}
+
+// 左侧菜单切换
+var pageNames = {
+  home: '首页',
+  features: '功能开关',
+  users: '用户列表',
+  groups: '群组管理',
+  org: '组织架构',
+  roles: '角色权限',
+  admins: '管理员管理',
+  chats: '群聊管理',
+  approval: '审批流程',
+  attendance: '考勤规则',
+  call: '通话配置',
+  system: '系统配置',
+  logs: '操作日志'
+};
+
+document.querySelectorAll('.as-nav-item').forEach(function(item) {
+  item.addEventListener('click', function() {
+    if (isDirty) {
+      if (!confirm('您有未保存的更改，确定离开吗？')) return;
+    }
+    
+    document.querySelectorAll('.as-nav-item').forEach(function(i) { i.classList.remove('active'); });
+    this.classList.add('active');
+    
+    var page = this.getAttribute('data-page');
+    document.getElementById('pageTitle').textContent = pageNames[page] || '功能开关';
+    document.getElementById('pageBreadcrumb').textContent = '管理后台 / ' + (pageNames[page] || '功能开关');
+    
+    if (page === 'features') {
+      document.getElementById('featuresPage').style.display = '';
+      document.getElementById('otherPage').style.display = 'none';
+      // 功能开关页面显示底部保存栏
+      document.querySelector('.save-bar').style.display = 'flex';
+    } else {
+      document.getElementById('featuresPage').style.display = 'none';
+      document.getElementById('otherPage').style.display = '';
+      // 其他页面隐藏底部保存栏
+      document.querySelector('.save-bar').style.display = 'none';
+      
+      // 隐藏所有子页面
+      var allPages = document.querySelectorAll('#otherPage > div');
+      allPages.forEach(function(p) { p.style.display = 'none'; });
+      
+      // 显示对应页面
+      var targetPage = document.getElementById(page + 'Page');
+      if (targetPage) {
+        targetPage.style.display = '';
+      } else {
+        // 没有对应页面就显示默认占位
+        document.getElementById('defaultPage').style.display = '';
+        document.getElementById('otherPageTitle').textContent = pageNames[page] + ' · 建设中';
+      }
+    }
+  });
+});
+
+// 搜索功能
+document.getElementById('searchInput').addEventListener('input', function() {
+  filterModules();
+});
+document.querySelectorAll('.am-filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.am-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    this.classList.add('active');
+    filterModules();
+  });
+});
+
+function filterModules() {
+  var kw = document.getElementById('searchInput').value.trim().toLowerCase();
+  var filter = document.querySelector('.am-filter-btn.active').getAttribute('data-filter');
+  
+  document.querySelectorAll('.module-card').forEach(function(card) {
+    var name = card.querySelector('.mc-name').textContent.toLowerCase();
+    var desc = card.querySelector('.mc-desc').textContent.toLowerCase();
+    var matchKw = !kw || name.indexOf(kw) >= 0 || desc.indexOf(kw) >= 0;
+    
+    var mainOn = card.querySelector('.toggle-switch').classList.contains('on');
+    var matchFilter = filter === 'all' || (filter === 'on' && mainOn) || (filter === 'off' && !mainOn);
+    
+    card.style.display = (matchKw && matchFilter) ? '' : 'none';
+  });
+}
+
+// 离开页面前提示
+window.addEventListener('beforeunload', function(e) {
+  if (isDirty) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
+
+// ========== 用户列表页面交互 ==========
+
+// 组织架构树展开/折叠
+document.querySelectorAll('.org-tree-item').forEach(function(item) {
+  item.addEventListener('click', function(e) {
+    e.stopPropagation();
+    
+    // 选中状态
+    document.querySelectorAll('.org-tree-item').forEach(function(i) {
+      i.style.background = '';
+      i.style.color = '';
+    });
+    this.style.background = 'var(--dt-brand-light)';
+    this.style.color = 'var(--dt-brand)';
+    
+    // 研发部展开/折叠
+    if (this.textContent.includes('研发部')) {
+      var children = document.getElementById('devChildren');
+      var arrow = this.querySelector('.org-arrow');
+      if (children.style.display === 'none') {
+        children.style.display = '';
+        arrow.style.transform = '';
+      } else {
+        children.style.display = 'none';
+        arrow.style.transform = 'rotate(-90deg)';
+      }
+    }
+  });
+});
+
+// === 群组管理交互 ===
+var groupSearchInput = document.getElementById('groupSearch');
+if (groupSearchInput) {
+  groupSearchInput.addEventListener('input', function() {
+    var kw = this.value.trim().toLowerCase();
+    document.querySelectorAll('#groupsPage .group-row').forEach(function(row) {
+      var name = row.querySelector('span[style*="font-weight:500"]');
+      var match = !kw || (name && name.textContent.toLowerCase().indexOf(kw) >= 0);
+      row.style.display = match ? '' : 'none';
+    });
+  });
+}
+var groupCheckAll = document.getElementById('groupCheckAll');
+if (groupCheckAll) {
+  groupCheckAll.addEventListener('change', function() {
+    document.querySelectorAll('#groupsPage .group-row input[type="checkbox"]').forEach(function(cb) {
+      cb.checked = groupCheckAll.checked;
+    });
+  });
+}
+document.querySelectorAll('#groupsPage .group-row button').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    showToast(this.textContent.trim() + '（演示）');
+  });
+});
+
+// 表格按钮点击反馈
+document.querySelectorAll('.admin-table button').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var action = this.textContent.trim();
+    if (action === '编辑') {
+      // 找到这一行的用户名
+      var row = this.closest('.table-row');
+      var name = row.querySelector('.td div div div').textContent;
+      openUserModal('编辑用户', name);
+    } else if (action === '禁用' || action === '启用') {
+      if (confirm('确定要' + action + '该用户吗？')) {
+        showToast(action + '成功（演示）');
+      }
+    }
+  });
+});
+
+// 用户列表筛选按钮
+document.querySelectorAll('#usersPage .am-filter-btn').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('#usersPage .am-filter-btn').forEach(function(b) {
+      b.classList.remove('active');
+    });
+    this.classList.add('active');
+  });
+});
+
+// 分页按钮点击反馈
+document.querySelectorAll('#usersPage button').forEach(function(btn) {
+  btn.addEventListener('click', function(e) {
+    var text = this.textContent.trim();
+    if (text === '上一页' || text === '下一页' || /^\d+$/.test(text)) {
+      // 页码按钮
+      document.querySelectorAll('#usersPage button').forEach(function(b) {
+        if (/^\d+$/.test(b.textContent.trim())) {
+          b.style.background = 'var(--dt-bg-card)';
+          b.style.color = 'var(--dt-text-regular)';
+          b.style.borderColor = 'var(--dt-border)';
+        }
+      });
+      if (/^\d+$/.test(text)) {
+        this.style.background = 'var(--dt-brand)';
+        this.style.color = 'var(--dt-bg-card)';
+        this.style.borderColor = 'var(--dt-brand)';
+      }
+    }
+  });
+});
+
+// 添加用户按钮
+var addUserBtn = document.querySelector('#usersPage .btn-save');
+if (addUserBtn) {
+  addUserBtn.addEventListener('click', function() {
+    openUserModal('添加用户');
+  });
+}
+
+// 打开用户弹窗
+function openUserModal(title, name, phone, email, dept, position) {
+  document.getElementById('userModalTitle').textContent = title;
+  document.getElementById('userName').value = name || '';
+  document.getElementById('userPhone').value = phone || '';
+  document.getElementById('userEmail').value = email || '';
+  document.getElementById('userDept').value = dept || '产品部';
+  document.getElementById('userPosition').value = position || '';
+  document.getElementById('userModal').classList.add('show');
+}
+
+// 关闭用户弹窗
+function closeUserModal() {
+  document.getElementById('userModal').classList.remove('show');
+}
+
+// 保存用户
+function saveUser() {
+  var name = document.getElementById('userName').value.trim();
+  if (!name) {
+    showToast('请输入姓名');
+    return;
+  }
+  closeUserModal();
+  showToast('保存成功（演示）');
+}
+
+// 复选框和批量操作
+(function() {
+  // 全选复选框
+  var selectAll = document.querySelector('#usersPage .table-header input[type="checkbox"]');
+  if (selectAll) {
+    selectAll.addEventListener('change', function() {
+      var checkboxes = document.querySelectorAll('#usersPage .table-row input[type="checkbox"]');
+      checkboxes.forEach(function(cb) {
+        cb.checked = selectAll.checked;
+      });
+      updateBatchBar();
+    });
+  }
+
+  // 单个复选框
+  var checkboxes = document.querySelectorAll('#usersPage .table-row input[type="checkbox"]');
+  checkboxes.forEach(function(cb) {
+    cb.addEventListener('change', updateBatchBar);
+  });
+
+  // 更新批量操作栏
+  function updateBatchBar() {
+    var checked = document.querySelectorAll('#usersPage .table-row input[type="checkbox"]:checked');
+    var batchBar = document.getElementById('batchBar');
+    var selectedCount = document.getElementById('selectedCount');
+    if (checked.length > 0) {
+      batchBar.style.display = 'flex';
+      selectedCount.textContent = checked.length;
+    } else {
+      batchBar.style.display = 'none';
+    }
+  }
+
+  // 筛选按钮
+  var filterBtns = document.querySelectorAll('#usersPage .am-filter-btn');
+  filterBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      filterBtns.forEach(function(b) { b.classList.remove('active'); });
+      this.classList.add('active');
+    });
+  });
+})();
+</script>
+
+<script src="shared.js"></script>
+</body>
+</html>

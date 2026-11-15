@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>心飞IM · 聊天窗口</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+:root{
+  --dt-brand:#277EFB;--dt-brand-hover:#1169E0;--dt-brand-light:#E6F2FF;
+  --dt-success:#00B42A;--dt-warning:#FF7D00;--dt-danger:#F53F3F;--dt-unread:#FF4D4F;
+  --dt-text-primary:#171A1D;--dt-text-secondary:#5F6670;--dt-text-tertiary:#8A9099;
+  --dt-text-quaternary:#B1B6BD;--dt-text-icon:#ADB1B8;--dt-text-placeholder:#B1B6BD;
+  --dt-bg-body:#F5F6F7;--dt-bg-card:#FFFFFF;--dt-bg-hover:#F6F6F6;--dt-bg-active:#E5E6EB;
+  --dt-bg-session-active:#E6F2FF;--dt-nav-dark:#2B2D33;
+  --dt-border:#E5E6EB;--dt-border-light:#E5E6EB;
+  --dt-radius-sm:4px;--dt-radius-md:6px;--dt-radius-lg:8px;--dt-radius-xl:12px;
+  --dt-bubble-send:var(--dt-brand);
+  --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;overflow:hidden}
+
+/* L1 Nav */
+.l1-nav{width:64px;background:var(--dt-nav-dark);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0}
+.l1-avatar{width:var(--dt-avatar-l1);height:var(--dt-avatar-l1);border-radius:var(--dt-radius-lg);background:var(--dt-brand);color:var(--dt-bg-card);font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;margin-bottom:16px;cursor:pointer}
+.l1-item{width:44px;height:44px;border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:rgba(255,255,255,0.6);font-size:12px;text-decoration:none}
+.l1-item.active{color:var(--dt-bg-card);background:rgba(255,255,255,0.12)}
+.l1-item svg{width:22px;height:22px;flex-shrink:0}
+.l1-bottom{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+
+/* L2 Session List (250px) */
+.l2-panel{width:var(--dt-session-panel-width);background:var(--dt-bg-card);border-right:0.5px solid var(--dt-border);display:flex;flex-direction:column;flex-shrink:0;min-width:0}
+.l2-header{height:56px;padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--dt-border-light)}
+.l2-search{flex:1;height:32px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--dt-text-tertiary);font-size:13px;border:none;width:100%;font-family:var(--dt-font)}
+.l2-search:focus{outline:none}
+.session-list{flex:1;overflow-y:auto}
+.session-item{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:var(--dt-session-item-height);cursor:pointer;position:relative}
+.session-item:hover{background:var(--dt-bg-hover)}
+.session-item.active{background:var(--dt-bg-session-active);box-shadow:inset 3px 0 0 var(--dt-brand)}
+.session-item.active:hover{background:var(--dt-bg-session-active)}
+.sess-avatar{width:var(--dt-avatar-session);height:var(--dt-avatar-session);border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:15px;font-weight:600;position:relative}
+.sess-avatar .online-dot{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:var(--dt-success);border:2px solid var(--dt-bg-card);border-radius:50%}
+.sess-info{flex:1;min-width:0}
+.sess-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.sess-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-time{font-size:11px;color:var(--dt-text-tertiary);flex-shrink:0;margin-left:4px}
+.sess-row2{display:flex;align-items:center;gap:4px}
+.sess-msg{font-size:13px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-prefix{font-size:12px;font-weight:600;flex-shrink:0;padding:1px 5px;border-radius:3px}
+.sess-prefix.draft{color:var(--dt-danger)}
+.sess-prefix.at-me{color:var(--dt-warning)}
+.sess-prefix.normal{color:var(--dt-text-tertiary)}
+.sess-unread{min-width:18px;height:18px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:9px;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
+.pinned-bar{height:36px;display:flex;align-items:center;padding:0 16px;gap:6px;border-bottom:0.5px solid var(--dt-border-light)}
+.pinned-bar span{font-size:12px;color:var(--dt-text-tertiary)}
+.pinned-avatar{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:11px;font-weight:600;cursor:pointer}
+
+/* Chat Area (auto) */
+.chat-main{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--dt-bg-card);border-right:0.5px solid var(--dt-border)}
+.chat-header{height:56px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
+.chat-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:6px}
+.chat-title .member-count{font-size:12px;color:var(--dt-text-secondary);font-weight:400}
+.chat-actions{display:flex;gap:2px}
+.action-btn{width:32px;height:32px;border:none;background:transparent;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary)}
+.action-btn:hover{background:var(--dt-bg-body)}
+
+.msg-list{flex:1;overflow-y:auto;padding:24px 24px;background:var(--dt-bg-hover);position:relative}
+.time-sep{text-align:center;padding:12px 0;font-size:11px;color:var(--dt-text-tertiary)}
+.time-sep span{background:var(--dt-bg-card);padding:4px 12px;border-radius:var(--dt-radius-lg);border:0.5px solid var(--dt-border)}
+.msg-wrap{display:flex;gap:12px;margin-bottom:16px}
+.msg-wrap.self{flex-direction:row-reverse}
+.msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:14px;font-weight:600;cursor:pointer}
+.msg-wrap:not(.self) .msg-avatar{margin-top:16px}
+.msg-body{max-width:380px}
+.msg-sender{font-size:12px;color:var(--dt-text-secondary);margin-bottom:3px}
+.msg-bubble{display:inline-block;padding:9px 12px;border-radius:var(--dt-bubble-radius);font-size:14px;line-height:1.5;max-width:100%;word-wrap:break-word}
+.msg-wrap:not(.self) .msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
+.msg-wrap.self .msg-bubble{background:var(--dt-brand);color:var(--dt-bg-panel);border-top-right-radius:4px}
+.msg-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
+.sys-msg-row{text-align:center;margin:12px 0}
+.sys-msg{background:rgba(0,0,0,0.04);color:var(--dt-text-secondary);font-size:11px;padding:4px 16px;border-radius:var(--dt-radius-lg);display:inline-block}
+
+/* Input Bar (48px，doc12 §9) */
+.input-bar{height:var(--dt-toolbar-height);border-top:0.5px solid var(--dt-border-light);background:var(--dt-bg-card);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0}
+.input-bar .tool-btn{width:32px;height:32px;border:none;background:transparent;border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dt-text-secondary)}
+.input-bar .tool-btn:hover{background:var(--dt-bg-body)}
+.input-bar .tool-btn svg{width:20px;height:20px}
+.input-bar .text-input{flex:1;height:36px;border:none;background:var(--dt-bg-body);border-radius:8px;padding:0 16px;font-size:14px;font-family:var(--dt-font);color:var(--dt-text-primary)}
+.input-bar .text-input:focus{outline:none}
+.input-bar .send-btn{height:32px;padding:0 24px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:var(--dt-radius-sm);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--dt-font)}
+.input-bar .send-btn:hover{background:var(--dt-brand-hover)}
+
+/* Right Info Panel（详情抽屉 320px，doc12 §11） */
+.info-panel{width:var(--dt-drawer-width);background:var(--dt-bg-card);display:flex;flex-direction:column;flex-shrink:0}
+.info-header{height:56px;border-bottom:0.5px solid var(--dt-border-light);display:flex;align-items:center;padding:0 16px;gap:8px}
+.info-title{font-size:14px;font-weight:500;flex:1}
+.info-tabs{display:flex;gap:0;font-size:12px}
+.info-tab{padding:6px 12px;cursor:pointer;color:var(--dt-text-tertiary);border-radius:4px}
+.info-tab.active{color:var(--dt-brand);background:var(--dt-brand-light)}
+.info-body{flex:1;overflow-y:auto;padding:16px}
+.group-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.group-id{font-size:12px;color:var(--dt-text-tertiary);margin-bottom:16px}
+.member-label{font-size:12px;color:var(--dt-text-tertiary);margin-bottom:12px;display:flex;justify-content:space-between}
+.member-label a{color:var(--dt-brand);text-decoration:none;font-size:11px}
+.member-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px 8px;margin-bottom:24px}
+.member-item{display:flex;flex-direction:column;align-items:center;gap:4px}
+.member-av{width:32px;height:32px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:11px;font-weight:600}
+.member-name{font-size:11px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:44px}
+.info-section{border-top:0.5px solid var(--dt-border-light);padding-top:16px;margin-bottom:16px}
+.section-title{font-size:12px;font-weight:500;margin-bottom:8px;color:var(--dt-text-primary)}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px}
+.info-row .label{color:var(--dt-text-tertiary)}
+.info-row .val{color:var(--dt-text-secondary)}
+.toggle-switch{width:36px;height:20px;background:var(--dt-success);border-radius:var(--dt-radius-full);position:relative;cursor:pointer}
+.toggle-switch.off{background:var(--dt-border)}
+.toggle-switch::after{content:'';position:absolute;width:16px;height:16px;background:var(--dt-bg-card);border-radius:50%;top:2px;right:2px;transition:right 0.15s}
+.toggle-switch.off::after{right:auto;left:2px}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:2px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+<!-- L1 导航栏 -->
+<nav class="l1-nav">
+  <div class="l1-avatar" onclick="location.href='index.html'">我</div>
+    <div class="l1-item active" onclick="location.href='dingtalk-mockup.html'" title="消息" aria-label="消息">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>消息</span>
+    <div class="l1-badge">24</div>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-contacts.html'" title="通讯录" aria-label="通讯录">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>通讯录</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-calendar.html'" title="日历" aria-label="日历">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>日历</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-docs.html'" title="文档" aria-label="文档">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>文档</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-workbench.html'" title="工作台" aria-label="工作台">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>工作台</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-approval.html'" title="审批" aria-label="审批">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>审批</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-mail.html'" title="邮箱" aria-label="邮箱">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <span>邮箱</span>
+  </div>
+
+  <div class="l1-bottom">
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="搜索" aria-label="搜索">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>搜索</span>
+    </div>
+    <div class="l1-item" onclick="location.href='dingtalk-admin.html'" title="设置" aria-label="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
+      <span>设置</span>
+    </div>
+  </div>
+</nav>
+
+<!-- L2 会话列表 (250px) -->
+<div class="l2-panel">
+  <div class="l2-header">
+    <input class="l2-search" placeholder="搜索" onClick="this.select()">
+  </div>
+  <div class="pinned-bar">
+    <span>置顶</span>
+    <div class="pinned-avatar" style="background:var(--dt-av-indigo)">首</div>
+    <div class="pinned-avatar" style="background:var(--dt-av-red)">李</div>
+    <div class="pinned-avatar" style="background:var(--dt-av-orange)">周</div>
+  </div>
+  <div class="session-list">
+    <div class="session-item active">
+      <div class="sess-avatar" style="background:var(--dt-av-indigo)">首<span class="online-dot"></span></div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">首座 · 张总</span><span class="sess-time">14:23</span></div>
+        <div class="sess-row2"><span class="sess-msg">张总，方案已发您邮箱，请查收</span></div>
+      </div>
+    </div>
+    <div class="session-item">
+      <div class="sess-avatar" style="background:var(--dt-av-red)">李</div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">李四</span><span class="sess-time">13:40</span></div>
+        <div class="sess-row2"><span class="sess-prefix at-me">@我</span><span class="sess-msg">@全体成员 明天下午3点开评审会</span><span class="sess-unread">3</span></div>
+      </div>
+    </div>
+    <div class="session-item">
+      <div class="sess-avatar" style="background:var(--dt-av-orange)">周</div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">周武</span><span class="sess-time">12:05</span></div>
+        <div class="sess-row2"><span class="sess-prefix draft">[草稿]</span><span class="sess-msg">关于Q4的OKR方案</span></div>
+      </div>
+    </div>
+    <div class="session-item">
+      <div class="sess-avatar" style="background:var(--dt-purple)">产</div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">产品部(12)</span><span class="sess-time">昨天</span></div>
+        <div class="sess-row2"><span class="sess-prefix normal">[图片]</span><span class="sess-msg">[图片]王五:转发</span></div>
+      </div>
+    </div>
+    <div class="session-item">
+      <div class="sess-avatar" style="background:var(--dt-av-cyan)">设</div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">设计组(8)</span><span class="sess-time">昨天</span></div>
+        <div class="sess-row2"><span class="sess-prefix normal">[文件]</span><span class="sess-msg">赵六:需求终稿V3.pdf</span><span class="sess-unread">12</span></div>
+      </div>
+    </div>
+    <div class="session-item">
+      <div class="sess-avatar" style="background:var(--dt-av-orange)">王<span class="online-dot"></span></div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">王嘉兴</span><span class="sess-time">周一</span></div>
+        <div class="sess-row2"><span class="sess-msg">没问题，已处理</span></div>
+      </div>
+    </div>
+    <div class="session-item">
+      <div class="sess-avatar" style="background:var(--dt-av-blue)">刘</div>
+      <div class="sess-info">
+        <div class="sess-row1"><span class="sess-name">刘洋</span><span class="sess-time">周一</span></div>
+        <div class="sess-row2"><span class="sess-prefix normal">[名片]</span><span class="sess-msg">[个人名片]</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 中间聊天区域 -->
+<div class="chat-main">
+  <div class="chat-header">
+    <div class="chat-title">首座 · 张总 <span class="member-count">在线</span></div>
+    <div class="chat-actions">
+      <button class="action-btn" title="语音通话" aria-label="语音通话"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6A19.79 19.79 0 012.12 4.18 2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></button>
+      <button class="action-btn" title="视频通话" aria-label="视频通话"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></button>
+      <button class="action-btn" title="更多" aria-label="更多"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+    </div>
+  </div>
+  <div class="msg-list">
+    <div class="time-sep"><span>2026年6月10日 星期三</span></div>
+    <div class="msg-wrap">
+      <div class="msg-avatar" style="background:var(--dt-av-indigo)">首</div>
+      <div class="msg-body">
+        <div class="msg-sender">张总</div>
+        <div class="msg-bubble">小刘，Q4 OKR 方案准备好了吗？明天要提交给管理层。</div>
+        <div class="msg-meta"><span>10:30</span></div>
+      </div>
+    </div>
+    <div class="msg-wrap self">
+      <div class="msg-body">
+        <div class="msg-bubble">张总，方案已发您邮箱，请查收。另外评审会PPT正在收尾，中午前完成。</div>
+        <div class="msg-meta"><span>已读</span><span>·</span><span>10:32</span></div>
+      </div>
+      <div class="msg-avatar" style="background:var(--dt-brand)">我</div>
+    </div>
+    <div class="msg-wrap">
+      <div class="msg-avatar" style="background:var(--dt-av-indigo)">首</div>
+      <div class="msg-body">
+        <div class="msg-sender">张总</div>
+        <div class="msg-bubble">好的，收到。另外 <span style="color:var(--dt-brand)">@全体成员</span> 明天下午3点开产品需求评审会，全员参加。</div>
+        <div class="msg-meta"><span>14:20</span></div>
+      </div>
+    </div>
+    <div class="sys-msg-row"><div class="sys-msg">张总 更改群名为「产品需求评审」</div></div>
+    <div class="msg-wrap self">
+      <div class="msg-body">
+        <div class="msg-bubble">收到！已定好会议室302，辛苦了张总。</div>
+        <div class="msg-meta"><span>送达</span><span>·</span><span>14:23</span></div>
+      </div>
+      <div class="msg-avatar" style="background:var(--dt-brand)">我</div>
+    </div>
+  </div>
+  <div class="input-bar">
+    <button class="tool-btn" title="表情" aria-label="表情"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
+    <button class="tool-btn" title="发送文件" aria-label="发送文件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg></button>
+    <input class="text-input" placeholder="输入消息...">
+    <button class="send-btn">发送</button>
+  </div>
+</div>
+
+<!-- 右侧信息面板 (280px) -->
+<div class="info-panel">
+  <div class="info-header">
+    <div class="info-tabs">
+      <div class="info-tab active">资料</div>
+      <div class="info-tab">设置</div>
+    </div>
+  </div>
+  <div class="info-body">
+    <div style="text-align:center;padding:12px 0 16px">
+      <div style="width:64px;height:64px;border-radius:4px;background:var(--dt-av-indigo);color:var(--dt-bg-card);font-size:24px;font-weight:600;display:flex;align-items:center;justify-content:center;margin:0 auto 12px">张</div>
+      <div style="font-size:16px;font-weight:600">张建国</div>
+      <div style="font-size:12px;color:var(--dt-text-tertiary);margin-top:2px">产品总监 · 工号 1001</div>
+    </div>
+    <div class="info-section">
+      <div class="section-title">邮箱地址</div>
+      <div class="info-row"><span class="label">公司邮箱</span><span class="val">zhang.jian@xinfei.com</span></div>
+      <div class="info-section" style="border-top:none;margin-top:8px">
+        <div class="section-title">职位信息</div>
+        <div class="info-row"><span class="label">所在部门</span><span class="val">产品中心</span></div>
+        <div class="info-row"><span class="label">岗位</span><span class="val">产品总监</span></div>
+        <div class="info-row"><span class="label">汇报给</span><span class="val">王总</span></div>
+      </div>
+    </div>
+    <div class="info-section">
+      <div class="section-title">群聊设置</div>
+      <div class="info-row"><span class="label">消息免打扰</span><div class="toggle-switch off"></div></div>
+      <div class="info-row"><span class="label">置顶聊天</span><div class="toggle-switch"></div></div>
+      <div class="info-row"><span class="label">保存到通讯录</span><div class="toggle-switch"></div></div>
+    </div>
+    <div class="info-section">
+      <div class="section-title"><span class="member-label">群成员 (12人)<a href="#">查看全部</a></span></div>
+      <div class="member-grid">
+        <div class="member-item"><div class="member-av" style="background:var(--dt-av-indigo)">张</div><div class="member-name">张总</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-av-red)">李</div><div class="member-name">李四</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-av-orange)">周</div><div class="member-name">周武</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-purple)">王</div><div class="member-name">王五</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-av-cyan)">赵</div><div class="member-name">赵六</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-av-orange)">孙</div><div class="member-name">孙七</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-av-blue)">刘</div><div class="member-name">刘洋</div></div>
+        <div class="member-item"><div class="member-av" style="background:var(--dt-brand)">我</div><div class="member-name">我</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="shared.js"></script>
+</body>
+</html>

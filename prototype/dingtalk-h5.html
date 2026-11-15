@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>心飞IM · H5 手机端</title>
+<style>
+/* ============================================================
+   H5 移动端 · 独立样式
+   ============================================================ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+.ic{width:1em;height:1em;display:inline-block;flex-shrink:0;vertical-align:-0.125em}
+.ic use{pointer-events:none}
+:root{
+  --dt-brand:#277EFB;--dt-brand-hover:#1169E0;--dt-brand-active:#0656C6;--dt-brand-light:#E6F2FF;
+  --dt-bg-body:#F5F6F7;--dt-bg-panel:#FFFFFF;--dt-bg-hover:#F6F6F6;--dt-bg-active:#E5E6EB;--dt-bg-session-active:#E6F2FF;
+  --dt-text-primary:#171A1D;--dt-text-regular:#5F6670;--dt-text-secondary:#5F6670;--dt-text-tertiary:#8A9099;
+  --dt-text-quaternary:#B1B6BD;--dt-text-icon:#ADB1B8;--dt-text-placeholder:#B1B6BD;
+  --dt-border:#E5E6EB;--dt-border-light:#E5E6EB;
+  --dt-success:#00B42A;--dt-warning:#FF7D00;--dt-danger:#F53F3F;--dt-unread:#FF4D4F;
+  --dt-success-light:#F6FFED;--dt-warning-light:#FFF7E6;--dt-danger-light:#FFF1F0;--dt-purple-light:#F5F3FF;--dt-purple:#6C5CE7;
+  --dt-nav-dark:#2B2D33;
+  --dt-av-blue:#4A74CA;--dt-av-indigo:#297BB3;--dt-av-cyan:#018288;--dt-av-pink:#CE3C83;
+  --dt-av-teal:#00866C;--dt-av-orange:#A6672A;--dt-av-red:#C44C66;--dt-av-brown:#8B6914;
+  --dt-radius-sm:4px;--dt-radius-md:6px;--dt-radius-lg:8px;--dt-radius-xl:12px;
+  --dt-bubble-radius:12px;
+  --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+}
+body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;justify-content:center;min-height:100vh;-webkit-tap-highlight-color:transparent}
+.phone-shell{width:375px;height:100vh;max-height:812px;background:var(--dt-bg-body);position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:48px;box-shadow:0 0 0 10px var(--dt-text-primary),0 0 0 11px var(--dt-text-primary),0 24px 48px rgba(0,0,0,0.4)}
+@media(max-width:420px){.phone-shell{width:100%;height:100vh;border-radius:0;box-shadow:none}}
+
+/* Notch */
+.phone-shell::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:var(--dt-text-primary);border-radius:0 0 20px 20px;z-index:20}
+
+/* Status Bar */
+.status-bar{height:48px;background:var(--dt-bg-panel);display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 32px;font-size:14px;font-weight:600;flex-shrink:0;padding-top:8px;position:relative;z-index:10}
+.status-bar .time{font-weight:600;letter-spacing:0.3px}
+.status-icons{display:flex;align-items:center;gap:6px}
+.status-icons svg{width:16px;height:16px}
+
+/* Pages */
+.page{display:none;flex:1;flex-direction:column;overflow:hidden}
+.page.active{display:flex}
+
+/* =============== PAGE 1: MESSAGE LIST =============== */
+.msg-page-header{height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;padding:0 16px;gap:8px;flex-shrink:0;border-bottom:0.5px solid var(--dt-border-light)}
+.hdr-title{flex:1;font-size:17px;font-weight:600;text-align:center}
+.hdr-btn{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-brand);border-radius:50%;transition:background 0.15s}
+.hdr-btn:active{background:var(--dt-bg-body)}
+.hdr-btn svg{width:22px;height:22px}
+
+/* Filter Tabs */
+.filter-bar{display:flex;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0;padding:0 12px}
+.filter-tab{flex:1;height:40px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--dt-text-secondary);cursor:pointer;border-bottom:2px solid transparent;font-weight:500;position:relative;transition:color 0.15s}
+.filter-tab.active{color:var(--dt-brand);border-bottom-color:var(--dt-brand);font-weight:600}
+.filter-tab .tab-badge{position:absolute;top:50%;right:50%;transform:translate(16px,-18px);min-width:16px;height:16px;background:var(--dt-unread);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+
+/* Search */
+.search-bar{padding:8px 16px;background:var(--dt-bg-body);flex-shrink:0}
+.search-input{width:100%;height:36px;background:var(--dt-bg-panel);border-radius:8px;border:none;padding:0 12px;font-size:13px;color:var(--dt-text-regular);display:flex;align-items:center;gap:6px;cursor:pointer}
+.search-input svg{width:14px;height:14px;flex-shrink:0;color:var(--dt-text-tertiary)}
+
+/* Session List */
+.session-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.sess-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);cursor:pointer;transition:background 0.1s;position:relative}
+.sess-item:active{background:var(--dt-bg-active)}
+.sess-item:not(:last-child)::after{content:'';position:absolute;left:80px;right:0;bottom:0;height:0.5px;background:var(--dt-border)}
+.sess-avatar{width:50px;height:50px;border-radius:var(--dt-radius-lg);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:17px;font-weight:600;position:relative}
+.sess-avatar.group{border-radius:14px}
+.sess-avatar .online-dot{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:var(--dt-success);border:2px solid var(--dt-bg-panel);border-radius:50%}
+.sess-avatar .top-pin{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--dt-brand);border-radius:8px;display:flex;align-items:center;justify-content: center;border:1.5px solid var(--dt-bg-panel)}
+.sess-avatar .top-pin svg{width:8px;height:8px;fill:var(--dt-bg-panel)}
+.sess-info{flex:1;min-width:0;margin-left:16px}
+.sess-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.sess-name{font-size:15px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess-name .mute-tag{font-size:11px;padding:1px 4px;border-radius:3px;background:var(--dt-bg-body);color:var(--dt-text-secondary)}
+.sess-time{font-size:11px;color:var(--dt-text-secondary);flex-shrink:0}
+.sess-row2{display:flex;align-items:center;gap:4px}
+.sess-msg{flex:1;font-size:13px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-mute-icn{width:14px;height:14px;flex-shrink:0;stroke:var(--dt-text-placeholder);fill:none;stroke-width:2}
+.sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-panel);border-radius:9px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
+.sess-unread.group{background:var(--dt-text-quaternary);border-radius:4px;font-weight:500}
+
+/* =============== PAGE 2: CHAT VIEW =============== */
+.chat-h5{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--dt-bg-body)}
+.chat-header{height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;padding:0 8px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
+.chat-back{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-primary)}
+.chat-back:active{background:var(--dt-bg-body);border-radius:50%}
+.chat-back svg{width:22px;height:22px}
+.chat-title{flex:1;text-align:center;font-size:17px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-actions{display:flex;gap:2px}
+.chat-actions button{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%}
+.chat-actions button:active{background:var(--dt-bg-body)}
+.chat-actions button svg{width:20px;height:20px}
+
+.chat-msg-list{flex:1;overflow-y:auto;padding:12px 12px 8px;-webkit-overflow-scrolling:touch}
+/* 时间分割线：即时通讯风格居中胶囊 */
+.chat-time{width:fit-content;margin:16px auto 12px;padding:2px 12px;border-radius:var(--dt-radius-lg);background:rgba(0,0,0,0.05);font-size:11px;color:var(--dt-text-tertiary);text-align:center;line-height:1.6}
+.chat-time:first-child{margin-top:2px}
+.chat-msg-wrap{display:flex;gap:8px;margin-bottom:16px;max-width:82%}
+.chat-msg-wrap.self{flex-direction:row-reverse;margin-left:auto}
+.chat-msg-avatar{width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:13px;font-weight:600;line-height:1}
+.chat-msg-body{min-width:0}
+.chat-msg-bubble{padding:9px 12px;border-radius:var(--dt-bubble-radius);font-size:15px;line-height:1.55;word-break:break-word;overflow-wrap:break-word}
+/* 非自己：白底深字，尖角在靠头像的左上 */
+.chat-msg-wrap:not(.self) .chat-msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
+/* 自己：品牌蓝实色 + 白字，尖角在靠头像的右上 */
+.chat-msg-wrap.self .chat-msg-bubble{background:var(--dt-brand);color:var(--dt-bg-panel);border-top-right-radius:4px}
+.chat-msg-sender{font-size:11px;color:var(--dt-text-secondary);margin-bottom:3px}
+.chat-msg-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
+.chat-msg-wrap.self .chat-msg-meta{justify-content:flex-end}
+.read-status{color:var(--dt-brand)}
+/* @提及：他人消息里用品牌蓝；自己发的蓝气泡里转白 + 下划线 */
+.chat-msg-bubble .mention{color:var(--dt-brand);font-weight:500}
+.chat-msg-wrap.self .chat-msg-bubble .mention{color:var(--dt-bg-panel);font-weight:600;text-decoration:underline}
+/* 同一人连续消息：只首条显示头像+昵称，后续收紧间距（即时通讯行为） */
+.chat-msg-wrap.follow{margin-top:-8px}
+.chat-msg-wrap.follow .chat-msg-avatar{visibility:hidden}
+.chat-msg-wrap.follow .chat-msg-sender{display:none}
+/* 私聊（1对1）不显示发送者昵称 */
+.chat-msg-list.p2p .chat-msg-sender{display:none}
+
+/* Chat Input */
+.chat-input-area{background:var(--dt-bg-panel);border-top:0.5px solid var(--dt-border-light);flex-shrink:0}
+.chat-toolbar-row{display:flex;align-items:center;padding:6px 12px 2px;gap:0;justify-content:space-between}
+.chat-toolbar-row button{width:44px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:4px}
+.chat-toolbar-row button:active{background:var(--dt-bg-body)}
+.chat-toolbar-row button svg{width:20px;height:20px}
+.chat-input-row{display:flex;align-items:center;padding:6px 8px 8px;gap:6px}
+.chat-input-icon{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%;flex-shrink:0}
+.chat-input-icon:active{background:var(--dt-bg-body)}
+.chat-input-icon svg{width:22px;height:22px}
+.chat-input-row textarea{flex:1;border:none;outline:none;font-size:15px;font-family:var(--dt-font);resize:none;height:34px;line-height:22px;padding:6px 12px;background:var(--dt-bg-panel);border:0.5px solid var(--dt-border);border-radius:6px;max-height:80px;min-width:0;overflow-y:auto}
+.chat-send-btn{width:34px;height:34px;background:var(--dt-brand);color:var(--dt-bg-panel);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-send-btn:active{background:var(--dt-brand-active)}
+.chat-send-btn:disabled{background:var(--dt-border);color:var(--dt-text-tertiary);cursor:default}
+
+/* =============== PAGE 3: WORKBENCH =============== */
+.wb-page{flex:1;overflow-y:auto;background:var(--dt-bg-body);-webkit-overflow-scrolling:touch}
+/* 注意：status-bar 是独立常驻元素（48px），页面内不要再补 48~52px 顶padding */
+.wb-header{background:var(--dt-brand);padding:16px 16px 24px;color:var(--dt-bg-panel);border-radius:0 0 16px 16px}
+.wb-header-row{display:flex;align-items:center;gap:16px}
+.wb-avatar{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;border:2px solid rgba(255,255,255,0.4)}
+.wb-user-name{font-size:17px;font-weight:600}
+.wb-user-dept{font-size:12px;opacity:0.85;margin-top:3px}
+
+.wb-quick-actions{display:flex;background:var(--dt-bg-panel);margin:-12px 12px 0;border-radius:var(--dt-radius-xl);padding:16px 0;position:relative;z-index:2}
+.wb-qa-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--dt-text-regular)}
+.wb-qa-icon{width:38px;height:38px;background:var(--dt-brand-light);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.wb-qa-icon svg{width:18px;height:18px;fill:var(--dt-brand)}
+
+.wb-section{margin:16px 12px}
+.wb-section-title{font-size:13px;font-weight:500;color:var(--dt-text-secondary);margin-bottom:8px;padding-left:16px}
+.wb-apps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 12px;padding:16px 16px;background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl)}
+.wb-app-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--dt-text-regular);cursor:pointer}
+.wb-app-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--dt-bg-panel)}
+.wb-badge-dot{position:relative}
+.wb-badge-dot::after{content:attr(data-badge);position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+.wb-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
+.wb-card-item{display:flex;align-items:center;padding:16px 16px;font-size:14px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
+.wb-card-item:last-child{border-bottom:none}
+.wb-card-item:active{background:var(--dt-bg-hover)}
+.wb-card-item svg{width:18px;height:18px;margin-right:12px;flex-shrink:0}
+.wb-card-arrow{margin-left:auto;color:var(--dt-text-placeholder);font-size:18px}
+
+/* =============== PAGE 4: DING =============== */
+.ding-page{flex:1;overflow-y:auto;background:var(--dt-bg-body)}
+.ding-header{background:var(--dt-bg-panel);padding:0 16px 0;border-bottom:0.5px solid var(--dt-border-light)}
+.ding-tabs{display:flex;gap:0;margin-top:12px}
+.ding-tab{flex:1;padding:12px 0;text-align:center;font-size:14px;color:var(--dt-text-secondary);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
+.ding-tab.active{color:var(--dt-brand);border-bottom-color:var(--dt-brand);font-weight:600}
+.ding-list{padding:0 0 12px}
+.ding-item{padding:16px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
+.ding-item:active{background:var(--dt-bg-hover)}
+.ding-item-title{font-size:14px;font-weight:500;margin-bottom:6px;line-height:1.4}
+.ding-item-meta{font-size:12px;color:var(--dt-text-secondary);display:flex;gap:12px;align-items:center}
+.ding-status{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
+.ding-status-done{background:var(--dt-success-light);color:var(--dt-success)}
+.ding-status-pending{background:var(--dt-danger-light);color:var(--dt-danger)}
+
+/* =============== PAGE 5: CONTACTS =============== */
+.contact-page{flex:1;overflow-y:auto;background:var(--dt-bg-body)}
+.contact-section{margin:12px}
+.contact-section-title{font-size:12px;color:var(--dt-text-secondary);padding:0 16px 8px;font-weight:500}
+.contact-item,.ci-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
+.contact-item:active,.ci-item:active{background:var(--dt-bg-hover)}
+.ci-item:last-child{border-bottom:none}
+.ci-avatar{width:42px;height:42px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:600}
+.ci-info{flex:1;margin-left:12px;min-width:0}
+.ci-name{font-size:15px;font-weight:500}
+.ci-desc{font-size:12px;color:var(--dt-text-secondary);margin-top:2px}
+.ci-arrow{color:var(--dt-text-placeholder);font-size:18px;flex-shrink:0}
+
+/* =============== PAGE 6: MY =============== */
+.my-page{flex:1;overflow-y:auto;background:var(--dt-bg-body)}
+.my-header{background:var(--dt-brand);padding:16px 24px 28px;display:flex;align-items:center;gap:16px;border-radius:0 0 16px 16px}
+.my-avatar{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:var(--dt-bg-panel);border:2px solid rgba(255,255,255,0.4)}
+.my-name{font-size:20px;font-weight:600;color:var(--dt-bg-panel)}
+.my-account{font-size:13px;color:rgba(255,255,255,0.8);margin-top:3px}
+.my-vip-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(255,255,255,0.2);border-radius:var(--dt-radius-lg);font-size:11px;color:var(--dt-bg-panel);margin-top:6px}
+.my-list-section{margin:12px}
+.my-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
+.my-card-item{display:flex;align-items:center;padding:16px 16px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer;font-size:14px}
+.my-card-item:last-child{border-bottom:none}
+.my-card-item:active{background:var(--dt-bg-hover)}
+.my-card-item svg{width:20px;height:20px;margin-right:12px;flex-shrink:0}
+.my-item-text{flex:1}
+.my-item-value{font-size:12px;color:var(--dt-text-secondary)}
+.my-item-arrow{color:var(--dt-text-placeholder);font-size:16px;flex-shrink:0}
+.my-logout{margin:24px 12px}
+.my-logout-btn{width:100%;height:46px;background:var(--dt-bg-panel);border:none;border-radius:var(--dt-radius-xl);color:var(--dt-danger);font-size:15px;font-weight:500;cursor:pointer}
+.my-logout-btn:active{background:var(--dt-danger-light)}
+.my-version{text-align:center;font-size:11px;color:var(--dt-text-tertiary);padding:16px 0 24px}
+
+/* =============== BOTTOM TAB BAR =============== */
+.tab-bar{height:58px;background:var(--dt-bg-panel);border-top:1px solid var(--dt-border-light);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:12px}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--dt-text-secondary);font-size:11px;position:relative}
+.tab-item.active{color:var(--dt-brand)}
+.tab-item svg{width:22px;height:22px;fill:currentColor}
+.tab-item .tab-badge{position:absolute;top:1px;right:50%;transform:translate(14px,0);min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.tab-center{margin-top:-16px}
+.tab-add-btn{width:46px;height:34px;background:var(--dt-brand);border-radius:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.tab-add-btn:active{background:var(--dt-brand)}
+.tab-add-btn svg{width:18px;height:18px;fill:none;stroke:var(--dt-bg-panel);stroke-width:2.5}
+
+/* Global */
+::-webkit-scrollbar{display:none}
+
+/* === @me mention styling === */
+.sess-item.has-at .sess-msg{font-weight:600}
+.sess-item.has-at .sess-unread{background:var(--dt-danger);box-shadow:0 0 0 2px rgba(245,63,63,0.15)}
+
+/* === + plus panel === */
+/* + 面板：作为 chat-h5 的流式子元素，展开时把输入区顶上去（即时通讯行为） */
+.h5-plus-panel{display:none;background:var(--dt-bg-panel);padding:16px 12px 12px;border-top:0.5px solid var(--dt-border-light);flex-shrink:0;position:relative;z-index:90}
+.h5-plus-panel.show{display:block}
+.h5-plus-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.h5-plus-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--dt-text-secondary);cursor:pointer}
+.h5-plus-icon{width:44px;height:44px;border-radius:12px;background:var(--dt-bg-body);display:flex;align-items:center;justify-content:center}
+.h5-plus-icon svg{width:22px;height:22px;fill:var(--dt-text-secondary)}
+.h5-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.2);z-index:80}
+.h5-backdrop.show{display:block}
+
+/* Toast */
+.h5-toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-panel);padding:8px 24px;border-radius:6px;font-size:12px;z-index:200;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.h5-toast.show{opacity:1}
+</style>
+</head>
+<body><svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
+
+<div class="phone-shell">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <div class="status-icons">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C17.93 4.07 6.07 4.07 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-6-6l2 2a7.074 7.074 0 0 1 10 0l2-2C13.14 7.14 5.86 7.14 3 11z"/></svg>
+      <svg viewBox="0 0 24 24" fill="currentColor"><rect x="17" y="4" width="4" height="16" rx="1"/><rect x="11" y="8" width="4" height="12" rx="1"/><rect x="5" y="12" width="4" height="8" rx="1"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><rect x="20" y="10" width="2" height="4" rx="1" fill="currentColor"/></svg>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 1: MESSAGES ===== -->
+  <div class="page active" id="pg-msg">
+    <div class="msg-page-header">
+      <span class="hdr-title">消息</span>
+      <button class="hdr-btn" aria-label="搜索"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-tab active">全部<span class="tab-badge">9</span></div>
+      <div class="filter-tab">@我<span class="tab-badge">3</span></div>
+      <div class="filter-tab">未读</div>
+      <div class="filter-tab">文件</div>
+    </div>
+    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索</div></div>
+    <div class="session-scroll">
+      <div class="sess-item has-at" onclick="openChat(0)"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品需求评审群</div><div class="sess-time">14:35</div></div><div class="sess-row2"><div class="sess-msg"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dt-danger);margin-right:5px;vertical-align:middle"></span><span style="color:var(--dt-danger);font-weight:600">[有人@你]</span>张三: 交互稿已更新</div><div class="sess-unread">3</div></div></div></div>
+      <div class="sess-item" onclick="openChat(1)"><div class="sess-avatar" style="background:var(--dt-purple);">李<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">李四</div><div class="sess-time">14:20</div></div><div class="sess-row2"><div class="sess-msg">今天下午开会记得带电脑</div><div class="sess-unread">1</div></div></div></div>
+      <div class="sess-item" onclick="openChat(2)"><div class="sess-avatar group" style="background:var(--dt-success);">技</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">技术架构组</div><div class="sess-time">13:10</div></div><div class="sess-row2"><div class="sess-msg">[图片] 部署架构图</div><svg class="sess-mute-icn" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><div class="sess-unread group">12</div></div></div></div>
+      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-warning);">王<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">王五</div><div class="sess-time">12:05</div></div><div class="sess-row2"><div class="sess-msg">好的，没问题</div></div></div></div>
+      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-danger);">D</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">DING助手</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">你有 3 条未确认的 DING</div><div class="sess-unread">3</div></div></div></div>
+      <div class="sess-item"><div class="sess-avatar group" style="background:var(--dt-av-cyan);">前</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">前端开发小组</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">[待办] 修复 iOS 兼容性</div><div class="sess-unread group">5</div></div></div></div>
+      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-av-pink);">赵<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">赵六</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">视频.mp4</div></div></div></div>
+      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-purple);">钉</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">心飞服务通知</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">你的请假申请已通过</div></div></div></div>
+      <div class="sess-item"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品设计部</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">[周报] 交互稿 v3 已完成评审</div></div></div></div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 2: CHAT ===== -->
+  <div class="page" id="pg-chat">
+    <div class="chat-h5">
+      <div class="chat-header">
+        <button class="chat-back" aria-label="返回会话列表" onclick="closeChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <div class="chat-title" id="chatTitle">产品需求评审群</div>
+        <div class="chat-actions">
+          <button aria-label="密聊"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15.5 7.5a4 4 0 1 0-8 0v3h8z"/><path d="M5 11a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2"/></svg></button>
+          <button aria-label="更多操作"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+        </div>
+      </div>
+      <div class="chat-msg-list">
+        <div class="chat-time">10月28日 14:35</div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body msg-appear"><div class="chat-msg-sender">张三·产品经理</div><div class="chat-msg-bubble">需求文档更新了，增加了三个核心场景的交互细节，大家看一下有没有问题 🙏</div><div class="chat-msg-meta"><span>14:01</span><span>3 人未读</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-success);">李</div><div class="chat-msg-body msg-appear"><div class="chat-msg-sender">李四·设计师</div><div class="chat-msg-bubble">收到，我看下第7页那个按钮样式</div><div class="chat-msg-meta"><span>14:15</span></div></div></div>
+        <div class="chat-msg-wrap self"><div class="chat-msg-avatar" style="background:var(--dt-brand);">我</div><div class="chat-msg-body msg-appear"><div class="chat-msg-bubble"><span class="mention">@李四</span> 用的是蓝色 var(--dt-brand) 没问题</div><div class="chat-msg-meta"><span>14:30</span><span class="read-status">✓✓ 已读 2/8</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body msg-appear"><div class="chat-msg-sender">张三·产品经理</div><div class="chat-msg-bubble">交互稿已经更新完了，<span class="mention">@李四</span> 你看下有没有需要调整的～</div><div class="chat-msg-meta"><span>14:35</span><span>5 人未读</span></div></div></div>
+      </div>
+      <div class="h5-plus-panel" id="h5-plus-panel">
+        <div class="h5-plus-grid">
+          <div class="h5-plus-item" onclick="openPlusFeature('相册')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><span>相册</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('拍摄')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4"/><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4"/></svg></div><span>拍摄</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('文件')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19"/></svg></div><span>文件</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('位置')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><span>位置</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('文档')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><polyline points="14 2 14 8 20 8"/></svg></div><span>文档</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('待办')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5"/></svg></div><span>待办</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('会议')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg></div><span>会议</span></div>
+          <div class="h5-plus-item" onclick="openPlusFeature('妙记')"><div class="h5-plus-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><span>妙记</span></div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <div class="chat-toolbar-row">
+          <button aria-label="表情"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
+          <button aria-label="附件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83"/></svg></button>
+          <button aria-label="图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></button>
+          <button aria-label="拍摄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="4"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42"/></svg></button>
+        </div>
+        <div class="chat-input-row">
+          <button class="chat-input-icon" id="h5PlusBtn" aria-label="更多功能">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <textarea placeholder="输入消息..." rows="1" id="h5ChatInput"></textarea>
+          <button class="chat-send-btn">发</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PAGE 3: WORKBENCH ===== -->
+  <div class="page" id="pg-wb"><div class="wb-page">
+    <div class="wb-header"><div class="wb-header-row"><div class="wb-avatar">我</div><div><div class="wb-user-name">架构师</div><div class="wb-user-dept">产品设计部 · 产品经理</div></div></div></div>
+    <div class="wb-quick-actions">
+      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span>日志</span></div>
+      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>考勤</span></div>
+      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>审批</span></div>
+      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span>待办</span></div>
+    </div>
+    <div class="wb-section"><div class="wb-section-title">常用应用</div>
+      <div class="wb-apps-grid">
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);font-size:12px;font-weight:700;">日志</div><span>日志</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-success-light);color:var(--dt-success);">考勤</div><span>考勤打卡</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">审批</div><span>审批</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-purple-light);color:var(--dt-purple);">待办</div><span>待办</span></div>
+        <div class="wb-app-item wb-badge-dot" data-badge="2"><div class="wb-app-icon" style="background:var(--dt-danger-light);color:var(--dt-av-pink);">邮件</div><span>邮箱</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">日历</div><span>日历</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);font-size:11px;">文档</div><span>文档</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-bg-body);color:var(--dt-text-tertiary);">会议</div><span>视频会议</span></div>
+      </div>
+    </div>
+    <div class="wb-section"><div class="wb-section-title">最近使用</div>
+      <div class="wb-card">
+        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>日常审批<span class="wb-card-arrow">›</span></div>
+        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><polyline points="14 2 14 8 20 8"/></svg>团队日志<span class="wb-card-arrow">›</span></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- ===== PAGE 4: DING ===== -->
+  <div class="page" id="pg-ding"><div class="ding-page">
+    <div class="ding-header"><div class="msg-page-header" style="padding:0;border:none"><span class="hdr-title">DING</span><button class="hdr-btn" aria-label="新建 DING"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+      <div class="ding-tabs"><div class="ding-tab active">收到的</div><div class="ding-tab">发出的</div></div></div>
+    <div class="ding-list">
+      <div class="ding-item"><div class="ding-item-title">今天下午 3 点需求评审，请准时参加！</div><div class="ding-item-meta"><span>张三</span><span>14:30</span><span class="ding-status ding-status-done">已确认</span></div></div>
+      <div class="ding-item"><div class="ding-item-title">代码提测前必须完成自测</div><div class="ding-item-meta"><span>李四</span><span>昨天</span><span class="ding-status ding-status-pending">待确认</span></div></div>
+      <div class="ding-item"><div class="ding-item-title">周报提交提醒</div><div class="ding-item-meta"><span>赵六</span><span>周一</span><span class="ding-status ding-status-done">已确认</span></div></div>
+    </div>
+  </div></div>
+
+  <!-- ===== PAGE 5: CONTACTS ===== -->
+  <div class="page" id="pg-contact"><div class="contact-page">
+    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索联系人</div></div>
+    <div class="contact-section"><div class="contact-section-title">功能入口</div><div class="wb-card">
+      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-brand);">新</div><div class="ci-info"><div class="ci-name">新的好友</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-success);">我</div><div class="ci-info"><div class="ci-name">我的群组</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-warning);">通</div><div class="ci-info"><div class="ci-name">通讯录</div><div class="ci-desc">32 位联系人</div></div><div class="ci-arrow">›</div></div>
+    </div></div>
+    <div class="contact-section"><div class="contact-section-title">组织架构 · 产品设计部</div>
+      <div class="wb-card">
+      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-purple);">张</div><div class="ci-info"><div class="ci-name">张三</div><div class="ci-desc">产品经理</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-success);">李</div><div class="ci-info"><div class="ci-name">李四</div><div class="ci-desc">UI 设计师</div></div><div class="ci-arrow">›</div></div>
+      </div>
+    </div>
+  </div></div>
+
+  <!-- ===== PAGE 6: MY ===== -->
+  <div class="page" id="pg-my"><div class="my-page">
+    <div class="my-header"><div class="my-avatar">我</div><div><div class="my-name">架构师</div><div class="my-account">architect@xinfei.com</div><div class="my-vip-badge"><svg class="ic"><use href="#i-star"/></svg> 高级版</div></div></div>
+    <div class="my-list-section"><div class="my-card">
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="my-item-text">个人资料</span><span class="my-item-arrow">›</span></div>
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="my-item-text">账号与安全</span><span class="my-item-arrow">›</span></div>
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="my-item-text">消息通知</span><span class="my-item-value">已开启</span><span class="my-item-arrow">›</span></div>
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg><span class="my-item-text">主题与外观</span><span class="my-item-value">品牌蓝</span><span class="my-item-arrow">›</span></div>
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1"/></svg><span class="my-item-text">通用设置</span><span class="my-item-arrow">›</span></div>
+    </div></div>
+    <div class="my-list-section"><div class="my-card">
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="my-item-text">帮助与反馈</span><span class="my-item-arrow">›</span></div>
+      <div class="my-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg><span class="my-item-text">关于 心飞IM</span><span class="my-item-value">v8.2.0</span><span class="my-item-arrow">›</span></div>
+    </div></div>
+    <div class="my-logout"><button class="my-logout-btn">退出登录</button></div>
+    <div class="my-version">© 2026 心飞科技有限公司</div>
+  </div></div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <div class="tab-item active" onclick="switchTab('msg')"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>消息</span><div class="tab-badge">9</div></div>
+    <div class="tab-item" onclick="switchTab('wb')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>工作台</span></div>
+    <div class="tab-item tab-center" onclick="switchTab('ding')"><div class="tab-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>DING</span></div>
+    <div class="tab-item" onclick="switchTab('contact')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>通讯录</span></div>
+    <div class="tab-item" onclick="switchTab('my')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></div>
+  </div>
+
+  <div class="h5-backdrop" id="h5Backdrop" onclick="document.getElementById('h5-plus-panel').classList.remove('show');this.classList.remove('show')"></div>
+
+</div>
+
+<script>
+function switchTab(t){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById({msg:'pg-msg',wb:'pg-wb',ding:'pg-ding',contact:'pg-contact',my:'pg-my'}[t]).classList.add('active');
+  var idx={msg:0,wb:1,ding:2,contact:3,my:4}[t];
+  document.querySelectorAll('.tab-item')[idx].classList.add('active');
+  document.querySelector('.tab-bar').style.display='flex';
+}
+function h5ClosePlus(){
+  var p=document.getElementById('h5-plus-panel'),b=document.getElementById('h5Backdrop');
+  if(p)p.classList.remove('show');if(b)b.classList.remove('show');
+}
+function openChat(i){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-chat').classList.add('active');
+  document.querySelector('.tab-bar').style.display='none';
+  var titles=['产品需求评审群','李四','技术架构组'];
+  if(titles[i])document.getElementById('chatTitle').textContent=titles[i];
+  // 私聊（李四）隐藏发送者昵称；群聊恢复显示
+  var list=document.querySelector('.chat-msg-list');
+  if(list)list.classList.toggle('p2p',i===1);
+  h5ClosePlus();
+}
+function closeChat(){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-msg').classList.add('active');
+  document.querySelector('.tab-bar').style.display='flex';
+  h5ClosePlus();
+}
+// Filter tabs
+document.querySelectorAll('.filter-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+// DING tabs
+document.querySelectorAll('.ding-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.ding-tab').forEach(t=>t.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+// + button panel toggle
+var h5PlusBtn=document.getElementById('h5PlusBtn');
+if(h5PlusBtn){h5PlusBtn.addEventListener('click',function(){
+  var p=document.getElementById('h5-plus-panel');var b=document.getElementById('h5Backdrop');
+  p.classList.toggle('show');b.classList.toggle('show');
+});}
+// 输入框：聚焦收起「+」面板；随内容自动增高（上限 80px，与 CSS max-height 一致）
+var h5ChatInput=document.getElementById('h5ChatInput');
+function h5AutoGrow(){
+  if(!h5ChatInput)return;
+  h5ChatInput.style.height='auto';
+  h5ChatInput.style.height=Math.min(h5ChatInput.scrollHeight,80)+'px';
+}
+if(h5ChatInput){h5ChatInput.addEventListener('focus',function(){h5ClosePlus();});}
+
+// ===== 发送消息：点击「发」或 Enter 追加一条自己的气泡 =====
+function h5Now(){
+  var d=new Date();
+  return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+}
+function h5UpdateSendBtn(){
+  var b=document.querySelector('.chat-send-btn');
+  if(b&&h5ChatInput)b.disabled=!h5ChatInput.value.trim();
+}
+function h5SendMsg(){
+  var text=h5ChatInput.value.trim();
+  if(!text)return;
+  var list=document.querySelector('.chat-msg-list');
+  if(!list)return;
+  var wrap=document.createElement('div');
+  wrap.className='chat-msg-wrap self msg-appear';
+  wrap.innerHTML='<div class="chat-msg-avatar" style="background:var(--dt-brand);">我</div>'
+    +'<div class="chat-msg-body"><div class="chat-msg-bubble"></div>'
+    +'<div class="chat-msg-meta"><span>'+h5Now()+'</span><span class="read-status">✓ 已读 1/8</span></div></div>';
+  // 与上一条同为「我」发的 → 合并为连续消息（隐藏头像）
+  var prev=list.lastElementChild;
+  if(prev&&prev.classList.contains('self'))wrap.classList.add('follow');
+  wrap.querySelector('.chat-msg-bubble').textContent=text;   // 用 textContent 赋值，避免 HTML 注入
+  list.appendChild(wrap);
+  h5ChatInput.value='';
+  h5UpdateSendBtn();
+  h5AutoGrow();
+  list.scrollTop=list.scrollHeight;
+}
+var h5SendBtn=document.querySelector('.chat-send-btn');
+if(h5SendBtn)h5SendBtn.addEventListener('click',h5SendMsg);
+if(h5ChatInput){
+  h5ChatInput.addEventListener('input',function(){h5UpdateSendBtn();h5AutoGrow();});
+  h5ChatInput.addEventListener('keydown',function(e){
+    if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();h5SendMsg();}
+  });
+  h5UpdateSendBtn();
+}
+// Plus feature handler
+function openPlusFeature(name){
+  document.getElementById('h5-plus-panel').classList.remove('show');
+  document.getElementById('h5Backdrop').classList.remove('show');
+  var t=document.getElementById('h5Toast');
+  if(!t){document.querySelector('.phone-shell').insertAdjacentHTML('beforeend','<div id="h5Toast" class="h5-toast"></div>');t=document.getElementById('h5Toast');}
+  t.textContent=name+' 功能已打开（演示）';t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show')},1500);
+}
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

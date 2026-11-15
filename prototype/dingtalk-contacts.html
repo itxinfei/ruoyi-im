@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>心飞IM · 通讯录</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;height:100vh;overflow:hidden}
+/* L2 */
+.l2-tab-bar{display:flex;border-bottom:0.5px solid var(--dt-border);background:var(--dt-bg-card)}
+.l2-tab{flex:1;padding:11px 0;text-align:center;font-size:13px;cursor:pointer;color:var(--dt-text-tertiary);font-weight:500;position:relative}
+.l2-tab.active{color:var(--dt-brand)}
+.l2-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:20px;height:2px;background:var(--dt-brand);border-radius:1px}
+.l2-tab .badge{display:inline-block;min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:var(--dt-radius-lg);font-size:11px;padding:0 4px;margin-left:4px;vertical-align:middle;line-height:16px}
+/* Tab content wrapper */
+.l2-tab-content{display:none;flex:1;overflow-y:auto;min-height:0;flex-direction:column}
+.l2-tab-content.active{display:flex}
+/* Org tree */
+.t-node{display:flex;align-items:center;gap:8px;padding:8px 16px;cursor:pointer;font-size:13px;border-radius:var(--dt-radius-sm);margin:0 8px}
+.t-node:hover{background:var(--dt-bg-body)}
+.t-arrow{width:16px;display:flex;align-items:center;justify-content:center;color:var(--dt-text-tertiary);transition:transform 0.15s;flex-shrink:0}
+.t-node.open .t-arrow{transform:rotate(90deg)}
+.t-icon{width:20px;height:20px;background:var(--dt-brand-light);border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;color:var(--dt-brand);flex-shrink:0}
+.t-children{display:none;padding-left:24px}
+.t-node.open+.t-children{display:block}
+/* Avatar node */
+.a-node{display:flex;align-items:center;gap:12px;padding:8px 16px;cursor:pointer;border-radius:var(--dt-radius-md);margin:0 8px}
+.a-node:hover{background:var(--dt-bg-body)}
+.a-node .a-av{width:32px;height:32px;border-radius:var(--dt-radius-md);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:13px;font-weight:600;flex-shrink:0}
+.a-node .a-name{font-size:13px;font-weight:500}
+.a-node .a-pos{font-size:11px;color:var(--dt-text-tertiary)}
+/* Group node */
+.g-node{display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;border-radius:var(--dt-radius-md)}
+.g-node:hover{background:var(--dt-bg-body)}
+.g-av{width:36px;height:36px;border-radius:var(--dt-radius-lg);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:14px;font-weight:600}
+.g-name{font-size:13px;font-weight:500;display:flex;align-items:center;gap:4px}
+.g-badge{min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:var(--dt-radius-lg);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.g-desc{font-size:11px;color:var(--dt-text-tertiary);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* L3 */
+.l3-detail{flex:1;display:flex;flex-direction:column;align-items:center;padding:40px}
+.l3-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--dt-text-quaternary)}
+.cd-av{width:80px;height:80px;border-radius:var(--dt-radius-xl);margin-bottom:16px;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:32px;font-weight:600}
+.cd-name{font-size:20px;font-weight:500;margin-bottom:4px}
+.cd-pos{font-size:13px;color:var(--dt-text-tertiary);margin-bottom:24px}
+.cd-row{display:flex;padding:12px 24px;border-bottom:0.5px solid var(--dt-bg-body)}
+.cd-label{width:80px;font-size:13px;color:var(--dt-text-tertiary);flex-shrink:0}
+.cd-val{flex:1;font-size:13px}
+.cd-btns{display:flex;gap:12px;margin-top:24px}
+.cd-btns button{border-radius:var(--dt-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.cd-msg{background:var(--dt-brand);color:var(--dt-bg-card);border:none;padding:8px 24px}
+.cd-call{background:var(--dt-bg-card);color:var(--dt-brand);border:0.5px solid var(--dt-brand);padding:8px 16px}
+.cd-more{background:var(--dt-bg-body);color:var(--dt-text-regular);border:none;width:36px;height:36px;display:flex;align-items:center;justify-content:center;padding:0;border-radius:var(--dt-radius-md)}
+.cd-more:hover{background:var(--dt-border)}
+.cd-more-menu{display:none;position:absolute;right:0;top:100%;margin-top:4px;width:180px;background:var(--dt-bg-card);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);z-index:60;padding:4px}
+.cd-more-menu.show{display:block}
+.mm-item{display:flex;align-items:center;gap:8px;padding:12px 16px;font-size:13px;cursor:pointer;border-radius:var(--dt-radius-sm);color:var(--dt-text-primary)}
+.mm-item:hover{background:var(--dt-bg-body)}
+.mm-item svg{width:14px;height:14px;color:var(--dt-text-secondary)}
+.mm-divider{height:0.5px;background:var(--dt-border);margin:4px 0}
+/* Toast */
+.ct-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:13px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.ct-toast.show{opacity:1}
+/* Overlay */
+.ct-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:100;align-items:center;justify-content:center}
+.ct-overlay.show{display:flex}
+.ct-card{width:340px;background:var(--dt-bg-card);border-radius:var(--dt-radius-2xl);overflow:hidden;}
+.ct-card-hdr{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border);font-size:15px;font-weight:600;color:var(--dt-text-primary)}
+.ct-card-hdr.profile{padding:24px 24px 16px;text-align:center;color:var(--dt-bg-card);background:var(--dt-brand)}
+.ct-card-av{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.3);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600}
+.ct-card-body{padding:12px 24px}
+.ct-info-row{display:flex;padding:8px 0;font-size:13px;border-bottom:0.5px solid var(--dt-bg-body)}
+.ct-info-row .lbl{width:60px;color:var(--dt-text-tertiary)}
+.ct-card-actions{display:flex;border-top:0.5px solid var(--dt-border)}
+.ct-card-actions button{flex:1;padding:12px;border:none;background:transparent;font-size:13px;color:var(--dt-brand);cursor:pointer;font-weight:500}
+.ct-card-actions button:active{background:var(--dt-brand-light)}
+.ct-card-actions button:last-child{border-left:0.5px solid var(--dt-border);color:var(--dt-text-regular)}
+.panel-close{width:26px;height:26px;border:none;background:transparent;color:var(--dt-text-tertiary);font-size:14px;cursor:pointer;border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.panel-close:hover{background:var(--dt-bg-body);color:var(--dt-text-regular)}
+</style>
+</head>
+<body>
+
+<!-- Electron 原生标题栏 -->
+<div class="electron-titlebar" style="height:36px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none">
+  <div style="font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>心飞IM</span>
+  </div>
+  <div style="display:flex;gap:0;-webkit-app-region:no-drag;height:100%">
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.minimize()">─</button>
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.maximize()">□</button>
+    <button aria-label="关闭窗口" style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary);transition:background 0.15s" onmouseover="this.style.background='var(--dt-danger)';this.style.color='var(--dt-bg-card)'" onmouseout="this.style.background='transparent';this.style.color='var(--dt-text-secondary)'" onclick="window.electronAPI?.close()">✕</button>
+  </div>
+</div>
+<script>
+if(window.isElectron||window.electronAPI){
+  document.body.classList.add('electron');
+  document.body.style.padding='0';
+}
+</script><style>.electron-titlebar{display:none}body.electron{flex-direction:column}body.electron .electron-titlebar{display:flex;flex:none;width:100%}</style>
+
+<!-- L1 nav -->
+<nav class="l1-nav">
+  <div class="l1-avatar" onclick="location.href='index.html'">我</div>
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="消息" aria-label="消息">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>消息</span>
+    <div class="l1-badge">24</div>
+  </div>
+  <div class="l1-item active" onclick="location.href='dingtalk-contacts.html'" title="通讯录" aria-label="通讯录">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>通讯录</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-calendar.html'" title="日历" aria-label="日历">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>日历</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-docs.html'" title="文档" aria-label="文档">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>文档</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-workbench.html'" title="工作台" aria-label="工作台">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>工作台</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-approval.html'" title="审批" aria-label="审批">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>审批</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-mail.html'" title="邮箱" aria-label="邮箱">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <span>邮箱</span>
+  </div>
+
+  <div class="l1-bottom">
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="搜索" aria-label="搜索">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>搜索</span>
+    </div>
+    <div class="l1-item" onclick="location.href='dingtalk-admin.html'" title="设置" aria-label="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
+      <span>设置</span>
+    </div>
+  </div>
+</nav>
+
+<!-- L2 panel -->
+<div style="width:var(--dt-l2-width);display:flex;flex-direction:column;background:var(--dt-bg-card);border-right:0.5px solid var(--dt-border);flex-shrink:0">
+  <div class="l2-tab-bar">
+    <div class="l2-tab active" data-tab="org">组织架构</div>
+    <div class="l2-tab" data-tab="friend">好友<span class="badge">2</span></div>
+    <div class="l2-tab" data-tab="group">群组</div>
+  </div>
+  <div style="padding:8px 12px;border-bottom:0.5px solid var(--dt-bg-body)">
+    <input type="text" id="ctSearch" placeholder="搜索" style="width:100%;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);background:var(--dt-bg-body);padding:0 12px;font-size:13px;outline:none;font-family:var(--dt-font);box-sizing:border-box">
+  </div>
+  <div style="padding:6px 12px;display:flex;flex-direction:column;gap:2px;border-bottom:0.5px solid var(--dt-bg-body)">
+    <div onclick="document.getElementById('reqOverlay').classList.add('show')" style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:var(--dt-radius-md);cursor:pointer" onmouseover="this.style.background='var(--dt-bg-body)'" onmouseout="this.style.background=''">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-warning);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:13px;font-weight:600">新</div>
+      <div style="flex:1"><div style="font-size:13px">新的好友</div><div style="font-size:11px;color:var(--dt-text-tertiary)">2个待处理申请</div></div>
+      <div style="min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:var(--dt-radius-lg);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px">2</div>
+    </div>
+    <div onclick="document.querySelectorAll('.l2-tab')[2].click()" style="display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:var(--dt-radius-md);cursor:pointer" onmouseover="this.style.background='var(--dt-bg-body)'" onmouseout="this.style.background=''">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--dt-success);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:13px;font-weight:600">群</div>
+      <div style="flex:1"><div style="font-size:13px">我的群组</div><div style="font-size:11px;color:var(--dt-text-tertiary)">5个群</div></div>
+    </div>
+  </div>
+
+  <!-- 组织架构 -->
+  <div class="l2-tab-content active" id="orgTab">
+    <div class="t-node open" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg></div><span>XinFei 技术有限公司 (32人)</span></div>
+    <div class="t-children" style="display:block">
+      <div class="t-node open" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/></svg></div><span>产品研发中心 (18人)</span></div>
+      <div class="t-children" style="display:block">
+        <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><polyline points="16 18 22 12 16 8"/><polyline points="8 8 2 12 8 16"/></svg></div><span>前端组 (6人)</span></div>
+        <div class="t-children">
+          <div class="a-node" onclick="showContact('我','前端负责人','产品研发中心 / 前端组','EMP0001','me@xinfei.com','var(--dt-brand)')"><div class="a-av" style="background:var(--dt-brand)">我</div><div><div class="a-name">我</div><div class="a-pos">前端负责人</div></div></div>
+          <div class="a-node" onclick="showContact('李四','前端工程师','产品研发中心 / 前端组','EMP0042','lisi@xinfei.com','var(--dt-av-teal)')"><div class="a-av" style="background:var(--dt-av-teal)">李</div><div><div class="a-name">李四</div><div class="a-pos">前端工程师</div></div></div>
+          <div class="a-node" onclick="showContact('王五','前端工程师','产品研发中心 / 前端组','EMP0088','wangwu@xinfei.com','var(--dt-warning)')"><div class="a-av" style="background:var(--dt-warning)">王</div><div><div class="a-name">王五</div><div class="a-pos">前端工程师</div></div></div>
+        </div>
+        <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><span>后端组 (5人)</span></div>
+        <div class="t-children">
+          <div class="a-node" onclick="showContact('赵六','后端工程师','产品研发中心 / 后端组','EMP0065','zhaoliu@xinfei.com','var(--dt-av-pink)')"><div class="a-av" style="background:var(--dt-av-pink)">赵</div><div><div class="a-name">赵六</div><div class="a-pos">后端工程师</div></div></div>
+          <div class="a-node" onclick="showContact('钱七','后端工程师','产品研发中心 / 后端组','EMP0071','qianqi@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">钱</div><div><div class="a-name">钱七</div><div class="a-pos">后端工程师</div></div></div>
+        </div>
+        <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span>测试组 (3人)</span></div>
+        <div class="t-children">
+          <div class="a-node" onclick="showContact('吴十','测试工程师','产品研发中心 / 测试组','EMP0078','wushi@xinfei.com','var(--dt-av-cyan)')"><div class="a-av" style="background:var(--dt-av-cyan)">吴</div><div><div class="a-name">吴十</div><div class="a-pos">测试工程师</div></div></div>
+        </div>
+      </div>
+      <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span>运营中心 (8人)</span></div>
+      <div class="t-children">
+        <div class="a-node" onclick="showContact('运营-小明','运营专员','运营中心','EMP0045','xiaoming@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">小</div><div><div class="a-name">小明</div><div class="a-pos">运营专员</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 好友 -->
+  <div class="l2-tab-content" id="friendTab">
+    <div class="a-node" onclick="showContact('白雨萌','产品经理','产品部','EMP0033','baimm@xinfei.com','var(--dt-av-pink)')"><div class="a-av" style="background:var(--dt-av-pink)">白</div><div><div class="a-name">白雨萌</div><div class="a-pos">产品经理 · 在线</div></div></div>
+    <div class="a-node" onclick="showContact('艾伦','数据分析师','产品研发中心','EMP0102','aillen@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">艾</div><div><div class="a-name">艾伦</div><div class="a-pos">数据分析师 · 不在线</div></div></div>
+    <div class="a-node" onclick="showContact('陈七','前端工程师','产品研发中心 / 前端组','EMP0056','chenqi@xinfei.com','var(--dt-av-cyan)')"><div class="a-av" style="background:var(--dt-av-cyan)">陈</div><div><div class="a-name">陈七</div><div class="a-pos">前端工程师 · 在线</div></div></div>
+    <div class="a-node" onclick="showContact('刘九','测试工程师','产品研发中心 / 测试组','EMP0079','liu9@xinfei.com','var(--dt-warning)')"><div class="a-av" style="background:var(--dt-warning)">刘</div><div><div class="a-name">刘九</div><div class="a-pos">测试工程师 · 在线</div></div></div>
+  </div>
+
+  <!-- 群组 -->
+  <div class="l2-tab-content" id="groupTab">
+    <div class="g-node" onclick="showToast('进入 产品需求评审群（演示）')"><div class="g-av" style="background:var(--dt-av-blue)">产</div><div><div class="g-name">产品需求评审群<span class="g-badge">3</span></div><div class="g-desc">8人 · 张三: 交互稿已更新</div></div></div>
+    <div class="g-node" onclick="showToast('进入 技术架构组（演示）')"><div class="g-av" style="background:var(--dt-success)">技</div><div><div class="g-name">技术架构组<span class="g-badge">12</span></div><div class="g-desc">12人 · 部署架构图</div></div></div>
+    <div class="g-node" onclick="showToast('进入 前端开发小组（演示）')"><div class="g-av" style="background:var(--dt-av-cyan)">前</div><div><div class="g-name">前端开发小组<span class="g-badge">5</span></div><div class="g-desc">6人 · 待办 iOS 兼容性</div></div></div>
+    <div class="g-node" onclick="showToast('进入 产品设计部（演示）')"><div class="g-av" style="background:var(--dt-purple)">产</div><div><div class="g-name">产品设计部</div><div class="g-desc">5人 · 上周消息</div></div></div>
+  </div>
+</div>
+
+<!-- L3 心飞式联系人详情 -->
+<div style="flex:1;display:flex;background:var(--dt-bg-card)">
+  <div class="l3-empty" id="l3Empty">
+    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-quaternary)" stroke-width="1"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/></svg>
+    <div style="font-size:13px;color:var(--dt-text-quaternary);margin-top:12px">选择一个联系人查看详情</div>
+  </div>
+  <div class="l3-detail" id="l3Detail" style="display:none">
+    <div style="text-align:center;padding:32px 24px 16px">
+      <div style="position:relative;width:80px;height:80px;margin:0 auto 12px">
+        <div class="cd-av" id="cdAvatar">李</div>
+        <div id="cdOnline" style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;background:var(--dt-success);border:2px solid var(--dt-bg-card);border-radius:50%;display:none"></div>
+      </div>
+      <div class="cd-name" id="cdName">李四</div>
+      <div class="cd-pos" id="cdPos">前端工程师 · 产品研发中心</div>
+    </div>
+    <div class="cd-btns" style="position:relative">
+      <button class="cd-msg" onclick="showToast('打开会话（演示）')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--dt-bg-card)" stroke-width="2" style="margin-right:4px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>发消息</button>
+      <button class="cd-call" onclick="showToast('发起语音通话（演示）')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2" style="margin-right:4px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A2 2 0 0 1 4.11 2h3"/></svg>语音通话</button>
+      <button class="cd-more" aria-label="更多操作" onclick="event.stopPropagation();document.getElementById('mmMore').classList.toggle('show')" style="background:var(--dt-bg-body);border:none;width:36px;height:36px;border-radius:var(--dt-radius-md);display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="4" height="16" viewBox="0 0 4 16" fill="var(--dt-text-regular)"><circle cx="2" cy="3" r="1.5"/><circle cx="2" cy="8" r="1.5"/><circle cx="2" cy="13" r="1.5"/></svg></button>
+      <div class="cd-more-menu" id="mmMore" onclick="event.stopPropagation()">
+        <div class="mm-item" onclick="showToast('转发名片（演示）');document.getElementById('mmMore').classList.remove('show')"><svg viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13" stroke="currentColor" stroke-width="2" fill="none"/></svg>转发名片</div>
+        <div class="mm-item" onclick="showToast('推荐给好友（演示）');document.getElementById('mmMore').classList.remove('show')"><svg viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M12 2L2 7l10 5 10-5-10-5z" stroke="currentColor" stroke-width="2" fill="none"/><path d="M2 17l10 5 10-5" stroke="currentColor" stroke-width="2" fill="none"/></svg>推荐给好友</div>
+        <div class="mm-item" onclick="showToast('设置备注名（演示）');document.getElementById('mmMore').classList.remove('show')"><svg viewBox="0 0 24 24" style="width:14px;height:14px"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" fill="none"/></svg>设置备注</div>
+        <div style="height:0.5px;background:var(--dt-border);margin:4px 0"></div>
+        <div class="mm-item" onclick="showToast('加入黑名单（演示）');document.getElementById('mmMore').classList.remove('show')" style="color:var(--dt-danger)"><svg viewBox="0 0 24 24" style="width:14px;height:14px"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" stroke-width="2"/></svg>加入黑名单</div>
+      </div>
+    </div>
+    <div class="cd-info">
+      <div class="cd-row"><span class="cd-label">工号</span><span class="cd-val" id="cdEmp">EMP0042</span></div>
+      <div class="cd-row"><span class="cd-label">部门</span><span class="cd-val" id="cdDeptVal">产品研发中心 / 前端组</span></div>
+      <div class="cd-row"><span class="cd-label">手机</span><span class="cd-val">138****5678</span></div>
+      <div class="cd-row"><span class="cd-label">邮箱</span><span class="cd-val" id="cdEmail">lisi@xinfei.com</span></div>
+      <div class="cd-row"><span class="cd-label">工位</span><span class="cd-val">3F-B-042</span></div>
+      <div class="cd-row"><span class="cd-label">汇报给</span><span class="cd-val">张三（产品总监）</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 好友请求弹窗 -->
+<div class="ct-overlay" id="reqOverlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="ct-card" onclick="event.stopPropagation()">
+    <div class="ct-card-hdr"><div class="ct-card-body">好友请求 (2)</div><button aria-label="关闭好友请求" onclick="document.getElementById('reqOverlay').classList.remove('show')" class="panel-close">✕</button></div>
+    <div style="padding:16px">
+      <div data-req-card="true" style="display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);margin-bottom:8px">
+        <div style="width:40px;height:40px;border-radius:var(--dt-radius-md);background:var(--dt-av-pink);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600">赵</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500">赵六</div><div style="font-size:12px;color:var(--dt-text-tertiary)">后端组 · 后端工程师 · 你好，我是后端组的赵六</div></div>
+        <div style="display:flex;gap:6px"><button style="height:32px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.innerHTML='<div style=\'padding:24px;text-align:center;color:var(--dt-success);font-size:13px\'>✓ 已通过</div>'">通过</button><button style="height:30px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);color:var(--dt-text-regular);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.remove()">拒绝</button></div>
+      </div>
+      <div data-req-card="true" style="display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg)">
+        <div style="width:40px;height:40px;border-radius:var(--dt-radius-md);background:var(--dt-purple);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600">钱</div>
+        <div style="flex:1"><div style="font-size:14px;font-weight:500">钱七</div><div style="font-size:12px;color:var(--dt-text-tertiary)">后端组 · 后端工程师 · Hi，我是后端组的钱七</div></div>
+        <div style="display:flex;gap:6px"><button style="height:32px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.innerHTML='<div style=\'padding:24px;text-align:center;color:var(--dt-success);font-size:13px\'>✓ 已通过</div>'">通过</button><button style="height:30px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);color:var(--dt-text-regular);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.remove()">拒绝</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 个人名片弹窗 -->
+<div class="ct-overlay" id="contactOverlay" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="ct-card" onclick="event.stopPropagation()">
+    <div class="ct-card-hdr profile" id="cpHeader">
+      <div class="ct-card-av" id="cpAvatar">张</div>
+      <div style="font-size:17px;font-weight:600" id="cpName">张三</div>
+      <div style="font-size:12px;opacity:0.85;margin-top:3px" id="cpRole">产品经理</div>
+    </div>
+    <div class="ct-card-body">
+      <div class="ct-info-row"><span class="lbl">部门</span><span id="cpDept">产品设计部</span></div>
+      <div class="ct-info-row"><span class="lbl">工号</span><span id="cpId">RY0001</span></div>
+      <div class="ct-info-row"><span class="lbl">邮箱</span><span id="cpEmail">zhangsan@xinfei.com</span></div>
+    </div>
+    <div class="ct-card-actions"><button onclick="document.getElementById('contactOverlay').classList.remove('show')">发消息</button><button onclick="document.getElementById('contactOverlay').classList.remove('show')">关闭</button></div>
+  </div>
+</div>
+<div class="ct-toast" id="ctToast"></div>
+
+<script>
+function toggleOrg(el){
+  el.classList.toggle('open');
+}
+function showContact(name,role,dept,id,email,color){
+  // 仅显示 L3 详情（不弹名片弹窗）
+  var e=document.getElementById('l3Empty');if(e)e.style.display='none';
+  var d=document.getElementById('l3Detail');if(d)d.style.display='flex';
+  var av=document.getElementById('cdAvatar');if(av){av.textContent=name.charAt(0);av.style.background=color;}
+  var n=document.getElementById('cdName');if(n)n.textContent=name;
+  var p=document.getElementById('cdPos');if(p)p.textContent=role+' · '+dept;
+  var emp=document.getElementById('cdEmp');if(emp)emp.textContent=id;
+  var deptVal=document.getElementById('cdDeptVal');if(deptVal)deptVal.textContent=dept;
+  var em=document.getElementById('cdEmail');if(em)em.textContent=email;
+  var online=document.getElementById('cdOnline');
+  if(online){online.style.display=(name!=='艾伦'&&name!=='郑十一')?'block':'none';}
+}
+function showToast(msg){var t=document.getElementById('ctToast');if(t){t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);}}
+// Close more menu when clicking outside
+document.addEventListener('click',function(){var mm=document.getElementById('mmMore');if(mm)mm.classList.remove('show');});
+// Tabs
+document.querySelectorAll('.l2-tab').forEach(function(tab,i){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.l2-tab').forEach(function(t){t.classList.remove('active');});
+    this.classList.add('active');
+    var tabs=['orgTab','friendTab','groupTab'];
+    document.querySelectorAll('.l2-tab-content').forEach(function(c){c.classList.remove('active');});
+    var el=document.getElementById(tabs[i]);
+    if(el)el.classList.add('active');
+  });
+});
+// Search - filter all node types
+document.getElementById('ctSearch').addEventListener('input',function(){
+  var kw=this.value.trim().toLowerCase();
+  document.querySelectorAll('.a-node').forEach(function(node){
+    var name=node.querySelector('.a-name');
+    if(name){node.style.display=(!kw||name.textContent.toLowerCase().includes(kw))?'flex':'none';}
+  });
+  document.querySelectorAll('.t-node').forEach(function(node){
+    var span=node.querySelector('span:last-child');
+    if(span){node.style.display=(!kw||span.textContent.toLowerCase().includes(kw))?'flex':'none';}
+  });
+  document.querySelectorAll('.g-node').forEach(function(node){
+    var name=node.querySelector('.g-name');
+    if(name){node.style.display=(!kw||name.textContent.toLowerCase().includes(kw))?'flex':'none';}
+  });
+});
+</script>
+
+<!-- 全局搜索弹窗 -->
+<div class="search-modal-overlay" id="searchModalOverlay" onclick="closeSearchModal()">
+  <div class="search-modal" onclick="event.stopPropagation()">
+    <div class="search-modal-header">
+      <input type="text" id="searchModalInput" class="search-modal-input" placeholder="搜索联系人、群组、文件、消息..." autofocus>
+    </div>
+    <div class="search-modal-tabs">
+      <div class="search-modal-tab active" data-tab="all">全部</div>
+      <div class="search-modal-tab" data-tab="contacts">联系人</div>
+      <div class="search-modal-tab" data-tab="groups">群组</div>
+      <div class="search-modal-tab" data-tab="messages">消息</div>
+      <div class="search-modal-tab" data-tab="files">文件</div>
+    </div>
+    <div class="search-modal-body" id="searchModalBody">
+      <div class="search-modal-section" data-tab="contacts">
+        <div class="search-modal-section-title">联系人</div>
+        <div class="search-modal-card" onclick="showToast('打开个人名片: 张三')">
+          <div class="search-modal-avatar" style="background:var(--dt-purple)">张</div>
+          <div><div class="search-modal-card-title">张三</div><div class="search-modal-card-desc">产品部 · 产品经理</div></div>
+        </div>
+        <div class="search-modal-card" onclick="showToast('打开个人名片: 李四')">
+          <div class="search-modal-avatar" style="background:var(--dt-success)">李</div>
+          <div><div class="search-modal-card-title">李四</div><div class="search-modal-card-desc">设计部 · 设计师</div></div>
+        </div>
+      </div>
+      <div class="search-modal-section" data-tab="groups">
+        <div class="search-modal-section-title">群组</div>
+        <div class="search-modal-card" onclick="showToast('进入群聊: 产品需求评审群')">
+          <div class="search-modal-avatar" style="background:var(--dt-av-blue)">产</div>
+          <div><div class="search-modal-card-title">产品需求评审群</div><div class="search-modal-card-desc">8人 · 产品部 · 研发部</div></div>
+        </div>
+      </div>
+      <div class="search-modal-section" data-tab="messages">
+        <div class="search-modal-section-title">消息</div>
+        <div class="search-modal-card" onclick="showToast('跳转消息: 张三')">
+          <div class="search-modal-avatar" style="background:var(--dt-purple)">张</div>
+          <div><div class="search-modal-card-title">张三</div><div class="search-modal-card-desc">需求文档更新了，增加了三个核心场景...</div></div>
+        </div>
+      </div>
+      <div class="search-modal-section" data-tab="files">
+        <div class="search-modal-section-title">文件</div>
+        <div class="search-modal-card" onclick="showToast('下载: 需求文档.pdf')">
+          <div class="search-modal-avatar" style="background:var(--dt-danger)">PDF</div>
+          <div><div class="search-modal-card-title">需求文档.pdf</div><div class="search-modal-card-desc">2.3 MB · 张三</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.search-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:flex-start;justify-content:center;padding-top:80px;z-index:300}
+.search-modal-overlay.show{display:flex}
+.search-modal{width:600px;max-height:70vh;background:var(--dt-bg-card);border-radius:var(--dt-radius-2xl);display:flex;flex-direction:column;overflow:hidden;}
+.search-modal-header{padding:16px 24px;border-bottom:0.5px solid var(--dt-border)}
+.search-modal-input{width:100%;height:40px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);padding:0 16px;font-size:14px;color:var(--dt-text-primary);outline:none;box-sizing:border-box}
+.search-modal-input:focus{border-color:var(--dt-av-blue);background:var(--dt-bg-card)}
+.search-modal-tabs{display:flex;padding:0 24px;border-bottom:0.5px solid var(--dt-border)}
+.search-modal-tab{padding:12px 16px;font-size:14px;cursor:pointer;color:var(--dt-text-regular)}
+.search-modal-tab.active{color:var(--dt-av-blue);font-weight:500;border-bottom:2px solid var(--dt-av-blue);margin-bottom:-0.5px}
+.search-modal-body{flex:1;overflow-y:auto;padding:16px 24px}
+.search-modal-section{margin-bottom:24px}
+.search-modal-section-title{font-size:12px;color:var(--dt-text-tertiary);margin-bottom:8px;font-weight:500}
+.search-modal-card{display:flex;align-items:center;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);cursor:pointer;margin-bottom:8px}
+.search-modal-card:hover{background:var(--dt-bg-body)}
+.search-modal-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600;flex-shrink:0}
+.search-modal-card-title{font-size:14px;font-weight:500;color:var(--dt-text-primary)}
+.search-modal-card-desc{font-size:12px;color:var(--dt-text-tertiary);margin-top:2px}
+</style>
+
+<script>
+function openSearchModal(){
+  document.getElementById('searchModalOverlay').classList.add('show');
+  setTimeout(function(){document.getElementById('searchModalInput').focus()},100);
+}
+function closeSearchModal(){
+  document.getElementById('searchModalOverlay').classList.remove('show');
+}
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape')closeSearchModal();
+});
+// 搜索弹窗tab切换
+document.querySelectorAll('.search-modal-tab').forEach(function(tab){
+  tab.addEventListener('click',function(){
+    document.querySelectorAll('.search-modal-tab').forEach(function(t){t.classList.remove('active')});
+    this.classList.add('active');
+    var tabName=this.getAttribute('data-tab');
+    // 根据tab显示对应内容
+    document.querySelectorAll('#searchModalBody .search-modal-section').forEach(function(section){
+      if(tabName==='all'){
+        section.style.display='block';
+      } else {
+        section.style.display='none';
+        if(section.getAttribute('data-tab')===tabName){
+          section.style.display='block';
+        }
+      }
+    });
+  });
+});
+</script>
+<script src="shared.js"></script>
+</body>
+</html>

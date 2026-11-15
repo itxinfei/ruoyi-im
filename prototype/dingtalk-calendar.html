@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>心飞IM · 日历</title>
+<link rel="stylesheet" href="shared.css">
+<style>
+/* 心飞日历：左侧 = 小日历 + 日历列表；右侧 = 月/周/日视图 */
+/* L2 mini cal */
+.l2-sec{padding:12px 16px}
+.l2-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.l2-yr{font-size:12px;color:var(--dt-text-tertiary);font-weight:500}
+.th-nav{display:flex;gap:2px}
+.th-arrow{width:24px;height:24px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-tertiary);border:0.5px solid transparent}
+.th-arrow:hover{border-color:var(--dt-border);background:var(--dt-bg-hover)}
+.th-arrow svg{width:12px;height:12px}
+.mc-dow{text-align:center;font-size:11px;color:var(--dt-text-tertiary);padding:6px 0;font-weight:500}
+.mc-day{height:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;cursor:pointer;border-radius:var(--dt-radius-sm);color:var(--dt-text-primary);position:relative;transition:all 0.1s;border:1.5px solid transparent}
+.mc-day:hover{background:var(--dt-bg-body)}
+.mc-day.other-month{color:var(--dt-text-quaternary)}
+.mc-day.today{background:var(--dt-brand);color:var(--dt-bg-card);font-weight:600}
+.mc-day.selected:not(.today){border-color:var(--dt-brand);color:var(--dt-brand);font-weight:600;background:var(--dt-brand-light)}
+.mc-day .ev-dot{position:absolute;bottom:1px;display:flex;gap:1px}
+.mc-day .ev-dot span{width:3px;height:3px;border-radius:50%}
+/* Calendar list */
+.cal-list-section{border-top:0.5px solid var(--dt-bg-body);padding:8px 16px;flex:1;overflow-y:auto}
+.cal-list-title{font-size:11px;color:var(--dt-text-tertiary);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.cal-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--dt-radius-sm);cursor:pointer;font-size:12px}
+.cal-item:hover{background:var(--dt-bg-hover)}
+.cal-chk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--dt-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cal-chk.on{border-color:var(--dt-brand);background:var(--dt-brand)}
+.cal-chk.on::after{content:'';width:4px;height:7px;border:solid var(--dt-bg-card);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
+.cal-color{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cal-name{flex:1;color:var(--dt-text-primary)}
+/* L3 header */
+.l3-hdr{display:flex;align-items:center;justify-content:space-between;height:var(--dt-header-height);padding:0 24px;border-bottom:0.5px solid var(--dt-bg-body);flex-shrink:0}
+.l3-left{display:flex;align-items:center;gap:12px}
+.l3-title{font-size:18px;font-weight:600}
+.l3-nav-btn{width:28px;height:28px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-regular)}
+.l3-nav-btn:hover{background:var(--dt-bg-body)}
+.l3-right{display:flex;align-items:center;gap:8px}
+.l3-view-tabs{display:flex;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);padding:2px}
+.l3-tab{padding:5px 16px;border:none;background:transparent;border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer;color:var(--dt-text-regular);font-weight:500}
+.l3-tab.active{background:var(--dt-bg-card);color:var(--dt-text-primary)}
+.l3-today{padding:5px 12px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:12px;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:4px}
+.l3-add{height:30px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:12px;cursor:pointer;font-weight:500;display:flex;align-items:center;gap:4px}
+.l3-add:hover{background:var(--dt-brand-hover)}
+/* Month grid */
+.month-wrap{flex:1;overflow-y:auto;display:flex;flex-direction:column}
+.mg-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:0.5px solid var(--dt-bg-body);flex-shrink:0}
+.mg-dow{text-align:center;font-size:12px;padding:12px 0;font-weight:500;color:var(--dt-text-tertiary)}
+.mg-grid{flex:1;display:flex;flex-direction:column}
+.mg-row{display:grid;grid-template-columns:repeat(7,1fr);flex:1}
+.mg-cell{border-right:0.5px solid var(--dt-bg-body);border-bottom:0.5px solid var(--dt-bg-body);padding:4px 6px;cursor:pointer;min-height:90px;display:flex;flex-direction:column;gap:2px;transition:background 0.1s}
+.mg-cell:hover{background:var(--dt-bg-hover)}
+.mg-cell.other{background:var(--dt-bg-hover)}
+.mg-cell.today .mg-date{background:var(--dt-brand);color:var(--dt-bg-card)}
+.mg-date{font-size:11px;padding:2px 4px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;width:20px;height:20px;font-weight:500}
+.mg-cell.other .mg-date{color:var(--dt-text-quaternary)}
+.mg-ev{font-size:11px;padding:2px 6px;border-radius:3px;color:var(--dt-bg-card);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.mg-more{font-size:11px;color:var(--dt-text-tertiary);padding:2px 6px;cursor:pointer}
+.mg-more:hover{color:var(--dt-brand)}
+/* Day view */
+.dv-wrap{flex:1;overflow-y:auto;display:none;flex-direction:column}
+.dv-hdr{display:flex;align-items:center;gap:12px;padding:16px 24px;border-bottom:0.5px solid var(--dt-bg-body)}
+.dv-date-big{font-size:48px;font-weight:300;color:var(--dt-brand);line-height:1}
+.dv-date-info{margin-left:8px}
+.dv-weekday{font-size:13px;color:var(--dt-text-tertiary)}
+.dv-day-list{flex:1;overflow-y:auto;padding:12px 24px}
+.dv-ev-card{display:flex;gap:12px;padding:12px 16px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;border-left:3px solid var(--dt-brand);cursor:pointer;transition:background 0.15s}
+.dv-ev-card:hover{background:var(--dt-brand-light)}
+.dv-ev-time{font-size:12px;color:var(--dt-text-tertiary);width:50px;flex-shrink:0;padding-top:2px}
+.dv-ev-info{flex:1}
+.dv-ev-name{font-size:13px;font-weight:500;color:var(--dt-text-primary);margin-bottom:2px}
+.dv-ev-meta{font-size:11px;color:var(--dt-text-tertiary)}
+/* Week view */
+.wv-wrap{flex:1;overflow-y:auto;display:none}
+.wv-grid{display:flex;flex-direction:column;height:100%}
+.wv-dates{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:0.5px solid var(--dt-bg-body);flex-shrink:0}
+.wv-date-cell{text-align:center;padding:12px 0}
+.wv-date-num{font-size:11px;color:var(--dt-text-tertiary)}
+.wv-day-num{font-size:16px;font-weight:500;color:var(--dt-text-primary);width:28px;height:28px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.wv-date-cell.today .wv-day-num{background:var(--dt-brand);color:var(--dt-bg-card)}
+.wv-body{flex:1;display:grid;grid-template-columns:repeat(7,1fr);overflow-y:auto}
+.wv-col{border-right:0.5px solid var(--dt-bg-body);padding:4px;display:flex;flex-direction:column;gap:2px}
+/* Modal */
+.cal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center}
+.cal-overlay.show{display:flex}
+.cal-modal{width:440px;background:var(--dt-bg-card);border-radius:var(--dt-radius-xl);overflow:hidden}
+.cal-hdr{padding:16px 24px;border-bottom:0.5px solid var(--dt-bg-body);display:flex;justify-content:space-between;align-items:center;font-size:15px;font-weight:500}
+.cal-close{width:26px;height:26px;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-tertiary);border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1}
+.cal-close:hover{background:var(--dt-bg-body);color:var(--dt-text-regular)}
+.cal-close:hover{background:var(--dt-bg-body)}
+.cal-body{padding:24px}
+.cal-field{margin-bottom:12px}
+.cal-label{font-size:12px;color:var(--dt-text-tertiary);margin-bottom:4px;font-weight:500}
+.cal-input{width:100%;height:32px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);padding:0 12px;font-size:13px;outline:none;box-sizing:border-box;font-family:var(--dt-font)}
+.cal-input:focus{border-color:var(--dt-brand)}
+.cal-row{display:flex;gap:12px}
+.cal-row .cal-field{flex:1}
+.cal-footer{padding:12px 24px;border-top:0.5px solid var(--dt-bg-body);display:flex;justify-content:flex-end;gap:8px}
+.cal-btn-cancel{height:32px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer}
+.cal-btn-save{height:32px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-md);font-size:13px;cursor:pointer;font-weight:500}
+/* Toast */
+.cal-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:13px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.cal-toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- Electron 原生标题栏 -->
+<div class="electron-titlebar" style="height:36px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none">
+  <div style="font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>心飞IM</span>
+  </div>
+  <div style="display:flex;gap:0;-webkit-app-region:no-drag;height:100%">
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.minimize()">─</button>
+    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.maximize()">□</button>
+    <button aria-label="关闭窗口" style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary);transition:background 0.15s" onmouseover="this.style.background='var(--dt-danger)';this.style.color='var(--dt-bg-card)'" onmouseout="this.style.background='transparent';this.style.color='var(--dt-text-secondary)'" onclick="window.electronAPI?.close()">✕</button>
+  </div>
+</div>
+<script>
+if(window.isElectron||window.electronAPI){
+  document.body.classList.add('electron');
+  document.body.style.padding='0';
+}
+</script><style>.electron-titlebar{display:none}body.electron{flex-direction:column}body.electron .electron-titlebar{display:flex;flex:none;width:100%}</style>
+
+<!-- L1 nav -->
+<nav class="l1-nav">
+  <div class="l1-avatar" onclick="location.href='index.html'">我</div>
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="消息" aria-label="消息">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>消息</span>
+    <div class="l1-badge">24</div>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-contacts.html'" title="通讯录" aria-label="通讯录">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    <span>通讯录</span>
+  </div>
+  <div class="l1-item active" onclick="location.href='dingtalk-calendar.html'" title="日历" aria-label="日历">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span>日历</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-docs.html'" title="文档" aria-label="文档">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    <span>文档</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-workbench.html'" title="工作台" aria-label="工作台">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    <span>工作台</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-approval.html'" title="审批" aria-label="审批">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    <span>审批</span>
+  </div>
+  <div class="l1-item" onclick="location.href='dingtalk-mail.html'" title="邮箱" aria-label="邮箱">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <span>邮箱</span>
+  </div>
+
+  <div class="l1-bottom">
+    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="搜索" aria-label="搜索">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <span>搜索</span>
+    </div>
+    <div class="l1-item" onclick="location.href='dingtalk-admin.html'" title="设置" aria-label="设置">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
+      <span>设置</span>
+    </div>
+  </div>
+</nav>
+
+<!-- L3 Main -->
+<div style="flex:1;display:flex;min-width:0;background:var(--dt-bg-card)">
+  <!-- 左边：本月日程 -->
+  <div style="flex:1;border-right:0.5px solid var(--dt-border);display:flex;flex-direction:column;background:var(--dt-bg-card);overflow-y:auto">
+    <div style="padding:16px;border-bottom:0.5px solid var(--dt-bg-body)">
+      <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary)">本月日程</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:12px">
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">产品需求评审</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月28日 10:00 · 会议室301</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-warning);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">UI终稿确认</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月28日 14:00 · 线上</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-success);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">团队周会</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月28日 16:30 · 大会议室</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">迭代计划会</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月29日 09:00 · 会议室201</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">产品评审会</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月7日 10:00 · 会议室301</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-warning);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">UI设计评审</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月14日 14:00 · 线上</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-success);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">设计走查</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月20日 09:30 · 设计部</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
+        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">迭代复盘</div>
+          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月24日 15:00 · 大会议室</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 中间：日历主区域（占一半） -->
+  <div style="flex:2;display:flex;flex-direction:column;min-width:0">
+    <div class="l3-hdr">
+      <div class="l3-left">
+        <div class="l3-title" id="l3Title">2026年10月</div>
+        <button class="l3-nav-btn" aria-label="上一月" onclick="navMonth(-1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="l3-nav-btn" aria-label="下一月" onclick="navMonth(1)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>
+      </div>
+      <div class="l3-right">
+        <button class="l3-today" onclick="goToday()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>今天</button>
+        <div class="l3-view-tabs">
+          <button class="l3-tab" data-view="day" onclick="switchView('day')">日</button>
+          <button class="l3-tab" data-view="week" onclick="switchView('week')">周</button>
+          <button class="l3-tab active" data-view="month" onclick="switchView('month')">月</button>
+        </div>
+        <button class="l3-add" onclick="document.getElementById('calOverlay').classList.add('show')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-bg-card)" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>创建日程</button>
+      </div>
+    </div>
+
+    <!-- Month view -->
+    <div class="month-wrap" id="monthView">
+      <div class="mg-weekdays" id="mgWeekdays"></div>
+      <div class="mg-grid" id="monthGrid"></div>
+    </div>
+
+    <!-- Day view -->
+    <div class="dv-wrap" id="dayView">
+      <div class="dv-hdr">
+      <div class="dv-date-big" id="dvDay">28</div>
+      <div class="dv-date-info">
+        <div style="font-size:15px;font-weight:500" id="dvWeekday">星期三</div>
+        <div class="dv-weekday" id="dvFullDate">2026年10月28日</div>
+      </div>
+    </div>
+    <div class="dv-day-list" id="dvList"></div>
+  </div>
+
+  <!-- Week view -->
+  <div class="wv-wrap" id="weekView">
+    <div class="wv-dates" id="wvDates"></div>
+    <div class="wv-body" id="wvBody"></div>
+  </div>
+  </div>
+
+  <!-- 右侧信息栏：天气预报 + 农历 -->
+  <div style="flex:1;border-left:0.5px solid var(--dt-border);display:flex;flex-direction:column;background:var(--dt-bg-card);overflow-y:auto">
+    <!-- 天气预报 -->
+    <div style="padding:16px;border-bottom:0.5px solid var(--dt-bg-body)">
+      <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary);margin-bottom:12px">天气预报</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--dt-bg-body);border-radius:var(--dt-radius-lg);margin-bottom:12px">
+        <div style="font-size:28px">☀️</div>
+        <div style="flex:1">
+          <div style="font-size:16px;color:var(--dt-text-primary);font-weight:500">今天 晴</div>
+          <div style="font-size:12px;color:var(--dt-text-tertiary);margin-top:2px">18~26℃ · 武汉</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px">
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">明天</div>
+          <div style="font-size:18px;margin:6px 0">⛅</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">19~25℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周三</div>
+          <div style="font-size:18px;margin:6px 0">🌧️</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">17~23℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周四</div>
+          <div style="font-size:18px;margin:6px 0">⛅</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">18~24℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周五</div>
+          <div style="font-size:18px;margin:6px 0">☀️</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">19~27℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周六</div>
+          <div style="font-size:18px;margin:6px 0">☀️</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">20~28℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周日</div>
+          <div style="font-size:18px;margin:6px 0">⛅</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">19~26℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周一</div>
+          <div style="font-size:18px;margin:6px 0">🌧️</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">16~22℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周二</div>
+          <div style="font-size:18px;margin:6px 0">⛅</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">17~23℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周三</div>
+          <div style="font-size:18px;margin:6px 0">☀️</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">18~25℃</div>
+        </div>
+        <div style="text-align:center;padding:8px 4px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md)">
+          <div style="font-size:11px;color:var(--dt-text-tertiary)">周四</div>
+          <div style="font-size:18px;margin:6px 0">☀️</div>
+          <div style="font-size:11px;color:var(--dt-text-primary)">19~26℃</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 农历和节气信息 -->
+    <div style="flex:1;padding:16px">
+      <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary);margin-bottom:12px">传统信息</div>
+      <div style="padding:12px;background:var(--dt-bg-body);border-radius:var(--dt-radius-lg);margin-bottom:12px">
+        <div style="font-size:16px;color:var(--dt-text-primary);font-weight:500">九月十八</div>
+        <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">乙巳年 · 丙戌月 · 甲辰日</div>
+        <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:8px">宜：祭祀、祈福、求嗣、出行</div>
+        <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:2px">忌：动土、破土、安葬</div>
+      </div>
+      <div style="padding:12px;background:var(--dt-bg-body);border-radius:var(--dt-radius-lg)">
+        <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">节气</div>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:12px;color:var(--dt-text-tertiary)">寒露</div>
+            <div style="font-size:11px;color:var(--dt-text-primary);margin-top:2px">10月8日</div>
+          </div>
+          <div style="color:var(--dt-text-quaternary)">→</div>
+          <div style="text-align:right">
+            <div style="font-size:12px;color:var(--dt-text-tertiary)">霜降</div>
+            <div style="font-size:11px;color:var(--dt-warning);font-weight:500;margin-top:2px">10月23日</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 创建日程弹窗 -->
+<div class="cal-overlay" id="calOverlay">
+  <div class="cal-modal" onclick="event.stopPropagation()">
+    <div class="cal-hdr"><span>创建日程</span><button class="cal-close" aria-label="关闭创建日程" onclick="document.getElementById('calOverlay').classList.remove('show')">✕</button></div>
+    <div class="cal-body">
+      <div class="cal-field"><div class="cal-label">标题</div><input class="cal-input" id="evTitle" placeholder="请输入日程标题"></div>
+      <div class="cal-row"><div class="cal-field"><div class="cal-label">开始时间</div><input class="cal-input" id="evStart" placeholder="2026-10-28 10:00"></div><div class="cal-field"><div class="cal-label">结束时间</div><input class="cal-input" id="evEnd" placeholder="2026-10-28 11:30"></div></div>
+      <div class="cal-field"><div class="cal-label">地点</div><input class="cal-input" id="evLoc" placeholder="添加地点"></div>
+      <div class="cal-field"><div class="cal-label">日历</div><input class="cal-input" value="我的日程" readonly style="background:var(--dt-bg-body);cursor:default"></div>
+    </div>
+    <div class="cal-footer"><button class="cal-btn-cancel" onclick="document.getElementById('calOverlay').classList.remove('show')">取消</button><button class="cal-btn-save" onclick="saveEvent()">保存</button></div>
+  </div>
+</div>
+<div class="cal-toast" id="calToast"></div>
+
+<script>
+var now=new Date();
+var todayY=now.getFullYear(),todayM=now.getMonth()+1,todayD=now.getDate();
+var selDate=todayD,selYear=todayY,selMonth=todayM;
+var weeks=['日','一','二','三','四','五','六'];
+var eventsData={
+  '7':[{time:'10:00',name:'产品评审会',loc:'会议室301',color:'var(--dt-brand)',cal:'我的日程'}],
+  '14':[{time:'14:00',name:'UI设计评审',loc:'线上',color:'var(--dt-warning)',cal:'我的日程'}],
+  '20':[{time:'09:30',name:'设计走查',loc:'设计部',color:'var(--dt-success)',cal:'团队日历'}],
+  '24':[{time:'15:00',name:'迭代复盘',loc:'大会议室',color:'var(--dt-brand)',cal:'我的日程'}],
+  '28':[
+    {time:'10:00',name:'产品需求评审',loc:'会议室301',color:'var(--dt-brand)',cal:'我的日程'},
+    {time:'14:00',name:'UI终稿确认',loc:'线上',color:'var(--dt-warning)',cal:'我的日程'},
+    {time:'16:30',name:'团队周会',loc:'大会议室',color:'var(--dt-success)',cal:'团队日历'}
+  ],
+  '29':[{time:'09:00',name:'迭代计划会',loc:'会议室201',color:'var(--dt-brand)',cal:'我的日程'}]
+};
+function getMonthDays(y,m){return new Date(y,m,0).getDate();}
+function getFirstDay(y,m){var d=new Date(y,m-1,1).getDay();return d===0?6:d-1;}
+function showCalToast(msg){var t=document.getElementById('calToast');if(!t){document.body.insertAdjacentHTML('beforeend','<div id="calToast" class="cal-toast">'+msg+'</div>');t=document.getElementById('calToast');}t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},1500);}
+function renderMonthGrid(y,m){
+  var days=getMonthDays(y,m),first=getFirstDay(y,m);
+  var prevDays=getMonthDays(y,m-1);
+  var cells=[];
+  for(var i=first-1;i>=0;i--){cells.push({d:prevDays-i,om:1});}
+  for(var d=1;d<=days;d++){cells.push({d:d,om:0});}
+  while(cells.length%7!==0){cells.push({d:cells.length-days-first+1,om:1});}
+  // Weekday headers
+  var wdHtml='';
+  weeks.forEach(function(w){wdHtml+='<div class="mg-dow">'+w+'</div>';});
+  document.getElementById('mgWeekdays').innerHTML=wdHtml;
+  // Grid rows
+  var rowsHtml='';
+  for(var r=0;r<cells.length/7;r++){
+    rowsHtml+='<div class="mg-row">';
+    for(var c=0;c<7;c++){
+      var cell=cells[r*7+c];
+      var cls='mg-cell'+(cell.om?' other':'')+(cell.om===0&&y===todayY&&m===todayM&&cell.d===todayD?' today':'')+(String(cell.d)===String(selDate)&&!cell.om?' selected':'');
+      var evs=eventsData[cell.d];
+      var evHtml='';
+      if(evs){
+        var shown=evs.slice(0,2);
+        shown.forEach(function(e){evHtml+='<div class="mg-ev" style="background:'+e.color+'"><span style="opacity:0.7">'+e.time+'</span> '+e.name+'</div>';});
+        if(evs.length>2)evHtml+='<div class="mg-more">+'+(evs.length-2)+' more</div>';
+      }
+      rowsHtml+='<div class="'+cls+'" onclick="selectDate('+cell.d+')"><div class="mg-date">'+cell.d+'</div>'+evHtml+'</div>';
+    }
+    rowsHtml+='</div>';
+  }
+  document.getElementById('monthGrid').innerHTML=rowsHtml;
+}
+function renderDayView(day){
+  document.getElementById('dvDay').textContent=day;
+  var wd=new Date(selYear,selMonth-1,day).getDay();
+  document.getElementById('dvWeekday').textContent='星期'+weeks[wd];
+  document.getElementById('dvFullDate').textContent=selYear+'年'+selMonth+'月'+day+'日';
+  var list=document.getElementById('dvList');
+  var evs=eventsData[day]||[];
+  if(evs.length===0){list.innerHTML='<div style="padding:40px;text-align:center;color:var(--dt-text-quaternary)"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--dt-border)" stroke-width="1"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div style="margin-top:12px;font-size:13px">今天还没有日程</div></div>';return;}
+  var html='';
+  evs.forEach(function(e){html+='<div class="dv-ev-card" style="border-left-color:'+e.color+'" onclick="showCalToast(\'编辑：'+e.name+'（演示）\')"><div class="dv-ev-time">'+e.time+'</div><div class="dv-ev-info"><div class="dv-ev-name">'+e.name+'</div><div class="dv-ev-meta" style="display:flex;align-items:center;gap:3px"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg> '+e.loc+' · '+e.cal+'</div></div></div>';});
+  list.innerHTML=html;
+}
+function selectDate(day){
+  selDate=day;
+  renderMonthGrid(selYear,selMonth);
+  renderDayView(day);
+}
+function navMonth(delta){
+  selMonth+=delta;
+  if(selMonth>12){selMonth=1;selYear++;}
+  if(selMonth<1){selMonth=12;selYear--;}
+  var t=selYear+'年'+selMonth+'月';
+  document.getElementById('l3Title').textContent=t;
+  renderMonthGrid(selYear,selMonth);
+}
+function goToday(){
+  selYear=todayY;selMonth=todayM;selDate=todayD;
+  var t=todayY+'年'+todayM+'月';
+  document.getElementById('l3Title').textContent=t;
+  renderMonthGrid(todayY,todayM);
+  renderDayView(todayD);
+  showCalToast('已回到今天');
+}
+function switchView(view){
+  document.querySelectorAll('.l3-tab').forEach(function(t){t.classList.toggle('active',t.dataset.view===view);});
+  document.getElementById('monthView').style.display=view==='month'?'flex':'none';
+  document.getElementById('dayView').style.display=view==='day'?'flex':'none';
+  document.getElementById('weekView').style.display=view==='week'?'flex':'none';
+  showCalToast(view==='day'?'日视图':view==='week'?'周视图':'月视图');
+}
+function toggleCal(el){
+  var chk=el.querySelector('.cal-chk');
+  chk.classList.toggle('on');
+  showCalToast((chk.classList.contains('on')?'显示':'隐藏')+'：'+el.querySelector('.cal-name').textContent);
+}
+function saveEvent(){
+  var t=document.getElementById('evTitle').value||'新日程';
+  var s=document.getElementById('evStart').value||selYear+'-'+selMonth+'-'+selDate+' 09:00';
+  var l=document.getElementById('evLoc').value||'未设置';
+  var time=s.includes(' ')?s.split(' ')[1]:'09:00';
+  eventsData[selDate]=eventsData[selDate]||[];
+  eventsData[selDate].push({time:time,name:t,loc:l,color:'var(--dt-brand)',cal:'我的日程'});
+  document.getElementById('calOverlay').classList.remove('show');
+  renderDayView(selDate);
+  renderMonthGrid(selYear,selMonth);
+  showCalToast('日程已创建');
+}
+document.getElementById('l3Title').textContent=todayY+'年'+todayM+'月';
+renderMonthGrid(todayY,todayM);
+renderDayView(todayD);
+</script>
+<script src="shared.js"></script>
+</body>
+</html>
