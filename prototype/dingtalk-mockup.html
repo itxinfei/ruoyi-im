@@ -62,6 +62,8 @@
 
 /* Message Body */
 .msg-body{min-width:0;flex:1}
+/* 己方消息：气泡/元信息右对齐（钉钉布局：气泡在左、头像在最右） */
+.msg-wrap.self .msg-body{display:flex;flex-direction:column;align-items:flex-end;min-width:0}
 .msg-sender{font-size:12px;color:var(--dt-text-secondary);margin-bottom:3px;display:flex;align-items:center;gap:6px}
 .msg-sender .sender-role{display:inline-block;font-size:11px;padding:1px 5px;border-radius:3px;background:var(--dt-bg-body);color:var(--dt-text-tertiary)}
 .msg-wrap.self .msg-sender{flex-direction:row-reverse}
@@ -72,8 +74,8 @@
 .msg-wrap:not(.self) .msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
 .msg-wrap.self .msg-bubble{background:var(--dt-brand);color:var(--dt-bg-panel);border-top-right-radius:4px}
 
-/* Self max-width control */
-.msg-wrap.self .msg-bubble-wrapper{max-width:calc(100% - 46px)}
+/* Self max-width control：己方已有头像，无需再为头像留位 */
+.msg-wrap.self .msg-bubble-wrapper{max-width:100%}
 
 /* Message Meta Row */
 .msg-meta{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
@@ -719,8 +721,9 @@ body.electron .electron-titlebar{display:flex}
         <div class="msg-hover-toolbar"><button title="回复" aria-label="回复" onclick="replyMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button><button title="表情" aria-label="表情" onclick="addReaction(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button><button title="引用" aria-label="引用" onclick="quoteMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3-2 5-5 5-9V5h6v7c0 4 3 7 6 9"/><path d="M7 16c1.5-1 2.5-2.5 2.5-4"/></svg></button><button title="复制文字" aria-label="复制文字" onclick="copyMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button title="更多" aria-label="更多" onclick="showToast('更多功能（演示）')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></div>
       </div>
       <div class="msg-wrap self">
-        <div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">收到，准备好交互稿午餐前发群里</div></div><div class="msg-meta"><span>14:05</span><span class="msg-read-status">✓ 已读 7/8</span><span class="msg-edited">已编辑</span></div></div>
-        <div class="msg-hover-toolbar"><button title="撤回" aria-label="撤回" onclick="recallMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button><button title="复制文字" aria-label="复制文字" onclick="copyMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div>
+        <div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile('我','前端开发','me','var(--dt-brand)')">我</div>
+        <div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">收到，准备好交互稿午餐前发群里</div></div><div class="msg-meta"><span>14:05</span><span class="msg-read-status">✓ 已读 7/8</span><span class="msg-edited">已编辑</span></div>
+        <div class="msg-hover-toolbar"><button title="撤回" aria-label="撤回" onclick="recallMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg></button><button title="复制文字" aria-label="复制文字" onclick="copyMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button></div></div>
       </div>
       <div class="msg-wrap">
         <div class="msg-avatar" style="background:var(--dt-purple);" onclick="showProfile('张三','产品经理','zhangsan','var(--dt-purple)')">张</div>
@@ -730,7 +733,7 @@ body.electron .electron-titlebar{display:flex}
         </div>
         <div class="msg-hover-toolbar"><button title="下载" aria-label="下载" onclick="downloadFile(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/></svg></button><button title="引用" aria-label="引用" onclick="quoteMsg(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21c3-2 5-5 5-9V5h6v7c0 4 3 7 6 9"/><path d="M7 16c1.5-1 2.5-2.5 2.5-4"/></svg></button></div>
       </div>
-      <div class="msg-wrap self"><div class="msg-body"><div class="img-bubble"><div class="img-placeholder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div><div class="msg-meta"><span>14:12</span><span class="msg-read-status" onclick="readDetail(this)">✓ 已读 7/8</span></div></div></div>
+      <div class="msg-wrap self"><div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile('我','前端开发','me','var(--dt-brand)')">我</div><div class="msg-body"><div class="img-bubble"><div class="img-placeholder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div></div><div class="msg-meta"><span>14:12</span><span class="msg-read-status" onclick="readDetail(this)">✓ 已读 7/8</span></div></div></div>
       <div class="msg-wrap">
         <div class="msg-avatar" style="background:var(--dt-success);" onclick="showProfile('李四','设计师','lisi','var(--dt-success)')">李</div>
         <div class="msg-body"><div class="msg-sender">李四<span class="sender-role">设计师</span></div>
@@ -770,12 +773,12 @@ body.electron .electron-titlebar{display:flex}
         <div class="msg-avatar" style="background:var(--dt-purple);" onclick="showProfile('李四','设计师','lisi','var(--dt-purple)')">李</div>
         <div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">今天下午开会记得带电脑，有新材料要讨论</div></div><div class="msg-meta"><span>13:50</span></div></div>
       </div>
-      <div class="msg-wrap self"><div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">好的，没问题！材料我提前看一下</div></div><div class="msg-meta"><span>14:00</span><span class="msg-read-status">✓✓ 已读</span></div></div></div>
+      <div class="msg-wrap self"><div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile('我','前端开发','me','var(--dt-brand)')">我</div><div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">好的，没问题！材料我提前看一下</div></div><div class="msg-meta"><span>14:00</span><span class="msg-read-status">✓✓ 已读</span></div></div></div>
       <div class="msg-wrap">
         <div class="msg-avatar" style="background:var(--dt-purple);" onclick="showProfile('李四','设计师','lisi','var(--dt-purple)')">李</div>
         <div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">你等下到了吗？差不多可以开始了</div></div><div class="msg-meta"><span>14:18</span></div></div>
       </div>
-      <div class="msg-wrap self"><div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">快到了，5分钟</div></div><div class="msg-meta"><span>14:20</span><span class="msg-read-status">✓✓ 已读</span></div></div></div>
+      <div class="msg-wrap self"><div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile('我','前端开发','me','var(--dt-brand)')">我</div><div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">快到了，5分钟</div></div><div class="msg-meta"><span>14:20</span><span class="msg-read-status">✓✓ 已读</span></div></div></div>
     </div>
 
     <!-- ====== 会话2: 技术架构组 ====== -->
@@ -786,7 +789,7 @@ body.electron .electron-titlebar{display:flex}
         <div class="msg-body"><div class="msg-sender">陈七<span class="sender-role">架构师</span></div><div class="msg-bubble-wrapper"><div class="msg-bubble">上次的微服务拆分方案已经定稿了，核心是把用户服务和消息服务分离。这是部署架构图，大家看下有没有问题</div></div><div class="msg-meta"><span>13:05</span><span class="msg-read-status">✓ 已读 4/6</span></div></div>
       </div>
       <div class="msg-wrap"><div class="msg-avatar" style="background:var(--dt-success);" onclick="showProfile('吴八','DevOps','wuba','var(--dt-success)')">吴</div><div class="msg-body"><div class="msg-sender">吴八<span class="sender-role">DevOps</span></div><div class="img-bubble"><div class="img-placeholder"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></div></div><div class="msg-meta"><span>13:10</span></div></div></div>
-      <div class="msg-wrap self"><div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">收到，方案没问题 👍 K8s 集群已经就绪</div></div><div class="msg-meta"><span>13:12</span><span class="msg-read-status">✓ 已读 5/6</span></div></div></div>
+      <div class="msg-wrap self"><div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile('我','前端开发','me','var(--dt-brand)')">我</div><div class="msg-body"><div class="msg-bubble-wrapper"><div class="msg-bubble">收到，方案没问题 👍 K8s 集群已经就绪</div></div><div class="msg-meta"><span>13:12</span><span class="msg-read-status">✓ 已读 5/6</span></div></div></div>
     </div>
 
   </div>
@@ -1422,9 +1425,10 @@ function showToast(msg){
         quoteHTML='<div class="msg-quote"><div class="quote-sender">'+replyData.sender+'</div><div class="quote-text">'+(replyData.hasMore?replyData.text+'...':replyData.text)+'</div></div>';
         window.currentReply=null;
       }
-      wrap.innerHTML='<div class="msg-body">'+quoteHTML+'<div class="msg-bubble-wrapper"><div class="msg-bubble"></div></div>'
-        +'<div class="msg-meta"><span>'+t+'</span><span class="msg-status" data-status="sending"><span class="status-icon"><i class="status-spinner"></i></span><span class="status-tooltip">发送中</span></span></div></div>'
-        +'<div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile(\'我\',\'前端开发\',\'me\',\'var(--dt-brand)\')">我</div>';
+      /* avatar 放 DOM 首位：msg-wrap.self 为 row-reverse，首位即视觉最右（与静态 self 块一致） */
+      wrap.innerHTML='<div class="msg-avatar" style="background:var(--dt-brand);" onclick="showProfile(\'我\',\'前端开发\',\'me\',\'var(--dt-brand)\')">我</div>'
+        +'<div class="msg-body">'+quoteHTML+'<div class="msg-bubble-wrapper"><div class="msg-bubble"></div></div>'
+        +'<div class="msg-meta"><span>'+t+'</span><span class="msg-status" data-status="sending"><span class="status-icon"><i class="status-spinner"></i></span><span class="status-tooltip">发送中</span></span></div></div>';
       var bubble=wrap.querySelector('.msg-bubble');
       bubble.textContent=text;
       view.appendChild(wrap);
