@@ -332,10 +332,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   body.xf-mobile.xf-depth-2 .xf-l4{display:flex!important}
   /* 返回按钮 */
   body.xf-mobile.xf-depth-1 .xf-back,body.xf-mobile.xf-depth-2 .xf-back{display:flex}
-  /* 返回按钮占顶部 44px：内容栏整体下移，避免遮挡 L3/L4 头部标题（日历标题/天气预报） */
-  body.xf-mobile .xf-back{top:6px}
+  /* 返回按钮占顶部 48px（8pt 栅格）：内容栏整体下移，避免遮挡 L3/L4 头部标题（日历标题/天气预报） */
+  body.xf-mobile .xf-back{top:8px}
   body.xf-mobile.xf-depth-1 .xf-l3,
-  body.xf-mobile.xf-depth-2 .xf-l4{padding-top:44px}
+  body.xf-mobile.xf-depth-2 .xf-l4{padding-top:48px}
   /* 弹层窄屏兜底 */
   body.xf-mobile .cal-modal,body.xf-mobile .checkin-modal,body.xf-mobile .ct-card,
   body.xf-mobile .search-modal,body.xf-mobile .xf-settings,
