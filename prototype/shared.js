@@ -13,6 +13,10 @@
 
   function qs(sel) { return document.querySelector(sel); }
 
+  /* h5 为独立移动端原型（不引 shared.css），桌面向全局弹层（首用引导/命令面板/帮助）在此禁用，
+     否则注入层无样式、以 position:static 参与 body flex 布局会挤压 .phone-shell。 */
+  function isH5() { return !!(document.body && document.body.classList.contains('xf-h5')); }
+
   /* ---------- 1. 关闭最上层弹层 ---------- */
   /* 各页弹层类名统一为 .show 控制显示；mockup 的 .modal-overlay 用 .hidden */
   var SHOW_OVERLAYS =
@@ -66,6 +70,7 @@
 
   /* ---------- 3. 使用帮助 ---------- */
   function showHelp() {
+    if (isH5()) return;
     if (qs('.xf-help-overlay')) return;
     var el = document.createElement('div');
     el.className = 'xf-help-overlay';
@@ -458,6 +463,7 @@
   }
 
   function showPalette() {
+    if (isH5()) return;
     closePalette();
     var cmds = paletteCommands();
     var el = document.createElement('div');
@@ -550,6 +556,7 @@
   }
 
   function showOnboard() {
+    if (isH5()) return;
     closeOnboard();
     var el = document.createElement('div');
     el.className = 'xf-onboard-overlay';
