@@ -6,6 +6,8 @@
 
 /* === Design Tokens（对齐 8.2 官方） === */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* 表单控件必须继承设计字体：Windows Chrome 的 UA 样式会让 button/input 回退为 Arial */
+button,input,select,textarea{font-family:var(--dt-font)}
 :root{
   --dt-brand:#277EFB;
   --dt-brand-hover:#1169E0;
@@ -330,6 +332,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   body.xf-mobile.xf-depth-2 .xf-l4{display:flex!important}
   /* 返回按钮 */
   body.xf-mobile.xf-depth-1 .xf-back,body.xf-mobile.xf-depth-2 .xf-back{display:flex}
+  /* 返回按钮占顶部 44px：内容栏整体下移，避免遮挡 L3/L4 头部标题（日历标题/天气预报） */
+  body.xf-mobile .xf-back{top:6px}
+  body.xf-mobile.xf-depth-1 .xf-l3,
+  body.xf-mobile.xf-depth-2 .xf-l4{padding-top:44px}
   /* 弹层窄屏兜底 */
   body.xf-mobile .cal-modal,body.xf-mobile .checkin-modal,body.xf-mobile .ct-card,
   body.xf-mobile .search-modal,body.xf-mobile .xf-settings,
@@ -337,4 +343,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   body.xf-mobile .xf-palette{width:100%;max-width:calc(100vw - 24px)}
   body.xf-mobile .xf-confirm{width:calc(100vw - 32px);max-width:340px}
   body.xf-mobile .xf-onboard{width:calc(100vw - 32px);max-width:420px}
+  /* 窄屏输入栏：flex 默认会压缩按钮，导致「发送」换行竖排 */
+  .send-btn{flex-shrink:0!important;white-space:nowrap}
+  .input-bar .text-input{min-width:0}
 }

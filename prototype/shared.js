@@ -502,7 +502,7 @@
   /* ---------- 7. 首用引导 ---------- */
   var ONBOARD_KEY = 'xf_onboard_done_v1';
   var ONBOARD_STEPS = [
-    { title:'三栏工作台', body:'左侧深色栏切换模块，中间列表快速定位，右侧主区承载内容。窄屏（手机浏览器）会自动折叠为「列表 → 详情」两级。' },
+    { title:'三栏工作台', body:'左侧品牌蓝栏切换模块，中间列表快速定位，右侧主区承载内容。窄屏（手机浏览器）会自动折叠为「列表 → 详情」两级。' },
     { title:'全局快捷键', body:'按 / 直接搜索；按 Ctrl/⌘ + K 打开命令面板，输入即可跳转模块或执行动作；按 ? 随时查看帮助。' },
     { title:'安全与反馈', body:'删除会话、消息、文件等破坏性操作都会二次确认；发送失败可重发，断网出现错误态与重试。' }
   ];
@@ -628,7 +628,7 @@
   var MOBILE_MQ = null;
 
   function isOverlayCls(cls) {
-    return /overlay|modal|toast|context-menu|palette|onboard|help|xf-/.test(cls || '');
+    return /overlay|modal|toast|context-menu|palette|onboard|help|mask|xf-/.test(cls || '');
   }
 
   function detectItems(block) {
@@ -724,7 +724,9 @@
   function initMobileLayout() {
     markLayout();
     document.body.classList.add('xf-depth-0');
-    document.addEventListener('click', onLayoutClick);
+    /* 捕获阶段监听：目标元素的自带 onclick（如日历 selectDate）会重渲染列表、
+       把被点击节点移出 DOM，冒泡阶段再校验 block.contains(item) 会失败。 */
+    document.addEventListener('click', onLayoutClick, true);
     if (window.matchMedia) {
       MOBILE_MQ = window.matchMedia('(max-width:768px)');
       applyMode();
@@ -733,10 +735,76 @@
     }
   }
 
+  /* ============================================================
+     可点击元素键盘可达（doc12 §13 无障碍基线）
+     原型大量交互用 div + onclick 实现，需补齐 role / tabindex，
+     并支持 Enter / Space 触发，保证键盘可完整走查原型。
+     ============================================================ */
+  var A11Y_CLICKABLE =
+    '.l1-item,.l1-avatar,.nav-item,.nav-btn,.tab-item,.sess-item,.file-row,' +
+    '.ctx-item,.mm-item,.more-menu-item,.l2-action-item,.toggle-switch,.mg-cell,' +
+    '.a-node,.t-node,.g-node,.h5-plus-item,.rp-member,.search-modal-card,' +
+    '.search-modal-file,.search-modal-msg,.ct-card,.msg-avatar,.crumb,.sortable,' +
+    '.am-file-upload,' +
+    /* 无类名的行内可点击块（如通讯录快捷入口、后台统计卡片） */
+    'div[onclick]:not([class])';
+
+  function a11yRoleFor(el) {
+    var cls = (typeof el.className === 'string' ? el.className : '').trim();
+    if (/^toggle-switch\b/.test(cls)) return 'switch';
+    if (/^tab-item\b/.test(cls)) return 'tab';
+    if (/^(a-node|t-node|g-node)\b/.test(cls)) return 'treeitem';
+    return 'button';
+  }
+
+  function xfEnhanceClickable(el) {
+    if (!el || el.hasAttribute('role') || el.hasAttribute('tabindex')) return;
+    var role = a11yRoleFor(el);
+    el.setAttribute('role', role);
+    el.setAttribute('tabindex', '0');
+    if (role === 'switch') {
+      el.setAttribute('aria-checked', /(^|\s)on(\s|$)/.test(el.className) ? 'true' : 'false');
+    } else if (role === 'tab') {
+      el.setAttribute('aria-selected', /(^|\s)active(\s|$)/.test(el.className) ? 'true' : 'false');
+    }
+    if (!el.hasAttribute('aria-label') && el.hasAttribute('title')) {
+      el.setAttribute('aria-label', el.getAttribute('title'));
+    }
+    el.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+        e.preventDefault();
+        this.click();
+      }
+    });
+  }
+
+  function initA11y() {
+    var nodes = document.querySelectorAll(A11Y_CLICKABLE);
+    for (var i = 0; i < nodes.length; i++) xfEnhanceClickable(nodes[i]);
+    /* 弹层内动态插入的可点击项同样需要增强 */
+    if (window.MutationObserver) {
+      new MutationObserver(function (muts) {
+        for (var i = 0; i < muts.length; i++) {
+          var added = muts[i].addedNodes;
+          for (var j = 0; j < added.length; j++) {
+            var n = added[j];
+            if (!n || n.nodeType !== 1) continue;
+            if (n.matches && n.matches(A11Y_CLICKABLE)) xfEnhanceClickable(n);
+            if (n.querySelectorAll) {
+              var inner = n.querySelectorAll(A11Y_CLICKABLE);
+              for (var k = 0; k < inner.length; k++) xfEnhanceClickable(inner[k]);
+            }
+          }
+        }
+      }).observe(document.body, { childList: true, subtree: true });
+    }
+  }
+
   function boot() {
     xfRestoreTheme();
     initToasts();
     initMobileLayout();
+    initA11y();
     if (!onboardDone()) showOnboard();
   }
 

@@ -501,6 +501,15 @@ body.electron .electron-titlebar{display:flex}
 .electron-titlebar .ctrl-btn{width:36px;height:100%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-tertiary);font-size:14px;font-weight:300;transition:background 0.15s}
 .electron-titlebar .ctrl-btn:hover{background:var(--dt-bg-body)}
 .electron-titlebar .ctrl-btn.close:hover{background:var(--dt-danger);color:var(--dt-bg-panel)}
+/* 移动端（≤768px）：聊天头部左侧标题省略、右侧按钮收紧，避免 390px 下换行/挤压 */
+@media (max-width:768px){
+.chat-header{padding:0 12px}
+.chat-header .chat-title{flex:1;min-width:0;font-size:15px;gap:4px}
+.chat-header .chat-title>span:not(.member-count){min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-header .chat-title .member-count{display:none}
+.chat-header .chat-actions{gap:0;flex-shrink:0}
+.chat-header .chat-actions .action-btn{width:30px;height:30px}
+}
 </style>
 </head>
 <body>
