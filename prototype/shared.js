@@ -208,10 +208,11 @@
     if (!cur) cur = XF_SETTINGS_THEME[0].color;
     var html = '';
     XF_SETTINGS_THEME.forEach(function (t) {
-      html += '<button type="button" class="xf-settings-theme-dot' + (t.color === cur ? ' active' : '') + '"' +
+      var on = t.color === cur;
+      html += '<button type="button" class="xf-settings-theme-dot' + (on ? ' active' : '') + '"' +
         ' data-color="' + t.color + '" data-light="' + t.light + '"' +
         ' data-hover="' + t.hover + '" data-active="' + t.active + '"' +
-        ' style="background:' + t.color + '" aria-label="' + escapeHtml(t.name) + '" title="' + escapeHtml(t.name) + '"></button>';
+        ' style="background:' + t.color + (on ? ';border-color:' + t.active : '') + '" aria-label="' + escapeHtml(t.name) + '" title="' + escapeHtml(t.name) + '"></button>';
     });
     return html;
   }
@@ -293,13 +294,40 @@
     if (el) el.remove();
   }
 
-  function xfSettings() {
+  /* 轻量 toast：优先复用页面已定义的 window.showToast，否则用内置浮层 */
+  function xfToast(msg) {
+    if (typeof window.showToast === 'function') { window.showToast(msg); return; }
+    var old = document.getElementById('xfToast');
+    if (old && old.parentNode) old.parentNode.removeChild(old);
+    var t = document.createElement('div');
+    t.id = 'xfToast';
+    t.setAttribute('role', 'status');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.82);color:#fff;padding:8px 20px;border-radius:6px;font-size:13px;line-height:1.4;z-index:99999;opacity:0;transition:opacity .2s;pointer-events:none;font-family:inherit';
+    document.body.appendChild(t);
+    requestAnimationFrame(function () { t.style.opacity = '1'; });
+    setTimeout(function () {
+      t.style.opacity = '0';
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); }, 200);
+    }, 1500);
+  }
+
+  /* 退出登录（演示）：供各页「退出登录」按钮复用 */
+  function xfSettingsLogout() {
     closeSettings();
-    var tab = 'profile';
-    try {
-      var saved = localStorage.getItem(XF_SETTINGS_KEY) || '';
-      if (XF_SETTINGS_NAV.some(function (n) { return n.key === saved; })) tab = saved;
-    } catch (err) {}
+    xfToast('已退出登录（演示）');
+  }
+
+  function xfSettings(tab) {
+    closeSettings();
+    var key = '';
+    try { key = localStorage.getItem(XF_SETTINGS_KEY) || ''; } catch (err) { key = ''; }
+    if (tab && XF_SETTINGS_NAV.some(function (n) { return n.key === tab; })) {
+      key = tab;
+    } else if (!XF_SETTINGS_NAV.some(function (n) { return n.key === key; })) {
+      key = 'profile';
+    }
+    var tab = key;
 
     var el = document.createElement('div');
     el.className = 'xf-settings-overlay';
@@ -310,14 +338,14 @@
     var navHtml = '';
     XF_SETTINGS_NAV.forEach(function (n) {
       navHtml += '<button type="button" class="xf-settings-nav-item' + (n.key === tab ? ' active' : '') + '"' +
-        ' role="tab" data-xf-tab="' + n.key + '">' + escapeHtml(n.name) + '</button>';
+        ' role="tab" aria-selected="' + (n.key === tab ? 'true' : 'false') + '" data-xf-tab="' + n.key + '">' + escapeHtml(n.name) + '</button>';
     });
 
     el.innerHTML =
       '<div class="xf-settings">' +
         '<div class="xf-settings-aside">' +
           '<div class="xf-settings-aside-title">设置</div>' +
-          '<div class="xf-settings-nav">' + navHtml + '</div>' +
+          '<div class="xf-settings-nav" role="tablist">' + navHtml + '</div>' +
         '</div>' +
         '<div class="xf-settings-content">' +
           '<div class="xf-settings-content-head">' +
@@ -334,7 +362,9 @@
       body.innerHTML = xfSettingsPane(key);
       if (title) title.textContent = xfSettingsTabName(key);
       Array.prototype.forEach.call(el.querySelectorAll('.xf-settings-nav-item'), function (item) {
-        item.classList.toggle('active', item.getAttribute('data-xf-tab') === key);
+        var on = item.getAttribute('data-xf-tab') === key;
+        item.classList.toggle('active', on);
+        item.setAttribute('aria-selected', on ? 'true' : 'false');
       });
       body.scrollTop = 0;
     }
@@ -363,10 +393,7 @@
         xfApplyTheme(dot.getAttribute('data-color'), dot.getAttribute('data-light'), dot.getAttribute('data-hover'), dot.getAttribute('data-active'));
         return;
       }
-      if (t.closest('.xf-settings-logout')) {
-        closeSettings();
-        if (typeof window.showToast === 'function') window.showToast('已退出登录（演示）');
-      }
+      if (t.closest('.xf-settings-logout')) { xfSettingsLogout(); }
     });
 
     document.body.appendChild(el);
@@ -378,6 +405,8 @@
 
   window.xfSettings = xfSettings;
   window.xfCloseSettings = closeSettings;
+  window.xfSettingsLogout = xfSettingsLogout;
+  window.xfToast = xfToast;
 
   /* ---------- 5. 键盘 ---------- */
   document.addEventListener('keydown', function (e) {
