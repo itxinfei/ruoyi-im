@@ -18,8 +18,8 @@
   var SHOW_OVERLAYS =
     '.cal-overlay.show, .approval-overlay.show, .approval-modal-overlay.show, ' +
     '.confirm-overlay.show, .ct-overlay.show, .search-modal-overlay.show, ' +
-    '.settings-modal-overlay.show, .checkin-modal-overlay.show, .xf-confirm-overlay.show, ' +
-    '.xf-palette-overlay.show, .xf-onboard-overlay.show';
+    '.checkin-modal-overlay.show, .xf-confirm-overlay.show, ' +
+    '.xf-settings-overlay.show, .xf-palette-overlay.show, .xf-onboard-overlay.show';
 
   function closeTopOverlay() {
     var help = qs('.xf-help-overlay');
@@ -33,6 +33,8 @@
     if (show) {
       if (show.classList.contains('xf-confirm-overlay')) {
         closeConfirm();
+      } else if (show.classList.contains('xf-settings-overlay')) {
+        closeSettings();
       } else if (show.classList.contains('checkin-modal-overlay') && typeof window.closeCheckinModal === 'function') {
         window.closeCheckinModal();
       } else {
@@ -157,6 +159,226 @@
   window.xfConfirm = xfConfirm;
   window.xfCloseConfirm = closeConfirm;
 
+  /* ---------- 4b. 全局设置弹层（L1 底部「设置」入口） ---------- */
+  /* 用途：打开「个人设置」，含消息通知 / 隐私与安全 / 通用 / 快捷键 / 关于。
+     与 xfConfirm 一致：动态注入、点遮罩关闭、Esc 关闭、自动聚焦。 */
+  var XF_SETTINGS_KEY = 'xf_settings_tab_v1';
+  var XF_THEME_KEY = 'xf_theme_color_v1';
+  var XF_SETTINGS_THEME = [
+    { name:'品牌蓝', color:'#277EFB', light:'#E6F2FF', hover:'#1169E0', active:'#0656C6' },
+    { name:'活力橙', color:'#FF7D00', light:'#FFF7E6', hover:'#E06E00', active:'#C25F00' },
+    { name:'安心绿', color:'#00B42A', light:'#F6FFED', hover:'#009E24', active:'#00861F' },
+    { name:'绛红', color:'#F53F3F', light:'#FFF1F0', hover:'#D93838', active:'#BF3131' },
+    { name:'烟雨紫', color:'#6C5CE7', light:'#F5F3FF', hover:'#5A4BD1', active:'#4B3EB8' }
+  ];
+  var XF_SETTINGS_NAV = [
+    { key:'profile', name:'个人设置' },
+    { key:'notify', name:'消息通知' },
+    { key:'privacy', name:'隐私与安全' },
+    { key:'general', name:'通用' },
+    { key:'shortcut', name:'快捷键' },
+    { key:'about', name:'关于' }
+  ];
+
+  function xfSettingsTabName(key) {
+    for (var i = 0; i < XF_SETTINGS_NAV.length; i++) {
+      if (XF_SETTINGS_NAV[i].key === key) return XF_SETTINGS_NAV[i].name;
+    }
+    return '设置';
+  }
+
+  function xfSettingsRow(title, desc, opt) {
+    opt = opt || {};
+    var right = '';
+    if (opt.kind === 'switch') {
+      right = '<button type="button" class="xf-settings-switch' + (opt.on ? ' on' : '') + '" role="switch" aria-checked="' + (opt.on ? 'true' : 'false') + '" aria-label="' + escapeHtml(title) + '"></button>';
+    } else if (opt.kind === 'text') {
+      right = '<span class="xf-settings-value">' + escapeHtml(opt.value || '') + '</span>';
+    } else if (opt.kind === 'action') {
+      right = '<span class="xf-settings-more">›</span>';
+    }
+    return '<div class="xf-settings-row"><div><div class="xf-settings-row-title">' + escapeHtml(title) + '</div>' +
+      (desc ? '<div class="xf-settings-row-desc">' + escapeHtml(desc) + '</div>' : '') +
+      '</div>' + right + '</div>';
+  }
+
+  function xfSettingsThemeDots() {
+    var cur = '';
+    try { cur = (localStorage.getItem(XF_THEME_KEY) || '').split('|')[0]; } catch (err) { cur = ''; }
+    if (!cur) cur = XF_SETTINGS_THEME[0].color;
+    var html = '';
+    XF_SETTINGS_THEME.forEach(function (t) {
+      html += '<button type="button" class="xf-settings-theme-dot' + (t.color === cur ? ' active' : '') + '"' +
+        ' data-color="' + t.color + '" data-light="' + t.light + '"' +
+        ' data-hover="' + t.hover + '" data-active="' + t.active + '"' +
+        ' style="background:' + t.color + '" aria-label="' + escapeHtml(t.name) + '" title="' + escapeHtml(t.name) + '"></button>';
+    });
+    return html;
+  }
+
+  function xfSettingsPane(key) {
+    if (key === 'notify') {
+      return xfSettingsRow('新消息通知', '开启后收到系统通知横幅和声音', { kind:'switch', on:true }) +
+        xfSettingsRow('通知显示消息详情', '在通知横幅中显示消息内容预览', { kind:'switch', on:true }) +
+        xfSettingsRow('声音', '收到消息时播放提示音', { kind:'switch', on:false }) +
+        xfSettingsRow('免打扰时段', '时段内仅静音，未读角标仍然保留', { kind:'text', value:'22:00 - 08:00' });
+    }
+    if (key === 'privacy') {
+      return xfSettingsRow('展示在线状态', '关闭后他人看不到你的在线状态', { kind:'switch', on:true }) +
+        xfSettingsRow('接收已读回执', '开启后对方可看到你已读消息', { kind:'switch', on:true }) +
+        xfSettingsRow('禁止陌生人私信', '开启后仅通讯录联系人可发起会话', { kind:'switch', on:false }) +
+        xfSettingsRow('屏蔽列表', '已屏蔽的账号不会再收到其消息', { kind:'text', value:'0 人' });
+    }
+    if (key === 'general') {
+      return '<div class="xf-settings-sec-title">主题色</div>' +
+        '<div class="xf-settings-theme-dots">' + xfSettingsThemeDots() + '</div>' +
+        '<div class="xf-settings-gap"></div>' +
+        xfSettingsRow('多语言', '设置界面与消息翻译的默认语言', { kind:'text', value:'简体中文' }) +
+        xfSettingsRow('会话列表密度', '调整会话项的显示密度', { kind:'text', value:'标准' });
+    }
+    if (key === 'shortcut') {
+      return '<ul class="xf-help-list">' +
+        '<li><span>聚焦搜索</span><kbd>/</kbd></li>' +
+        '<li><span>打开命令面板</span><span><kbd>Ctrl</kbd> + <kbd>K</kbd></span></li>' +
+        '<li><span>打开使用帮助</span><kbd>?</kbd></li>' +
+        '<li><span>发送消息</span><kbd>Enter</kbd></li>' +
+        '<li><span>换行</span><span><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span></li>' +
+        '<li><span>关闭当前弹层</span><kbd>Esc</kbd></li>' +
+        '</ul>';
+    }
+    if (key === 'about') {
+      return xfSettingsRow('产品版本', '当前为高保真原型版本', { kind:'text', value:'v8.2.0' }) +
+        xfSettingsRow('开发商', '', { kind:'text', value:'心飞科技' }) +
+        xfSettingsRow('官方网站', '', { kind:'text', value:'xinfei.com' }) +
+        xfSettingsRow('用户协议与隐私政策', '', { kind:'action' }) +
+        '<p class="xf-settings-note">心飞IM 高保真原型 · 数据为演示用，非真实业务数据。</p>';
+    }
+    /* 个人设置（默认） */
+    return '<div class="xf-settings-profile">' +
+        '<div class="xf-settings-avatar">飞</div>' +
+        '<div><div class="xf-settings-name">架构师</div>' +
+        '<div class="xf-settings-sub">产品设计部 · architect@xinfei.com</div></div>' +
+      '</div>' +
+      '<div class="xf-settings-sec-title">账号信息</div>' +
+      xfSettingsRow('昵称', '', { kind:'text', value:'架构师' }) +
+      xfSettingsRow('工号', '', { kind:'text', value:'XF10086' }) +
+      xfSettingsRow('部门', '', { kind:'text', value:'产品设计部' }) +
+      xfSettingsRow('邮箱', '', { kind:'text', value:'architect@xinfei.com' }) +
+      '<div class="xf-settings-gap"></div>' +
+      '<button type="button" class="xf-settings-logout">退出登录</button>';
+  }
+
+  function xfApplyTheme(color, light, hover, active) {
+    if (!color) return;
+    var root = document.documentElement.style;
+    root.setProperty('--dt-brand', color);
+    if (light) root.setProperty('--dt-brand-light', light);
+    if (hover) root.setProperty('--dt-brand-hover', hover);
+    if (active) root.setProperty('--dt-brand-active', active);
+    try { localStorage.setItem(XF_THEME_KEY, [color, light || '', hover || '', active || ''].join('|')); } catch (err) {}
+  }
+
+  function xfRestoreTheme() {
+    try {
+      var v = localStorage.getItem(XF_THEME_KEY);
+      if (!v) return;
+      var p = v.split('|');
+      if (!p[0]) return;
+      xfApplyTheme(p[0], p[1], p[2], p[3]);
+    } catch (err) {}
+  }
+
+  function closeSettings() {
+    var el = qs('.xf-settings-overlay');
+    if (el) el.remove();
+  }
+
+  function xfSettings() {
+    closeSettings();
+    var tab = 'profile';
+    try {
+      var saved = localStorage.getItem(XF_SETTINGS_KEY) || '';
+      if (XF_SETTINGS_NAV.some(function (n) { return n.key === saved; })) tab = saved;
+    } catch (err) {}
+
+    var el = document.createElement('div');
+    el.className = 'xf-settings-overlay';
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-label', '设置');
+
+    var navHtml = '';
+    XF_SETTINGS_NAV.forEach(function (n) {
+      navHtml += '<button type="button" class="xf-settings-nav-item' + (n.key === tab ? ' active' : '') + '"' +
+        ' role="tab" data-xf-tab="' + n.key + '">' + escapeHtml(n.name) + '</button>';
+    });
+
+    el.innerHTML =
+      '<div class="xf-settings">' +
+        '<div class="xf-settings-aside">' +
+          '<div class="xf-settings-aside-title">设置</div>' +
+          '<div class="xf-settings-nav">' + navHtml + '</div>' +
+        '</div>' +
+        '<div class="xf-settings-content">' +
+          '<div class="xf-settings-content-head">' +
+            '<span class="xf-settings-title">' + escapeHtml(xfSettingsTabName(tab)) + '</span>' +
+            '<button type="button" class="xf-settings-close" aria-label="关闭设置">×</button>' +
+          '</div>' +
+          '<div class="xf-settings-body"></div>' +
+        '</div>' +
+      '</div>';
+
+    function render(key) {
+      var body = el.querySelector('.xf-settings-body');
+      var title = el.querySelector('.xf-settings-title');
+      body.innerHTML = xfSettingsPane(key);
+      if (title) title.textContent = xfSettingsTabName(key);
+      Array.prototype.forEach.call(el.querySelectorAll('.xf-settings-nav-item'), function (item) {
+        item.classList.toggle('active', item.getAttribute('data-xf-tab') === key);
+      });
+      body.scrollTop = 0;
+    }
+
+    el.addEventListener('click', function (e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t === el) { closeSettings(); return; }
+      if (t.closest('.xf-settings-close')) { closeSettings(); return; }
+      var nav = t.closest('.xf-settings-nav-item');
+      if (nav) {
+        var key = nav.getAttribute('data-xf-tab');
+        try { localStorage.setItem(XF_SETTINGS_KEY, key); } catch (err) {}
+        render(key);
+        return;
+      }
+      var sw = t.closest('.xf-settings-switch');
+      if (sw) {
+        sw.setAttribute('aria-checked', sw.classList.toggle('on') ? 'true' : 'false');
+        return;
+      }
+      var dot = t.closest('.xf-settings-theme-dot');
+      if (dot) {
+        Array.prototype.forEach.call(el.querySelectorAll('.xf-settings-theme-dot'), function (d) { d.classList.remove('active'); });
+        dot.classList.add('active');
+        xfApplyTheme(dot.getAttribute('data-color'), dot.getAttribute('data-light'), dot.getAttribute('data-hover'), dot.getAttribute('data-active'));
+        return;
+      }
+      if (t.closest('.xf-settings-logout')) {
+        closeSettings();
+        if (typeof window.showToast === 'function') window.showToast('已退出登录（演示）');
+      }
+    });
+
+    document.body.appendChild(el);
+    el.classList.add('show');
+    render(tab);
+    var closeBtn = el.querySelector('.xf-settings-close');
+    if (closeBtn) closeBtn.focus();
+  }
+
+  window.xfSettings = xfSettings;
+  window.xfCloseSettings = closeSettings;
+
   /* ---------- 5. 键盘 ---------- */
   document.addEventListener('keydown', function (e) {
     var t = e.target;
@@ -177,6 +399,7 @@
   var PALETTE_BASE = [
     { group:'动作', name:'搜索', hint:'/', run:function(){ closePalette(); focusSearch(); } },
     { group:'动作', name:'打开使用帮助', hint:'?', run:function(){ closePalette(); showHelp(); } },
+    { group:'动作', name:'个人设置', run:function(){ closePalette(); xfSettings(); } },
     { group:'动作', name:'重新查看新手指引', run:function(){ closePalette(); showOnboard(); } },
     { group:'模块', name:'消息', href:'dingtalk-mockup.html' },
     { group:'模块', name:'通讯录', href:'dingtalk-contacts.html' },
@@ -511,6 +734,7 @@
   }
 
   function boot() {
+    xfRestoreTheme();
     initToasts();
     initMobileLayout();
     if (!onboardDone()) showOnboard();
