@@ -233,7 +233,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* 全局设置弹层（shared.js xfSettings） */
 .xf-settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2100;display:none;align-items:center;justify-content:center}
 .xf-settings-overlay.show{display:flex}
-.xf-settings{width:700px;max-width:calc(100vw - 32px);max-height:85vh;background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);box-shadow:var(--dt-shadow-lg);overflow:hidden;display:flex}
+.xf-settings{width:700px;height:520px;max-width:calc(100vw - 32px);max-height:85vh;background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);box-shadow:var(--dt-shadow-lg);overflow:hidden;display:flex}
 .xf-settings-aside{width:180px;flex-shrink:0;background:var(--dt-bg-body);border-right:0.5px solid var(--dt-border);display:flex;flex-direction:column}
 .xf-settings-aside-title{height:var(--dt-header-height);padding:0 24px;display:flex;align-items:center;font-size:16px;font-weight:600;color:var(--dt-text-primary);border-bottom:0.5px solid var(--dt-border)}
 .xf-settings-nav{display:flex;flex-direction:column;padding:8px}
@@ -241,7 +241,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .xf-settings-nav-item:hover{background:var(--dt-bg-hover)}
 .xf-settings-nav-item:focus-visible{outline:2px solid var(--dt-brand);outline-offset:-2px}
 .xf-settings-nav-item.active{background:var(--dt-bg-session-active);color:var(--dt-brand);font-weight:500}
-.xf-settings-content{flex:1;min-width:0;display:flex;flex-direction:column}
+.xf-settings-content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .xf-settings-content-head{height:var(--dt-header-height);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border);flex-shrink:0}
 .xf-settings-content-head span{font-size:15px;font-weight:600;color:var(--dt-text-primary)}
 .xf-settings-close{width:28px;height:28px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;color:var(--dt-text-secondary);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center}
@@ -346,7 +346,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   body.xf-mobile .search-modal,body.xf-mobile .xf-settings,
   body.xf-mobile .ding-modal,body.xf-mobile .approval-modal{width:100%;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);overflow-y:auto}
   /* 设置弹层窄屏：左侧导航改顶部横向 Tab 条，内容全宽 */
-  body.xf-mobile .xf-settings{flex-direction:column;overflow:hidden}
+  body.xf-mobile .xf-settings{flex-direction:column;overflow:hidden;height:520px}
   body.xf-mobile .xf-settings-aside{width:100%;border-right:none;border-bottom:0.5px solid var(--dt-border)}
   body.xf-mobile .xf-settings-aside-title{display:none}
   body.xf-mobile .xf-settings-nav{flex-direction:row;overflow-x:auto;padding:6px 8px;gap:4px}

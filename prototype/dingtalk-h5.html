@@ -225,13 +225,13 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* =============== 设置弹层（shared.js xfSettings，H5 自带样式） =============== */
 .xf-settings-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);z-index:150;display:none;align-items:center;justify-content:center;padding:12px}
 .xf-settings-overlay.show{display:flex}
-.xf-settings{width:100%;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden;display:flex;flex-direction:column}
+.xf-settings{width:100%;height:520px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden;display:flex;flex-direction:column}
 .xf-settings-aside{width:100%;flex-shrink:0;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border)}
 .xf-settings-aside-title{display:none}
 .xf-settings-nav{display:flex;flex-direction:row;overflow-x:auto;padding:6px 8px;gap:4px}
 .xf-settings-nav-item{display:flex;align-items:center;height:34px;padding:0 12px;border:none;background:transparent;border-radius:var(--dt-radius-full);cursor:pointer;font-family:var(--dt-font);font-size:13px;color:var(--dt-text-regular);flex-shrink:0}
 .xf-settings-nav-item.active{background:var(--dt-brand-light);color:var(--dt-brand);font-weight:500}
-.xf-settings-content{flex:1;min-width:0;display:flex;flex-direction:column}
+.xf-settings-content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .xf-settings-content-head{height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border);flex-shrink:0}
 .xf-settings-content-head span{font-size:15px;font-weight:600;color:var(--dt-text-primary)}
 .xf-settings-close{width:28px;height:28px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;color:var(--dt-text-secondary);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center}
