@@ -65,6 +65,16 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .ct-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.3);z-index:100;align-items:center;justify-content:center}
 .ct-overlay.show{display:flex}
 .ct-card{width:340px;background:var(--dt-bg-card);border-radius:var(--dt-radius-2xl);overflow:hidden;}
+.ct-req-card{display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);margin-bottom:8px}
+.ct-req-card:last-child{margin-bottom:0}
+.ct-req-avatar{width:40px;height:40px;border-radius:var(--dt-radius-md);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600;flex-shrink:0}
+.ct-req-info{flex:1;min-width:0}
+.ct-req-name{font-size:14px;font-weight:500}
+.ct-req-desc{font-size:12px;color:var(--dt-text-tertiary)}
+.ct-req-actions{display:flex;gap:6px}
+.ct-req-btn{height:32px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer}
+.ct-req-btn.ghost{border:0.5px solid var(--dt-border);background:var(--dt-bg-card);color:var(--dt-text-regular)}
+.ct-req-done{padding:24px;text-align:center;color:var(--dt-success);font-size:13px}
 .ct-card-hdr{padding:16px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border);font-size:15px;font-weight:600;color:var(--dt-text-primary)}
 .ct-card-hdr.profile{padding:24px 24px 16px;text-align:center;color:var(--dt-bg-card);background:var(--dt-brand)}
 .ct-card-av{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.3);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600}
@@ -256,15 +266,15 @@ if(window.isElectron||window.electronAPI){
   <div class="ct-card" onclick="event.stopPropagation()">
     <div class="ct-card-hdr"><span>好友请求 (2)</span><button aria-label="关闭好友请求" onclick="document.getElementById('reqOverlay').classList.remove('show')" class="panel-close">✕</button></div>
     <div style="padding:16px">
-      <div data-req-card="true" style="display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);margin-bottom:8px">
-        <div style="width:40px;height:40px;border-radius:var(--dt-radius-md);background:var(--dt-av-pink);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600">赵</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500">赵六</div><div style="font-size:12px;color:var(--dt-text-tertiary)">后端组 · 后端工程师 · 你好，我是后端组的赵六</div></div>
-        <div style="display:flex;gap:6px"><button style="height:32px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.innerHTML='<div style=\'padding:24px;text-align:center;color:var(--dt-success);font-size:13px\'>✓ 已通过</div>'">通过</button><button style="height:30px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);color:var(--dt-text-regular);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.remove()">拒绝</button></div>
+      <div class="ct-req-card" data-req-card="true">
+        <div class="ct-req-avatar" style="background:var(--dt-av-pink)">赵</div>
+        <div class="ct-req-info"><div class="ct-req-name">赵六</div><div class="ct-req-desc">后端组 · 后端工程师 · 你好，我是后端组的赵六</div></div>
+        <div class="ct-req-actions"><button class="ct-req-btn" onclick="var c=this.closest('[data-req-card]');if(c)c.innerHTML='<div class=&quot;ct-req-done&quot;>✓ 已通过</div>'">通过</button><button class="ct-req-btn ghost" onclick="var c=this.closest('[data-req-card]');if(c)c.remove()">拒绝</button></div>
       </div>
-      <div data-req-card="true" style="display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg)">
-        <div style="width:40px;height:40px;border-radius:var(--dt-radius-md);background:var(--dt-purple);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600">钱</div>
-        <div style="flex:1"><div style="font-size:14px;font-weight:500">钱七</div><div style="font-size:12px;color:var(--dt-text-tertiary)">后端组 · 后端工程师 · Hi，我是后端组的钱七</div></div>
-        <div style="display:flex;gap:6px"><button style="height:32px;padding:0 16px;border:none;background:var(--dt-brand);color:var(--dt-bg-card);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.innerHTML='<div style=\'padding:24px;text-align:center;color:var(--dt-success);font-size:13px\'>✓ 已通过</div>'">通过</button><button style="height:30px;padding:0 16px;border:0.5px solid var(--dt-border);background:var(--dt-bg-card);color:var(--dt-text-regular);border-radius:var(--dt-radius-sm);font-size:12px;cursor:pointer" onclick="var c=this.closest('[data-req-card]');if(c)c.remove()">拒绝</button></div>
+      <div class="ct-req-card" data-req-card="true">
+        <div class="ct-req-avatar" style="background:var(--dt-purple)">钱</div>
+        <div class="ct-req-info"><div class="ct-req-name">钱七</div><div class="ct-req-desc">后端组 · 后端工程师 · Hi，我是后端组的钱七</div></div>
+        <div class="ct-req-actions"><button class="ct-req-btn" onclick="var c=this.closest('[data-req-card]');if(c)c.innerHTML='<div class=&quot;ct-req-done&quot;>✓ 已通过</div>'">通过</button><button class="ct-req-btn ghost" onclick="var c=this.closest('[data-req-card]');if(c)c.remove()">拒绝</button></div>
       </div>
     </div>
   </div>

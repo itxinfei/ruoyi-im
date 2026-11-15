@@ -28,6 +28,13 @@
 .cal-list-title{font-size:11px;color:var(--dt-text-tertiary);font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
 .cal-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--dt-radius-sm);cursor:pointer;font-size:12px}
 .cal-item:hover{background:var(--dt-bg-hover)}
+/* 本月日程卡片：8 处相同内联样式提取为 class（对齐 cal-card 基准） */
+.cal-item.card{display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer}
+.cal-item.card:hover{background:var(--dt-bg-hover)}
+.cal-card-bar{width:4px;border-radius:2px;flex-shrink:0}
+.cal-card-info{flex:1;min-width:0}
+.cal-card-title{font-size:13px;color:var(--dt-text-primary);font-weight:500}
+.cal-card-sub{font-size:11px;color:var(--dt-text-tertiary);margin-top:4px}
 .cal-chk{width:14px;height:14px;border-radius:3px;border:1.5px solid var(--dt-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cal-chk.on{border-color:var(--dt-brand);background:var(--dt-brand)}
 .cal-chk.on::after{content:'';width:4px;height:7px;border:solid var(--dt-bg-card);border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
@@ -190,60 +197,60 @@ if(window.isElectron||window.electronAPI){
       <div style="font-size:16px;font-weight:500;color:var(--dt-text-primary)">本月日程</div>
     </div>
     <div style="flex:1;overflow-y:auto;padding:12px">
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">产品需求评审</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月28日 10:00 · 会议室301</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-brand);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">产品需求评审</div>
+          <div class="cal-card-sub">10月28日 10:00 · 会议室301</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-warning);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">UI终稿确认</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月28日 14:00 · 线上</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-warning);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">UI终稿确认</div>
+          <div class="cal-card-sub">10月28日 14:00 · 线上</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-success);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">团队周会</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月28日 16:30 · 大会议室</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-success);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">团队周会</div>
+          <div class="cal-card-sub">10月28日 16:30 · 大会议室</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">迭代计划会</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月29日 09:00 · 会议室201</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-brand);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">迭代计划会</div>
+          <div class="cal-card-sub">10月29日 09:00 · 会议室201</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">产品评审会</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月7日 10:00 · 会议室301</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-brand);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">产品评审会</div>
+          <div class="cal-card-sub">10月7日 10:00 · 会议室301</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-warning);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">UI设计评审</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月14日 14:00 · 线上</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-warning);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">UI设计评审</div>
+          <div class="cal-card-sub">10月14日 14:00 · 线上</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-success);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">设计走查</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月20日 09:30 · 设计部</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-success);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">设计走查</div>
+          <div class="cal-card-sub">10月20日 09:30 · 设计部</div>
         </div>
       </div>
-      <div class="cal-item" style="display:flex;gap:12px;padding:12px;border-radius:var(--dt-radius-lg);background:var(--dt-bg-body);margin-bottom:8px;cursor:pointer">
-        <div style="width:4px;border-radius:2px;background:var(--dt-brand);flex-shrink:0"></div>
-        <div style="flex:1">
-          <div style="font-size:13px;color:var(--dt-text-primary);font-weight:500">迭代复盘</div>
-          <div style="font-size:11px;color:var(--dt-text-tertiary);margin-top:4px">10月24日 15:00 · 大会议室</div>
+      <div class="cal-item card">
+        <div class="cal-card-bar" style="background:var(--dt-brand);flex-shrink:0"></div>
+        <div class="cal-card-info">
+          <div class="cal-card-title">迭代复盘</div>
+          <div class="cal-card-sub">10月24日 15:00 · 大会议室</div>
         </div>
       </div>
     </div>

@@ -32,6 +32,13 @@
 .wb-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);padding:16px 24px;border:0.5px solid var(--dt-border)}
 .wc-title{font-size:14px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
 .wc-more{font-size:12px;color:var(--dt-brand);cursor:pointer}
+.dp-list{display:flex;flex-direction:column;gap:8px}
+.dp-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--dt-bg-hover);border-radius:var(--dt-radius-md);cursor:pointer}
+.dp-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.dp-row-info{flex:1;min-width:0}
+.dp-row-name{font-size:14px;color:var(--dt-text-primary);font-weight:500}
+.dp-row-sub{font-size:12px;color:var(--dt-text-secondary);margin-top:2px}
+.dp-row-time{font-size:12px;color:var(--dt-text-secondary)}
 .dp-empty{text-align:center;padding:24px;color:var(--dt-text-placeholder);font-size:13px}
 .wc-item{display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--dt-border-light)}
 .wc-item:last-child{border-bottom:none}
@@ -434,18 +441,18 @@ function openDetailPanel(title,items){
   if(!items||items.length===0){
     body.innerHTML='<div class="dp-empty">暂无记录</div>';
   }else{
-    var html='<div style="display:flex;flex-direction:column;gap:8px">';
+    var html='<div class="dp-list">';
     items.forEach(function(item){
       var name=item.querySelector('.wc-name')?item.querySelector('.wc-name').textContent:'';
       var from=item.querySelector('.wc-from')?item.querySelector('.wc-from').textContent:'';
       var time=item.querySelector('.wc-time')?item.querySelector('.wc-time').textContent:'';
       var dot=item.querySelector('.wc-dot');
       var dotColor=dot?dot.style.background:'var(--dt-brand)';
-      html+='<div style="display:flex;align-items:center;gap:12px;padding:12px 12px;background:var(--dt-bg-hover);border-radius:var(--dt-radius-md);cursor:pointer" onclick="closeDetailPanel()">'
-        +'<div style="width:8px;height:8px;border-radius:50%;background:'+dotColor+';flex-shrink:0"></div>'
-        +'<div style="flex:1;min-width:0"><div style="font-size:14px;color:var(--dt-text-primary);font-weight:500">'+name+'</div>'
-        +'<div style="font-size:12px;color:var(--dt-text-secondary);margin-top:2px">'+(from||time)+'</div></div>'
-        +'<div style="font-size:12px;color:var(--dt-text-secondary)">'+time+'</div></div>';
+      html+='<div class="dp-row" onclick="closeDetailPanel()">'
+        +'<div class="dp-dot" style="background:'+dotColor+'"></div>'
+        +'<div class="dp-row-info"><div class="dp-row-name">'+name+'</div>'
+        +'<div class="dp-row-sub">'+(from||time)+'</div></div>'
+        +'<div class="dp-row-time">'+time+'</div></div>';
     });
     html+='</div>';
     body.innerHTML=html;

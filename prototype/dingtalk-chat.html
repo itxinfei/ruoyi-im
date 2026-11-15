@@ -31,7 +31,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .session-item:hover{background:var(--dt-bg-hover)}
 .session-item.active{background:var(--dt-bg-session-active);box-shadow:inset 3px 0 0 var(--dt-brand)}
 .session-item.active:hover{background:var(--dt-bg-session-active)}
-.sess-avatar{width:var(--dt-avatar-session);height:var(--dt-avatar-session);border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:15px;font-weight:600;position:relative}
+.sess-avatar{width:var(--dt-avatar-session);height:var(--dt-avatar-session);border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600;position:relative}
 .sess-avatar .online-dot{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:var(--dt-success);border:2px solid var(--dt-bg-card);border-radius:50%}
 .sess-info{flex:1;min-width:0}
 .sess-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
@@ -43,7 +43,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .sess-prefix.draft{color:var(--dt-danger)}
 .sess-prefix.at-me{color:var(--dt-warning)}
 .sess-prefix.normal{color:var(--dt-text-tertiary)}
-.sess-unread{min-width:18px;height:18px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:9px;font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
+.sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 .pinned-bar{height:36px;display:flex;align-items:center;padding:0 16px;gap:6px;border-bottom:0.5px solid var(--dt-border-light)}
 .pinned-bar span{font-size:12px;color:var(--dt-text-tertiary)}
 .pinned-avatar{width:22px;height:22px;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:11px;font-weight:600;cursor:pointer}
@@ -64,7 +64,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .msg-wrap.self{flex-direction:row-reverse}
 /* 己方：气泡/元信息在 body 内右对齐（avatar 放 DOM 首位，row-reverse 下位于最右） */
 .msg-wrap.self .msg-body{display:flex;flex-direction:column;align-items:flex-end}
-.msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:14px;font-weight:600;cursor:pointer}
+.msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:13px;font-weight:600;cursor:pointer}
 .msg-wrap:not(.self) .msg-avatar{margin-top:16px}
 .msg-body{max-width:380px}
 .msg-sender{font-size:12px;color:var(--dt-text-secondary);margin-bottom:3px}
