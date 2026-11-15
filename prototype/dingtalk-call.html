@@ -61,6 +61,12 @@
 /* Toggle state */
 .ctrl-btn.toggled{background:rgba(255,255,255,0.35)}
 .ctrl-btn.toggled::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:var(--dt-bg-card)}
+
+/* 移动端适配（≤768px）：通话记录全宽限高，通话区占剩余高度 */
+@media (max-width:768px){
+.call-list{width:100%;max-height:38vh;overflow-y:auto;border-right:none;border-bottom:0.5px solid var(--dt-border-light)}
+.call-main{width:100%;min-height:calc(100vh - 56px - 38vh)}
+}
 </style>
 </head>
 <body>
