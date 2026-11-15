@@ -777,7 +777,7 @@
     '.ctx-item,.mm-item,.more-menu-item,.l2-action-item,.toggle-switch,.mg-cell,' +
     '.a-node,.t-node,.g-node,.h5-plus-item,.rp-member,.search-modal-card,' +
     '.search-modal-file,.search-modal-msg,.ct-card,.msg-avatar,.crumb,.sortable,' +
-    '.am-file-upload,' +
+    '.am-file-upload,.my-card-item,.msg-read-status,.action,.cd-more-menu,.ding-tag-remove,.search-recent-tag,' +
     /* 无类名的行内可点击块（如通讯录快捷入口、后台统计卡片） */
     'div[onclick]:not([class])';
 
