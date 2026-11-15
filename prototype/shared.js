@@ -640,7 +640,8 @@
       for (var j = 0; j < parts.length; j++) {
         var p = parts[j];
         if (!p || !/item|node|row|cell/.test(p)) continue;
-        if (/^(l2-|sk-|t-arrow|xf-)/.test(p)) continue;
+        /* mg-cell 是日历月视图日期格（数量最多），自身有 selectDate 行为，不可作为下钻项 */
+        if (/^(l2-|sk-|t-arrow|xf-|mg-cell)/.test(p)) continue;
         counts[p] = (counts[p] || 0) + 1;
       }
     }
@@ -708,6 +709,8 @@
     if (!t || !t.closest) return;
     var item = t.closest('.' + sel);
     if (!item || !block.contains(item)) return;
+    /* 命中自身带交互的元素（onclick/链接/表单控件）时，优先执行其自身行为，不下钻 */
+    if (t.closest('[onclick],a[href],button,input,select,textarea,label')) return;
     setDepth(d + 1);
   }
 

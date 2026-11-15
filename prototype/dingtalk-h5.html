@@ -25,6 +25,7 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-av-teal:#00866C;--dt-av-orange:#A6672A;--dt-av-red:#C44C66;--dt-av-brown:#8B6914;
   --dt-radius-sm:4px;--dt-radius-md:6px;--dt-radius-lg:8px;--dt-radius-xl:12px;
   --dt-bubble-radius:12px;
+  --dt-avatar-chat:36px;
   --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
 }
 body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;justify-content:center;min-height:100vh;-webkit-tap-highlight-color:transparent}
@@ -101,9 +102,13 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .chat-time:first-child{margin-top:2px}
 .chat-msg-wrap{display:flex;gap:8px;margin-bottom:16px;max-width:82%}
 .chat-msg-wrap.self{flex-direction:row-reverse;margin-left:auto}
-.chat-msg-avatar{width:34px;height:34px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:13px;font-weight:600;line-height:1}
+.chat-msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:13px;font-weight:600;line-height:1}
 .chat-msg-body{min-width:0}
-.chat-msg-bubble{padding:9px 12px;border-radius:var(--dt-bubble-radius);font-size:15px;line-height:1.55;word-break:break-word;overflow-wrap:break-word}
+/* 己方：气泡在 body 内右对齐（avatar 已置 DOM 首位，row-reverse 下位于最右） */
+.chat-msg-wrap.self .chat-msg-body{display:flex;flex-direction:column;align-items:flex-end}
+/* 块化的气泡需显式右对齐，短气泡贴 body 右缘 */
+.chat-msg-wrap.self .chat-msg-bubble{align-self:flex-end;max-width:100%}
+.chat-msg-bubble{display:inline-block;max-width:100%;padding:9px 12px;border-radius:var(--dt-bubble-radius);font-size:15px;line-height:1.55;word-break:break-word;overflow-wrap:break-word}
 /* 非自己：白底深字，尖角在靠头像的左上 */
 .chat-msg-wrap:not(.self) .chat-msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
 /* 自己：品牌蓝实色 + 白字，尖角在靠头像的右上 */
@@ -302,10 +307,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       </div>
       <div class="chat-msg-list">
         <div class="chat-time">10月28日 14:35</div>
-        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body msg-appear"><div class="chat-msg-sender">张三·产品经理</div><div class="chat-msg-bubble">需求文档更新了，增加了三个核心场景的交互细节，大家看一下有没有问题 🙏</div><div class="chat-msg-meta"><span>14:01</span><span>3 人未读</span></div></div></div>
-        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-success);">李</div><div class="chat-msg-body msg-appear"><div class="chat-msg-sender">李四·设计师</div><div class="chat-msg-bubble">收到，我看下第7页那个按钮样式</div><div class="chat-msg-meta"><span>14:15</span></div></div></div>
-        <div class="chat-msg-wrap self"><div class="chat-msg-avatar" style="background:var(--dt-brand);">我</div><div class="chat-msg-body msg-appear"><div class="chat-msg-bubble"><span class="mention">@李四</span> 用的是蓝色 var(--dt-brand) 没问题</div><div class="chat-msg-meta"><span>14:30</span><span class="read-status">✓✓ 已读 2/8</span></div></div></div>
-        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body msg-appear"><div class="chat-msg-sender">张三·产品经理</div><div class="chat-msg-bubble">交互稿已经更新完了，<span class="mention">@李四</span> 你看下有没有需要调整的～</div><div class="chat-msg-meta"><span>14:35</span><span>5 人未读</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body"><div class="chat-msg-sender">张三·产品经理</div><div class="chat-msg-bubble">需求文档更新了，增加了三个核心场景的交互细节，大家看一下有没有问题 🙏</div><div class="chat-msg-meta"><span>14:01</span><span>3 人未读</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-success);">李</div><div class="chat-msg-body"><div class="chat-msg-sender">李四·设计师</div><div class="chat-msg-bubble">收到，我看下第7页那个按钮样式</div><div class="chat-msg-meta"><span>14:15</span></div></div></div>
+        <div class="chat-msg-wrap self"><div class="chat-msg-avatar" style="background:var(--dt-brand);">我</div><div class="chat-msg-body"><div class="chat-msg-bubble"><span class="mention">@李四</span> 用的是蓝色 var(--dt-brand) 没问题</div><div class="chat-msg-meta"><span>14:30</span><span class="read-status">✓✓ 已读 2/8</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body"><div class="chat-msg-sender">张三·产品经理</div><div class="chat-msg-bubble">交互稿已经更新完了，<span class="mention">@李四</span> 你看下有没有需要调整的～</div><div class="chat-msg-meta"><span>14:35</span><span>5 人未读</span></div></div></div>
       </div>
       <div class="h5-plus-panel" id="h5-plus-panel">
         <div class="h5-plus-grid">
@@ -498,7 +503,7 @@ function h5SendMsg(){
   var list=document.querySelector('.chat-msg-list');
   if(!list)return;
   var wrap=document.createElement('div');
-  wrap.className='chat-msg-wrap self msg-appear';
+  wrap.className='chat-msg-wrap self';
   wrap.innerHTML='<div class="chat-msg-avatar" style="background:var(--dt-brand);">我</div>'
     +'<div class="chat-msg-body"><div class="chat-msg-bubble"></div>'
     +'<div class="chat-msg-meta"><span>'+h5Now()+'</span><span class="read-status">✓ 已读 1/8</span></div></div>';

@@ -37,7 +37,7 @@
 .dc-sn{font-size:12px;color:var(--dt-text-secondary)}
 .dc-row{display:flex;padding:12px 0;border-bottom:0.5px solid var(--dt-border-light)}
 .dc-label{width:100px;font-size:13px;color:var(--dt-text-secondary);flex-shrink:0}
-.dc-value{flex:1;font-size:13px;color:var(--dt-text-primary)}
+.dc-value{flex:1;min-width:0;word-break:break-word;font-size:13px;color:var(--dt-text-primary)}
 .dc-approvers{margin-top:24px;border-top:0.5px solid var(--dt-border-light);padding-top:16px}
 .dc-appr-title{font-size:13px;font-weight:500;color:var(--dt-text-regular);margin-bottom:12px}
 .flow-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
@@ -63,16 +63,6 @@
 
 .approval-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center}
 .approval-overlay.show{display:flex}
-.approval-detail{background:var(--dt-bg-card);border-radius:var(--dt-radius-xl);width:420px;max-height:80vh;overflow-y:auto;}
-.approval-header{padding:16px 24px;border-bottom:0.5px solid var(--dt-border-light);font-size:15px;font-weight:500;display:flex;justify-content:space-between;align-items:center}
-.approval-close{width:24px;height:24px;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-tertiary)}
-.approval-body{padding:24px}
-.approval-flow{padding:16px 0;border-bottom:0.5px solid var(--dt-border-light)}
-.approval-actions{display:flex;gap:8px;padding:16px 0}
-.approval-actions button{flex:1;height:36px;border-radius:var(--dt-radius-md);font-size:13px;font-weight:500;cursor:pointer}
-.approval-pass{background:var(--dt-brand);color:var(--dt-bg-card);border:none}
-.approval-reject{background:var(--dt-bg-card);color:var(--dt-danger);border:0.5px solid var(--dt-danger)}
-.approval-transfer{background:var(--dt-bg-card);color:var(--dt-text-regular);border:0.5px solid var(--dt-border)}
 .approval-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:14px;z-index:300;opacity:0;transition:opacity 0.2s;pointer-events:none}
 .approval-toast.show{opacity:1}
 /* 新增发起审批弹窗 */

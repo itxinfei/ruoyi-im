@@ -254,7 +254,7 @@ if(window.isElectron||window.electronAPI){
 <!-- 好友请求弹窗 -->
 <div class="ct-overlay" id="reqOverlay" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="ct-card" onclick="event.stopPropagation()">
-    <div class="ct-card-hdr"><div class="ct-card-body">好友请求 (2)</div><button aria-label="关闭好友请求" onclick="document.getElementById('reqOverlay').classList.remove('show')" class="panel-close">✕</button></div>
+    <div class="ct-card-hdr"><span>好友请求 (2)</span><button aria-label="关闭好友请求" onclick="document.getElementById('reqOverlay').classList.remove('show')" class="panel-close">✕</button></div>
     <div style="padding:16px">
       <div data-req-card="true" style="display:flex;align-items:center;gap:12px;padding:12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-lg);margin-bottom:8px">
         <div style="width:40px;height:40px;border-radius:var(--dt-radius-md);background:var(--dt-av-pink);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600">赵</div>
@@ -303,7 +303,7 @@ function showContact(name,role,dept,id,email,color){
   var deptVal=document.getElementById('cdDeptVal');if(deptVal)deptVal.textContent=dept;
   var em=document.getElementById('cdEmail');if(em)em.textContent=email;
   var online=document.getElementById('cdOnline');
-  if(online){online.style.display=(name!=='艾伦'&&name!=='郑十一')?'block':'none';}
+  if(online){online.style.display=(name!=='艾伦')?'block':'none';}
 }
 function showToast(msg){var t=document.getElementById('ctToast');if(t){t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);}}
 // Close more menu when clicking outside

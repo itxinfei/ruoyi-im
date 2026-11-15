@@ -443,7 +443,7 @@ function renderMonthGrid(y,m){
       if(evs){
         var shown=evs.slice(0,2);
         shown.forEach(function(e){evHtml+='<div class="mg-ev" style="background:'+e.color+'"><span style="opacity:0.7">'+e.time+'</span> '+e.name+'</div>';});
-        if(evs.length>2)evHtml+='<div class="mg-more">+'+(evs.length-2)+' more</div>';
+        if(evs.length>2)evHtml+='<div class="mg-more">+'+(evs.length-2)+' 条</div>';
       }
       rowsHtml+='<div class="'+cls+'" onclick="selectDate('+cell.d+')"><div class="mg-date">'+cell.d+'</div>'+evHtml+'</div>';
     }

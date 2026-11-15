@@ -24,6 +24,8 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--dt-bg-body)
 
 /* 主内容区 */
 .main-area { flex:1; display:flex; flex-direction:column; background:var(--dt-bg-card); margin:8px; border:1px solid var(--dt-border); border-radius:var(--dt-radius-sm); overflow:hidden; }
+/* 移动端：L2 全宽展示，清除桌面端外边距避免右侧溢出 */
+@media (max-width:768px){.main-area{margin:0}}
 
 /* 菜单栏 */
 .menu-bar { display:flex; align-items:center; padding:0 8px; background:var(--dt-bg-body); border-bottom:1px solid var(--dt-border); }
@@ -432,5 +434,7 @@ renderFileList();
 </script>
 
 <script src="shared.js"></script>
+<!-- SVG sprite：右键菜单图标（与邮箱页同源） -->
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
 </body>
 </html>

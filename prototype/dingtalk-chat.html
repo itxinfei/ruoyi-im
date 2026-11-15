@@ -62,6 +62,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .time-sep span{background:var(--dt-bg-card);padding:4px 12px;border-radius:var(--dt-radius-lg);border:0.5px solid var(--dt-border)}
 .msg-wrap{display:flex;gap:12px;margin-bottom:16px}
 .msg-wrap.self{flex-direction:row-reverse}
+/* 己方：气泡/元信息在 body 内右对齐（avatar 放 DOM 首位，row-reverse 下位于最右） */
+.msg-wrap.self .msg-body{display:flex;flex-direction:column;align-items:flex-end}
 .msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:14px;font-weight:600;cursor:pointer}
 .msg-wrap:not(.self) .msg-avatar{margin-top:16px}
 .msg-body{max-width:380px}
@@ -70,6 +72,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .msg-wrap:not(.self) .msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
 .msg-wrap.self .msg-bubble{background:var(--dt-brand);color:var(--dt-bg-panel);border-top-right-radius:4px}
 .msg-meta{display:flex;align-items:center;gap:6px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
+.msg-wrap.self .msg-meta{justify-content:flex-end}
 .sys-msg-row{text-align:center;margin:12px 0}
 .sys-msg{background:rgba(0,0,0,0.04);color:var(--dt-text-secondary);font-size:11px;padding:4px 16px;border-radius:var(--dt-radius-lg);display:inline-block}
 
@@ -245,11 +248,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       </div>
     </div>
     <div class="msg-wrap self">
+      <div class="msg-avatar" style="background:var(--dt-brand)">我</div>
       <div class="msg-body">
         <div class="msg-bubble">张总，方案已发您邮箱，请查收。另外评审会PPT正在收尾，中午前完成。</div>
         <div class="msg-meta"><span>已读</span><span>·</span><span>10:32</span></div>
       </div>
-      <div class="msg-avatar" style="background:var(--dt-brand)">我</div>
     </div>
     <div class="msg-wrap">
       <div class="msg-avatar" style="background:var(--dt-av-indigo)">首</div>
@@ -261,11 +264,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
     <div class="sys-msg-row"><div class="sys-msg">张总 更改群名为「产品需求评审」</div></div>
     <div class="msg-wrap self">
+      <div class="msg-avatar" style="background:var(--dt-brand)">我</div>
       <div class="msg-body">
         <div class="msg-bubble">收到！已定好会议室302，辛苦了张总。</div>
         <div class="msg-meta"><span>送达</span><span>·</span><span>14:23</span></div>
       </div>
-      <div class="msg-avatar" style="background:var(--dt-brand)">我</div>
     </div>
   </div>
   <div class="input-bar">
