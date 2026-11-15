@@ -109,3 +109,7 @@ docs/dist/
 prototype/.impeccable/
 prototype/_work/
 prototype/_restore.ps1
+
+# 工具产物 / 每日记忆（本地生成，不入库）
+.impeccable/
+.workbuddy/
