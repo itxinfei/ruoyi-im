@@ -117,14 +117,14 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* ============================================================
    L1 左侧导航栏 · 64px 深色
    ============================================================ */
-.l1-nav{width:var(--dt-nav-sidebar-width);background:var(--dt-nav-dark);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;z-index:10}
-.l1-nav .l1-avatar{width:var(--dt-avatar-l1);height:var(--dt-avatar-l1);border-radius:var(--dt-radius-sm);background:var(--dt-brand);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:14px;font-weight:600;margin-bottom:16px;cursor:pointer}
-.l1-nav .l1-item{width:44px;height:44px;border-radius:var(--dt-radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--dt-nav-sidebar-text);font-size:12px;text-decoration:none;transition:background 0.1s}
-.l1-nav .l1-item:hover{background:var(--dt-nav-hover);color:rgba(255,255,255,0.9)}
-.l1-nav .l1-item.active{color:var(--dt-nav-sidebar-text-active);background:var(--dt-nav-active)}
+.l1-nav{width:var(--dt-nav-sidebar-width);background:var(--dt-nav-sidebar-bg);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;z-index:10}
+.l1-nav .l1-avatar{width:var(--dt-avatar-l1);height:var(--dt-avatar-l1);border-radius:var(--dt-radius-sm);background:var(--dt-brand);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:14px;font-weight:600;margin-bottom:16px;cursor:pointer;flex-shrink:0}
+.l1-nav .l1-item{position:relative;width:44px;height:44px;border-radius:var(--dt-radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--dt-nav-sidebar-text);font-size:12px;text-decoration:none;transition:background 0.1s}
+.l1-nav .l1-item:hover{background:var(--dt-nav-hover);color:var(--dt-nav-sidebar-text-active)}
+.l1-nav .l1-item.active{color:var(--dt-nav-sidebar-text-active);background:var(--dt-nav-active);box-shadow:inset 3px 0 0 var(--dt-brand)}
+.l1-nav .l1-item.active:hover{background:var(--dt-nav-active)}
 .l1-nav .l1-item svg{width:22px;height:22px;flex-shrink:0}
 .l1-nav .l1-item .l1-badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px}
-.l1-nav .l1-item{position:relative}
 .l1-nav .l1-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:8px}
 
 /* ============================================================
@@ -319,6 +319,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   body.xf-mobile .xf-l1 .l1-avatar{display:none}
   body.xf-mobile .xf-l1 .l1-bottom{margin-top:0;flex:1;flex-direction:row;align-items:stretch;gap:0}
   body.xf-mobile .xf-l1 .l1-item{flex:1;width:auto;height:56px;border-radius:0;font-size:11px}
+  /* 底部 Tab：主色指示条转到顶部 */
+  body.xf-mobile .xf-l1 .l1-item.active{box-shadow:inset 0 3px 0 var(--dt-brand)}
   /* L2 / L3 / L4 逐级切换（!important 用于覆盖页面内联布局样式） */
   body.xf-mobile .xf-l2,body.xf-mobile .xf-l3,body.xf-mobile .xf-l4{position:static!important;width:100%!important;height:calc(100vh - 56px)!important;min-height:320px;border-right:none;overflow:hidden;display:none!important}
   body.xf-mobile.xf-depth-0 .xf-l2{display:flex!important}
