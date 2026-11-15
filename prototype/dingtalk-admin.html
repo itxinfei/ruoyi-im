@@ -109,12 +109,6 @@
 .confirm-cancel{background:var(--dt-bg-card);border:0.5px solid var(--admin-card-border);color:var(--dt-text-regular)}
 .confirm-ok{background:var(--dt-danger);color:var(--dt-bg-card);border:none;}
 
-/* 空页面占位 */
-.page-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:100px 24px;color:var(--dt-text-placeholder)}
-.page-placeholder .icon{font-size:56px;margin-bottom:24px;opacity:0.5}
-.page-placeholder h3{font-size:17px;color:var(--dt-text-secondary);margin-bottom:8px;font-weight:500}
-.page-placeholder p{font-size:13.5px;color:var(--dt-text-placeholder)}
-
 /* 开关高亮联动 */
 .table-row.highlight,.group-row.highlight{background:var(--dt-warning-light) !important;transition:background 0.3s}
 .table-row.highlight td,.group-row.highlight td{color:var(--dt-warning) !important}
@@ -428,7 +422,7 @@ body.electron .electron-titlebar{display:flex;flex:none;width:100%}
       </div>
     </div>
 
-    <!-- 其他页面占位 -->
+    <!-- 非功能开关页容器：容纳各管理页，切换导航时显隐对应子页 -->
     <div class="am-content" id="otherPage" style="display:none">
       <!-- 用户列表页面 -->
       <div id="usersPage" style="display:none">
@@ -2229,12 +2223,6 @@ body.electron .electron-titlebar{display:flex;flex:none;width:100%}
         </div>
       </div>
 
-      <!-- 其他页面占位 -->
-      <div class="page-placeholder" id="defaultPage">
-        <div class="icon"><svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 20h20z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.6"/></svg></div>
-        <h3 id="otherPageTitle">该模块原型未实现</h3>
-        <p>此导航项仅作结构占位，未纳入本轮原型交付范围</p>
-      </div>
     </div>
 
     <!-- 保存栏 -->
@@ -2472,7 +2460,6 @@ var pageNames = {
   home: '首页',
   features: '功能开关',
   users: '用户列表',
-  groups: '群组管理',
   org: '组织架构',
   roles: '角色权限',
   admins: '管理员管理',
@@ -2514,13 +2501,7 @@ document.querySelectorAll('.as-nav-item').forEach(function(item) {
       
       // 显示对应页面
       var targetPage = document.getElementById(page + 'Page');
-      if (targetPage) {
-        targetPage.style.display = '';
-      } else {
-        // 没有对应页面就显示默认占位
-        document.getElementById('defaultPage').style.display = '';
-        document.getElementById('otherPageTitle').textContent = pageNames[page] + ' · 建设中';
-      }
+      if (targetPage) targetPage.style.display = '';
     }
   });
 });

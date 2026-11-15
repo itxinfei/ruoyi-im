@@ -66,6 +66,11 @@
 @media (max-width:768px){
 .call-list{width:100%;max-height:38vh;overflow-y:auto;border-right:none;border-bottom:0.5px solid var(--dt-border-light)}
 .call-main{width:100%;min-height:calc(100vh - 56px - 38vh)}
+/* 320px 下控制栏原 332px 会溢出，缩小按钮/间距并允许居中换行 */
+.call-controls{left:50%;transform:translateX(-50%);flex-wrap:wrap;justify-content:center;gap:12px;bottom:24px;max-width:calc(100% - 32px)}
+.ctrl-btn{width:48px;height:48px}
+.ctrl-btn.hangup{width:56px;height:56px}
+.video-pip{top:16px;right:16px}
 }
 </style>
 </head>

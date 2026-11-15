@@ -75,6 +75,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .detail-actions{display:flex;gap:2px}
 .detail-btn{width:30px;height:30px;border:none;background:transparent;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary)}
 .detail-btn:hover{background:var(--dt-bg-body)}
+.detail-close{display:none}
 .detail-body{flex:1;overflow-y:auto;padding:24px}
 .detail-meta{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px;padding-bottom:16px;border-bottom:0.5px solid var(--dt-border-light)}
 .detail-av{width:40px;height:40px;border-radius:4px;background:var(--dt-brand);color:var(--dt-bg-card);font-size:15px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -95,6 +96,14 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .reply-btn.primary:hover{background:var(--dt-brand-hover)}
 .reply-btn.secondary{background:var(--dt-bg-body);color:var(--dt-text-secondary)}
 .reply-btn.secondary:hover{background:var(--dt-bg-active)}
+
+/* 中屏（769–1279px）：三栏总宽不足（64+240+575+400=1279）时，详情面板改为右侧覆盖层，
+   列表获得完整宽度，避免 .list-toolbar 标题被挤压换行；>1279px 仍为三栏 */
+@media (min-width:769px) and (max-width:1279px){
+.mail-detail{display:none}
+.mail-detail.open{display:flex;position:absolute;top:36px;right:0;bottom:0;width:400px;max-width:calc(100% - 64px);z-index:130;box-shadow:-6px 0 16px rgba(0,0,0,0.10)}
+.detail-close{display:flex}
+}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:2px}
@@ -241,7 +250,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <div class="mail-star starred"><svg class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">GitHub</div>
       <div class="mail-content">
-        <div class="mail-subject">[xinfei-im] Pull Request #128: 新增消息已读状态功能</div>
+        <div class="mail-subject">[心飞IM] Pull Request #128: 新增消息已读状态功能</div>
         <div class="mail-preview">zhangsan commented on this pull request: LGTM, 可以合并</div>
       </div>
       <div class="mail-right">
@@ -309,6 +318,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <button class="detail-btn" title="转发" aria-label="转发"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg></button>
       <button class="detail-btn" title="删除" aria-label="删除"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
       <button class="detail-btn" title="更多" aria-label="更多"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+      <button class="detail-btn detail-close" type="button" title="关闭" aria-label="关闭" onclick="closeMailDetail()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
   </div>
   <div class="detail-body">
@@ -348,6 +358,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 (function(){
   'use strict';
   var toastTimer=null;
+  window.closeMailDetail=function(){
+    var d=document.querySelector('.mail-detail');
+    if(d)d.classList.remove('open');
+  };
   function toast(msg){
     var t=document.getElementById('mailToast');
     if(!t)return;
@@ -376,6 +390,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         el.remove();
         var d=document.querySelector('.mail-detail');
         if(d)d.style.display='none';
+        if(d)d.classList.remove('open');
         toast('已删除 1 封邮件');
       }
     });
@@ -387,7 +402,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         for(var n=0;n<items.length;n++)items[n].classList.remove('active');
         el.classList.add('active');
         var d=document.querySelector('.mail-detail');
-        if(d)d.style.display='';
+        if(d){d.style.display='';d.classList.add('open');}
         var s=el.querySelector('.mail-subject');
         var sub=document.querySelector('.detail-subject');
         if(s&&sub)sub.textContent=s.textContent;
@@ -404,7 +419,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       });
     })(i);
   }
-  var da=document.querySelectorAll('.detail-actions .detail-btn');
+  var da=document.querySelectorAll('.detail-actions .detail-btn:not(.detail-close)');
   for(var j=0;j<da.length;j++){
     (function(idx){
       da[idx].addEventListener('click',function(){

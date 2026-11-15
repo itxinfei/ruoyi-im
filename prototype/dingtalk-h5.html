@@ -252,7 +252,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .xf-settings-theme-dots{display:flex;gap:12px}
 .xf-settings-theme-dot{position:relative;width:28px;height:28px;border-radius:var(--dt-radius-full);cursor:pointer;border:2px solid transparent}
 .xf-settings-theme-dot.active{border-color:var(--dt-text-primary)}
-.xf-settings-theme-dot.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;line-height:1}
+.xf-settings-theme-dot.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:700;line-height:1}
 .xf-settings-logout{width:100%;height:46px;border:0.5px solid var(--dt-border);background:var(--dt-bg-panel);border-radius:var(--dt-radius-lg);color:var(--dt-danger);font-size:14px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
 .xf-settings-logout:active{background:var(--dt-danger-light)}
 .xf-settings-value{font-size:13px;color:var(--dt-text-tertiary)}
@@ -269,7 +269,6 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .tab-item.active{color:var(--dt-brand)}
 .tab-item svg{width:22px;height:22px;fill:currentColor}
 .tab-item .tab-badge{position:absolute;top:1px;right:50%;transform:translate(14px,0);min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
-.tab-center{margin-top:0}
 /* 34px 按钮比 22px 图标位高 12px，居中后标签会比其他标签低 6px；相对上移 5px 使其基线对齐且不与按钮贴合 */
 .tab-center span{position:relative;top:-5px}
 .tab-add-btn{width:46px;height:34px;flex-shrink:0;background:var(--dt-brand);border-radius:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;}

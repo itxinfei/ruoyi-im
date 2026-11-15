@@ -9,7 +9,7 @@
 /* 审批专属 CSS */
 
 .l2-tabs{display:flex;border-bottom:0.5px solid var(--dt-border-light)}
-.l2-tab{flex:1;padding:12px 4px;text-align:center;font-size:13px;cursor:pointer;color:var(--dt-text-secondary);position:relative;white-space:nowrap}
+.l2-tab{flex:1 1 auto;padding:12px 0;text-align:center;font-size:13px;cursor:pointer;color:var(--dt-text-secondary);position:relative;white-space:nowrap;min-width:0}
 .l2-tab.active{color:var(--dt-brand);font-weight:500}
 .l2-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--dt-brand);border-radius:1px}
 .l2-search{flex:1;height:32px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--dt-text-secondary);font-size:13px}
@@ -218,6 +218,7 @@
 .l3-badge.done{background:var(--dt-success-light);color:var(--dt-success)}
 .l3-badge.cc{background:var(--dt-bg-body);color:var(--dt-text-secondary)}
 .dc-empty{padding:48px 16px;text-align:center;color:var(--dt-text-tertiary);font-size:14px}
+.approval-empty{padding:48px 16px;text-align:center;color:var(--dt-text-tertiary);font-size:14px}
 </style>
 </head>
 <body>
@@ -298,6 +299,7 @@ if(window.isElectron||window.electronAPI){
     <div class="l2-tab" data-tab="cc">抄送我的</div>
   </div>
   <div class="approval-list">
+    <div class="approval-empty" id="approvalEmpty" style="display:none">暂无相关审批记录</div>
     <div class="approval-item active" data-id="1" data-tab="pending">
       <div class="ai-header">
         <div class="ai-type"><span style="color:var(--dt-warning);">📋</span> 请假申请</div>
@@ -413,6 +415,26 @@ function showApprovalToast(msg){
   t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show')},1500);
 }
+
+// ===== 页签切换：按 data-tab 过滤审批条目，空分类给出真实空状态 =====
+(function(){
+  var tabs=document.querySelectorAll('.l2-tab');
+  var empty=document.getElementById('approvalEmpty');
+  tabs.forEach(function(tab){
+    tab.addEventListener('click',function(){
+      tabs.forEach(function(t){t.classList.remove('active');});
+      tab.classList.add('active');
+      var key=tab.getAttribute('data-tab');
+      var visible=0;
+      document.querySelectorAll('.approval-item').forEach(function(it){
+        var show=it.getAttribute('data-tab')===key;
+        it.style.display=show?'':'none';
+        if(show)visible++;
+      });
+      if(empty)empty.style.display=visible?'none':'';
+    });
+  });
+})();
 
 // ===== 打开发起审批弹窗 =====
 document.getElementById('openCreateApproval').addEventListener('click', function() {

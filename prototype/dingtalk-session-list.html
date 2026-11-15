@@ -52,21 +52,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .sess-time{font-size:11px;color:var(--dt-text-tertiary);flex-shrink:0;margin-left:6px;font-variant-numeric:tabular-nums}
 .sess-row2{display:flex;align-items:center;gap:4px;font-size:13px;color:var(--dt-text-secondary)}
 .sess-msg-text{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
-.sess-prefix{font-size:11px;font-weight:600;flex-shrink:0;padding:1px 5px;border-radius:3px;line-height:1.4}
-.sess-prefix.draft{background:var(--dt-danger-light);color:var(--dt-danger)}
-.sess-prefix.at-me{background:var(--dt-bg-card)7E6;color:var(--dt-warning)}
-.sess-prefix.at-all{background:var(--dt-bg-card)7E6;color:var(--dt-warning)}
-.sess-prefix.image{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.file{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.voice{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.video{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.link{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.card{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.ding{background:var(--dt-bg-card)7E6;color:var(--dt-danger)}
-.sess-prefix.system{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.location{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.redpacket{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
-.sess-prefix.transfer{background:var(--dt-bg-hover);color:var(--dt-text-tertiary)}
+/* 会话列表前缀：颜色/字重对齐需求文档 14《专项微交互》第四节（红=草稿/DING、橙=@我、灰=类型），不加重底色 */
+.sess-prefix{font-size:12px;font-weight:400;color:var(--dt-text-tertiary);flex-shrink:0;padding:1px 5px;border-radius:3px;line-height:1.4}
+.sess-prefix.draft{color:var(--dt-danger);font-weight:500}
+.sess-prefix.at-me,.sess-prefix.at-all{color:var(--dt-warning);font-weight:600}
+.sess-prefix.ding{color:var(--dt-danger);font-weight:600}
 .sess-muted-icon{font-size:12px;flex-shrink:0;color:var(--dt-text-tertiary)}
 .sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0;font-variant-numeric:tabular-nums}
 .sess-unread.dots{width:10px;height:10px;padding:0;border-radius:50%}

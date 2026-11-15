@@ -39,10 +39,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .sess-time{font-size:11px;color:var(--dt-text-tertiary);flex-shrink:0;margin-left:4px}
 .sess-row2{display:flex;align-items:center;gap:4px}
 .sess-msg{font-size:13px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sess-prefix{font-size:12px;font-weight:600;flex-shrink:0;padding:1px 5px;border-radius:3px}
-.sess-prefix.draft{color:var(--dt-danger)}
-.sess-prefix.at-me{color:var(--dt-warning)}
-.sess-prefix.normal{color:var(--dt-text-tertiary)}
+/* 会话列表前缀：与 session-list 页同一套（红=草稿、橙=@我、灰=类型），颜色/字重对齐需求文档 14《专项微交互》第四节 */
+.sess-prefix{font-size:12px;font-weight:400;color:var(--dt-text-tertiary);flex-shrink:0;padding:1px 5px;border-radius:3px;line-height:1.4}
+.sess-prefix.draft{color:var(--dt-danger);font-weight:500}
+.sess-prefix.at-me{color:var(--dt-warning);font-weight:600}
 .sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 .pinned-bar{height:36px;display:flex;align-items:center;padding:0 16px;gap:6px;border-bottom:0.5px solid var(--dt-border-light)}
 .pinned-bar span{font-size:12px;color:var(--dt-text-tertiary)}
@@ -107,10 +107,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .info-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px}
 .info-row .label{color:var(--dt-text-tertiary)}
 .info-row .val{color:var(--dt-text-secondary)}
-.toggle-switch{width:36px;height:20px;background:var(--dt-success);border-radius:var(--dt-radius-full);position:relative;cursor:pointer}
-.toggle-switch.off{background:var(--dt-border)}
-.toggle-switch::after{content:'';position:absolute;width:16px;height:16px;background:var(--dt-bg-card);border-radius:50%;top:2px;right:2px;transition:right 0.15s}
-.toggle-switch.off::after{right:auto;left:2px}
+.toggle-switch{width:36px;height:20px;background:var(--dt-border);border-radius:var(--dt-radius-full);position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0}
+.toggle-switch.on{background:var(--dt-brand)}
+.toggle-switch::after{content:'';position:absolute;width:16px;height:16px;background:var(--dt-bg-card);border-radius:50%;top:2px;left:2px;transition:transform 0.2s}
+.toggle-switch.on::after{transform:translateX(16px)}
 
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:2px}
@@ -200,14 +200,14 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <div class="sess-avatar" style="background:var(--dt-purple)">产</div>
       <div class="sess-info">
         <div class="sess-row1"><span class="sess-name">产品部(12)</span><span class="sess-time">昨天</span></div>
-        <div class="sess-row2"><span class="sess-prefix normal">[图片]</span><span class="sess-msg">[图片]王五:转发</span></div>
+        <div class="sess-row2"><span class="sess-prefix">[图片]</span><span class="sess-msg">[图片]王五:转发</span></div>
       </div>
     </div>
     <div class="session-item">
       <div class="sess-avatar" style="background:var(--dt-av-cyan)">设</div>
       <div class="sess-info">
         <div class="sess-row1"><span class="sess-name">设计组(8)</span><span class="sess-time">昨天</span></div>
-        <div class="sess-row2"><span class="sess-prefix normal">[文件]</span><span class="sess-msg">赵六:需求终稿V3.pdf</span><span class="sess-unread">12</span></div>
+        <div class="sess-row2"><span class="sess-prefix">[文件]</span><span class="sess-msg">赵六:需求终稿V3.pdf</span><span class="sess-unread">12</span></div>
       </div>
     </div>
     <div class="session-item">
@@ -221,7 +221,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <div class="sess-avatar" style="background:var(--dt-av-blue)">刘</div>
       <div class="sess-info">
         <div class="sess-row1"><span class="sess-name">刘洋</span><span class="sess-time">周一</span></div>
-        <div class="sess-row2"><span class="sess-prefix normal">[名片]</span><span class="sess-msg">[个人名片]</span></div>
+        <div class="sess-row2"><span class="sess-prefix">[名片]</span><span class="sess-msg">[个人名片]</span></div>
       </div>
     </div>
   </div>
@@ -305,9 +305,9 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
     <div class="info-section">
       <div class="section-title">群聊设置</div>
-      <div class="info-row"><span class="label">消息免打扰</span><div class="toggle-switch off"></div></div>
-      <div class="info-row"><span class="label">置顶聊天</span><div class="toggle-switch"></div></div>
-      <div class="info-row"><span class="label">保存到通讯录</span><div class="toggle-switch"></div></div>
+      <div class="info-row"><span class="label">消息免打扰</span><div class="toggle-switch" id="muteToggle"></div></div>
+      <div class="info-row"><span class="label">置顶聊天</span><div class="toggle-switch on" id="pinToggle"></div></div>
+      <div class="info-row"><span class="label">保存到通讯录</span><div class="toggle-switch" id="saveToggle"></div></div>
     </div>
     <div class="info-section">
       <div class="section-title"><span class="member-label">群成员 (12人)<a href="#">查看全部</a></span></div>
@@ -324,6 +324,12 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
   </div>
 </div>
+<script>
+// 群聊设置开关：与全局 .toggle-switch 语义对齐（默认关，.on 为开，品牌蓝）
+document.querySelectorAll('.info-section .toggle-switch').forEach(function(sw){
+  sw.addEventListener('click',function(){ sw.classList.toggle('on'); });
+});
+</script>
 <script src="shared.js"></script>
 </body>
 </html>
