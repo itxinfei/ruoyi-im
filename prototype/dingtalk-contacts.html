@@ -221,10 +221,10 @@ if(window.isElectron||window.electronAPI){
     <div class="cd-info">
       <div class="cd-row"><span class="cd-label">工号</span><span class="cd-val" id="cdEmp">XF10035</span></div>
       <div class="cd-row"><span class="cd-label">部门</span><span class="cd-val" id="cdDeptVal">产品设计部</span></div>
-      <div class="cd-row"><span class="cd-label">手机</span><span class="cd-val">138****5678</span></div>
+      <div class="cd-row"><span class="cd-label">手机</span><span class="cd-val" id="cdPhone">138****0035</span></div>
       <div class="cd-row"><span class="cd-label">邮箱</span><span class="cd-val" id="cdEmail">lisi@xinfei.com</span></div>
-      <div class="cd-row"><span class="cd-label">工位</span><span class="cd-val">3F-B-042</span></div>
-      <div class="cd-row"><span class="cd-label">汇报给</span><span class="cd-val">张三（产品经理）</span></div>
+      <div class="cd-row"><span class="cd-label">工位</span><span class="cd-val" id="cdStation">3F-A-0035</span></div>
+      <div class="cd-row"><span class="cd-label">汇报给</span><span class="cd-val" id="cdReport">徐静（设计总监）</span></div>
     </div>
   </div>
 </div>
@@ -280,6 +280,15 @@ function showContact(name,role,dept,id,email,color){
   var emp=document.getElementById('cdEmp');if(emp)emp.textContent=id;
   var deptVal=document.getElementById('cdDeptVal');if(deptVal)deptVal.textContent=dept;
   var em=document.getElementById('cdEmail');if(em)em.textContent=email;
+  // 手机/工位由工号派生，汇报对象由部门负责人表推导（部门负责人直接汇报 CEO）
+  var ph=document.getElementById('cdPhone');if(ph)ph.textContent='138****'+id.slice(-4);
+  var deptIdx=ORG.findIndex(function(d){return d[0]===dept;});
+  var st=document.getElementById('cdStation');if(st)st.textContent='3F-'+'ABCDE'.charAt(Math.max(deptIdx,0))+'-'+id.slice(-4);
+  var rp=document.getElementById('cdReport');
+  if(rp){
+    var head=DEPT_HEADS[dept]||[];
+    rp.textContent=(head[0]===name)?'CEO':head[0]+'（'+head[1]+'）';
+  }
 }
 function showToast(msg){var t=document.getElementById('ctToast');if(t){t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);}}
 // Close more menu when clicking outside
@@ -313,6 +322,14 @@ var CT_CONTACTS={
   '孙八':['var(--dt-av-teal)','XF10072','sunba@xinfei.com'],
   '周九':['var(--dt-av-indigo)','XF10080','zhoujiu@xinfei.com'],
   '吴十':['var(--dt-av-orange)','XF10085','wushi@xinfei.com']
+};
+// 部门负责人表（与 ORG 成员一致），用于推导「汇报给」关系线
+var DEPT_HEADS={
+  '产品设计部':['徐静','设计总监'],
+  '技术研发部':['何敏','架构师'],
+  '市场运营部':['冯刚','商务经理'],
+  '人力资源部':['周九','HRBP'],
+  '财务法务部':['邓艾','财务经理']
 };
 (function(){
   var pal=['var(--dt-av-blue)','var(--dt-av-indigo)','var(--dt-av-cyan)','var(--dt-av-pink)','var(--dt-av-teal)','var(--dt-av-orange)','var(--dt-av-red)','var(--dt-av-brown)','var(--dt-purple)','var(--dt-success)','var(--dt-warning)','var(--dt-danger)'];

@@ -144,6 +144,29 @@
   cursor: pointer;
 }
 .am-file-upload:hover { border-color: var(--dt-brand); color: var(--dt-brand); }
+/* 已选附件列表 */
+.am-file-list { margin-top: 8px; text-align: left; }
+.am-file-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 10px; border: 0.5px solid var(--dt-border);
+  border-radius: var(--dt-radius-md); margin-bottom: 6px;
+  font-size: 12px; color: var(--dt-text-primary);
+}
+.am-file-item .fname { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.am-file-item .fsize { color: var(--dt-text-tertiary); flex-shrink: 0; }
+.am-file-item button { border: none; background: transparent; color: var(--dt-text-tertiary); cursor: pointer; font-size: 14px; line-height: 1; padding: 2px; }
+.am-file-item button:hover { color: var(--dt-danger); }
+/* 转交选人弹层 */
+.tr-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3); z-index: 120; align-items: center; justify-content: center; }
+.tr-overlay.show { display: flex; }
+.tr-card { width: 320px; background: var(--dt-bg-card); border-radius: var(--dt-radius-2xl); overflow: hidden; }
+.tr-hdr { padding: 16px 20px; font-size: 15px; font-weight: 600; border-bottom: 0.5px solid var(--dt-border); display: flex; align-items: center; justify-content: space-between; }
+.tr-body { padding: 12px 16px; max-height: 320px; overflow-y: auto; }
+.tr-person { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--dt-radius-lg); cursor: pointer; }
+.tr-person:hover { background: var(--dt-bg-body); }
+.tr-person .tr-av { width: 36px; height: 36px; border-radius: var(--dt-radius-sm); display: flex; align-items: center; justify-content: center; color: var(--dt-bg-card); font-size: 14px; font-weight: 600; flex-shrink: 0; }
+.tr-person .tr-name { font-size: 14px; font-weight: 500; }
+.tr-person .tr-pos { font-size: 12px; color: var(--dt-text-tertiary); }
 .am-footer {
   padding: 16px 24px;
   border-top: 0.5px solid var(--dt-border-light);
@@ -378,9 +401,11 @@ if(window.isElectron||window.electronAPI){
       </div>
       <div class="am-form-group">
         <label class="am-label">附件材料</label>
-        <div class="am-file-upload" onclick="showApprovalToast('文件上传功能暂未开放')">
+        <div class="am-file-upload" id="amFileUpload" tabindex="0" role="button" aria-label="上传附件">
           <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
           <div style="margin-top:6px">点击上传附件（支持图片、PDF、文档，最大10MB）</div>
+          <input type="file" id="amFileInput" multiple accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" style="display:none">
+          <div class="am-file-list" id="amFileList"></div>
         </div>
       </div>
       <div class="am-form-group">
@@ -401,12 +426,103 @@ if(window.isElectron||window.electronAPI){
   </div>
 </div>
 
+<!-- 转交选人弹层 -->
+<div class="tr-overlay" id="transferOverlay">
+  <div class="tr-card" role="dialog" aria-modal="true" aria-label="选择转交人">
+    <div class="tr-hdr">转交给<button class="am-close" aria-label="关闭转交选人" onclick="closeTransferDialog()">✕</button></div>
+    <div class="tr-body" id="transferList"></div>
+  </div>
+</div>
+
 <script>
 function showApprovalToast(msg){
   var t=document.getElementById('approvalToast');
   t.textContent=msg;t.classList.add('show');
   setTimeout(function(){t.classList.remove('show')},1500);
 }
+
+// ===== 附件上传：真实选择文件并渲染可移除列表 =====
+(function(){
+  var upload=document.getElementById('amFileUpload');
+  var input=document.getElementById('amFileInput');
+  var list=document.getElementById('amFileList');
+  var files=[];
+  function fmtSize(n){
+    if(n<1024)return n+'B';
+    if(n<1024*1024)return (n/1024).toFixed(1)+'KB';
+    return (n/1024/1024).toFixed(1)+'MB';
+  }
+  function render(){
+    list.innerHTML=files.map(function(f,i){
+      return '<div class="am-file-item"><span class="fname">'+esc(f.name)+'</span><span class="fsize">'+fmtSize(f.size)+'</span><button aria-label="移除附件 '+esc(f.name)+'" data-i="'+i+'">✕</button></div>';
+    }).join('');
+  }
+  upload.addEventListener('click',function(e){
+    if(e.target.closest('.am-file-item'))return;
+    input.click();
+  });
+  upload.addEventListener('keydown',function(e){
+    if((e.key==='Enter'||e.key===' ')&&e.target===upload){e.preventDefault();input.click();}
+  });
+  input.addEventListener('change',function(){
+    for(var i=0;i<input.files.length;i++)files.push(input.files[i]);
+    input.value='';
+    render();
+  });
+  list.addEventListener('click',function(e){
+    var btn=e.target.closest('button[data-i]');
+    if(!btn)return;
+    files.splice(+btn.getAttribute('data-i'),1);
+    render();
+  });
+})();
+
+// ===== 转交：选人后更新审批流程并重渲染 =====
+var currentDetailId='1';
+var transferCandidates=[
+  { name:'张三', pos:'直属主管', av:'var(--dt-av-blue)' },
+  { name:'李四', pos:'部门经理', av:'var(--dt-av-indigo)' },
+  { name:'王五', pos:'HR 专员', av:'var(--dt-av-pink)' }
+];
+function openTransferDialog(){
+  var box=document.getElementById('transferList');
+  box.innerHTML=transferCandidates.map(function(p){
+    return '<div class="tr-person" role="button" tabindex="0" data-name="'+esc(p.name)+'">'+
+      '<div class="tr-av" style="background:'+p.av+'">'+esc(p.name.charAt(0))+'</div>'+
+      '<div><div class="tr-name">'+esc(p.name)+'</div><div class="tr-pos">'+esc(p.pos)+'</div></div></div>';
+  }).join('');
+  document.getElementById('transferOverlay').classList.add('show');
+}
+function closeTransferDialog(){
+  document.getElementById('transferOverlay').classList.remove('show');
+}
+function transferTo(name){
+  var data=approvalData[currentDetailId];
+  if(data){
+    for(var i=0;i<data.flow.length;i++){
+      if(data.flow[i].status==='current'){
+        data.flow[i].text='已转交 · 转给了'+name;
+        break;
+      }
+    }
+    if(data.actions){
+      data.actions=data.actions.filter(function(a){return a!=='transfer';});
+    }
+    renderApprovalDetail(currentDetailId);
+  }
+  closeTransferDialog();
+  showApprovalToast('已转交给'+name);
+}
+document.getElementById('transferOverlay').addEventListener('click',function(e){
+  if(e.target===this){closeTransferDialog();return;}
+  var p=e.target.closest('.tr-person');
+  if(p)transferTo(p.getAttribute('data-name'));
+});
+document.getElementById('transferOverlay').addEventListener('keydown',function(e){
+  var p=e.target.closest('.tr-person');
+  if(p&&(e.key==='Enter'||e.key===' ')){e.preventDefault();transferTo(p.getAttribute('data-name'));}
+});
+
 
 // ===== 页签切换：按 data-tab 过滤审批条目，空分类给出真实空状态 =====
 (function(){
@@ -579,6 +695,7 @@ function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return
 
 /* 按数据渲染 L3 */
 function renderApprovalDetail(id){
+  currentDetailId=id;
   var data=approvalData[id];
   var card=document.getElementById('approvalDetailCard');
   var badge=document.getElementById('l3StatusBadge');
@@ -611,7 +728,7 @@ function renderApprovalDetail(id){
     html+='<div class="dc-actions">';
     for(var a=0;a<acts.length;a++){
       if(acts[a]==='reject')html+='<button class="dc-btn reject" onclick="approveItem(\'reject\')">拒绝</button>';
-      else if(acts[a]==='transfer')html+='<button class="dc-btn ghost" onclick="showApprovalToast(\'转交功能暂未开放\')">转交</button>';
+      else if(acts[a]==='transfer')html+='<button class="dc-btn ghost" onclick="openTransferDialog()">转交</button>';
       else if(acts[a]==='pass')html+='<button class="dc-btn primary" onclick="approveItem(\'pass\')">通过</button>';
       else if(acts[a]==='revoke')html+='<button class="dc-btn reject" onclick="revokeApproval()">撤销申请</button>';
       else if(acts[a]==='urge')html+='<button class="dc-btn ghost" onclick="showApprovalToast(\'已发送催办提醒\')">催办</button>';
