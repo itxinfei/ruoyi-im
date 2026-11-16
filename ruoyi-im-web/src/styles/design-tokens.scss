@@ -11,7 +11,7 @@
   --dt-bg-chat: #f5f6f7;
   --dt-bg-session-list: #ffffff;
   --dt-bg-session-hover: rgba(23, 26, 29, 0.04);
-  --dt-bg-session-active: #E6F2FF;
+  --dt-bg-session-active: #E8EAF0;
   --dt-bg-hover: rgba(23, 26, 29, 0.04);
   --dt-bg-input: #fafbfc;
   --dt-bg-input-hover: rgba(23, 26, 29, 0.04);  /* 钉钉规范：输入区hover */
@@ -164,9 +164,10 @@
   --dt-radius-xl: 12px;
   --dt-radius-2xl: 16px;
   --dt-radius-full: 9999px;
-  --dt-bubble-radius: 8px;
-  --dt-bubble-radius-sent: 8px 4px 8px 8px;
-  --dt-bubble-radius-received: 4px 8px 8px 8px;
+  /* 气泡圆角基准：对齐 prototype/dingtalk-h5.html 与 dingtalk-mockup.html（12px，近头像顶角 4px） */
+  --dt-bubble-radius: 12px;
+  --dt-bubble-radius-sent: 12px 4px 12px 12px;
+  --dt-bubble-radius-received: 4px 12px 12px 12px;
 
   // === Z-Index (层级协议) ===
   --dt-z-deep: -1;
@@ -186,10 +187,10 @@
   --dt-scrollbar-thumb-bg: rgba(0, 0, 0, 0.2);  /* 滚动条滑块背景 */
   --dt-scrollbar-thumb-bg-hover: rgba(0, 0, 0, 0.35);  /* 滚动条滑块hover背景 */
 
-  // === Navigation Sidebar (侧边栏 - 钉钉 8.2 深灰基线) ===
+  // === Navigation Sidebar (侧边栏 - 品牌蓝基线) ===
   // ⚠️ 权威依据：docs/00-钉钉8.2像素级权威基线.md §2.2
   // ❌ 禁止改为 #0089FF（旧蓝主色，已废弃）
-  --dt-nav-sidebar-bg: #2B2D33;  /* L1 侧边栏背景（钉钉 8.2 深灰） */
+  --dt-nav-sidebar-bg: #277EFB;  /* L1 侧边栏背景（品牌蓝，2026-11-15 裁决） */
   --dt-nav-sidebar-text: rgba(255, 255, 255, 0.7);  /* 侧边栏默认文字色 */
   --dt-nav-sidebar-text-active: #ffffff;  /* 侧边栏激活文字色 */
   --dt-nav-hover: rgba(255, 255, 255, 0.08);  /* 侧边栏 hover 背景 */
@@ -209,7 +210,7 @@
   --dt-avatar-size-lg: 44px;
   --dt-avatar-session: 40px;  // 会话列表头像 钉钉标准
   --dt-session-item-height: 56px;  // 会话项固定高度 钉钉标准
-  --dt-session-panel-width: 250px;  // 消息会话列表 钉钉标准
+  --dt-session-panel-width: 240px;  // 全模块统一 240px
   --dt-contact-panel-width: 260px;  // 通讯录/待办/云盘/工作台等其他模块（加宽）
   --dt-drawer-width: 340px;  // 详情抽屉（聊天详情/个人资料/群信息）（加宽）
   --dt-chat-min-width: 480px;
@@ -251,10 +252,11 @@
   --dt-bubble-compact-margin-top: -4px;  // 连续消息压缩间距 钉钉标准
 
   // === Component Specific (钉钉风格 - 对齐21文档) ===
-  --dt-bubble-padding-v: 8px;   /* 钉钉规范：上下 8px */
-  --dt-bubble-padding-h: 12px;  /* 钉钉规范：左右 12px */
-  --dt-bubble-left-bg: #ffffff;
-  --dt-bubble-right-bg: #277EFB;
+  /* 气泡内边距/底色：对齐 H5 与桌面原型（9px 12px，接收方无边框、面板底色） */
+  --dt-bubble-padding-v: 9px;   /* 上下 9px */
+  --dt-bubble-padding-h: 12px;  /* 左右 12px */
+  --dt-bubble-left-bg: var(--dt-bg-card);
+  --dt-bubble-right-bg: var(--dt-brand-color);
   --dt-bubble-max-width: 70%;  /* 钉钉规范：气泡最大宽度 70% */
   --dt-bubble-right-bg-hover: #4493FA;
   --dt-chat-gutter: 24px;  /* 钉钉规范：消息区左右内边距 24px */
@@ -346,7 +348,7 @@ html.dark {
   --dt-bg-chat: #0f172a;
   --dt-bg-session-list: #1e293b;
   --dt-bg-session-hover: rgba(255, 255, 255, 0.05);
-  --dt-bg-session-active: #1e3a5f;
+  --dt-bg-session-active: rgba(255, 255, 255, 0.10);
   --dt-bg-hover: rgba(255, 255, 255, 0.05);
   --dt-bg-input: #0f172a;
   --dt-bg-input-hover: rgba(255, 255, 255, 0.05);
@@ -365,9 +367,9 @@ html.dark {
   --dt-text-tertiary: var(--dt-text-tertiary-dark);
 
   // === Bubble Colors (暗色模式气泡) ===
-  --dt-bubble-left-bg: #1e293b;
-  --dt-bubble-right-bg: #277EFB;
-  --dt-bubble-right-bg-hover: #4493FA;
+  --dt-bubble-left-bg: var(--dt-bg-card);
+  --dt-bubble-right-bg: var(--dt-brand-color);
+  --dt-bubble-right-bg-hover: var(--dt-brand-light);
 
   // === Overlay & Placeholder (暗色模式) ===
   --dt-overlay-bg: rgba(255, 255, 255, 0.2);  /* 暗色模式视频时长背景 */
@@ -400,6 +402,84 @@ html.dark {
   --dt-bubble-sent-icon-bg: rgba(255, 255, 255, 0.15);
   --dt-bubble-sent-text: rgba(255, 255, 255, 0.7);
   --dt-bubble-voice-progress-bg: rgba(255, 255, 255, 0.15);
+}
+
+// === Theme Color Options (设置 → 主题与外观) ===
+// 5 个可选主题色；通过 html[data-dt-theme] 覆盖品牌色，默认（无属性）为品牌蓝
+// 色值仅在此处定义，组件只引用 token，禁止组件内硬编码色值
+:root {
+  --dt-theme-blue: #277EFB;
+  --dt-theme-orange: #FF7D00;
+  --dt-theme-green: #00B42A;
+  --dt-theme-red: #F53F3F;
+  --dt-theme-purple: #6C5CE7;
+}
+
+html:root[data-dt-theme='orange'] {
+  --dt-brand-color: var(--dt-theme-orange);
+  --dt-brand-hover: #E06E00;
+  --dt-brand-active: #C25F00;
+  --dt-brand-light: color-mix(in srgb, var(--dt-theme-orange) 72%, #ffffff);
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-orange) 12%, #ffffff);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-orange) 10%, #ffffff);
+}
+
+html:root[data-dt-theme='green'] {
+  --dt-brand-color: var(--dt-theme-green);
+  --dt-brand-hover: #009E24;
+  --dt-brand-active: #00861F;
+  --dt-brand-light: color-mix(in srgb, var(--dt-theme-green) 72%, #ffffff);
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-green) 12%, #ffffff);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-green) 10%, #ffffff);
+}
+
+html:root[data-dt-theme='red'] {
+  --dt-brand-color: var(--dt-theme-red);
+  --dt-brand-hover: #D93838;
+  --dt-brand-active: #BF3131;
+  --dt-brand-light: color-mix(in srgb, var(--dt-theme-red) 72%, #ffffff);
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-red) 12%, #ffffff);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-red) 10%, #ffffff);
+}
+
+html:root[data-dt-theme='purple'] {
+  --dt-brand-color: var(--dt-theme-purple);
+  --dt-brand-hover: #5A4BD1;
+  --dt-brand-active: #4B3EB8;
+  --dt-brand-light: color-mix(in srgb, var(--dt-theme-purple) 72%, #ffffff);
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-purple) 12%, #ffffff);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-purple) 10%, #ffffff);
+}
+
+// 暗色模式下的浅色变体改用透明混合，避免浅色 tint 在深底上突兀
+html.dark:root[data-dt-theme='orange'] {
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-orange) 18%, transparent);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-orange) 18%, transparent);
+}
+
+html.dark:root[data-dt-theme='green'] {
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-green) 18%, transparent);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-green) 18%, transparent);
+}
+
+html.dark:root[data-dt-theme='red'] {
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-red) 18%, transparent);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-red) 18%, transparent);
+}
+
+html.dark:root[data-dt-theme='purple'] {
+  --dt-brand-lighter: color-mix(in srgb, var(--dt-theme-purple) 18%, transparent);
+  --dt-brand-bg: color-mix(in srgb, var(--dt-theme-purple) 18%, transparent);
+}
+
+// === 会话列表密度（设置 → 主题与外观）===
+// 会话项高度唯一来源：ChatSessionList 使用 var(--dt-session-item-height)
+html:root[data-dt-density='compact'] {
+  --dt-session-item-height: 48px;
+}
+
+html:root[data-dt-density='loose'] {
+  --dt-session-item-height: 64px;
 }
 
 // SCSS 辅助 Mixins

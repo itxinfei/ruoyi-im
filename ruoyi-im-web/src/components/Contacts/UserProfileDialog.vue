@@ -15,7 +15,7 @@
           <div class="banner-bg"></div>
           <el-icon class="close-btn" @click="visible = false"><Close /></el-icon>
           <div class="avatar-stack">
-            <DingtalkAvatar :src="userDetail.avatar" :name="userDetail.nickname" :size="72" shape="square" class="v4-main-avatar" />
+            <DingtalkAvatar :src="userDetail.avatar" :name="userDetail.nickname" :size="72" class="v4-main-avatar" />
             <div class="status-indicator online"></div>
           </div>
         </header>
@@ -136,7 +136,7 @@ watch(visible, (v) => emit('update:modelValue', v))
 
   .avatar-stack {
     position: absolute; left: 24px; bottom: -32px; z-index: 5;
-    .v4-main-avatar { border: 4px solid var(--dt-bg-card); border-radius: var(--dt-radius-lg); box-shadow: var(--dt-shadow-2); }
+    .v4-main-avatar { border: 4px solid var(--dt-bg-card); border-radius: var(--dt-radius-sm); box-shadow: var(--dt-shadow-2); }
     .status-indicator { position: absolute; bottom: 2px; right: 2px; width: 14px; height: 14px; border: 2px solid var(--dt-bg-card); border-radius: 50%; &.online { background: var(--dt-success-color); } }
   }
 }

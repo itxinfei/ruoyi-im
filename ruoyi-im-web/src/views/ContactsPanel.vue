@@ -68,7 +68,7 @@
             <div class="member-grid-header">直属成员 ({{ deptMembers.length }})</div>
             <div class="members-grid">
               <div v-for="m in deptMembers" :key="m.id" class="member-card-v3" @click="handleMemberClick(m)">
-                <DingtalkAvatar :src="m.avatar" :name="m.name" :size="40" shape="square" />
+                <DingtalkAvatar :src="m.avatar" :name="m.name" :size="40" />
                 <div class="member-info">
                   <div class="m-name">{{ m.name || m.userName }}</div>
                   <div class="m-post">{{ m.position || '成员' }}</div>

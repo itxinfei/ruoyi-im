@@ -166,7 +166,7 @@ const handleSave = async () => {
   width: 100px;
   height: 100px;
   border: 1px dashed var(--dt-border-color);
-  border-radius: 50%;
+  border-radius: var(--dt-radius-sm);
   cursor: pointer;
   position: relative;
   overflow: hidden;

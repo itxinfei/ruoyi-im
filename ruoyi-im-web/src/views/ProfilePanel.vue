@@ -9,7 +9,6 @@
             :src="userInfo.avatar"
             :name="userInfo.nickname"
             :size="80"
-            shape="square"
           />
           <div class="avatar-mask">
             <el-icon><Camera /></el-icon>
@@ -311,7 +310,7 @@ onMounted(loadUser)
     .avatar-container {
       position: relative;
       border: var(--dt-avatar-border, 4px) solid var(--dt-bg-card);
-      border-radius: var(--dt-radius-lg);
+      border-radius: var(--dt-radius-sm);
       cursor: pointer;
       overflow: hidden;
       transition: opacity var(--dt-transition-base);

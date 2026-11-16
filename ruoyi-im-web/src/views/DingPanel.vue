@@ -34,7 +34,7 @@
       <div class="ding-flow" v-loading="loading">
         <div v-for="ding in displayList" :key="ding.id" class="ding-card-v2" :class="{ urgent: ding.priority === 'URGENT' }">
           <div class="card-left">
-            <DingtalkAvatar :src="ding.senderAvatar" :name="ding.senderName" :size="44" shape="square" />
+            <DingtalkAvatar :src="ding.senderAvatar" :name="ding.senderName" :size="44" />
           </div>
           <div class="card-main">
             <div class="row-top">

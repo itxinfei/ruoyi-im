@@ -19,7 +19,7 @@
           @click="selectedCall = call"
         >
           <div class="call-avatar">
-            <DingtalkAvatar :src="call.peerAvatar" :name="call.peerName" :size="36" shape="square" />
+            <DingtalkAvatar :src="call.peerAvatar" :name="call.peerName" :size="36" />
           </div>
           <div class="call-main-info">
             <div class="name-row">
@@ -41,7 +41,7 @@
       <aside class="call-detail-pane">
         <div v-if="selectedCall" class="detail-container">
           <div class="detail-header">
-            <DingtalkAvatar :src="selectedCall.peerAvatar" :name="selectedCall.peerName" :size="64" shape="square" />
+            <DingtalkAvatar :src="selectedCall.peerAvatar" :name="selectedCall.peerName" :size="64" />
             <h3>{{ selectedCall.peerName }}</h3>
             <div class="action-row">
               <el-button type="primary" :icon="PhoneFilled">语音通话</el-button>

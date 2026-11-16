@@ -2,7 +2,7 @@
   <header class="chat-window-header">
     <div class="header-left">
       <div class="channel-info" @click="$emit('show-detail')">
-        <DingtalkAvatar :src="session?.avatar" :name="session?.name" :size="32" shape="square" />
+        <DingtalkAvatar :src="session?.avatar" :name="session?.name" :size="32" />
         <div class="channel-text">
           <span class="channel-prefix" v-if="session?.type === 'GROUP'">#</span>
           <span class="channel-name">{{ session?.name || '频道' }}</span>

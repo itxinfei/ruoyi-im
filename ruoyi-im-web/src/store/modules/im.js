@@ -6,6 +6,39 @@ import session from './im-session'
 import message from './im-message'
 import contact from './im-contact'
 
+/**
+ * 系统设置默认值
+ * 与「设置」页（SystemSettingsPage）的字段一一对应
+ */
+const defaultSettings = () => ({
+  notifications: {
+    enabled: true,
+    sound: true,
+    preview: true,
+    dnd: '22:00 - 08:00'
+  },
+  privacy: {
+    showStatus: true,
+    readReceipt: true,
+    blockStranger: false
+  },
+  general: {
+    language: 'zh-CN',
+    theme: 'auto', // 'light' | 'dark' | 'auto'
+    themeColor: 'blue', // blue | orange | green | red | purple
+    density: 'standard', // compact | standard | loose
+    enterToSend: true,
+    autoUpdate: true
+  },
+  shortcuts: {
+    send: 'enter', // 'enter' | 'ctrl-enter'
+    globalSearch: 'Ctrl + K',
+    newChat: 'Ctrl + N',
+    screenshot: 'Alt + A',
+    scrollTop: 'Home'
+  }
+})
+
 export default {
   namespaced: true,
 
@@ -32,23 +65,7 @@ export default {
     typingUsers: {},
 
     // 系统实用设置
-    settings: {
-      notifications: {
-        enabled: true,
-        sound: false
-      },
-      privacy: {
-        showStatus: true,
-        readReceipt: true
-      },
-      general: {
-        language: 'zh-CN',
-        theme: 'auto' // 'light' | 'dark' | 'auto'
-      },
-      shortcuts: {
-        send: 'enter' // 'enter' | 'ctrl-enter'
-      }
-    }
+    settings: defaultSettings()
   }),
 
   getters: {
@@ -117,15 +134,21 @@ export default {
       localStorage.setItem('im-system-settings', JSON.stringify(state.settings))
     },
 
-    // 加载本地设置
+    // 加载本地设置（与默认值深度合并，兼容旧版本缺少的新字段）
     LOAD_SETTINGS(state) {
+      const defaults = defaultSettings()
       try {
         const local = localStorage.getItem('im-system-settings')
-        if (local) {
-          state.settings = { ...state.settings, ...JSON.parse(local) }
+        const parsed = local ? JSON.parse(local) : {}
+        state.settings = {
+          notifications: { ...defaults.notifications, ...(parsed.notifications || {}) },
+          privacy: { ...defaults.privacy, ...(parsed.privacy || {}) },
+          general: { ...defaults.general, ...(parsed.general || {}) },
+          shortcuts: { ...defaults.shortcuts, ...(parsed.shortcuts || {}) }
         }
       } catch (e) {
         console.warn('加载设置失败', e)
+        state.settings = defaults
       }
     },
 

@@ -149,7 +149,7 @@ const handleConfirm = (item) => {
   .item-left {
     display: flex; align-items: center; gap: 12px;
     .icon-avatar {
-      width: 32px; height: 32px; border-radius: var(--dt-radius-md); overflow: hidden; @include flex-center;
+      width: 32px; height: 32px; border-radius: var(--dt-radius-sm); overflow: hidden; @include flex-center;
       img { width: 100%; height: 100%; }
       &.user { border-radius: var(--dt-radius-sm); }
       &.file { background: var(--dt-bg-session-hover); color: var(--dt-error-color); }

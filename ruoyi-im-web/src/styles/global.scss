@@ -11,6 +11,9 @@
 // 2. Base 样式 (重置、排版、工具类、暗色模式)
 @use './base/index' as base;
 
+// 2.1 全局消息气泡（全站唯一气泡样式来源，任何页面可直接 <AppBubble> 调用）
+@use './components/bubble.scss' as *;
+
 // 3. Element Plus 组件覆盖 (钉钉风格)
 @use './element-overrides/index' as ep;
 

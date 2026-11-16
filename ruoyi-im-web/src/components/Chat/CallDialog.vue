@@ -14,7 +14,7 @@
         <div class="remote-track">
           <video ref="remoteVideoRef" autoplay playsinline class="video-element" />
           <div v-if="status !== 'talking' || remoteVideoOff" class="video-mask">
-            <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="120" shape="circle" />
+            <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="120" />
             <p class="mask-status">{{ statusText }}</p>
           </div>
         </div>
@@ -28,7 +28,7 @@
         <div class="avatar-ripple-container">
           <div class="ripple" v-if="status === 'calling' || status === 'incoming'"></div>
           <div class="ripple delay-1" v-if="status === 'calling' || status === 'incoming'"></div>
-          <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="100" shape="circle" custom-class="main-avatar" />
+          <DingtalkAvatar :src="peerAvatar" :name="peerName" :size="100" custom-class="main-avatar" />
         </div>
         <h2 class="peer-name">{{ peerName }}</h2>
         <p class="call-status-tag">{{ statusText }}</p>
@@ -237,7 +237,7 @@ defineExpose({ open, end, handleWebRTCSignal: (a, d) => { if (a === 'answer') { 
 .avatar-ripple-container {
   position: relative; width: 100px; height: 100px; margin: 0 auto 30px;
   .ripple {
-    position: absolute; inset: 0; border: 2px solid var(--dt-brand-color); border-radius: 50%;
+    position: absolute; inset: 0; border: 2px solid var(--dt-brand-color); border-radius: var(--dt-radius-sm);
     opacity: 0.5;
   }
   .delay-1 { opacity: 0.3; }

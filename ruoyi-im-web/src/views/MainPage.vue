@@ -22,16 +22,19 @@
 
     <!-- 3. 全局辅助组件 -->
     <EditProfileDialog v-model="profileVisible" />
-    <SystemSettingsDialog v-model="settingsVisible" />
+    <SystemSettingsPage
+      v-model="settingsVisible"
+      @open-edit-profile="profileVisible = true"
+    />
     <GlobalSearch v-model:visible="showGlobalSearch" @select="handleSearchSelect" />
   </div>
 </template>
 
 <script setup lang="js">
-import { ref, computed, defineAsyncComponent, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, defineAsyncComponent, onMounted, onUnmounted } from 'vue'
 import ImSideNavNew from '@/components/ImSideNavNew/index.vue'
 import EditProfileDialog from '@/components/Common/EditProfileDialog.vue'
-import SystemSettingsDialog from '@/components/Common/SystemSettingsDialog.vue'
+import SystemSettingsPage from '@/components/Common/SystemSettingsPage.vue'
 import GlobalSearch from '@/components/Chat/GlobalSearch.vue'
 
 const views = {
@@ -74,7 +77,7 @@ const handleSwitchModule = (id) => {
   }
 }
 
-const handleSearchSelect = (item) => { /* 全局跳转逻辑 */ }
+const handleSearchSelect = () => { /* 全局跳转逻辑 */ }
 
 const handleGlobalKeydown = (e) => {
   if ((e.ctrlKey || e.metaKey) && e.key === 'f') {

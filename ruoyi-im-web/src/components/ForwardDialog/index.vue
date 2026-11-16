@@ -54,7 +54,7 @@
               :class="{ selected: selectedSessionIds.includes(s.id) }"
               @click="toggleSession(s)"
             >
-              <DingtalkAvatar :src="s.avatar" :name="s.name" :size="32" shape="square" />
+              <DingtalkAvatar :src="s.avatar" :name="s.name" :size="32" />
               <span class="name">{{ s.name }}</span>
               <div class="check-box"><el-icon v-if="selectedSessionIds.includes(s.id)"><Check /></el-icon></div>
             </div>

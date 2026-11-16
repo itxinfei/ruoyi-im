@@ -213,7 +213,7 @@ onMounted(() => {
 .request-avatar {
   width: 48px;
   height: 48px;
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-sm);
   background: var(--dt-brand-color);
   color: var(--dt-text-white);
   display: flex;

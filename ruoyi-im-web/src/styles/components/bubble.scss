@@ -1,0 +1,32 @@
+// ============================================================================
+// 全局消息气泡 —— 全站唯一气泡样式来源（组件：@/components/Common/AppBubble.vue）
+// 基准：prototype/dingtalk-h5.html + prototype/dingtalk-mockup.html
+//   内边距 9px 12px · 圆角 12px · 近头像顶角 4px · 接收方无边框（面板底色）
+// ============================================================================
+
+.dt-bubble {
+  display: inline-block;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
+  border-radius: var(--dt-bubble-radius);
+  font-size: 14px;
+  line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+// 接收方（左侧，头像在左 → 左上顶角 4px）
+.dt-bubble--received {
+  background-color: var(--dt-bubble-left-bg);
+  color: var(--dt-text-primary);
+  border-radius: var(--dt-bubble-radius-received);
+}
+
+// 发送方（右侧，头像在右 → 右上顶角 4px）
+.dt-bubble--sent {
+  background-color: var(--dt-bubble-right-bg);
+  color: var(--dt-text-white);
+  border-radius: var(--dt-bubble-radius-sent);
+}

@@ -302,7 +302,7 @@ const topNavs = [
 .main-avatar {
   width: 100%;
   height: 100%;
-  border-radius: var(--dt-radius-lg);
+  border-radius: var(--dt-radius-sm);
   background: var(--dt-nav-sidebar-bg);
   object-fit: cover;
 }

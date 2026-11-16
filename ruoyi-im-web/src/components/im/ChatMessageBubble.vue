@@ -36,10 +36,10 @@
 
       <!-- 消息体 -->
       <div class="bubble-wrapper">
-        <!-- 文本消息 -->
-        <div v-if="messageType === 'TEXT'" class="bubble bubble-text">
+        <!-- 文本消息（全局统一气泡组件） -->
+        <AppBubble v-if="messageType === 'TEXT'" :sent="isMe">
           {{ message.content }}
-        </div>
+        </AppBubble>
 
         <!-- 图片消息 -->
         <div v-else-if="messageType === 'IMAGE'" class="bubble bubble-image">

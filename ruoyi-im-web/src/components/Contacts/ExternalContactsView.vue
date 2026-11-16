@@ -85,7 +85,6 @@
             :src="contact.avatar"
             :name="contact.name"
             :size="44"
-            shape="square"
           />
           <div class="contact-info">
             <div class="contact-name">
@@ -214,7 +213,6 @@
             :src="currentContact.avatar"
             :name="currentContact.name"
             :size="72"
-            shape="square"
           />
           <div class="detail-name">
             {{ currentContact.name }}

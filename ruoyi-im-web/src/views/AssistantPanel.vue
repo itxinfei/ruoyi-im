@@ -65,7 +65,7 @@
               <el-icon v-if="msg.role === 'assistant'"><Promotion /></el-icon>
               <span v-else>{{ userInitial }}</span>
             </div>
-            <div class="msg-bubble" :class="msg.role">
+            <AppBubble :sent="msg.role === 'user'">
               <div class="content markdown-body" v-html="formatMessage(msg.content)"></div>
               <!-- 打字机光标 -->
               <span v-if="msg.isStreaming" class="typing-cursor">|</span>
@@ -76,7 +76,7 @@
                   <button @click="regenerateMessage"><el-icon><Refresh /></el-icon></button>
                 </div>
               </div>
-            </div>
+            </AppBubble>
           </div>
         </div>
       </div>
@@ -380,21 +380,20 @@ onMounted(() => {
 }
 
 .msg-avatar {
-  width: 36px; height: 36px; border-radius: var(--dt-radius-lg); flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: var(--dt-radius-sm); flex-shrink: 0;
   @include flex-center; font-size: var(--dt-font-size-xl);
   .msg-row.assistant & { background: var(--dt-brand-color); color: var(--dt-text-white); }
   .msg-row.user & { background: var(--dt-bg-hover); color: var(--dt-text-secondary); font-size: 14px; font-weight: var(--dt-font-weight-semibold); }
 }
 
-.msg-bubble {
-  max-width: calc(100% - 100px); padding: 12px 16px; border-radius: var(--dt-radius-lg); line-height: 1.6; font-size: 14px;
-  &.assistant {
-    background: var(--dt-bg-input); border: 1px solid var(--dt-border-light); color: var(--dt-text-primary);
-    border-top-left-radius: 2px;
-  }
-  &.user {
-    background: var(--dt-brand-color); color: var(--dt-text-white); border-top-right-radius: 2px;
-  }
+// 气泡已统一由全局组件 <AppBubble> 接管（样式见 @/styles/components/bubble.scss）
+// 此处仅保留 AI 回复内容区的排版差异
+.msg-row .dt-bubble {
+  max-width: calc(100% - 52px);  // 36px 头像 + 16px 间距
+}
+
+.msg-row .content {
+  white-space: normal;
 }
 
 .typing-cursor {

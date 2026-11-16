@@ -36,7 +36,6 @@
             :src="approval.applicantAvatar"
             :name="approval.applicantName"
             :size="32"
-            shape="circle"
           />
           <span>{{ approval.applicantName || '我' }}</span>
           <span class="apply-time">{{ approval.applyTime }}</span>
@@ -171,7 +170,6 @@
                 :src="user.avatar"
                 :name="user.name"
                 :size="16"
-                shape="circle"
               />
               {{ user.name }}
             </el-tag>
@@ -205,7 +203,6 @@
               :src="user.avatar || user.userAvatar"
               :name="user.name || user.userName"
               :size="32"
-              shape="circle"
             />
             <span class="cc-result-name">{{ user.name || user.userName }}</span>
           </div>

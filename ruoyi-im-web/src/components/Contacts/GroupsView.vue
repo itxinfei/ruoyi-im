@@ -39,7 +39,6 @@
             :is-group="true"
             :members="group.members || []"
             :size="48"
-            shape="square"
           />
           <div class="group-info">
             <div class="group-name">

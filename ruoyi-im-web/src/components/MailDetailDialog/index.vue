@@ -13,7 +13,6 @@
             :src="email.senderAvatar"
             :name="email.sender"
             :size="44"
-            shape="circle"
           />
           <div class="sender-detail">
             <div class="sender-name">

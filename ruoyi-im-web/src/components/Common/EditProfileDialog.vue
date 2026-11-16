@@ -272,7 +272,7 @@ watch(() => props.modelValue, (val) => {
     .avatar-wrapper {
       position: relative;
       cursor: pointer;
-      border-radius: 50%;
+      border-radius: var(--dt-radius-sm);
       overflow: hidden;
 
       .el-avatar {

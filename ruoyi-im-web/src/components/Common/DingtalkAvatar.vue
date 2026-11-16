@@ -51,10 +51,6 @@ const props = defineProps({
     type: Number,
     default: 36
   },
-  shape: {
-    type: String,
-    default: 'circle'
-  },
   customClass: String,
   // 是否为群组
   isGroup: {
@@ -132,7 +128,6 @@ const bgColor = computed(() => {
 
 const avatarClass = computed(() => {
   const classes = []
-  classes.push(props.shape === 'square' ? 'avatar-square' : 'avatar-circle')
   if (props.isGroup) classes.push('is-group')
   if (props.customClass) classes.push(props.customClass)
   return classes.join(' ')
@@ -157,15 +152,14 @@ const handleImageError = () => {
   line-height: 1;
   box-sizing: border-box;
   background-color: var(--dt-border-light);
+  /* 死规定：头像统一 4px 方形圆角，禁止圆形 */
+  border-radius: var(--dt-radius-sm);
 
   &.is-group {
     padding: var(--dt-spacing-xxs);
     background-color: var(--dt-bg-body);
   }
 }
-
-.avatar-circle { border-radius: 50%; }
-.avatar-square { border-radius: var(--dt-radius-sm); }
 
 .avatar-img { width: 100%; height: 100%; object-fit: cover; }
 

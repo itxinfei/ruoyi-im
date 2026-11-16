@@ -133,7 +133,7 @@
 
 .bubble {
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  border-radius: var(--dt-bubble-radius, 8px);
+  border-radius: var(--dt-bubble-radius);
   font-size: 14px;
   line-height: 1.5;
   word-break: break-word;
@@ -142,20 +142,7 @@
   position: relative;
 }
 
-// 接收方气泡 (左侧)
-.message-row:not(.is-sent) .bubble-text {
-  background-color: var(--dt-bubble-left-bg);
-  color: var(--dt-text-primary);
-  border: 1px solid var(--dt-border-light);
-  border-radius: var(--dt-bubble-radius-received);
-}
-
-// 发送方气泡 (右侧)
-.message-row.is-sent .bubble-text {
-  background-color: var(--dt-bubble-right-bg);
-  color: var(--dt-text-white);
-  border-radius: var(--dt-bubble-radius-sent);
-}
+// 文本消息气泡已统一由全局组件 <AppBubble> 接管，样式见 @/styles/components/bubble.scss
 
 // ============================================================================
 // 图片消息
@@ -310,7 +297,7 @@
   .card-avatar {
     width: 40px;
     height: 40px;
-    border-radius: var(--dt-radius-md);
+    border-radius: var(--dt-radius-sm);
     flex-shrink: 0;
   }
 

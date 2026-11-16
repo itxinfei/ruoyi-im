@@ -11,7 +11,7 @@
       <section class="section hero-section">
         <div class="hero-main">
           <div class="avatar-edit-wrapper" :class="{ 'can-edit': isGroupOwner }" @click="handleEditAvatar">
-            <DingtalkAvatar :src="session.avatar" :name="session.name" :size="48" shape="square" />
+            <DingtalkAvatar :src="session.avatar" :name="session.name" :size="48" />
             <div v-if="isGroupOwner" class="avatar-edit-mask"><el-icon><Camera /></el-icon></div>
           </div>
           <div class="hero-info">

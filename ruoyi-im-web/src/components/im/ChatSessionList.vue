@@ -318,7 +318,7 @@ const handleOpenCreateChat = () => { /* 预留创建会话 */ }
     .avatar-img {
       width: 100%;
       height: 100%;
-      border-radius: var(--dt-radius-md);
+      border-radius: var(--dt-radius-sm);
       object-fit: cover;
     }
     .unread-badge {

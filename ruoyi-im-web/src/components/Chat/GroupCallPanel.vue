@@ -61,7 +61,6 @@
               :src="participant.avatar"
               :name="participant.name"
               :size="avatarSize"
-              shape="circle"
             />
           </div>
 
@@ -168,7 +167,6 @@
               :src="member.avatar"
               :name="member.name"
               :size="32"
-              shape="circle"
             />
             <span>{{ member.name }}</span>
             <el-tag v-if="isMemberInCall(member.userId)" type="info" size="small">

@@ -51,7 +51,6 @@
               :name="contact.name || contact.userName"
               :user-id="contact.id"
               :size="52"
-              shape="square"
             />
             <div v-if="contact.online" class="online-dot" />
           </div>
