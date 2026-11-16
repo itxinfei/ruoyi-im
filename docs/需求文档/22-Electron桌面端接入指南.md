@@ -8,7 +8,7 @@
 
 ## 一、工程结构（改造后）
 
-```
+```text
 ruoyi-im-web/                    ← Web 工程（业务代码零改动）
 ├── src/
 │   ├── main.js
@@ -346,7 +346,7 @@ module.exports = { setupAutoUpdater }
 
 ## 七、消息推送链路（WS消息 → 桌面通知）
 
-```
+```text
 WebSocket Server ──JSON帧──▶ Spring Boot ──WS推──▶ Electron 渲染进程
                                          │
                                          ▼

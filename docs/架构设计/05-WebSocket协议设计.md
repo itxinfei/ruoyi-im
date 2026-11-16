@@ -9,7 +9,7 @@
 
 ### 1.1 端点与网关
 
-```
+```text
 客户端 (Browser / Electron)
     │
     │  WSS wss://{host}:443/im/ws?token={jwt}
@@ -277,7 +277,7 @@ server {
 
 ### 3.4 服务端处理逻辑
 
-```
+```text
 WS Endpoint 收到 type=MESSAGE action=send
     │
     ├── 1. 校验: 用户是否在会话中
@@ -298,7 +298,7 @@ WS Endpoint 收到 type=MESSAGE action=send
 
 ### 4.1 状态机
 
-```
+```text
 IDLE → CALLING(invite) → CONNECTED(answer) → ENDED(hangup)
                    ↘ BUSY(busy)
                    ↘ TIMEOUT(timeout)
@@ -343,7 +343,7 @@ IDLE → CALLING(invite) → CONNECTED(answer) → ENDED(hangup)
 
 ### 4.3 多人会议 (LiveKit SFU)
 
-```
+```text
 客户端 → (LiveKit Client SDK) → LiveKit SFU Server
          (WebRTC P2P to SFU)
 
@@ -361,7 +361,7 @@ IDLE → CALLING(invite) → CONNECTED(answer) → ENDED(hangup)
 
 ### 5.1 心跳协议
 
-```
+```text
 客户端定时 (30s):
   C→S: { "type": "PING", "id": "ping-1", "timestamp": 1730000000000 }
   S→C: { "type": "PONG", "id": "ping-1", "timestamp": 1730000000050 }
@@ -373,7 +373,7 @@ IDLE → CALLING(invite) → CONNECTED(answer) → ENDED(hangup)
 
 ### 5.2 重连策略
 
-```
+```text
 断连事件
     │
     ├── 清除本地 connected 状态
@@ -398,7 +398,7 @@ IDLE → CALLING(invite) → CONNECTED(answer) → ENDED(hangup)
 
 ### 5.3 弱网发送队列
 
-```
+```text
 用户点击发送：
     1. 消息入本地 pendingQueue (IndexedDB)
     2. UI 显示"发送中"状态
@@ -483,7 +483,7 @@ stateDiagram-v2
 
 ### 6.1 serverSeq 同步流程
 
-```
+```text
 客户端记录: lastReceivedSeq (会话内最新收到的 serverSeq)
 
 收到新消息 serverSeq = 50，lastReceivedSeq = 48
@@ -496,7 +496,7 @@ stateDiagram-v2
 
 ### 6.2 批量已读回执
 
-```
+```text
 客户端 300ms 窗口:
     window.start()
     收到消息1 → 标记已读

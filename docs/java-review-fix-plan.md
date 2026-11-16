@@ -180,7 +180,7 @@
 
 ## 依赖关系
 
-```
+```text
 T1 (统一WebSocket) ──→ T2 (认证加固) ──→ T4 (Origin校验)
                     └──→ T11 (ObjectMapper)
                     └──→ T12 (异步发送)

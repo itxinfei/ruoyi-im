@@ -84,7 +84,7 @@
 
 ## 六、读取顺序（强制 LLM 读取顺序）
 
-```
+```text
 ① 本文件（权威数值来源）
 ② .claude/rules/dingtalk-ui-prompt.md（生成 Prompt）
 ③ .agent/rules/ui-standards.md（前端红线）

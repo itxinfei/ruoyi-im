@@ -539,7 +539,7 @@ spring:
 
 服务端以 SSE 协议推送流式 token，每帧格式如下：
 
-```
+```text
 data: {"token":"你","finish":false,"model":"deepseek-chat"}
 
 data: {"token":"好","finish":false,"model":"deepseek-chat"}
@@ -558,7 +558,7 @@ data: {"token":"","finish":true,"model":"deepseek-chat","usage":{"prompt_tokens"
 
 当首 token 推理失败或模型服务不可用时，服务端在 SSE 首帧返回 error 事件：
 
-```
+```text
 event: error
 data: {"code":5001,"msg":"模型服务不可用","retryable":true}
 ```
@@ -582,7 +582,7 @@ data: {"code":5001,"msg":"模型服务不可用","retryable":true}
 
 ### 16.4 客户端重连机制 (Last-Event-Id)
 
-```
+```text
 首次请求: POST /im/ai/chat/stream (无 Last-Event-Id)
 中断重连: POST /im/ai/chat/stream + Header: Last-Event-Id: <最后收到的 messageId>
 ```
