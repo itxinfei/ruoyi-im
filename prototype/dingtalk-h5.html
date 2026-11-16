@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" id="metaThemeColor" content="#277EFB">
 <title>心飞IM · H5 手机端</title>
 <style>
@@ -44,7 +44,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .status-icons svg{width:16px;height:16px}
 
 /* Pages */
-.page{display:none;flex:1;flex-direction:column;overflow:hidden;overflow:clip}
+.page{display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden;overflow:clip}
 /* 内容主区：设置页 absolute 的定位上下文，主区外 tab 栏常驻 */
 .h5-main{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow:hidden;overflow:clip}
 .page.active{display:flex}
@@ -1286,6 +1286,22 @@ function h5CloseSettings(){
     if(pp&&pp.classList.contains('show')){h5ClosePlus();return;}
     if(el.classList.contains('show'))h5CloseSettings();
   });
+})();
+// ===== 键盘适配：真机上输入法弹出时压缩整壳，输入条随底边上移（钉钉行为） =====
+// Android Chromium 由 viewport meta 的 interactive-widget=resizes-content 原生处理；
+// iOS Safari 不缩布局视口（键盘盖住底部），这里用 visualViewport 同步壳高兜底。
+// 仅在手机全屏模式（≤420px）生效，桌面外壳固定 812px 高不干预。
+(function(){
+  var vv=window.visualViewport;
+  var shell=document.querySelector('.phone-shell');
+  if(!vv||!shell)return;
+  function sync(){
+    if(window.innerWidth>420)return;
+    shell.style.height=vv.height+'px';
+  }
+  vv.addEventListener('resize',sync);
+  vv.addEventListener('scroll',sync);
+  sync();
 })();
 </script>
 <script src="shared.js"></script>
