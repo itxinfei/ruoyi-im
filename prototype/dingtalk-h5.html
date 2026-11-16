@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>心飞IM · H5 手机端</title>
 <style>
 /* ============================================================
@@ -14,7 +14,7 @@ button,input,select,textarea{font-family:var(--dt-font)}
 .ic use{pointer-events:none}
 :root{
   --dt-brand:#277EFB;--dt-brand-hover:#1169E0;--dt-brand-active:#0656C6;--dt-brand-light:#E6F2FF;
-  --dt-bg-body:#F5F6F7;--dt-bg-panel:#FFFFFF;--dt-bg-hover:#F6F6F6;--dt-bg-active:#E5E6EB;--dt-bg-session-active:#E6F2FF;
+  --dt-bg-body:#F5F6F7;--dt-bg-panel:#FFFFFF;--dt-bg-hover:#F6F6F6;--dt-bg-active:#E5E6EB;--dt-bg-session-active:#E8EAF0;
   --dt-text-primary:#171A1D;--dt-text-regular:#5F6670;--dt-text-secondary:#5F6670;--dt-text-tertiary:#8A9099;
   --dt-text-quaternary:#B1B6BD;--dt-text-icon:#ADB1B8;--dt-text-placeholder:#B1B6BD;
   --dt-border:#E5E6EB;--dt-border-light:#E5E6EB;
@@ -23,14 +23,14 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-nav-dark:#2B2D33;
   --dt-av-blue:#4A74CA;--dt-av-indigo:#297BB3;--dt-av-cyan:#018288;--dt-av-pink:#CE3C83;
   --dt-av-teal:#00866C;--dt-av-orange:#A6672A;--dt-av-red:#C44C66;--dt-av-brown:#8B6914;
-  --dt-radius-sm:4px;--dt-radius-md:6px;--dt-radius-lg:8px;--dt-radius-xl:12px;--dt-radius-full:9999px;
+  --dt-radius-sm:4px;--dt-radius-md:6px;--dt-radius-lg:8px;--dt-radius-xl:12px;--dt-radius-2xl:16px;--dt-radius-full:9999px;
   --dt-bubble-radius:12px;
   --dt-avatar-chat:36px;
   --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
 }
-body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;justify-content:center;min-height:100vh;-webkit-tap-highlight-color:transparent}
-.phone-shell{width:375px;height:100vh;max-height:812px;background:var(--dt-bg-body);position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:48px;box-shadow:0 0 0 10px var(--dt-text-primary),0 0 0 11px var(--dt-text-primary),0 24px 48px rgba(0,0,0,0.4)}
-@media(max-width:420px){.phone-shell{width:100%;height:100vh;border-radius:0;box-shadow:none}}
+body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;justify-content:center;min-height:100vh;position:relative;-webkit-tap-highlight-color:transparent}
+.phone-shell{width:375px;height:100vh;height:100dvh;max-height:812px;background:var(--dt-bg-body);position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:48px;box-shadow:0 0 0 10px var(--dt-text-primary),0 0 0 11px var(--dt-text-primary),0 24px 48px rgba(0,0,0,0.4)}
+@media(max-width:420px){.phone-shell{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none}}
 
 /* Notch */
 .phone-shell::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:150px;height:30px;background:var(--dt-text-primary);border-radius:0 0 20px 20px;z-index:20}
@@ -46,10 +46,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .page.active{display:flex}
 
 /* =============== PAGE 1: MESSAGE LIST =============== */
-.msg-page-header{height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;padding:0 16px;gap:8px;flex-shrink:0;border-bottom:0.5px solid var(--dt-border-light)}
-.hdr-title{flex:1;font-size:17px;font-weight:600;text-align:center}
+.msg-page-header{position:relative;height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;justify-content:flex-end;padding:0 16px;gap:8px;flex-shrink:0;border-bottom:0.5px solid var(--dt-border-light)}
+/* 标题绝对居中：不被右侧按钮挤偏（DING/消息/通讯录页共用） */
+.hdr-title{position:absolute;left:0;right:0;top:0;height:44px;line-height:44px;text-align:center;font-size:17px;font-weight:600;pointer-events:none}
 .hdr-btn{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-brand);border-radius:50%;transition:background 0.15s}
-.hdr-btn:active{background:var(--dt-bg-body)}
+.hdr-btn:hover,.hdr-btn:active{background:var(--dt-bg-body)}
 .hdr-btn svg{width:22px;height:22px}
 
 /* Filter Tabs */
@@ -60,40 +61,42 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 
 /* Search */
 .search-bar{padding:8px 16px;background:var(--dt-bg-body);flex-shrink:0}
-.search-input{width:100%;height:36px;background:var(--dt-bg-panel);border-radius:8px;border:none;padding:0 12px;font-size:13px;color:var(--dt-text-regular);display:flex;align-items:center;gap:6px;cursor:pointer}
+.search-input{width:100%;height:36px;background:var(--dt-bg-panel);border-radius:var(--dt-radius-full);border:none;padding:0 14px;font-size:13px;color:var(--dt-text-tertiary);display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;transition:background 0.15s}
+.search-input:active{background:var(--dt-bg-hover)}
 .search-input svg{width:14px;height:14px;flex-shrink:0;color:var(--dt-text-tertiary)}
 
 /* Session List */
 .session-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.sess-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);cursor:pointer;transition:background 0.1s;position:relative}
+.sess-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);cursor:pointer;transition:background 0.15s;position:relative}
 .sess-item:active{background:var(--dt-bg-active)}
-.sess-item:not(:last-child)::after{content:'';position:absolute;left:80px;right:0;bottom:0;height:0.5px;background:var(--dt-border)}
-.sess-avatar{width:50px;height:50px;border-radius:var(--dt-radius-lg);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:17px;font-weight:600;position:relative}
-.sess-avatar.group{border-radius:14px}
+.sess-item:hover{background:var(--dt-bg-hover)}
+/* 分隔线缩进对齐文字起点：16(左内边距)+50(头像)+16(间距)=82px */
+.sess-item:not(:last-child)::after{content:'';position:absolute;left:82px;right:0;bottom:0;height:0.5px;background:var(--dt-border-light)}
+.sess-avatar{width:50px;height:50px;border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:17px;font-weight:600;position:relative}
+.sess-avatar.group{border-radius:var(--dt-radius-sm)}
 .sess-avatar .online-dot{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:var(--dt-success);border:2px solid var(--dt-bg-panel);border-radius:50%}
-.sess-avatar .top-pin{position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--dt-brand);border-radius:8px;display:flex;align-items:center;justify-content: center;border:1.5px solid var(--dt-bg-panel)}
-.sess-avatar .top-pin svg{width:8px;height:8px;fill:var(--dt-bg-panel)}
 .sess-info{flex:1;min-width:0;margin-left:16px}
-.sess-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
-.sess-name{font-size:15px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sess-row1{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px}
+.sess-name{font-size:16px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:4px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .sess-name .mute-tag{font-size:11px;padding:1px 4px;border-radius:3px;background:var(--dt-bg-body);color:var(--dt-text-secondary)}
-.sess-time{font-size:11px;color:var(--dt-text-secondary);flex-shrink:0}
+.sess-time{font-size:12px;color:var(--dt-text-tertiary);flex-shrink:0}
 .sess-row2{display:flex;align-items:center;gap:4px}
-.sess-msg{flex:1;font-size:13px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-msg{flex:1;font-size:13px;color:var(--dt-text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sess-mute-icn{width:14px;height:14px;flex-shrink:0;stroke:var(--dt-text-placeholder);fill:none;stroke-width:2}
 .sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-panel);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 .sess-unread.group{background:var(--dt-text-quaternary);border-radius:4px;font-weight:500}
 
 /* =============== PAGE 2: CHAT VIEW =============== */
 .chat-h5{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--dt-bg-body)}
-.chat-header{height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;padding:0 8px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
+.chat-header{position:relative;height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;justify-content:space-between;padding:0 8px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
 .chat-back{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-primary)}
-.chat-back:active{background:var(--dt-bg-body);border-radius:50%}
+.chat-back:hover,.chat-back:active{background:var(--dt-bg-body);border-radius:50%}
 .chat-back svg{width:22px;height:22px}
-.chat-title{flex:1;text-align:center;font-size:17px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* 标题绝对居中：左右留出返回/操作区，长标题省略号 */
+.chat-title{position:absolute;left:0;right:0;top:0;height:44px;line-height:44px;text-align:center;font-size:17px;font-weight:600;padding:0 80px;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
 .chat-actions{display:flex;gap:2px}
 .chat-actions button{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%}
-.chat-actions button:active{background:var(--dt-bg-body)}
+.chat-actions button:hover,.chat-actions button:active{background:var(--dt-bg-body)}
 .chat-actions button svg{width:20px;height:20px}
 
 .chat-msg-list{flex:1;overflow-y:auto;padding:12px 12px 8px;-webkit-overflow-scrolling:touch}
@@ -102,7 +105,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .chat-time:first-child{margin-top:2px}
 .chat-msg-wrap{display:flex;gap:8px;margin-bottom:16px;max-width:82%}
 .chat-msg-wrap.self{flex-direction:row-reverse;margin-left:auto}
-.chat-msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:6px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:13px;font-weight:600;line-height:1}
+.chat-msg-avatar{width:var(--dt-avatar-chat);height:var(--dt-avatar-chat);border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:13px;font-weight:600;line-height:1}
 .chat-msg-body{min-width:0}
 /* 己方：气泡在 body 内右对齐（avatar 已置 DOM 首位，row-reverse 下位于最右） */
 .chat-msg-wrap.self .chat-msg-body{display:flex;flex-direction:column;align-items:flex-end}
@@ -131,13 +134,13 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 
 /* Chat Input */
 .chat-input-area{background:var(--dt-bg-panel);border-top:0.5px solid var(--dt-border-light);flex-shrink:0}
-.chat-toolbar-row{display:flex;align-items:center;padding:6px 12px 2px;gap:0;justify-content:space-between}
+.chat-toolbar-row{display:flex;align-items:center;padding:6px 12px 2px;gap:2px;justify-content:flex-start}
 .chat-toolbar-row button{width:44px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:4px}
-.chat-toolbar-row button:active{background:var(--dt-bg-body)}
+.chat-toolbar-row button:hover,.chat-toolbar-row button:active{background:var(--dt-bg-body)}
 .chat-toolbar-row button svg{width:20px;height:20px}
 .chat-input-row{display:flex;align-items:center;padding:6px 8px 8px;gap:6px}
 .chat-input-icon{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%;flex-shrink:0}
-.chat-input-icon:active{background:var(--dt-bg-body)}
+.chat-input-icon:hover,.chat-input-icon:active{background:var(--dt-bg-body)}
 .chat-input-icon svg{width:22px;height:22px}
 .chat-input-row textarea{flex:1;border:none;outline:none;font-size:15px;font-family:var(--dt-font);resize:none;height:34px;line-height:22px;padding:6px 12px;background:var(--dt-bg-panel);border:0.5px solid var(--dt-border);border-radius:6px;max-height:80px;min-width:0;overflow-y:auto}
 .chat-send-btn{width:34px;height:34px;background:var(--dt-brand);color:var(--dt-bg-panel);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -149,39 +152,43 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* 注意：status-bar 是独立常驻元素（48px），页面内不要再补 48~52px 顶padding */
 .wb-header{background:var(--dt-brand);padding:16px 16px 24px;color:var(--dt-bg-panel);border-radius:0 0 16px 16px}
 .wb-header-row{display:flex;align-items:center;gap:16px}
-.wb-avatar{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;border:2px solid rgba(255,255,255,0.4)}
+.wb-avatar{width:52px;height:52px;border-radius:var(--dt-radius-sm);background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:600;border:2px solid rgba(255,255,255,0.4)}
 .wb-user-name{font-size:17px;font-weight:600}
 .wb-user-dept{font-size:12px;opacity:0.85;margin-top:3px}
 
 .wb-quick-actions{display:flex;background:var(--dt-bg-panel);margin:-12px 12px 0;border-radius:var(--dt-radius-xl);padding:16px 0;position:relative;z-index:2}
 .wb-qa-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;font-size:11px;color:var(--dt-text-regular)}
-.wb-qa-icon{width:38px;height:38px;background:var(--dt-brand-light);border-radius:50%;display:flex;align-items:center;justify-content:center}
-.wb-qa-icon svg{width:18px;height:18px;fill:var(--dt-brand)}
+.wb-qa-icon{width:38px;height:38px;background:var(--dt-brand-light);color:var(--dt-brand);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.wb-qa-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.wb-qa-icon.green{background:var(--dt-success-light);color:var(--dt-success)}
+.wb-qa-icon.orange{background:var(--dt-warning-light);color:var(--dt-warning)}
+.wb-qa-icon.purple{background:var(--dt-purple-light);color:var(--dt-purple)}
 
 .wb-section{margin:16px 12px}
 .wb-section-title{font-size:13px;font-weight:500;color:var(--dt-text-secondary);margin-bottom:8px;padding-left:16px}
 .wb-apps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px 12px;padding:16px 16px;background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl)}
 .wb-app-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--dt-text-regular);cursor:pointer}
-.wb-app-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--dt-bg-panel)}
+.wb-app-icon{width:44px;height:44px;border-radius:var(--dt-radius-xl);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--dt-bg-panel)}
 .wb-badge-dot{position:relative}
 .wb-badge-dot::after{content:attr(data-badge);position:absolute;top:-3px;right:-3px;min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 3px}
 
 .wb-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
 .wb-card-item{display:flex;align-items:center;padding:16px 16px;font-size:14px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
 .wb-card-item:last-child{border-bottom:none}
-.wb-card-item:active{background:var(--dt-bg-hover)}
+.wb-card-item:hover,.wb-card-item:active{background:var(--dt-bg-hover)}
 .wb-card-item svg{width:18px;height:18px;margin-right:12px;flex-shrink:0}
 .wb-card-arrow{margin-left:auto;color:var(--dt-text-placeholder);font-size:18px}
 
 /* =============== PAGE 4: DING =============== */
-.ding-page{flex:1;overflow-y:auto;background:var(--dt-bg-body)}
-.ding-header{background:var(--dt-bg-panel);padding:0 16px 0;border-bottom:0.5px solid var(--dt-border-light)}
-.ding-tabs{display:flex;gap:0;margin-top:12px}
-.ding-tab{flex:1;padding:12px 0;text-align:center;font-size:14px;color:var(--dt-text-secondary);cursor:pointer;border-bottom:2px solid transparent;font-weight:500}
-.ding-tab.active{color:var(--dt-brand);border-bottom-color:var(--dt-brand);font-weight:600}
-.ding-list{padding:0 0 12px}
+.ding-page{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--dt-bg-body)}
+.ding-header{background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
+.ding-tabs{display:flex}
+.ding-tab{flex:1;padding:10px 0 11px;text-align:center;font-size:14px;color:var(--dt-text-secondary);cursor:pointer;font-weight:500;position:relative}
+.ding-tab.active{color:var(--dt-brand);font-weight:600}
+.ding-tab.active::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:24px;height:2px;background:var(--dt-brand);border-radius:1px}
+.ding-list{flex:1;overflow-y:auto;padding:0 0 12px;-webkit-overflow-scrolling:touch}
 .ding-item{padding:16px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
-.ding-item:active{background:var(--dt-bg-hover)}
+.ding-item:hover,.ding-item:active{background:var(--dt-bg-hover)}
 .ding-item-title{font-size:14px;font-weight:500;margin-bottom:6px;line-height:1.4}
 .ding-item-meta{font-size:12px;color:var(--dt-text-secondary);display:flex;gap:12px;align-items:center}
 .ding-status{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
@@ -189,89 +196,119 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .ding-status-pending{background:var(--dt-danger-light);color:var(--dt-danger)}
 
 /* =============== PAGE 5: CONTACTS =============== */
-.contact-page{flex:1;overflow-y:auto;background:var(--dt-bg-body)}
+.contact-page{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--dt-bg-body)}
+.contact-head{flex-shrink:0;background:var(--dt-bg-body)}
+.contact-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .contact-section{margin:12px}
 .contact-section-title{font-size:12px;color:var(--dt-text-secondary);padding:0 16px 8px;font-weight:500}
-.contact-item,.ci-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
-.contact-item:active,.ci-item:active{background:var(--dt-bg-hover)}
+.ci-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
+.ci-item:hover,.ci-item:active{background:var(--dt-bg-hover)}
 .ci-item:last-child{border-bottom:none}
-.ci-avatar{width:42px;height:42px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:600}
+.ci-avatar{width:42px;height:42px;border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:600}
 .ci-info{flex:1;margin-left:12px;min-width:0}
 .ci-name{font-size:15px;font-weight:500}
 .ci-desc{font-size:12px;color:var(--dt-text-secondary);margin-top:2px}
 .ci-arrow{color:var(--dt-text-placeholder);font-size:18px;flex-shrink:0}
 
 /* =============== PAGE 6: MY =============== */
-.my-page{flex:1;overflow-y:auto;background:var(--dt-bg-body)}
-.my-header{background:var(--dt-brand);padding:16px 24px 28px;display:flex;align-items:center;gap:16px;border-radius:0 0 16px 16px}
-.my-avatar{width:60px;height:60px;border-radius:50%;background:rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:var(--dt-bg-panel);border:2px solid rgba(255,255,255,0.4)}
-.my-name{font-size:20px;font-weight:600;color:var(--dt-bg-panel)}
-.my-account{font-size:13px;color:rgba(255,255,255,0.8);margin-top:3px}
-.my-vip-badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;background:rgba(255,255,255,0.2);border-radius:var(--dt-radius-lg);font-size:11px;color:var(--dt-bg-panel);margin-top:6px}
+/* 对齐钉钉移动端「我的」：浅灰底 + 白色资料卡 + 彩色功能图标块 */
+.my-page{flex:1;overflow-y:auto;background:var(--dt-bg-body);-webkit-overflow-scrolling:touch}
+.my-profile{display:flex;align-items:center;gap:14px;padding:20px 16px;background:var(--dt-bg-panel);cursor:pointer}
+.my-profile:active{background:var(--dt-bg-hover)}
+.my-avatar{width:64px;height:64px;border-radius:var(--dt-radius-sm);background:var(--dt-brand);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:600;color:var(--dt-bg-panel);flex-shrink:0}
+.my-info{flex:1;min-width:0}
+.my-name-row{display:flex;align-items:center;gap:6px;min-width:0}
+.my-name{font-size:18px;font-weight:600;color:var(--dt-text-primary);line-height:24px}
+.my-vip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:var(--dt-radius-sm);background:var(--dt-warning-light);color:var(--dt-warning);font-size:11px;font-weight:500;flex-shrink:0}
+.my-account{font-size:13px;color:var(--dt-text-secondary);line-height:18px;margin-top:5px}
+.my-dept{font-size:12px;color:var(--dt-text-tertiary);line-height:16px;margin-top:2px}
 .my-list-section{margin:12px}
 .my-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
-.my-card-item{display:flex;align-items:center;padding:16px 16px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer;font-size:14px}
+.my-card-item{display:flex;align-items:center;padding:13px 16px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer;font-size:15px}
 .my-card-item:last-child{border-bottom:none}
-.my-card-item:active{background:var(--dt-bg-hover)}
-.my-card-item svg{width:20px;height:20px;margin-right:12px;flex-shrink:0}
-.my-item-text{flex:1}
-.my-item-value{font-size:12px;color:var(--dt-text-secondary)}
-.my-item-arrow{color:var(--dt-text-placeholder);font-size:16px;flex-shrink:0}
-.my-logout{margin:24px 12px}
+.my-card-item:hover,.my-card-item:active{background:var(--dt-bg-hover)}
+.my-ic{width:32px;height:32px;border-radius:var(--dt-radius-lg);display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0}
+.my-ic svg{width:18px;height:18px}
+.my-ic.blue{background:var(--dt-brand-light);color:var(--dt-brand)}
+.my-ic.green{background:var(--dt-success-light);color:var(--dt-success)}
+.my-ic.orange{background:var(--dt-warning-light);color:var(--dt-warning)}
+.my-ic.purple{background:var(--dt-purple-light);color:var(--dt-purple)}
+.my-ic.gray{background:var(--dt-bg-body);color:var(--dt-text-secondary)}
+.my-item-text{flex:1;min-width:0}
+.my-item-value{font-size:13px;color:var(--dt-text-tertiary);margin-right:8px}
+.my-item-arrow{color:var(--dt-text-quaternary);font-size:16px;flex-shrink:0}
+.my-logout{margin:20px 12px 0}
 .my-logout-btn{width:100%;height:46px;background:var(--dt-bg-panel);border:none;border-radius:var(--dt-radius-xl);color:var(--dt-danger);font-size:15px;font-weight:500;cursor:pointer}
 .my-logout-btn:active{background:var(--dt-danger-light)}
-.my-version{text-align:center;font-size:11px;color:var(--dt-text-tertiary);padding:16px 0 24px}
+.my-version{text-align:center;font-size:11px;line-height:1.7;color:var(--dt-text-tertiary);padding:16px 0 24px}
 
-/* =============== 设置弹层（shared.js xfSettings，H5 自带样式） =============== */
-.xf-settings-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.45);z-index:150;display:none;align-items:center;justify-content:center;padding:12px}
-.xf-settings-overlay.show{display:flex}
-.xf-settings{width:100%;height:520px;max-width:calc(100vw - 24px);max-height:calc(100vh - 80px);background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);box-shadow:0 8px 32px rgba(0,0,0,0.18);overflow:hidden;display:flex;flex-direction:column}
-.xf-settings-aside{width:100%;flex-shrink:0;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border)}
-.xf-settings-aside-title{display:none}
-.xf-settings-nav{display:flex;flex-direction:row;overflow-x:auto;padding:6px 8px;gap:4px}
-.xf-settings-nav-item{display:flex;align-items:center;height:34px;padding:0 12px;border:none;background:transparent;border-radius:var(--dt-radius-full);cursor:pointer;font-family:var(--dt-font);font-size:13px;color:var(--dt-text-regular);flex-shrink:0}
-.xf-settings-nav-item.active{background:var(--dt-brand-light);color:var(--dt-brand);font-weight:500}
-.xf-settings-content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
-.xf-settings-content-head{height:48px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border);flex-shrink:0}
-.xf-settings-content-head span{font-size:15px;font-weight:600;color:var(--dt-text-primary)}
-.xf-settings-close{width:28px;height:28px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;color:var(--dt-text-secondary);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center}
-.xf-settings-close:active{background:var(--dt-bg-hover)}
-.xf-settings-body{padding:16px;overflow-y:auto}
-.xf-settings-profile{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.xf-settings-avatar{width:56px;height:56px;border-radius:var(--dt-radius-md);background:var(--dt-brand);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:22px;font-weight:600;flex-shrink:0}
-.xf-settings-name{font-size:16px;font-weight:600;color:var(--dt-text-primary)}
-.xf-settings-sub{font-size:12px;color:var(--dt-text-tertiary);margin-top:2px}
-.xf-settings-sec-title{font-size:12px;font-weight:500;color:var(--dt-text-secondary);margin-bottom:8px}
-.xf-settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-border-light)}
-.xf-settings-row-title{font-size:14px;color:var(--dt-text-primary)}
-.xf-settings-row-desc{font-size:12px;color:var(--dt-text-tertiary);margin-top:2px}
-.xf-settings-switch{width:36px;height:20px;border:none;background:var(--dt-border);border-radius:var(--dt-radius-full);position:relative;cursor:pointer;flex-shrink:0}
-.xf-settings-switch::after{content:'';width:16px;height:16px;background:var(--dt-bg-panel);border-radius:var(--dt-radius-full);position:absolute;top:2px;left:2px;transition:transform 0.2s}
-.xf-settings-switch.on{background:var(--dt-brand)}
-.xf-settings-switch.on::after{transform:translateX(16px)}
-.xf-settings-theme-dots{display:flex;gap:12px}
-.xf-settings-theme-dot{position:relative;width:28px;height:28px;border-radius:var(--dt-radius-full);cursor:pointer;border:2px solid transparent}
-.xf-settings-theme-dot.active{border-color:var(--dt-text-primary)}
-.xf-settings-theme-dot.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:700;line-height:1}
-.xf-settings-logout{width:100%;height:46px;border:0.5px solid var(--dt-border);background:var(--dt-bg-panel);border-radius:var(--dt-radius-lg);color:var(--dt-danger);font-size:14px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
-.xf-settings-logout:active{background:var(--dt-danger-light)}
-.xf-settings-value{font-size:13px;color:var(--dt-text-tertiary)}
-.xf-settings-more{font-size:16px;line-height:1;color:var(--dt-text-quaternary)}
-.xf-settings-gap{margin-top:16px}
-.xf-settings-note{font-size:12px;line-height:1.7;color:var(--dt-text-tertiary);margin-top:16px}
-.xf-help-list{list-style:none}
-.xf-help-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:0.5px solid var(--dt-border-light);font-size:14px;color:var(--dt-text-primary)}
-.xf-help-list kbd{display:inline-block;padding:2px 6px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);background:var(--dt-bg-body);font-size:12px;font-family:var(--dt-font);color:var(--dt-text-secondary)}
+/* =============== App 弹层体系（重设计，不照搬桌面居中弹窗） ===============
+   uniapp 适配映射：设置页 .h5-settings → 独立页面（navigateTo 全屏 push）；确认弹窗 .xf-confirm（shared.js 注入）→ uni.showModal；开关 → <switch>；Toast → uni.showToast */
+.h5-settings-title{position:absolute;left:0;right:0;top:0;height:44px;line-height:44px;text-align:center;font-size:16px;font-weight:600;pointer-events:none}
+.h5-settings{position:absolute;inset:0;z-index:120;background:var(--dt-bg-body);display:flex;flex-direction:column;transform:translateX(100%);visibility:hidden;transition:transform 0.22s ease,visibility 0s 0.22s}
+.h5-settings.show{transform:translateX(0);visibility:visible;transition:transform 0.22s ease}
+/* 设置页：全屏 push，从右滑入（App 页面栈导航，无遮罩、无居中卡片）；uniapp 映射见块头注释 */
+.h5-settings-nav{position:relative;height:44px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);display:flex;align-items:center;padding:0 8px;flex-shrink:0}
+.h5-settings-back{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-primary);border-radius:50%;position:relative;z-index:1}
+.h5-settings-back:active{background:var(--dt-bg-body)}
+.h5-settings-back svg{width:22px;height:22px}
+.h5-settings-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 12px 24px}
+.h5-set-sec{font-size:12px;color:var(--dt-text-secondary);padding:12px 16px 8px;font-weight:500}
+.h5-set-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
+.h5-set-row{display:flex;align-items:center;gap:12px;min-height:48px;padding:10px 16px;border-bottom:0.5px solid var(--dt-border-light)}
+.h5-set-row:last-child{border-bottom:none}
+.h5-set-row:active{background:var(--dt-bg-hover)}
+.h5-set-main{flex:1;min-width:0}
+.h5-set-label{font-size:14px;color:var(--dt-text-primary)}
+.h5-set-desc{font-size:12px;color:var(--dt-text-tertiary);margin-top:2px}
+.h5-set-value{font-size:13px;color:var(--dt-text-tertiary);flex-shrink:0}
+.h5-set-arrow{color:var(--dt-text-quaternary);font-size:16px;flex-shrink:0}
+/* App 开关：44x26 胶囊（对齐 uniapp <switch> 默认规格） */
+.h5-set-switch{width:44px;height:26px;border:none;background:var(--dt-border);border-radius:13px;position:relative;cursor:pointer;flex-shrink:0;padding:0;transition:background 0.15s}
+.h5-set-switch::after{content:'';width:22px;height:22px;background:var(--dt-bg-panel);border-radius:50%;position:absolute;top:2px;left:2px;transition:transform 0.15s;box-shadow:0 1px 2px rgba(0,0,0,0.15)}
+.h5-set-switch.on{background:var(--dt-brand)}
+.h5-set-switch.on::after{transform:translateX(18px)}
+.h5-set-profile{display:flex;align-items:center;gap:12px;padding:16px}
+.h5-set-avatar{width:56px;height:56px;border-radius:var(--dt-radius-sm);background:var(--dt-brand);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:22px;font-weight:600;flex-shrink:0}
+.h5-set-name{font-size:16px;font-weight:600;color:var(--dt-text-primary)}
+.h5-set-sub{font-size:12px;color:var(--dt-text-tertiary);margin-top:2px}
+.h5-theme-dots{display:flex;gap:16px;padding:14px 16px}
+.h5-theme-dot{width:28px;height:28px;border-radius:var(--dt-radius-full);border:2px solid transparent;cursor:pointer;padding:0;position:relative}
+.h5-theme-dot.active{border-color:var(--dt-text-primary)}
+.h5-theme-dot.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:700;line-height:1}
+.h5-set-gap{height:16px}
+.h5-set-logout{width:100%;height:46px;border:none;background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);color:var(--dt-danger);font-size:15px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
+.h5-set-logout:active{background:var(--dt-danger-light)}
+.h5-set-note{font-size:12px;line-height:1.7;color:var(--dt-text-tertiary);padding:12px 16px;text-align:center}
+
+/* 确认弹窗：App 居中小对话框（破坏性操作二次确认；对应 uni.showModal） */
+.xf-confirm-overlay{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:375px;max-width:100%;background:rgba(0,0,0,0.45);z-index:160;display:none;align-items:center;justify-content:center;padding:32px}
+.xf-confirm-overlay.show{display:flex}
+.xf-confirm{width:100%;max-width:300px;background:var(--dt-bg-panel);border-radius:var(--dt-radius-2xl);overflow:hidden}
+.xf-confirm-title{font-size:16px;font-weight:600;text-align:center;padding:20px 20px 8px;color:var(--dt-text-primary)}
+.xf-confirm-body{font-size:13px;color:var(--dt-text-secondary);text-align:center;line-height:1.6;padding:0 20px 20px}
+.xf-confirm-hint{display:block;margin-top:6px;font-size:12px;color:var(--dt-text-tertiary)}
+.xf-confirm-actions{display:flex;border-top:0.5px solid var(--dt-border-light)}
+.xf-confirm-btn{flex:1;height:44px;border:none;background:transparent;font-family:var(--dt-font);font-size:15px;color:var(--dt-text-primary);cursor:pointer}
+.xf-confirm-btn+.xf-confirm-btn{border-left:0.5px solid var(--dt-border-light)}
+.xf-confirm-btn.primary{color:var(--dt-brand);font-weight:600}
+.xf-confirm-btn.danger{color:var(--dt-danger);font-weight:600}
+.xf-confirm-btn:active{background:var(--dt-bg-hover)}
+
 
 /* =============== BOTTOM TAB BAR =============== */
-.tab-bar{height:58px;background:var(--dt-bg-panel);border-top:1px solid var(--dt-border-light);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:12px}
-.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--dt-text-secondary);font-size:11px;position:relative}
-.tab-item.active{color:var(--dt-brand)}
+/* 栏高 60px（含 12px Home 区）→ 内容区 48px；图标统一放进 30px 高的 .tab-ico 视觉区，
+   普通 tab 的 22px 图标在其中居中，中间 DING 的 30px 胶囊恰好填满该区，
+   五个 tab 结构完全一致（30px 图标区 + 2px 间距 + 13px 标签 = 45px），
+   整组由 justify-content:center 天然上下居中，标签严格落在同一基线，无需任何位移 hack */
+.tab-bar{height:60px;background:var(--dt-bg-panel);border-top:1px solid var(--dt-border-light);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:12px}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--dt-text-secondary);font-size:11px;line-height:13px;position:relative;transition:color 0.15s}
+.tab-item:hover{color:var(--dt-text-primary)}
+.tab-item.active,.tab-item.active:hover{color:var(--dt-brand)}
+.tab-ico{height:30px;display:flex;align-items:center;justify-content:center}
 .tab-item svg{width:22px;height:22px;fill:currentColor}
-.tab-item .tab-badge{position:absolute;top:1px;right:50%;transform:translate(14px,0);min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
-/* 34px 按钮比 22px 图标位高 12px，居中后标签会比其他标签低 6px；相对上移 5px 使其基线对齐且不与按钮贴合 */
-.tab-center span{position:relative;top:-5px}
-.tab-add-btn{width:46px;height:34px;flex-shrink:0;background:var(--dt-brand);border-radius:17px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.tab-item .tab-badge{position:absolute;top:2px;right:50%;transform:translate(14px,0);min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.tab-add-btn{width:46px;height:30px;flex-shrink:0;background:var(--dt-brand);border-radius:15px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .tab-add-btn:active{background:var(--dt-brand-hover)}
 .tab-add-btn svg{width:18px;height:18px;fill:none;stroke:var(--dt-bg-panel);stroke-width:2.5}
 
@@ -288,8 +325,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .h5-plus-panel.show{display:block}
 .h5-plus-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
 .h5-plus-item{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--dt-text-secondary);cursor:pointer}
-.h5-plus-icon{width:44px;height:44px;border-radius:12px;background:var(--dt-bg-body);display:flex;align-items:center;justify-content:center}
-.h5-plus-icon svg{width:22px;height:22px;fill:var(--dt-text-secondary)}
+.h5-plus-icon{width:44px;height:44px;border-radius:var(--dt-radius-xl);background:var(--dt-bg-body);display:flex;align-items:center;justify-content:center}
+.h5-plus-icon svg{width:22px;height:22px;fill:none;stroke:var(--dt-text-secondary);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
 .h5-backdrop{display:none;position:absolute;inset:0;background:rgba(0,0,0,0.2);z-index:80}
 .h5-backdrop.show{display:block}
 
@@ -298,7 +335,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .h5-toast.show{opacity:1}
 </style>
 </head>
-<body class="xf-h5"><svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
+<body class="xf-h5"><svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
 
 <div class="phone-shell">
   <!-- Status Bar -->
@@ -307,7 +344,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     <div class="status-icons">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C17.93 4.07 6.07 4.07 1 9zm8 8l3 3 3-3a4.237 4.237 0 0 0-6 0zm-6-6l2 2a7.074 7.074 0 0 1 10 0l2-2C13.14 7.14 5.86 7.14 3 11z"/></svg>
       <svg viewBox="0 0 24 24" fill="currentColor"><rect x="17" y="4" width="4" height="16" rx="1"/><rect x="11" y="8" width="4" height="12" rx="1"/><rect x="5" y="12" width="4" height="8" rx="1"/></svg>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="18" height="10" rx="2"/><rect x="20" y="10" width="2" height="4" rx="1" fill="currentColor"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="18" height="10" rx="2"/><rect x="20" y="10" width="2" height="4" rx="1" fill="currentColor"/></svg>
     </div>
   </div>
 
@@ -315,8 +352,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   <div class="page active" id="pg-msg">
     <div class="msg-page-header">
       <span class="hdr-title">消息</span>
-      <button class="hdr-btn" aria-label="搜索"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-      <button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="hdr-btn" aria-label="搜索"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     </div>
     <div class="filter-bar">
       <div class="filter-tab active">全部<span class="tab-badge">9</span></div>
@@ -324,7 +361,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <div class="filter-tab">未读</div>
       <div class="filter-tab">文件</div>
     </div>
-    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索</div></div>
+    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索</div></div>
     <div class="session-scroll">
       <div class="sess-item has-at" onclick="openChat(0)"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品需求评审群</div><div class="sess-time">14:35</div></div><div class="sess-row2"><div class="sess-msg"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dt-danger);margin-right:5px;vertical-align:middle"></span><span style="color:var(--dt-danger);font-weight:600">[有人@你]</span>张三: 交互稿已更新</div><div class="sess-unread">3</div></div></div></div>
       <div class="sess-item" onclick="openChat(1)"><div class="sess-avatar" style="background:var(--dt-purple);">李<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">李四</div><div class="sess-time">14:20</div></div><div class="sess-row2"><div class="sess-msg">今天下午开会记得带电脑</div><div class="sess-unread">1</div></div></div></div>
@@ -345,8 +382,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         <button class="chat-back" aria-label="返回会话列表" onclick="closeChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="chat-title" id="chatTitle">产品需求评审群</div>
         <div class="chat-actions">
-          <button aria-label="密聊"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15.5 7.5a4 4 0 1 0-8 0v3h8z"/><path d="M5 11a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2"/></svg></button>
-          <button aria-label="更多操作"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+          <button aria-label="密聊"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.5 7.5a4 4 0 1 0-8 0v3h8z"/><path d="M5 11a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2"/></svg></button>
+          <button aria-label="更多操作"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
         </div>
       </div>
       <div class="chat-msg-list">
@@ -370,14 +407,14 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       </div>
       <div class="chat-input-area">
         <div class="chat-toolbar-row">
-          <button aria-label="表情"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
-          <button aria-label="附件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83"/></svg></button>
-          <button aria-label="图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></button>
-          <button aria-label="拍摄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="4"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42"/></svg></button>
+          <button aria-label="表情"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
+          <button aria-label="附件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83"/></svg></button>
+          <button aria-label="图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></button>
+          <button aria-label="拍摄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="4"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42"/></svg></button>
         </div>
         <div class="chat-input-row">
           <button class="chat-input-icon" id="h5PlusBtn" aria-label="更多功能">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           </button>
           <textarea placeholder="输入消息..." rows="1" id="h5ChatInput"></textarea>
           <button class="chat-send-btn">发</button>
@@ -391,33 +428,33 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     <div class="wb-header"><div class="wb-header-row"><div class="wb-avatar">我</div><div><div class="wb-user-name">架构师</div><div class="wb-user-dept">产品设计部 · 产品经理</div></div></div></div>
     <div class="wb-quick-actions">
       <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span>日志</span></div>
-      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>考勤</span></div>
-      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>审批</span></div>
-      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span>待办</span></div>
+      <div class="wb-qa-item"><div class="wb-qa-icon green"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>考勤</span></div>
+      <div class="wb-qa-item"><div class="wb-qa-icon orange"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span>审批</span></div>
+      <div class="wb-qa-item"><div class="wb-qa-icon purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span>待办</span></div>
     </div>
     <div class="wb-section"><div class="wb-section-title">常用应用</div>
       <div class="wb-apps-grid">
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);font-size:12px;font-weight:700;">日志</div><span>日志</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">日志</div><span>日志</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-success-light);color:var(--dt-success);">考勤</div><span>考勤打卡</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">审批</div><span>审批</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-purple-light);color:var(--dt-purple);">待办</div><span>待办</span></div>
         <div class="wb-app-item wb-badge-dot" data-badge="2"><div class="wb-app-icon" style="background:var(--dt-danger-light);color:var(--dt-av-pink);">邮件</div><span>邮箱</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">日历</div><span>日历</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);font-size:11px;">文档</div><span>文档</span></div>
+        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">文档</div><span>文档</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-bg-body);color:var(--dt-text-tertiary);">会议</div><span>视频会议</span></div>
       </div>
     </div>
     <div class="wb-section"><div class="wb-section-title">最近使用</div>
       <div class="wb-card">
-        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>日常审批<span class="wb-card-arrow">›</span></div>
-        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><polyline points="14 2 14 8 20 8"/></svg>团队日志<span class="wb-card-arrow">›</span></div>
+        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>日常审批<span class="wb-card-arrow">›</span></div>
+        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><polyline points="14 2 14 8 20 8"/></svg>团队日志<span class="wb-card-arrow">›</span></div>
       </div>
     </div>
   </div></div>
 
   <!-- ===== PAGE 4: DING ===== -->
   <div class="page" id="pg-ding"><div class="ding-page">
-    <div class="ding-header"><div class="msg-page-header" style="padding:0;border:none"><span class="hdr-title">DING</span><button class="hdr-btn" aria-label="新建 DING"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+    <div class="ding-header"><div class="msg-page-header"><span class="hdr-title">DING</span><button class="hdr-btn" aria-label="新建 DING"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
       <div class="ding-tabs"><div class="ding-tab active">收到的</div><div class="ding-tab">发出的</div></div></div>
     <div class="ding-list">
       <div class="ding-item"><div class="ding-item-title">今天下午 3 点需求评审，请准时参加！</div><div class="ding-item-meta"><span>张三</span><span>14:30</span><span class="ding-status ding-status-done">已确认</span></div></div>
@@ -428,7 +465,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 
   <!-- ===== PAGE 5: CONTACTS ===== -->
   <div class="page" id="pg-contact"><div class="contact-page">
-    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索联系人</div></div>
+    <div class="contact-head">
+    <div class="msg-page-header"><span class="hdr-title">通讯录</span><button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索联系人</div></div>
+    </div>
+    <div class="contact-scroll">
     <div class="contact-section"><div class="contact-section-title">功能入口</div><div class="wb-card">
       <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-brand);">新</div><div class="ci-info"><div class="ci-name">新的好友</div></div><div class="ci-arrow">›</div></div>
       <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-success);">我</div><div class="ci-info"><div class="ci-name">我的群组</div></div><div class="ci-arrow">›</div></div>
@@ -440,33 +481,51 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-success);">李</div><div class="ci-info"><div class="ci-name">李四</div><div class="ci-desc">UI 设计师</div></div><div class="ci-arrow">›</div></div>
       </div>
     </div>
+    </div>
   </div></div>
 
   <!-- ===== PAGE 6: MY ===== -->
   <div class="page" id="pg-my"><div class="my-page">
-    <div class="my-header"><div class="my-avatar">我</div><div><div class="my-name">架构师</div><div class="my-account">architect@xinfei.com</div><div class="my-vip-badge"><svg class="ic"><use href="#i-star"/></svg> 高级版</div></div></div>
+    <div class="my-profile" onclick="h5Settings('profile')">
+      <div class="my-avatar">我</div>
+      <div class="my-info">
+        <div class="my-name-row"><div class="my-name">架构师</div><span class="my-vip"><svg class="ic"><use href="#i-star"/></svg>高级版</span></div>
+        <div class="my-account">architect@xinfei.com</div>
+        <div class="my-dept">产品设计部 · 产品经理</div>
+      </div>
+      <span class="my-item-arrow">›</span>
+    </div>
     <div class="my-list-section"><div class="my-card">
-<div class="my-card-item" onclick="xfSettings('profile')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="my-item-text">个人资料</span><span class="my-item-arrow">›</span></div>
-<div class="my-card-item" onclick="xfSettings('privacy')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span class="my-item-text">账号与安全</span><span class="my-item-arrow">›</span></div>
-<div class="my-card-item" onclick="xfSettings('notify')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="my-item-text">消息通知</span><span class="my-item-value">已开启</span><span class="my-item-arrow">›</span></div>
-<div class="my-card-item" onclick="xfSettings('general')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg><span class="my-item-text">主题与外观</span><span class="my-item-value">品牌蓝</span><span class="my-item-arrow">›</span></div>
-<div class="my-card-item" onclick="xfSettings('general')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1"/></svg><span class="my-item-text">通用设置</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('profile')"><span class="my-ic blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span class="my-item-text">个人资料</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('privacy')"><span class="my-ic green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="my-item-text">账号与安全</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('notify')"><span class="my-ic orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="my-item-text">消息通知</span><span class="my-item-value">已开启</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('general')"><span class="my-ic purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></span><span class="my-item-text">主题与外观</span><span class="my-item-value">品牌蓝</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('general')"><span class="my-ic gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg></span><span class="my-item-text">通用设置</span><span class="my-item-arrow">›</span></div>
     </div></div>
     <div class="my-list-section"><div class="my-card">
-<div class="my-card-item" onclick="xfSettings('shortcut')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="my-item-text">帮助与反馈</span><span class="my-item-arrow">›</span></div>
-<div class="my-card-item" onclick="xfSettings('about')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-text-secondary)" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg><span class="my-item-text">关于 心飞IM</span><span class="my-item-value">v8.2.0</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('shortcut')"><span class="my-ic blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span><span class="my-item-text">帮助与反馈</span><span class="my-item-arrow">›</span></div>
+<div class="my-card-item" onclick="h5Settings('about')"><span class="my-ic gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span><span class="my-item-text">关于 心飞IM</span><span class="my-item-value">v8.2.0</span><span class="my-item-arrow">›</span></div>
     </div></div>
     <div class="my-logout"><button class="my-logout-btn" onclick="xfSettingsLogout()">退出登录</button></div>
-    <div class="my-version">© 2026 心飞科技有限公司</div>
+    <div class="my-version">心飞IM v8.2.0<br>© 2026 心飞科技有限公司</div>
   </div></div>
 
   <!-- Tab Bar -->
   <div class="tab-bar">
-    <div class="tab-item active" onclick="switchTab('msg')"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg><span>消息</span><div class="tab-badge">9</div></div>
-    <div class="tab-item" onclick="switchTab('wb')"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>工作台</span></div>
-    <div class="tab-item tab-center" onclick="switchTab('ding')"><div class="tab-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>DING</span></div>
-    <div class="tab-item" onclick="switchTab('contact')"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span>通讯录</span></div>
-    <div class="tab-item" onclick="switchTab('my')"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>我的</span></div>
+    <div class="tab-item active" onclick="switchTab('msg')"><span class="tab-ico"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span>消息</span><div class="tab-badge">9</div></div>
+    <div class="tab-item" onclick="switchTab('wb')"><span class="tab-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span><span>工作台</span></div>
+    <div class="tab-item tab-center" onclick="switchTab('ding')"><span class="tab-ico"><div class="tab-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></span><span>DING</span></div>
+    <div class="tab-item" onclick="switchTab('contact')"><span class="tab-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>通讯录</span></div>
+    <div class="tab-item" onclick="switchTab('my')"><span class="tab-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>我的</span></div>
+  </div>
+
+  <!-- ===== 设置页（App 全屏 push 页，替代桌面居中弹窗；uniapp 中为 navigateTo 独立页面） ===== -->
+  <div class="h5-settings" id="h5Settings">
+    <div class="h5-settings-nav">
+      <button class="h5-settings-back" onclick="h5CloseSettings()" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <span class="h5-settings-title" id="h5SettingsTitle">设置</span>
+    </div>
+    <div class="h5-settings-body" id="h5SettingsBody"></div>
   </div>
 
   <div class="h5-backdrop" id="h5Backdrop" onclick="document.getElementById('h5-plus-panel').classList.remove('show');this.classList.remove('show')"></div>
@@ -585,6 +644,102 @@ function h5Toast(msg){
   t._timer=setTimeout(function(){t.classList.remove('show')},1500);
 }
 window.showToast=h5Toast;
+
+/* ===== App 设置页：全屏 push 导航（uniapp 中对应 navigateTo 的独立页面） ===== */
+var H5_SET_THEMES=[
+  {name:'品牌蓝',color:'#277EFB',light:'#E6F2FF',hover:'#1169E0',active:'#0656C6'},
+  {name:'活力橙',color:'#FF7D00',light:'#FFF7E6',hover:'#E06E00',active:'#C25F00'},
+  {name:'安心绿',color:'#00B42A',light:'#F6FFED',hover:'#009E24',active:'#00861F'},
+  {name:'绛红',color:'#F53F3F',light:'#FFF1F0',hover:'#D93838',active:'#BF3131'},
+  {name:'烟雨紫',color:'#6C5CE7',light:'#F5F3FF',hover:'#5A4BD1',active:'#4B3EB8'}
+];
+var H5_SET_TITLES={profile:'个人资料',privacy:'账号与安全',notify:'消息通知',general:'通用',shortcut:'帮助与反馈',about:'关于'};
+function h5Esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function h5Card(inner){return '<div class="h5-set-card">'+inner+'</div>'}
+function h5RowMain(label,desc){return '<div class="h5-set-main"><div class="h5-set-label">'+h5Esc(label)+'</div>'+(desc?'<div class="h5-set-desc">'+h5Esc(desc)+'</div>':'')+'</div>'}
+function h5Sw(label,desc,on){return '<div class="h5-set-row">'+h5RowMain(label,desc)+'<button type="button" class="h5-set-switch'+(on?' on':'')+'" role="switch" aria-checked="'+(on?'true':'false')+'" aria-label="'+h5Esc(label)+'"></button></div>'}
+function h5Vl(label,desc,v){return '<div class="h5-set-row">'+h5RowMain(label,desc)+'<span class="h5-set-value">'+h5Esc(v)+'</span><span class="h5-set-arrow">›</span></div>'}
+function h5Lk(label,toast){return '<div class="h5-set-row" data-h5-toast="'+h5Esc(toast)+'" role="button" tabindex="0">'+h5RowMain(label)+'<span class="h5-set-arrow">›</span></div>'}
+function h5Sec(t){return '<div class="h5-set-sec">'+h5Esc(t)+'</div>'}
+function h5ThemeDots(){
+  var cur='';try{cur=(localStorage.getItem('xf_theme_color_v1')||'').split('|')[0]}catch(e){}
+  if(!cur)cur=H5_SET_THEMES[0].color;
+  return '<div class="h5-theme-dots">'+H5_SET_THEMES.map(function(t){
+    return '<button type="button" class="h5-theme-dot'+(t.color===cur?' active':'')+'" data-color="'+t.color+'" data-light="'+t.light+'" data-hover="'+t.hover+'" data-active="'+t.active+'" style="background:'+t.color+'" aria-label="'+h5Esc(t.name)+'" title="'+h5Esc(t.name)+'"></button>';
+  }).join('')+'</div>';
+}
+/* 与 shared.js 主题逻辑共用同一 localStorage 键，两种入口互相兼容 */
+function h5ApplyTheme(color,light,hover,active){
+  var r=document.documentElement.style;
+  r.setProperty('--dt-brand',color);
+  if(light)r.setProperty('--dt-brand-light',light);
+  if(hover)r.setProperty('--dt-brand-hover',hover);
+  if(active)r.setProperty('--dt-brand-active',active);
+  try{localStorage.setItem('xf_theme_color_v1',[color,light||'',hover||'',active||''].join('|'))}catch(e){}
+}
+function h5SettingsPane(sec){
+  if(sec==='profile'){
+    return '<div class="h5-set-card h5-set-profile"><div class="h5-set-avatar">架</div><div><div class="h5-set-name">架构师</div><div class="h5-set-sub">产品设计部 · 产品经理</div></div></div>'
+      +h5Sec('账号信息')
+      +h5Card(h5Vl('昵称','','架构师')+h5Vl('工号','','XF10086')+h5Vl('部门','','产品设计部')+h5Vl('邮箱','','architect@xinfei.com'))
+      +'<div class="h5-set-gap"></div><button type="button" class="h5-set-logout" onclick="xfSettingsLogout()">退出登录</button>';
+  }
+  if(sec==='privacy'){
+    return h5Card(h5Sw('展示在线状态','关闭后好友看不到你的在线/离开状态',true)
+      +h5Sw('接收已读回执','同时你也无法看到对方的已读状态',true)
+      +h5Sw('禁止陌生人私信','仅同事可向你发起单聊',false)
+      +h5Vl('屏蔽列表','','0 人'));
+  }
+  if(sec==='notify'){
+    return h5Card(h5Sw('新消息通知','接收消息时在通知栏提醒',true)
+      +h5Sw('通知显示消息详情','通知栏展示消息内容与发送人',true)
+      +h5Sw('声音',null,true)
+      +h5Sw('震动','','')
+      +h5Vl('免打扰时段','','22:00 - 08:00'));
+  }
+  if(sec==='general'){
+    return h5Sec('主题色')+h5Card(h5ThemeDots())
+      +'<div class="h5-set-gap"></div>'
+      +h5Card(h5Vl('多语言','','简体中文')+h5Sw('深色模式','跟随 App 外观设置',false)+h5Vl('会话列表密度','','标准'));
+  }
+  if(sec==='shortcut'){
+    return h5Card(h5Lk('常见问题','常见问题（演示）')+h5Lk('意见反馈','意见反馈（演示）')+h5Lk('联系客服','联系客服（演示）'))
+      +'<div class="h5-set-note">如有问题也可发送邮件至 support@xinfei.com</div>';
+  }
+  if(sec==='about'){
+    return h5Card(h5Vl('产品版本','','v8.2.0')+h5Vl('开发商','','心飞科技')+h5Vl('官方网站','','xinfei.com')+h5Lk('用户协议与隐私政策','用户协议与隐私政策（演示）'))
+      +'<div class="h5-set-note">心飞IM v8.2.0<br>© 2026 心飞科技有限公司</div>';
+  }
+  return '';
+}
+function h5Settings(sec){
+  if(!H5_SET_TITLES[sec])sec='profile';
+  var el=document.getElementById('h5Settings');
+  document.getElementById('h5SettingsTitle').textContent=H5_SET_TITLES[sec];
+  document.getElementById('h5SettingsBody').innerHTML=h5SettingsPane(sec);
+  document.getElementById('h5SettingsBody').scrollTop=0;
+  el.classList.add('show');
+}
+function h5CloseSettings(){document.getElementById('h5Settings').classList.remove('show')}
+(function(){
+  var el=document.getElementById('h5Settings');
+  el.addEventListener('click',function(e){
+    var sw=e.target.closest('.h5-set-switch');
+    if(sw){sw.classList.toggle('on');sw.setAttribute('aria-checked',sw.classList.contains('on')?'true':'false');return;}
+    var dot=e.target.closest('.h5-theme-dot');
+    if(dot){
+      el.querySelectorAll('.h5-theme-dot').forEach(function(d){d.classList.remove('active')});
+      dot.classList.add('active');
+      h5ApplyTheme(dot.getAttribute('data-color'),dot.getAttribute('data-light'),dot.getAttribute('data-hover'),dot.getAttribute('data-active'));
+      return;
+    }
+    var t=e.target.closest('[data-h5-toast]');
+    if(t)h5Toast(t.getAttribute('data-h5-toast'));
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&el.classList.contains('show'))h5CloseSettings();
+  });
+})();
 </script>
 <script src="shared.js"></script>
 </body>
