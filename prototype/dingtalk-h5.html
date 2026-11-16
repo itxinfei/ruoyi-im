@@ -29,7 +29,8 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
 }
 body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;justify-content:center;min-height:100vh;position:relative;-webkit-tap-highlight-color:transparent}
-.phone-shell{width:375px;height:100vh;height:100dvh;max-height:812px;background:var(--dt-bg-body);position:relative;overflow:hidden;display:flex;flex-direction:column;border-radius:48px;box-shadow:0 0 0 10px var(--dt-text-primary),0 0 0 11px var(--dt-text-primary),0 24px 48px rgba(0,0,0,0.4)}
+/* overflow:clip 彻底禁止滚动（hidden 仍是可编程滚动区域）：防止右侧滑出的设置页把壳撑出 scrollWidth 后被浏览器/自动化滚动导致整壳左移 */
+.phone-shell{width:375px;height:100vh;height:100dvh;max-height:812px;background:var(--dt-bg-body);position:relative;overflow:hidden;overflow:clip;display:flex;flex-direction:column;border-radius:48px;box-shadow:0 0 0 10px var(--dt-text-primary),0 0 0 11px var(--dt-text-primary),0 24px 48px rgba(0,0,0,0.4)}
 @media(max-width:420px){.phone-shell{width:100%;height:100vh;height:100dvh;border-radius:0;box-shadow:none}}
 
 /* Notch */
@@ -42,7 +43,9 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .status-icons svg{width:16px;height:16px}
 
 /* Pages */
-.page{display:none;flex:1;flex-direction:column;overflow:hidden}
+.page{display:none;flex:1;flex-direction:column;overflow:hidden;overflow:clip}
+/* 内容主区：设置页 absolute 的定位上下文，主区外 tab 栏常驻 */
+.h5-main{flex:1;min-height:0;position:relative;display:flex;flex-direction:column;overflow:hidden;overflow:clip}
 .page.active{display:flex}
 
 /* =============== PAGE 1: MESSAGE LIST =============== */
@@ -50,7 +53,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* 标题绝对居中：不被右侧按钮挤偏（DING/消息/通讯录页共用） */
 .hdr-title{position:absolute;left:0;right:0;top:0;height:44px;line-height:44px;text-align:center;font-size:17px;font-weight:600;pointer-events:none}
 .hdr-btn{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-brand);border-radius:50%;transition:background 0.15s}
-.hdr-btn:hover,.hdr-btn:active{background:var(--dt-bg-body)}
+.hdr-btn:active{background:var(--dt-bg-body)}
 .hdr-btn svg{width:22px;height:22px}
 
 /* Filter Tabs */
@@ -67,11 +70,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 
 /* Session List */
 .session-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
-.sess-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);cursor:pointer;transition:background 0.15s;position:relative}
+.sess-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);cursor:pointer;transition:background 0.15s}
 .sess-item:active{background:var(--dt-bg-active)}
-.sess-item:hover{background:var(--dt-bg-hover)}
-/* 分隔线缩进对齐文字起点：16(左内边距)+50(头像)+16(间距)=82px */
-.sess-item:not(:last-child)::after{content:'';position:absolute;left:82px;right:0;bottom:0;height:0.5px;background:var(--dt-border-light)}
+/* 会话分隔线：参考钉钉移动端为通栏 1px（含头像下方），0.5px 在普通屏渲染过淡不可见 */
+.sess-item:not(:last-child){border-bottom:1px solid var(--dt-border-light)}
 .sess-avatar{width:50px;height:50px;border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:17px;font-weight:600;position:relative}
 .sess-avatar.group{border-radius:var(--dt-radius-sm)}
 .sess-avatar .online-dot{position:absolute;bottom:-2px;right:-2px;width:12px;height:12px;background:var(--dt-success);border:2px solid var(--dt-bg-panel);border-radius:50%}
@@ -90,18 +92,18 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .chat-h5{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--dt-bg-body)}
 .chat-header{position:relative;height:44px;background:var(--dt-bg-panel);display:flex;align-items:center;justify-content:space-between;padding:0 8px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
 .chat-back{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-primary)}
-.chat-back:hover,.chat-back:active{background:var(--dt-bg-body);border-radius:50%}
+.chat-back:active{background:var(--dt-bg-body);border-radius:50%}
 .chat-back svg{width:22px;height:22px}
 /* 标题绝对居中：左右留出返回/操作区，长标题省略号 */
 .chat-title{position:absolute;left:0;right:0;top:0;height:44px;line-height:44px;text-align:center;font-size:17px;font-weight:600;padding:0 80px;box-sizing:border-box;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;pointer-events:none}
 .chat-actions{display:flex;gap:2px}
 .chat-actions button{width:36px;height:36px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%}
-.chat-actions button:hover,.chat-actions button:active{background:var(--dt-bg-body)}
+.chat-actions button:active{background:var(--dt-bg-body)}
 .chat-actions button svg{width:20px;height:20px}
 
 .chat-msg-list{flex:1;overflow-y:auto;padding:12px 12px 8px;-webkit-overflow-scrolling:touch}
-/* 时间分割线：即时通讯风格居中胶囊 */
-.chat-time{width:fit-content;margin:16px auto 12px;padding:2px 12px;border-radius:var(--dt-radius-lg);background:rgba(0,0,0,0.05);font-size:11px;color:var(--dt-text-tertiary);text-align:center;line-height:1.6}
+/* 时间分割线：钉钉移动端为居中灰字、无背景胶囊 */
+.chat-time{width:fit-content;margin:16px auto 12px;font-size:11px;color:var(--dt-text-tertiary);text-align:center}
 .chat-time:first-child{margin-top:2px}
 .chat-msg-wrap{display:flex;gap:8px;margin-bottom:16px;max-width:82%}
 .chat-msg-wrap.self{flex-direction:row-reverse;margin-left:auto}
@@ -132,15 +134,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* 私聊（1对1）不显示发送者昵称 */
 .chat-msg-list.p2p .chat-msg-sender{display:none}
 
-/* Chat Input */
+/* Chat Input：钉钉移动端输入区仅一行（+号 + 输入框 + 发送），无桌面版工具栏行 */
 .chat-input-area{background:var(--dt-bg-panel);border-top:0.5px solid var(--dt-border-light);flex-shrink:0}
-.chat-toolbar-row{display:flex;align-items:center;padding:6px 12px 2px;gap:2px;justify-content:flex-start}
-.chat-toolbar-row button{width:44px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:4px}
-.chat-toolbar-row button:hover,.chat-toolbar-row button:active{background:var(--dt-bg-body)}
-.chat-toolbar-row button svg{width:20px;height:20px}
 .chat-input-row{display:flex;align-items:center;padding:6px 8px 8px;gap:6px}
 .chat-input-icon{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%;flex-shrink:0}
-.chat-input-icon:hover,.chat-input-icon:active{background:var(--dt-bg-body)}
+.chat-input-icon:active{background:var(--dt-bg-body)}
 .chat-input-icon svg{width:22px;height:22px}
 .chat-input-row textarea{flex:1;border:none;outline:none;font-size:15px;font-family:var(--dt-font);resize:none;height:34px;line-height:22px;padding:6px 12px;background:var(--dt-bg-panel);border:0.5px solid var(--dt-border);border-radius:6px;max-height:80px;min-width:0;overflow-y:auto}
 .chat-send-btn{width:34px;height:34px;background:var(--dt-brand);color:var(--dt-bg-panel);border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -175,7 +173,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .wb-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
 .wb-card-item{display:flex;align-items:center;padding:16px 16px;font-size:14px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
 .wb-card-item:last-child{border-bottom:none}
-.wb-card-item:hover,.wb-card-item:active{background:var(--dt-bg-hover)}
+.wb-card-item:active{background:var(--dt-bg-hover)}
 .wb-card-item svg{width:18px;height:18px;margin-right:12px;flex-shrink:0}
 .wb-card-arrow{margin-left:auto;color:var(--dt-text-placeholder);font-size:18px}
 
@@ -188,7 +186,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .ding-tab.active::after{content:'';position:absolute;left:50%;bottom:0;transform:translateX(-50%);width:24px;height:2px;background:var(--dt-brand);border-radius:1px}
 .ding-list{flex:1;overflow-y:auto;padding:0 0 12px;-webkit-overflow-scrolling:touch}
 .ding-item{padding:16px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
-.ding-item:hover,.ding-item:active{background:var(--dt-bg-hover)}
+.ding-item:last-child{border-bottom:none}
+.ding-item:active{background:var(--dt-bg-hover)}
 .ding-item-title{font-size:14px;font-weight:500;margin-bottom:6px;line-height:1.4}
 .ding-item-meta{font-size:12px;color:var(--dt-text-secondary);display:flex;gap:12px;align-items:center}
 .ding-status{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500}
@@ -202,7 +201,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .contact-section{margin:12px}
 .contact-section-title{font-size:12px;color:var(--dt-text-secondary);padding:0 16px 8px;font-weight:500}
 .ci-item{display:flex;align-items:center;padding:12px 16px;background:var(--dt-bg-panel);border-bottom:0.5px solid var(--dt-border-light);cursor:pointer}
-.ci-item:hover,.ci-item:active{background:var(--dt-bg-hover)}
+.ci-item:active{background:var(--dt-bg-hover)}
 .ci-item:last-child{border-bottom:none}
 .ci-avatar{width:42px;height:42px;border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:14px;font-weight:600}
 .ci-info{flex:1;margin-left:12px;min-width:0}
@@ -226,7 +225,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .my-card{background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);overflow:hidden}
 .my-card-item{display:flex;align-items:center;padding:13px 16px;border-bottom:0.5px solid var(--dt-border-light);cursor:pointer;font-size:15px}
 .my-card-item:last-child{border-bottom:none}
-.my-card-item:hover,.my-card-item:active{background:var(--dt-bg-hover)}
+.my-card-item:active{background:var(--dt-bg-hover)}
 .my-ic{width:32px;height:32px;border-radius:var(--dt-radius-lg);display:flex;align-items:center;justify-content:center;margin-right:12px;flex-shrink:0}
 .my-ic svg{width:18px;height:18px}
 .my-ic.blue{background:var(--dt-brand-light);color:var(--dt-brand)}
@@ -303,8 +302,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
    整组由 justify-content:center 天然上下居中，标签严格落在同一基线，无需任何位移 hack */
 .tab-bar{height:60px;background:var(--dt-bg-panel);border-top:1px solid var(--dt-border-light);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:12px}
 .tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--dt-text-secondary);font-size:11px;line-height:13px;position:relative;transition:color 0.15s}
-.tab-item:hover{color:var(--dt-text-primary)}
-.tab-item.active,.tab-item.active:hover{color:var(--dt-brand)}
+.tab-item.active{color:var(--dt-brand)}
 .tab-ico{height:30px;display:flex;align-items:center;justify-content:center}
 .tab-item svg{width:22px;height:22px;fill:currentColor}
 .tab-item .tab-badge{position:absolute;top:2px;right:50%;transform:translate(14px,0);min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-panel);border-radius:8px;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;padding:0 4px}
@@ -349,6 +347,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   </div>
 
   <!-- ===== PAGE 1: MESSAGES ===== -->
+  <!-- 内容主区：5 个 tab 页 + 设置页都在主区内，tab 栏在主区外常驻（App 固定布局） -->
+  <div class="h5-main" id="h5Main">
   <div class="page active" id="pg-msg">
     <div class="msg-page-header">
       <span class="hdr-title">消息</span>
@@ -356,20 +356,20 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     </div>
     <div class="filter-bar">
-      <div class="filter-tab active">全部<span class="tab-badge">9</span></div>
-      <div class="filter-tab">@我<span class="tab-badge">3</span></div>
-      <div class="filter-tab">未读</div>
-      <div class="filter-tab">文件</div>
+      <div class="filter-tab active" data-filter="all">全部<span class="tab-badge">9</span></div>
+      <div class="filter-tab" data-filter="at">@我<span class="tab-badge">3</span></div>
+      <div class="filter-tab" data-filter="unread">未读</div>
+      <div class="filter-tab" data-filter="file">文件</div>
     </div>
     <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索</div></div>
     <div class="session-scroll">
-      <div class="sess-item has-at" onclick="openChat(0)"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品需求评审群</div><div class="sess-time">14:35</div></div><div class="sess-row2"><div class="sess-msg"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dt-danger);margin-right:5px;vertical-align:middle"></span><span style="color:var(--dt-danger);font-weight:600">[有人@你]</span>张三: 交互稿已更新</div><div class="sess-unread">3</div></div></div></div>
-      <div class="sess-item" onclick="openChat(1)"><div class="sess-avatar" style="background:var(--dt-purple);">李<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">李四</div><div class="sess-time">14:20</div></div><div class="sess-row2"><div class="sess-msg">今天下午开会记得带电脑</div><div class="sess-unread">1</div></div></div></div>
-      <div class="sess-item" onclick="openChat(2)"><div class="sess-avatar group" style="background:var(--dt-success);">技</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">技术架构组</div><div class="sess-time">13:10</div></div><div class="sess-row2"><div class="sess-msg">[图片] 部署架构图</div><svg class="sess-mute-icn" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><div class="sess-unread group">12</div></div></div></div>
+      <div class="sess-item has-at" data-filter="at unread" onclick="openChat(0)"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品需求评审群</div><div class="sess-time">14:35</div></div><div class="sess-row2"><div class="sess-msg"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dt-danger);margin-right:5px;vertical-align:middle"></span><span style="color:var(--dt-danger);font-weight:600">[有人@你]</span>张三: 交互稿已更新</div><div class="sess-unread">3</div></div></div></div>
+      <div class="sess-item" data-filter="unread" onclick="openChat(1)"><div class="sess-avatar" style="background:var(--dt-purple);">李<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">李四</div><div class="sess-time">14:20</div></div><div class="sess-row2"><div class="sess-msg">今天下午开会记得带电脑</div><div class="sess-unread">1</div></div></div></div>
+      <div class="sess-item" data-filter="unread file" onclick="openChat(2)"><div class="sess-avatar group" style="background:var(--dt-success);">技</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">技术架构组</div><div class="sess-time">13:10</div></div><div class="sess-row2"><div class="sess-msg">[图片] 部署架构图</div><svg class="sess-mute-icn" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><div class="sess-unread group">12</div></div></div></div>
       <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-warning);">王<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">王五</div><div class="sess-time">12:05</div></div><div class="sess-row2"><div class="sess-msg">好的，没问题</div></div></div></div>
-      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-danger);">D</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">DING助手</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">你有 3 条未确认的 DING</div><div class="sess-unread">3</div></div></div></div>
-      <div class="sess-item"><div class="sess-avatar group" style="background:var(--dt-av-cyan);">前</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">前端开发小组</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">[待办] 修复 iOS 兼容性</div><div class="sess-unread group">5</div></div></div></div>
-      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-av-pink);">赵<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">赵六</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">视频.mp4</div></div></div></div>
+      <div class="sess-item" data-filter="unread"><div class="sess-avatar" style="background:var(--dt-danger);">D</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">DING助手</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">你有 3 条未确认的 DING</div><div class="sess-unread">3</div></div></div></div>
+      <div class="sess-item" data-filter="unread"><div class="sess-avatar group" style="background:var(--dt-av-cyan);">前</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">前端开发小组</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">[待办] 修复 iOS 兼容性</div><div class="sess-unread group">5</div></div></div></div>
+      <div class="sess-item" data-filter="file"><div class="sess-avatar" style="background:var(--dt-av-pink);">赵<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">赵六</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">视频.mp4</div></div></div></div>
       <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-purple);">钉</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">心飞服务通知</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">你的请假申请已通过</div></div></div></div>
       <div class="sess-item"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品设计部</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">[周报] 交互稿 v3 已完成评审</div></div></div></div>
     </div>
@@ -406,12 +406,6 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         </div>
       </div>
       <div class="chat-input-area">
-        <div class="chat-toolbar-row">
-          <button aria-label="表情"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg></button>
-          <button aria-label="附件"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83"/></svg></button>
-          <button aria-label="图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/></svg></button>
-          <button aria-label="拍摄"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="13" r="4"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42"/></svg></button>
-        </div>
         <div class="chat-input-row">
           <button class="chat-input-icon" id="h5PlusBtn" aria-label="更多功能">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -438,7 +432,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-success-light);color:var(--dt-success);">考勤</div><span>考勤打卡</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">审批</div><span>审批</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-purple-light);color:var(--dt-purple);">待办</div><span>待办</span></div>
-        <div class="wb-app-item wb-badge-dot" data-badge="2"><div class="wb-app-icon" style="background:var(--dt-danger-light);color:var(--dt-av-pink);">邮件</div><span>邮箱</span></div>
+        <div class="wb-app-item wb-badge-dot" data-badge="2"><div class="wb-app-icon" style="background:var(--dt-danger-light);color:var(--dt-danger);">邮件</div><span>邮箱</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">日历</div><span>日历</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">文档</div><span>文档</span></div>
         <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-bg-body);color:var(--dt-text-tertiary);">会议</div><span>视频会议</span></div>
@@ -510,6 +504,16 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     <div class="my-version">心飞IM v8.2.0<br>© 2026 心飞科技有限公司</div>
   </div></div>
 
+  <!-- ===== 设置页（我的 tab 的子页面：全屏 push 但 tab 栏常驻；uniapp 中用页内组件切换或自绘 tab 栏） ===== -->
+  <div class="h5-settings" id="h5Settings">
+    <div class="h5-settings-nav">
+      <button class="h5-settings-back" onclick="h5CloseSettings()" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
+      <span class="h5-settings-title" id="h5SettingsTitle">设置</span>
+    </div>
+    <div class="h5-settings-body" id="h5SettingsBody"></div>
+  </div>
+  </div><!-- /h5-main -->
+
   <!-- Tab Bar -->
   <div class="tab-bar">
     <div class="tab-item active" onclick="switchTab('msg')"><span class="tab-ico"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span><span>消息</span><div class="tab-badge">9</div></div>
@@ -517,15 +521,6 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     <div class="tab-item tab-center" onclick="switchTab('ding')"><span class="tab-ico"><div class="tab-add-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div></span><span>DING</span></div>
     <div class="tab-item" onclick="switchTab('contact')"><span class="tab-ico"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>通讯录</span></div>
     <div class="tab-item" onclick="switchTab('my')"><span class="tab-ico"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span><span>我的</span></div>
-  </div>
-
-  <!-- ===== 设置页（App 全屏 push 页，替代桌面居中弹窗；uniapp 中为 navigateTo 独立页面） ===== -->
-  <div class="h5-settings" id="h5Settings">
-    <div class="h5-settings-nav">
-      <button class="h5-settings-back" onclick="h5CloseSettings()" aria-label="返回"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
-      <span class="h5-settings-title" id="h5SettingsTitle">设置</span>
-    </div>
-    <div class="h5-settings-body" id="h5SettingsBody"></div>
   </div>
 
   <div class="h5-backdrop" id="h5Backdrop" onclick="document.getElementById('h5-plus-panel').classList.remove('show');this.classList.remove('show')"></div>
@@ -562,11 +557,16 @@ function closeChat(){
   document.querySelector('.tab-bar').style.display='flex';
   h5ClosePlus();
 }
-// Filter tabs
+// Filter tabs：切换高亮并真实过滤会话列表（sess-item 的 data-filter 支持空格分隔多标签）
 document.querySelectorAll('.filter-tab').forEach(function(tab){
   tab.addEventListener('click',function(){
-    document.querySelectorAll('.filter-tab').forEach(t=>t.classList.remove('active'));
-    this.classList.add('active');
+    document.querySelectorAll('.filter-tab').forEach(function(t){t.classList.remove('active');});
+    tab.classList.add('active');
+    var key=tab.getAttribute('data-filter')||'all';
+    document.querySelectorAll('#pg-msg .sess-item').forEach(function(it){
+      var tags=(it.getAttribute('data-filter')||'').split(/\s+/);
+      it.style.display=(key==='all'||tags.indexOf(key)>-1)?'':'none';
+    });
   });
 });
 // DING tabs
