@@ -118,21 +118,23 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .chat-msg-wrap:not(.self) .chat-msg-bubble{background:var(--dt-bg-panel);color:var(--dt-text-primary);border-top-left-radius:4px}
 /* 自己：品牌蓝实色 + 白字，尖角在靠头像的右上 */
 .chat-msg-wrap.self .chat-msg-bubble{background:var(--dt-brand);color:var(--dt-bg-panel);border-top-right-radius:4px}
-.chat-msg-sender{font-size:12px;color:var(--dt-text-secondary);margin-bottom:3px}
-/* 群聊发送者角色标签：与 mockup「产品需求评审群」基准一致 */
-.chat-msg-sender .sender-role{display:inline-block;font-size:11px;padding:1px 5px;border-radius:3px;background:var(--dt-bg-body);color:var(--dt-text-tertiary);margin-left:6px}
-.chat-msg-meta{display:flex;align-items:center;gap:8px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
-.chat-msg-wrap.self .chat-msg-meta{justify-content:flex-end}
+/* 元数据行（钉钉基准 dingtalk-mockup.html）：昵称/时间 12px 灰字在气泡上方 */
+.chat-msg-sender{display:flex;align-items:baseline;gap:8px;height:18px;line-height:18px;margin-bottom:4px;font-size:12px;color:var(--dt-text-secondary)}
+.chat-msg-time{font-size:12px;color:var(--dt-text-tertiary)}
+/* 头像下移跳过昵称行（18+4=22px）使头像顶部与气泡顶部对齐；己方无昵称行、连续消息不偏移 */
+.chat-msg-wrap:not(.self):not(.follow) .chat-msg-avatar{margin-top:22px}
+/* 气泡下方仅己方消息显示时间与状态（已读品牌蓝） */
+.chat-msg-meta{display:flex;justify-content:flex-end;gap:8px;margin-top:4px;font-size:11px;color:var(--dt-text-tertiary)}
 .read-status{color:var(--dt-brand)}
 /* @提及：他人消息里用品牌蓝；自己发的蓝气泡里转白 + 下划线 */
 .chat-msg-bubble .mention{color:var(--dt-brand);font-weight:500}
 .chat-msg-wrap.self .chat-msg-bubble .mention{color:var(--dt-bg-panel);font-weight:600;text-decoration:underline}
-/* 同一人连续消息：只首条显示头像+昵称，后续收紧间距（即时通讯行为） */
-.chat-msg-wrap.follow{margin-top:-8px}
+/* 同一人连续消息：只首条显示头像+元数据行，间距 4px（与 Web 端 is-consecutive 2px+2px 一致） */
+.chat-msg-wrap.follow{margin-top:-12px}
 .chat-msg-wrap.follow .chat-msg-avatar{visibility:hidden}
 .chat-msg-wrap.follow .chat-msg-sender{display:none}
-/* 私聊（1对1）不显示发送者昵称 */
-.chat-msg-list.p2p .chat-msg-sender{display:none}
+/* 私聊（1对1）只隐藏昵称，时间仍在气泡上方 */
+.chat-msg-list.p2p .chat-msg-name{display:none}
 
 /* Chat Input：钉钉移动端输入区仅一行（+号 + 输入框 + 发送），无桌面版工具栏行 */
 .chat-input-area{background:var(--dt-bg-panel);border-top:0.5px solid var(--dt-border-light);flex-shrink:0}
@@ -242,7 +244,13 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .my-version{text-align:center;font-size:11px;line-height:1.7;color:var(--dt-text-tertiary);padding:16px 0 24px}
 
 /* =============== App 弹层体系（重设计，不照搬桌面居中弹窗） ===============
-   uniapp 适配映射：设置页 .h5-settings → 独立页面（navigateTo 全屏 push）；确认弹窗 .xf-confirm（shared.js 注入）→ uni.showModal；开关 → <switch>；Toast → uni.showToast */
+   uniapp 适配映射：设置页 .h5-settings → 独立页面（navigateTo 全屏 push）；确认弹窗 .xf-confirm（shared.js 注入）→ uni.showModal；开关 → <switch>；Toast → uni.showToast
+   App 子页（均复用 .h5-settings 全屏 push 容器，h5Settings(pageId) 渲染）：
+   search=消息搜索 / newChat=发起新会话 / secretChat=密聊 / chatMore=聊天设置 / dingNew=发起 DING
+   wbLog=日志 / wbTeamLog=团队日志 / wbAttend=考勤打卡 / wbApproval=审批 / wbTodo=待办 / wbMail=邮箱 / wbCalendar=日历 / wbDoc=文档 / wbMeeting=视频会议
+   contactSearch=搜索联系人 / newFriends=新的好友 / myGroups=我的群组 / orgContacts=企业通讯录
+   参数化子页：h5Contact(name)=联系人详情 / h5DingDetail(i,out)=DING 详情（navigateTo + params）
+   页内组件切换：DING 页「收到/发出」tab、消息页筛选 tab（uniapp 中用页内 swiper/segmented 实现） */
 .h5-settings-title{position:absolute;left:0;right:0;top:0;height:44px;line-height:44px;text-align:center;font-size:16px;font-weight:600;pointer-events:none}
 .h5-settings{position:absolute;inset:0;z-index:120;background:var(--dt-bg-body);display:flex;flex-direction:column;transform:translateX(100%);visibility:hidden;transition:transform 0.22s ease,visibility 0s 0.22s}
 .h5-settings.show{transform:translateX(0);visibility:visible;transition:transform 0.22s ease}
@@ -279,6 +287,57 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .h5-set-logout{width:100%;height:46px;border:none;background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);color:var(--dt-danger);font-size:15px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
 .h5-set-logout:active{background:var(--dt-danger-light)}
 .h5-set-note{font-size:12px;line-height:1.7;color:var(--dt-text-tertiary);padding:12px 16px;text-align:center}
+
+/* === App 子页扩展样式（搜索/新会话/工作台应用/联系人详情等，全部复用 .h5-set-* 基类；仅 token 与 :active 按压态） === */
+.h5-search-field{display:flex;align-items:center;gap:8px;height:36px;background:var(--dt-bg-panel);border-radius:var(--dt-radius-full);padding:0 14px;margin-bottom:12px}
+.h5-search-field svg{width:14px;height:14px;color:var(--dt-text-tertiary);flex-shrink:0}
+.h5-search-field input{flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:13px;font-family:var(--dt-font);color:var(--dt-text-primary)}
+.h5-search-field input::placeholder{color:var(--dt-text-placeholder)}
+.h5-chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 8px}
+.h5-chip{height:28px;padding:0 12px;background:var(--dt-bg-panel);border:none;border-radius:var(--dt-radius-full);font-size:12px;font-family:var(--dt-font);color:var(--dt-text-regular);cursor:pointer;transition:background 0.15s}
+.h5-chip:active{background:var(--dt-bg-active)}
+.h5-act-ic{width:36px;height:36px;border-radius:var(--dt-radius-md);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.h5-act-ic svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.h5-set-row .ci-avatar{width:36px;height:36px;font-size:13px}
+.h5-avatar-stack{display:flex;padding:12px 16px}
+.h5-avatar-stack .ci-avatar{width:36px;height:36px;font-size:13px}
+.h5-avatar-stack .ci-avatar+.ci-avatar{margin-left:-8px;border:2px solid var(--dt-bg-panel)}
+.h5-pad-card{padding:16px}
+.h5-big-btn{display:block;width:100%;height:44px;border:none;border-radius:var(--dt-radius-xl);background:var(--dt-brand);color:var(--dt-bg-panel);font-size:15px;font-weight:600;font-family:var(--dt-font);cursor:pointer;transition:background 0.15s}
+.h5-big-btn:active{background:var(--dt-brand-active)}
+.h5-big-btn.ghost{background:var(--dt-bg-panel);color:var(--dt-brand);border:1px solid var(--dt-border)}
+.h5-mini-btn{height:30px;padding:0 14px;border:1px solid var(--dt-border);border-radius:var(--dt-radius-full);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:12px;font-family:var(--dt-font);cursor:pointer;flex-shrink:0;transition:background 0.15s}
+.h5-mini-btn:active{background:var(--dt-bg-hover)}
+.h5-mini-btn.primary{background:var(--dt-brand);border-color:var(--dt-brand);color:var(--dt-bg-panel)}
+.h5-mini-btn.primary:active{background:var(--dt-brand-active)}
+.h5-pill{font-size:11px;padding:2px 8px;border-radius:4px;font-weight:500;flex-shrink:0}
+.h5-pill.ok{background:var(--dt-success-light);color:var(--dt-success)}
+.h5-pill.warn{background:var(--dt-warning-light);color:var(--dt-warning)}
+.h5-pill.danger{background:var(--dt-danger-light);color:var(--dt-danger)}
+.h5-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.h5-unread-dot{display:inline-block;width:8px;height:8px;background:var(--dt-unread);border-radius:50%;margin-left:6px;vertical-align:middle}
+.h5-sel-row .h5-set-value{color:var(--dt-text-quaternary)}
+.h5-sel-row.active .h5-set-value{color:var(--dt-brand);font-weight:700}
+.h5-todo-check{width:20px;height:20px;border:1.5px solid var(--dt-border);border-radius:50%;position:relative;flex-shrink:0;cursor:pointer;transition:background 0.15s,border-color 0.15s}
+.h5-todo-row.done .h5-todo-check{background:var(--dt-success);border-color:var(--dt-success)}
+.h5-todo-row.done .h5-todo-check::after{content:'';position:absolute;left:6px;top:2px;width:4px;height:9px;border:solid var(--dt-bg-panel);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.h5-todo-row.done .h5-set-label{color:var(--dt-text-tertiary);text-decoration:line-through}
+.h5-punch-wrap{display:flex;flex-direction:column;align-items:center;padding:20px 0 24px}
+.h5-punch-time{font-size:28px;font-weight:600;letter-spacing:1px}
+.h5-punch-tip{font-size:12px;color:var(--dt-text-tertiary);margin:6px 0 16px}
+.h5-punch-btn{width:120px;height:120px;border:none;border-radius:50%;background:var(--dt-brand);color:var(--dt-bg-panel);font-size:16px;font-weight:600;font-family:var(--dt-font);cursor:pointer;transition:background 0.15s}
+.h5-punch-btn:active{background:var(--dt-brand-active)}
+.h5-punch-btn.done{background:var(--dt-success)}
+.h5-textarea{display:block;width:100%;min-height:88px;border:none;outline:none;resize:none;background:transparent;padding:12px 16px;font-size:14px;line-height:1.6;font-family:var(--dt-font);color:var(--dt-text-primary)}
+.h5-detail-pad{padding:16px}
+.h5-ding-title{font-size:15px;font-weight:600;line-height:1.5}
+.h5-ding-meta{font-size:12px;color:var(--dt-text-tertiary);margin-top:10px}
+.h5-cd-head{display:flex;flex-direction:column;align-items:center;padding:24px 16px}
+.h5-cd-avatar{width:72px;height:72px;border-radius:var(--dt-radius-md);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:28px;font-weight:600}
+.h5-cd-name{font-size:17px;font-weight:600;margin-top:12px}
+.h5-cd-role{font-size:12px;color:var(--dt-text-tertiary);margin-top:4px}
+.h5-cd-actions{display:flex;gap:10px;margin-top:16px;width:100%}
+.h5-cd-actions .h5-big-btn{flex:1;height:40px;font-size:14px;min-width:0}
 
 /* 确认弹窗：App 居中小对话框（破坏性操作二次确认；对应 uni.showModal） */
 .xf-confirm-overlay{position:absolute;top:0;bottom:0;left:50%;transform:translateX(-50%);width:375px;max-width:100%;background:rgba(0,0,0,0.45);z-index:160;display:none;align-items:center;justify-content:center;padding:32px}
@@ -352,8 +411,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   <div class="page active" id="pg-msg">
     <div class="msg-page-header">
       <span class="hdr-title">消息</span>
-      <button class="hdr-btn" aria-label="搜索"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
-      <button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+      <button class="hdr-btn" aria-label="搜索" onclick="h5Settings('search')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></button>
+      <button class="hdr-btn" aria-label="发起新会话" onclick="h5Settings('newChat')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
     </div>
     <div class="filter-bar">
       <div class="filter-tab active" data-filter="all">全部<span class="tab-badge">9</span></div>
@@ -361,17 +420,17 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
       <div class="filter-tab" data-filter="unread">未读</div>
       <div class="filter-tab" data-filter="file">文件</div>
     </div>
-    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索</div></div>
+    <div class="search-bar"><div class="search-input" role="button" tabindex="0" aria-label="搜索消息" onclick="h5Settings('search')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索</div></div>
     <div class="session-scroll">
       <div class="sess-item has-at" data-filter="at unread" onclick="openChat(0)"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品需求评审群</div><div class="sess-time">14:35</div></div><div class="sess-row2"><div class="sess-msg"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--dt-danger);margin-right:5px;vertical-align:middle"></span><span style="color:var(--dt-danger);font-weight:600">[有人@你]</span>张三: 交互稿已更新</div><div class="sess-unread">3</div></div></div></div>
       <div class="sess-item" data-filter="unread" onclick="openChat(1)"><div class="sess-avatar" style="background:var(--dt-purple);">李<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">李四</div><div class="sess-time">14:20</div></div><div class="sess-row2"><div class="sess-msg">今天下午开会记得带电脑</div><div class="sess-unread">1</div></div></div></div>
       <div class="sess-item" data-filter="unread file" onclick="openChat(2)"><div class="sess-avatar group" style="background:var(--dt-success);">技</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">技术架构组</div><div class="sess-time">13:10</div></div><div class="sess-row2"><div class="sess-msg">[图片] 部署架构图</div><svg class="sess-mute-icn" viewBox="0 0 24 24"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><div class="sess-unread group">12</div></div></div></div>
-      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-warning);">王<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">王五</div><div class="sess-time">12:05</div></div><div class="sess-row2"><div class="sess-msg">好的，没问题</div></div></div></div>
-      <div class="sess-item" data-filter="unread"><div class="sess-avatar" style="background:var(--dt-danger);">D</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">DING助手</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">你有 3 条未确认的 DING</div><div class="sess-unread">3</div></div></div></div>
-      <div class="sess-item" data-filter="unread"><div class="sess-avatar group" style="background:var(--dt-av-cyan);">前</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">前端开发小组</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">[待办] 修复 iOS 兼容性</div><div class="sess-unread group">5</div></div></div></div>
-      <div class="sess-item" data-filter="file"><div class="sess-avatar" style="background:var(--dt-av-pink);">赵<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">赵六</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">视频.mp4</div></div></div></div>
-      <div class="sess-item"><div class="sess-avatar" style="background:var(--dt-purple);">钉</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">心飞服务通知</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">你的请假申请已通过</div></div></div></div>
-      <div class="sess-item"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品设计部</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">[周报] 交互稿 v3 已完成评审</div></div></div></div>
+      <div class="sess-item" onclick="openChat(3)"><div class="sess-avatar" style="background:var(--dt-warning);">王<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">王五</div><div class="sess-time">12:05</div></div><div class="sess-row2"><div class="sess-msg">好的，没问题</div></div></div></div>
+      <div class="sess-item" data-filter="unread" onclick="openChat(4)"><div class="sess-avatar" style="background:var(--dt-danger);">D</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">DING助手</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">你有 3 条未确认的 DING</div><div class="sess-unread">3</div></div></div></div>
+      <div class="sess-item" data-filter="unread" onclick="openChat(5)"><div class="sess-avatar group" style="background:var(--dt-av-cyan);">前</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">前端开发小组</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">[待办] 修复 iOS 兼容性</div><div class="sess-unread group">5</div></div></div></div>
+      <div class="sess-item" data-filter="file" onclick="openChat(6)"><div class="sess-avatar" style="background:var(--dt-av-pink);">赵<div class="online-dot"></div></div><div class="sess-info"><div class="sess-row1"><div class="sess-name">赵六</div><div class="sess-time">昨天</div></div><div class="sess-row2"><div class="sess-msg">视频.mp4</div></div></div></div>
+      <div class="sess-item" onclick="openChat(7)"><div class="sess-avatar" style="background:var(--dt-purple);">钉</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">心飞服务通知</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">你的请假申请已通过</div></div></div></div>
+      <div class="sess-item" onclick="openChat(8)"><div class="sess-avatar group" style="background:var(--dt-av-blue);">产</div><div class="sess-info"><div class="sess-row1"><div class="sess-name">产品设计部</div><div class="sess-time">周一</div></div><div class="sess-row2"><div class="sess-msg">[周报] 交互稿 v3 已完成评审</div></div></div></div>
     </div>
   </div>
 
@@ -382,16 +441,16 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         <button class="chat-back" aria-label="返回会话列表" onclick="closeChat()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button>
         <div class="chat-title" id="chatTitle">产品需求评审群</div>
         <div class="chat-actions">
-          <button aria-label="密聊"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.5 7.5a4 4 0 1 0-8 0v3h8z"/><path d="M5 11a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2"/></svg></button>
-          <button aria-label="更多操作"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+          <button aria-label="密聊" onclick="h5Settings('secretChat')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.5 7.5a4 4 0 1 0-8 0v3h8z"/><path d="M5 11a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2"/></svg></button>
+          <button aria-label="更多操作" onclick="h5Settings('chatMore')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
         </div>
       </div>
       <div class="chat-msg-list">
         <div class="chat-time">10月28日 14:35</div>
-        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body"><div class="chat-msg-sender">张三<span class="sender-role">产品经理</span></div><div class="chat-msg-bubble">需求文档更新了，增加了三个核心场景的交互细节，大家看一下有没有问题 🙏</div><div class="chat-msg-meta"><span>14:01</span><span>3 人未读</span></div></div></div>
-        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-success);">李</div><div class="chat-msg-body"><div class="chat-msg-sender">李四<span class="sender-role">设计师</span></div><div class="chat-msg-bubble">收到，我看下第7页那个按钮样式</div><div class="chat-msg-meta"><span>14:15</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body"><div class="chat-msg-sender"><span class="chat-msg-name">张三</span><span class="chat-msg-time">14:01</span></div><div class="chat-msg-bubble">需求文档更新了，增加了三个核心场景的交互细节，大家看一下有没有问题 🙏</div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-success);">李</div><div class="chat-msg-body"><div class="chat-msg-sender"><span class="chat-msg-name">李四</span><span class="chat-msg-time">14:15</span></div><div class="chat-msg-bubble">收到，我看下第7页那个按钮样式</div></div></div>
         <div class="chat-msg-wrap self"><div class="chat-msg-avatar" style="background:var(--dt-brand);">我</div><div class="chat-msg-body"><div class="chat-msg-bubble"><span class="mention">@李四</span> 用的是蓝色 var(--dt-brand) 没问题</div><div class="chat-msg-meta"><span>14:30</span><span class="read-status">✓✓ 已读 2/8</span></div></div></div>
-        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body"><div class="chat-msg-sender">张三<span class="sender-role">产品经理</span></div><div class="chat-msg-bubble">交互稿已经更新完了，<span class="mention">@李四</span> 你看下有没有需要调整的～</div><div class="chat-msg-meta"><span>14:35</span><span>5 人未读</span></div></div></div>
+        <div class="chat-msg-wrap"><div class="chat-msg-avatar" style="background:var(--dt-purple);">张</div><div class="chat-msg-body"><div class="chat-msg-sender"><span class="chat-msg-name">张三</span><span class="chat-msg-time">14:35</span></div><div class="chat-msg-bubble">交互稿已经更新完了，<span class="mention">@李四</span> 你看下有没有需要调整的～</div></div></div>
       </div>
       <div class="h5-plus-panel" id="h5-plus-panel">
         <div class="h5-plus-grid">
@@ -421,58 +480,64 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   <div class="page" id="pg-wb"><div class="wb-page">
     <div class="wb-header"><div class="wb-header-row"><div class="wb-avatar">我</div><div><div class="wb-user-name">架构师</div><div class="wb-user-dept">产品设计部 · 产品经理</div></div></div></div>
     <div class="wb-quick-actions">
-      <div class="wb-qa-item"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span>日志</span></div>
-      <div class="wb-qa-item"><div class="wb-qa-icon green"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>考勤</span></div>
-      <div class="wb-qa-item"><div class="wb-qa-icon orange"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span>审批</span></div>
-      <div class="wb-qa-item"><div class="wb-qa-icon purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span>待办</span></div>
+      <div class="wb-qa-item" onclick="h5Settings('wbLog')"><div class="wb-qa-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><span>日志</span></div>
+      <div class="wb-qa-item" onclick="h5Settings('wbAttend')"><div class="wb-qa-icon green"><svg viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div><span>考勤</span></div>
+      <div class="wb-qa-item" onclick="h5Settings('wbApproval')"><div class="wb-qa-icon orange"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span>审批</span></div>
+      <div class="wb-qa-item" onclick="h5Settings('wbTodo')"><div class="wb-qa-icon purple"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><span>待办</span></div>
     </div>
     <div class="wb-section"><div class="wb-section-title">常用应用</div>
       <div class="wb-apps-grid">
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">日志</div><span>日志</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-success-light);color:var(--dt-success);">考勤</div><span>考勤打卡</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">审批</div><span>审批</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-purple-light);color:var(--dt-purple);">待办</div><span>待办</span></div>
-        <div class="wb-app-item wb-badge-dot" data-badge="2"><div class="wb-app-icon" style="background:var(--dt-danger-light);color:var(--dt-danger);">邮件</div><span>邮箱</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">日历</div><span>日历</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">文档</div><span>文档</span></div>
-        <div class="wb-app-item"><div class="wb-app-icon" style="background:var(--dt-bg-body);color:var(--dt-text-tertiary);">会议</div><span>视频会议</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbLog')"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">日志</div><span>日志</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbAttend')"><div class="wb-app-icon" style="background:var(--dt-success-light);color:var(--dt-success);">考勤</div><span>考勤打卡</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbApproval')"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">审批</div><span>审批</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbTodo')"><div class="wb-app-icon" style="background:var(--dt-purple-light);color:var(--dt-purple);">待办</div><span>待办</span></div>
+        <div class="wb-app-item wb-badge-dot" data-badge="2" onclick="h5Settings('wbMail')"><div class="wb-app-icon" style="background:var(--dt-danger-light);color:var(--dt-danger);">邮件</div><span>邮箱</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbCalendar')"><div class="wb-app-icon" style="background:var(--dt-warning-light);color:var(--dt-warning);">日历</div><span>日历</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbDoc')"><div class="wb-app-icon" style="background:var(--dt-brand-light);color:var(--dt-brand);">文档</div><span>文档</span></div>
+        <div class="wb-app-item" onclick="h5Settings('wbMeeting')"><div class="wb-app-icon" style="background:var(--dt-bg-body);color:var(--dt-text-tertiary);">会议</div><span>视频会议</span></div>
       </div>
     </div>
     <div class="wb-section"><div class="wb-section-title">最近使用</div>
       <div class="wb-card">
-        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>日常审批<span class="wb-card-arrow">›</span></div>
-        <div class="wb-card-item"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><polyline points="14 2 14 8 20 8"/></svg>团队日志<span class="wb-card-arrow">›</span></div>
+        <div class="wb-card-item" onclick="h5Settings('wbApproval')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>日常审批<span class="wb-card-arrow">›</span></div>
+        <div class="wb-card-item" onclick="h5Settings('wbTeamLog')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><polyline points="14 2 14 8 20 8"/></svg>团队日志<span class="wb-card-arrow">›</span></div>
       </div>
     </div>
   </div></div>
 
   <!-- ===== PAGE 4: DING ===== -->
   <div class="page" id="pg-ding"><div class="ding-page">
-    <div class="ding-header"><div class="msg-page-header"><span class="hdr-title">DING</span><button class="hdr-btn" aria-label="新建 DING"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+    <div class="ding-header"><div class="msg-page-header"><span class="hdr-title">DING</span><button class="hdr-btn" aria-label="新建 DING" onclick="h5Settings('dingNew')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
       <div class="ding-tabs"><div class="ding-tab active">收到的</div><div class="ding-tab">发出的</div></div></div>
     <div class="ding-list">
-      <div class="ding-item"><div class="ding-item-title">今天下午 3 点需求评审，请准时参加！</div><div class="ding-item-meta"><span>张三</span><span>14:30</span><span class="ding-status ding-status-done">已确认</span></div></div>
-      <div class="ding-item"><div class="ding-item-title">代码提测前必须完成自测</div><div class="ding-item-meta"><span>李四</span><span>昨天</span><span class="ding-status ding-status-pending">待确认</span></div></div>
-      <div class="ding-item"><div class="ding-item-title">周报提交提醒</div><div class="ding-item-meta"><span>赵六</span><span>周一</span><span class="ding-status ding-status-done">已确认</span></div></div>
+      <div id="dingListIn">
+      <div class="ding-item" onclick="h5DingDetail(0)"><div class="ding-item-title">今天下午 3 点需求评审，请准时参加！</div><div class="ding-item-meta"><span>张三</span><span>14:30</span><span class="ding-status ding-status-done">已确认</span></div></div>
+      <div class="ding-item" onclick="h5DingDetail(1)"><div class="ding-item-title">代码提测前必须完成自测</div><div class="ding-item-meta"><span>李四</span><span>昨天</span><span class="ding-status ding-status-pending">待确认</span></div></div>
+      <div class="ding-item" onclick="h5DingDetail(2)"><div class="ding-item-title">周报提交提醒</div><div class="ding-item-meta"><span>赵六</span><span>周一</span><span class="ding-status ding-status-done">已确认</span></div></div>
+      </div>
+      <div id="dingListOut" style="display:none">
+      <div class="ding-item" onclick="h5DingDetail(0,1)"><div class="ding-item-title">明天上午 10 点站会，请准时参加</div><div class="ding-item-meta"><span>发给 前端开发小组 · 6 人</span><span>昨天 16:40</span><span class="ding-status ding-status-done">2/3 已确认</span></div></div>
+      <div class="ding-item" onclick="h5DingDetail(1,1)"><div class="ding-item-title">本周五 18:00 前提交周报</div><div class="ding-item-meta"><span>发给 产品设计部 · 23 人</span><span>周一 09:10</span><span class="ding-status ding-status-pending">1/3 已确认</span></div></div>
+      </div>
     </div>
   </div></div>
 
   <!-- ===== PAGE 5: CONTACTS ===== -->
   <div class="page" id="pg-contact"><div class="contact-page">
     <div class="contact-head">
-    <div class="msg-page-header"><span class="hdr-title">通讯录</span><button class="hdr-btn" aria-label="发起新会话"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
-    <div class="search-bar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索联系人</div></div>
+    <div class="msg-page-header"><span class="hdr-title">通讯录</span><button class="hdr-btn" aria-label="发起新会话" onclick="h5Settings('newChat')"><svg viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+    <div class="search-bar"><div class="search-input" role="button" tabindex="0" aria-label="搜索联系人" onclick="h5Settings('contactSearch')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>搜索联系人</div></div>
     </div>
     <div class="contact-scroll">
     <div class="contact-section"><div class="contact-section-title">功能入口</div><div class="wb-card">
-      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-brand);">新</div><div class="ci-info"><div class="ci-name">新的好友</div></div><div class="ci-arrow">›</div></div>
-      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-success);">我</div><div class="ci-info"><div class="ci-name">我的群组</div></div><div class="ci-arrow">›</div></div>
-      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-warning);">通</div><div class="ci-info"><div class="ci-name">通讯录</div><div class="ci-desc">32 位联系人</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item" onclick="h5Settings('newFriends')"><div class="ci-avatar" style="background:var(--dt-brand);">新</div><div class="ci-info"><div class="ci-name">新的好友</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item" onclick="h5Settings('myGroups')"><div class="ci-avatar" style="background:var(--dt-success);">我</div><div class="ci-info"><div class="ci-name">我的群组</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item" onclick="h5Settings('orgContacts')"><div class="ci-avatar" style="background:var(--dt-warning);">通</div><div class="ci-info"><div class="ci-name">通讯录</div><div class="ci-desc">32 位联系人</div></div><div class="ci-arrow">›</div></div>
     </div></div>
     <div class="contact-section"><div class="contact-section-title">组织架构 · 产品设计部</div>
       <div class="wb-card">
-      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-purple);">张</div><div class="ci-info"><div class="ci-name">张三</div><div class="ci-desc">产品经理</div></div><div class="ci-arrow">›</div></div>
-      <div class="ci-item"><div class="ci-avatar" style="background:var(--dt-success);">李</div><div class="ci-info"><div class="ci-name">李四</div><div class="ci-desc">UI 设计师</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item" onclick="h5Contact('张三')"><div class="ci-avatar" style="background:var(--dt-purple);">张</div><div class="ci-info"><div class="ci-name">张三</div><div class="ci-desc">产品经理</div></div><div class="ci-arrow">›</div></div>
+      <div class="ci-item" onclick="h5Contact('李四')"><div class="ci-avatar" style="background:var(--dt-success);">李</div><div class="ci-info"><div class="ci-name">李四</div><div class="ci-desc">UI 设计师</div></div><div class="ci-arrow">›</div></div>
       </div>
     </div>
     </div>
@@ -540,17 +605,93 @@ function h5ClosePlus(){
   var p=document.getElementById('h5-plus-panel'),b=document.getElementById('h5Backdrop');
   if(p)p.classList.remove('show');if(b)b.classList.remove('show');
 }
-function openChat(i){
+/* ===== 聊天数据驱动：9 个会话 + 联系人直聊（uniapp 映射：会话详情页按 key 渲染） ===== */
+var H5_CHAT_DATA={
+  0:{title:'产品需求评审群',p2p:false,day:'10月28日 14:35',msgs:[
+    {self:0,name:'张三',ch:'张',av:'var(--dt-purple)',html:'需求文档更新了，增加了三个核心场景的交互细节，大家看一下有没有问题 🙏',time:'14:01'},
+    {self:0,name:'李四',role:'设计师',ch:'李',av:'var(--dt-success)',html:'收到，我看下第7页那个按钮样式',time:'14:15'},
+    {self:1,ch:'我',html:'<span class="mention">@李四</span> 用的是蓝色 var(--dt-brand) 没问题',time:'14:30',read:'✓✓ 已读 2/8'},
+    {self:0,name:'张三',ch:'张',av:'var(--dt-purple)',html:'交互稿已经更新完了，<span class="mention">@李四</span> 你看下有没有需要调整的～',time:'14:35'}
+  ]},
+  1:{title:'李四',p2p:true,day:'10月28日 14:20',msgs:[
+    {self:0,name:'李四',ch:'李',av:'var(--dt-success)',html:'今天下午开会记得带电脑',time:'14:20'},
+    {self:1,ch:'我',html:'好的，已经带了 👌',time:'14:21',read:'已读'},
+    {self:0,name:'李四',ch:'李',av:'var(--dt-success)',html:'顺便把交互稿最新版发我一下',time:'14:22'}
+  ]},
+  2:{title:'技术架构组',p2p:false,day:'10月28日 13:10',msgs:[
+    {self:0,name:'钱七',ch:'钱',av:'var(--dt-av-cyan)',html:'[图片] 部署架构图',time:'13:10'},
+    {self:0,name:'王五',role:'前端工程师',ch:'王',av:'var(--dt-av-blue)',html:'网关层加一层限流吧，大促要来了',time:'13:12'}
+  ]},
+  3:{title:'王五',p2p:true,day:'10月28日 12:05',msgs:[
+    {self:0,name:'王五',ch:'王',av:'var(--dt-warning)',html:'下午联调的接口环境我部署好了',time:'12:05'},
+    {self:1,ch:'我',html:'好的，没问题',time:'12:06',read:'已读'}
+  ]},
+  4:{title:'DING助手',p2p:true,day:'10月27日 18:30',msgs:[
+    {self:0,name:'DING助手',ch:'D',av:'var(--dt-danger)',html:'你有 3 条未确认的 DING，请及时处理',time:'18:30'},
+    {self:0,name:'DING助手',ch:'D',av:'var(--dt-danger)',html:'「代码提测前必须完成自测」来自 李四，可在 DING 页查看详情',time:'18:31'}
+  ]},
+  5:{title:'前端开发小组',p2p:false,day:'10月27日 17:40',msgs:[
+    {self:0,name:'王五',ch:'王',av:'var(--dt-av-blue)',html:'[待办] 修复 iOS 兼容性：输入框聚焦时页面整体上移',time:'17:40'},
+    {self:0,name:'赵六',ch:'赵',av:'var(--dt-av-pink)',html:'复现路径：iPhone 12 · iOS 16 · 输入法弹出时',time:'17:42'}
+  ]},
+  6:{title:'赵六',p2p:true,day:'10月27日 16:20',msgs:[
+    {self:0,name:'赵六',ch:'赵',av:'var(--dt-av-pink)',html:'[视频] 回归测试录屏.mp4',time:'16:20'},
+    {self:0,name:'赵六',ch:'赵',av:'var(--dt-av-pink)',html:'这是昨天回归测试的录屏，有空看下 02:30 那段',time:'16:21'}
+  ]},
+  7:{title:'心飞服务通知',p2p:true,day:'10月25日 10:00',msgs:[
+    {self:0,name:'心飞服务通知',ch:'钉',av:'var(--dt-purple)',html:'你的请假申请已通过（10月25日 全天）',time:'10:00'},
+    {self:0,name:'心飞服务通知',ch:'钉',av:'var(--dt-purple)',html:'本月考勤周期将于 31 日 24:00 截止，异常请及时补卡',time:'10:01'}
+  ]},
+  8:{title:'产品设计部',p2p:false,day:'10月25日 09:30',msgs:[
+    {self:0,name:'张三',ch:'张',av:'var(--dt-purple)',html:'[周报] 交互稿 v3 已完成评审，感谢大家',time:'09:30'}
+  ]},
+  zs:{title:'张三',p2p:true,day:'10月28日 11:05',msgs:[
+    {self:0,name:'张三',ch:'张',av:'var(--dt-purple)',html:'评审材料记得带上上次的会议纪要',time:'11:05'},
+    {self:1,ch:'我',html:'收到，已经在准备了',time:'11:10',read:'已读'}
+  ]},
+  ls:{title:'李四',p2p:true,day:'10月28日 09:40',msgs:[
+    {self:0,name:'李四',ch:'李',av:'var(--dt-success)',html:'视觉走查完了，列表页间距需要统一到 8pt 栅格',time:'09:40'},
+    {self:1,ch:'我',html:'好的，下午改完发你确认',time:'09:45',read:'已读'}
+  ]}
+};
+function openChat(k){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-chat').classList.add('active');
   document.querySelector('.tab-bar').style.display='none';
-  var titles=['产品需求评审群','李四','技术架构组'];
-  if(titles[i])document.getElementById('chatTitle').textContent=titles[i];
-  // 私聊（李四）隐藏发送者昵称；群聊恢复显示
+  var d=H5_CHAT_DATA[k];
+  if(!d){k=h5GenericChat(String(k));d=H5_CHAT_DATA[k];}
+  document.getElementById('chatTitle').textContent=d.title;
+  // 私聊隐藏发送者昵称；群聊恢复显示
   var list=document.querySelector('.chat-msg-list');
-  if(list)list.classList.toggle('p2p',i===1);
+  if(list)list.classList.toggle('p2p',!!d.p2p);
+  h5RenderChat(k);
   h5ClosePlus();
 }
+function h5RenderChat(k){
+  var d=H5_CHAT_DATA[k],list=document.querySelector('.chat-msg-list');
+  if(!d||!list)return;
+  var h='<div class="chat-time">'+h5Esc(d.day)+'</div>';
+  d.msgs.forEach(function(m){
+    h+='<div class="chat-msg-wrap'+(m.self?' self':'')+(m.follow?' follow':'')+'">'
+      +'<div class="chat-msg-avatar" style="background:'+(m.av||'var(--dt-brand)')+';">'+h5Esc(m.ch||'我')+'</div>'
+      +'<div class="chat-msg-body">'
+      +(m.self?'':'<div class="chat-msg-sender"><span class="chat-msg-name">'+h5Esc(m.name||'我')+'</span><span class="chat-msg-time">'+h5Esc(m.time)+'</span></div>')
+      +'<div class="chat-msg-bubble">'+m.html+'</div>'
+      +(m.self?'<div class="chat-msg-meta"><span>'+h5Esc(m.time)+'</span>'+(m.read?'<span class="read-status">'+h5Esc(m.read)+'</span>':'')+'</div>':'')
+      +'</div></div>';
+  });
+  list.innerHTML=h;list.scrollTop=0;
+}
+function h5GenericChat(name){
+  var c=H5_CONTACTS[name]||{};
+  H5_CHAT_DATA.__g={title:name,p2p:true,day:'今天',msgs:[
+    {self:0,name:name,ch:(c.ch||name.charAt(0)),av:c.color||'var(--dt-av-blue)',html:'你好，想和你同步一下后续的安排',time:h5Now()},
+    {self:1,ch:'我',html:'好的，你说',time:h5Now(),read:'已读'}
+  ]};
+  return '__g';
+}
+/* 从设置子页内跳转到聊天：先关子页再切页 */
+function h5ChatFrom(k){h5CloseSettings();openChat(k);}
 function closeChat(){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('pg-msg').classList.add('active');
@@ -569,11 +710,14 @@ document.querySelectorAll('.filter-tab').forEach(function(tab){
     });
   });
 });
-// DING tabs
-document.querySelectorAll('.ding-tab').forEach(function(tab){
+// DING tabs：切换高亮并真实切换 收到的/发出的 两个列表
+document.querySelectorAll('.ding-tab').forEach(function(tab,idx){
   tab.addEventListener('click',function(){
     document.querySelectorAll('.ding-tab').forEach(t=>t.classList.remove('active'));
     this.classList.add('active');
+    var inEl=document.getElementById('dingListIn'),outEl=document.getElementById('dingListOut');
+    if(inEl)inEl.style.display=idx===0?'':'none';
+    if(outEl)outEl.style.display=idx===1?'':'none';
   });
 });
 // + button panel toggle
@@ -653,7 +797,10 @@ var H5_SET_THEMES=[
   {name:'绛红',color:'#F53F3F',light:'#FFF1F0',hover:'#D93838',active:'#BF3131'},
   {name:'烟雨紫',color:'#6C5CE7',light:'#F5F3FF',hover:'#5A4BD1',active:'#4B3EB8'}
 ];
-var H5_SET_TITLES={profile:'个人资料',privacy:'账号与安全',notify:'消息通知',general:'通用',shortcut:'帮助与反馈',about:'关于'};
+var H5_SET_TITLES={profile:'个人资料',privacy:'账号与安全',notify:'消息通知',general:'通用',shortcut:'帮助与反馈',about:'关于',
+  search:'搜索',newChat:'发起新会话',secretChat:'密聊',chatMore:'聊天设置',dingNew:'发起 DING',
+  wbLog:'日志',wbTeamLog:'团队日志',wbAttend:'考勤打卡',wbApproval:'审批',wbTodo:'待办',wbMail:'邮箱',wbCalendar:'日历',wbDoc:'文档',wbMeeting:'视频会议',
+  contactSearch:'搜索联系人',newFriends:'新的好友',myGroups:'我的群组',orgContacts:'企业通讯录'};
 function h5Esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
 function h5Card(inner){return '<div class="h5-set-card">'+inner+'</div>'}
 function h5RowMain(label,desc){return '<div class="h5-set-main"><div class="h5-set-label">'+h5Esc(label)+'</div>'+(desc?'<div class="h5-set-desc">'+h5Esc(desc)+'</div>':'')+'</div>'}
@@ -676,6 +823,205 @@ function h5ApplyTheme(color,light,hover,active){
   if(hover)r.setProperty('--dt-brand-hover',hover);
   if(active)r.setProperty('--dt-brand-active',active);
   try{localStorage.setItem('xf_theme_color_v1',[color,light||'',hover||'',active||''].join('|'))}catch(e){}
+}
+/* ===== 联系人与 DING 数据（uniapp 映射：联系人详情/DING 详情为带 params 的 navigateTo） ===== */
+var H5_CONTACTS={
+  '张三':{ch:'张',color:'var(--dt-purple)',role:'产品经理',dept:'产品设计部',no:'XF10023',mail:'zhangsan@xinfei.com',tel:'138****6688',chat:'zs'},
+  '李四':{ch:'李',color:'var(--dt-success)',role:'UI 设计师',dept:'产品设计部',no:'XF10035',mail:'lisi@xinfei.com',tel:'139****2233',chat:'ls'},
+  '王五':{ch:'王',color:'var(--dt-warning)',role:'前端工程师',dept:'技术研发部',no:'XF10052',mail:'wangwu@xinfei.com',tel:'137****9900',chat:3},
+  '赵六':{ch:'赵',color:'var(--dt-av-pink)',role:'测试工程师',dept:'技术研发部',no:'XF10058',mail:'zhaoliu@xinfei.com',tel:'136****1122',chat:6},
+  '钱七':{ch:'钱',color:'var(--dt-av-cyan)',role:'后端工程师',dept:'技术研发部',no:'XF10061',mail:'qianqi@xinfei.com',tel:'135****3344'},
+  '孙八':{ch:'孙',color:'var(--dt-av-teal)',role:'运营专员',dept:'市场运营部',no:'XF10072',mail:'sunba@xinfei.com',tel:'134****5566'},
+  '周九':{ch:'周',color:'var(--dt-av-indigo)',role:'HRBP',dept:'人力资源部',no:'XF10080',mail:'zhoujiu@xinfei.com',tel:'133****7788'},
+  '吴十':{ch:'吴',color:'var(--dt-av-orange)',role:'销售顾问',dept:'市场运营部',no:'XF10085',mail:'wushi@xinfei.com',tel:'132****9900'}
+};
+/* 企业通讯录：5 个部门共 32 人，未详列的自动补全基础信息 */
+var H5_DEPTS=[
+  ['产品设计部',[['张三','产品经理'],['李四','UI 设计师'],['郑冬','交互设计师'],['刘梅','用户研究员'],['陈曦','视觉设计师'],['杨帆','产品实习生'],['黄磊','产品运营'],['徐静','设计总监']]],
+  ['技术研发部',[['王五','前端工程师'],['赵六','测试工程师'],['钱七','后端工程师'],['何敏','架构师'],['高翔','运维工程师'],['林悦','数据工程师'],['罗成','移动端工程师'],['梁雪','安全工程师'],['宋佳','前端工程师'],['唐磊','测试工程师']]],
+  ['市场运营部',[['孙八','运营专员'],['吴十','销售顾问'],['韩雪','市场专员'],['冯刚','商务经理'],['曹颖','客服主管'],['许涛','渠道经理']]],
+  ['人力资源部',[['周九','HRBP'],['邓琪','招聘专员'],['萧然','薪酬绩效'],['程琳','行政前台'],['袁博','培训经理']]],
+  ['财务法务部',[['邓艾','财务经理'],['苏芮','会计'],['卢卡','法务专员']]]
+];
+(function(){
+  var pal=['var(--dt-av-blue)','var(--dt-av-indigo)','var(--dt-av-cyan)','var(--dt-av-pink)','var(--dt-av-teal)','var(--dt-av-orange)','var(--dt-av-red)','var(--dt-av-brown)','var(--dt-purple)','var(--dt-success)','var(--dt-warning)','var(--dt-danger)'];
+  var i=0;
+  H5_DEPTS.forEach(function(d){d[1].forEach(function(p){
+    if(!H5_CONTACTS[p[0]])H5_CONTACTS[p[0]]={ch:p[0].charAt(0),color:pal[i%pal.length],role:p[1],dept:d[0],no:'XF1'+(1000+i),mail:'u'+(1000+i)+'@xinfei.com',tel:'139****'+(2000+i)};
+    i++;
+  });});
+})();
+var H5_DING=[
+  {title:'今天下午 3 点需求评审，请准时参加！',from:'张三',time:'今天 14:30',type:'应用内 DING',status:'done',content:'请各位提前准备评审材料，带上最新交互稿与测试用例，会议室 B 不变。',confirms:[['李四',1],['王五',1],['赵六',0]]},
+  {title:'代码提测前必须完成自测',from:'李四',time:'昨天 18:20',type:'应用内 DING',status:'pending',content:'本次提测范围：IM 模块消息收发与通知，请务必完成自测后再提测。',confirms:[['张三',1],['王五',0],['赵六',0]]},
+  {title:'周报提交提醒',from:'赵六',time:'周一 09:00',type:'短信 DING',status:'done',content:'本周周报请于 18:00 前提交至工作台。',confirms:[['张三',1],['李四',1],['王五',1]]}
+];
+var H5_DING_OUT=[
+  {title:'明天上午 10 点站会，请准时参加',from:'我',to:'前端开发小组 · 6 人',time:'昨天 16:40',type:'应用内 DING',status:'done',content:'同步 yesterday / today / blockers，控制在 15 分钟内。',confirms:[['王五',1],['赵六',1],['钱七',0]]},
+  {title:'本周五 18:00 前提交周报',from:'我',to:'产品设计部 · 23 人',time:'周一 09:10',type:'短信 DING',status:'pending',content:'请按模板提交本周周报，重点写产出与风险。',confirms:[['张三',1],['李四',0],['郑冬',0]]}
+];
+
+/* ===== 子页通用小组件 ===== */
+function h5SearchField(ph){return '<div class="h5-search-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="'+h5Esc(ph)+'" aria-label="'+h5Esc(ph)+'" oninput="h5FilterRows(this)"></div>';}
+/* 搜索框实时过滤：过滤当前子页内所有 .h5-filter-item 行 */
+function h5FilterRows(inp){
+  var q=inp.value.trim().toLowerCase();
+  var body=inp.closest('.h5-settings-body');
+  if(!body)return;
+  body.querySelectorAll('.h5-filter-item').forEach(function(r){
+    r.style.display=(!q||r.textContent.toLowerCase().indexOf(q)>-1)?'':'none';
+  });
+}
+/* 搜索历史 chip：点击回填搜索框 */
+function h5SearchFill(chip){
+  var body=chip.closest('.h5-settings-body');
+  if(!body)return;
+  var inp=body.querySelector('.h5-search-field input');
+  if(inp){inp.value=chip.textContent;h5FilterRows(inp);inp.focus();}
+}
+function h5ContactRow(name){
+  var c=H5_CONTACTS[name]||{ch:name.charAt(0),color:'var(--dt-av-blue)',role:'同事',dept:''};
+  return '<div class="h5-set-row h5-filter-item" onclick="h5Contact(\''+h5Esc(name)+'\')">'
+    +'<div class="ci-avatar" style="background:'+(c.color||'var(--dt-av-blue)')+';">'+h5Esc(c.ch||name.charAt(0))+'</div>'
+    +h5RowMain(name,c.role+(c.dept?' · '+c.dept:''))+'<span class="h5-set-arrow">›</span></div>';
+}
+function h5FileRow(name,meta){
+  return '<div class="h5-set-row" onclick="h5Toast(\'打开「'+h5Esc(name)+'」（演示）\')">'
+    +'<div class="h5-act-ic" style="background:var(--dt-brand-light);color:var(--dt-brand);"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>'
+    +h5RowMain(name,meta)+'<span class="h5-set-arrow">›</span></div>';
+}
+function h5GroupRow(name,meta,idx,color,ch){
+  return '<div class="h5-set-row" onclick="h5ChatFrom('+idx+')">'
+    +'<div class="ci-avatar" style="background:'+color+';">'+h5Esc(ch)+'</div>'
+    +h5RowMain(name,meta)+'<span class="h5-set-arrow">›</span></div>';
+}
+function h5Sel(label,desc,active,toast){
+  return '<div class="h5-set-row h5-sel-row'+(active?' active':'')+'" onclick="h5SelRow(this)">'
+    +h5RowMain(label,desc)+'<span class="h5-set-value">'+(active?'✓':'')+'</span></div>';
+}
+function h5SelRow(el){
+  var card=el.parentElement;
+  card.querySelectorAll('.h5-sel-row').forEach(function(r){r.classList.remove('active');var v=r.querySelector('.h5-set-value');if(v)v.textContent='';});
+  el.classList.add('active');
+  var v=el.querySelector('.h5-set-value');if(v)v.textContent='✓';
+  var lab=el.querySelector('.h5-set-label');
+  h5Toast('已设为'+(lab?lab.textContent:''));
+}
+function h5CalRow(time,title,place,color){
+  return '<div class="h5-set-row" onclick="h5Toast(\'打开日程（演示）\')"><span class="h5-dot" style="background:'+color+'"></span>'
+    +h5RowMain(title,place)+'<span class="h5-set-value">'+h5Esc(time)+'</span></div>';
+}
+function h5MailRow(from,subject,snip,time,unread){
+  return '<div class="h5-set-row" onclick="h5Toast(\'打开邮件（演示）\')">'
+    +h5RowMain(from,(unread?'【未读】':'')+subject+' — '+snip)
+    +'<span class="h5-set-value">'+h5Esc(time)+(unread?'<span class="h5-unread-dot"></span>':'')+'</span></div>';
+}
+function h5TodoRow(label,desc,done){
+  return '<div class="h5-set-row h5-todo-row'+(done?' done':'')+'" onclick="h5ToggleTodo(this)"><span class="h5-todo-check"></span>'
+    +h5RowMain(label,desc)+'</div>';
+}
+function h5ToggleTodo(row){
+  row.classList.toggle('done');
+  h5Toast(row.classList.contains('done')?'已完成待办':'已恢复待办');
+}
+function h5ApprRow(title,desc){
+  return '<div class="h5-set-row">'+h5RowMain(title,desc)
+    +'<span class="h5-appr-act"><button type="button" class="h5-mini-btn primary" data-act="同意" onclick="h5ApprovalAct(this)">同意</button>'
+    +'<button type="button" class="h5-mini-btn" data-act="拒绝" style="margin-left:8px" onclick="h5ApprovalAct(this)">拒绝</button></span></div>';
+}
+function h5ApprovalAct(btn){
+  var row=btn.closest('.h5-set-row');if(!row)return;
+  var act=btn.getAttribute('data-act')||'同意';
+  var ok=act!=='拒绝';
+  var holder=row.querySelector('.h5-appr-act');
+  if(holder)holder.innerHTML='<span class="h5-pill '+(ok?'ok':'danger')+'">已'+act+'</span>';
+  h5Toast('已'+act+'（演示）');
+}
+function h5FriendRow(name,desc){
+  var c=H5_CONTACTS[name]||{};
+  return '<div class="h5-set-row">'
+    +'<div class="ci-avatar" style="background:'+(c.color||'var(--dt-av-blue)')+';">'+h5Esc(c.ch||name.charAt(0))+'</div>'
+    +h5RowMain(name,desc)
+    +'<span class="h5-appr-act"><button type="button" class="h5-mini-btn primary" data-act="接受" onclick="h5ApprovalAct(this)">接受</button>'
+    +'<button type="button" class="h5-mini-btn" data-act="拒绝" style="margin-left:8px" onclick="h5ApprovalAct(this)">拒绝</button></span></div>';
+}
+function h5TeamLogRow(name,day,txt){
+  var c=H5_CONTACTS[name]||{};
+  return '<div class="h5-set-row" onclick="h5Toast(\'查看日志（演示）\')">'
+    +'<div class="ci-avatar" style="background:'+(c.color||'var(--dt-av-blue)')+';">'+h5Esc(c.ch||name.charAt(0))+'</div>'
+    +h5RowMain(day,txt)+'<span class="h5-set-value">'+h5Esc(name)+'</span></div>';
+}
+function h5AvatarStack(names){
+  return '<div class="h5-avatar-stack">'+names.map(function(n){
+    var c=H5_CONTACTS[n]||{};
+    return '<div class="ci-avatar" style="background:'+(c.color||'var(--dt-av-blue)')+';">'+h5Esc(c.ch||n.charAt(0))+'</div>';
+  }).join('')+'</div>';
+}
+function h5Punch(btn){
+  if(btn.classList.contains('done'))return;
+  btn.classList.add('done');btn.textContent='已打卡';
+  var tip=btn.parentElement.querySelector('.h5-punch-tip');
+  if(tip)tip.textContent='上班打卡成功 · 打卡时间 '+h5Now();
+  h5Toast('上班打卡成功');
+}
+function h5ClearChat(){
+  xfConfirm({title:'清空聊天记录',body:'清空后聊天记录不可恢复',confirmText:'清空',danger:true,
+    onConfirm:function(){h5Toast('聊天记录已清空（演示）');}});
+}
+function h5SendDing(){
+  h5CloseSettings();
+  h5Toast('DING 已发送（演示）');
+}
+/* 参数化子页：联系人详情（uniapp 映射：navigateTo + params） */
+function h5Contact(name){
+  var c=H5_CONTACTS[name];
+  if(!c){c={ch:name.charAt(0),color:'var(--dt-av-blue)',role:'同事',dept:'',no:'',mail:'',tel:''};}
+  var html='<div class="h5-set-card h5-cd-head">'
+    +'<div class="h5-cd-avatar" style="background:'+c.color+';">'+h5Esc(c.ch)+'</div>'
+    +'<div class="h5-cd-name">'+h5Esc(name)+'</div>'
+    +'<div class="h5-cd-role">'+h5Esc(c.role)+(c.dept?' · '+h5Esc(c.dept):'')+'</div>'
+    +'<div class="h5-cd-actions"><button type="button" class="h5-big-btn" onclick="h5ContactChat(\''+h5Esc(name)+'\')">发消息</button>'
+    +'<button type="button" class="h5-big-btn ghost" onclick="h5Toast(\'语音通话（演示）\')">语音</button>'
+    +'<button type="button" class="h5-big-btn ghost" onclick="h5Toast(\'视频通话（演示）\')">视频</button></div></div>'
+    +h5Sec('个人信息')
+    +h5Card(h5Vl('工号','',c.no)+h5Vl('职位','',c.role)+h5Vl('部门','',c.dept)+h5Vl('邮箱','',c.mail)+h5Vl('手机','',c.tel));
+  h5OpenCustom(name,html);
+}
+function h5ContactChat(name){
+  var c=H5_CONTACTS[name]||{};
+  openChat(c.chat!=null?c.chat:name);
+}
+/* 参数化子页：DING 详情 */
+function h5DingDetail(i,out){
+  var d=(out?H5_DING_OUT:H5_DING)[i];
+  if(!d)return;
+  var okcnt=d.confirms.filter(function(c){return c[1];}).length;
+  var conf=d.confirms.map(function(c){
+    return '<div class="h5-set-row"><div class="ci-avatar" style="background:'+((H5_CONTACTS[c[0]]||{}).color||'var(--dt-av-blue)')+';">'+h5Esc(c[0].charAt(0))+'</div>'
+      +h5RowMain(c[0])+(c[1]?'<span class="h5-pill ok">已确认</span>':'<span class="h5-pill warn">待确认</span>')+'</div>';
+  }).join('');
+  var html='<div class="h5-set-card"><div class="h5-detail-pad"><div class="h5-ding-title">'+h5Esc(d.title)+'</div>'
+    +'<div class="h5-set-desc" style="margin-top:8px">'+h5Esc(d.content)+'</div>'
+    +'<div class="h5-ding-meta">'+h5Esc(d.type)+' · '+h5Esc(d.time)+' · 发起人 '+h5Esc(d.from)+(d.to?' · 发给 '+h5Esc(d.to):'')+'</div></div></div>'
+    +h5Sec('确认情况（'+okcnt+'/'+d.confirms.length+'）')+h5Card(conf)
+    +(d.status==='pending'
+      ?'<div class="h5-set-gap"></div>'+(out?'<div class="h5-set-note">等待接收人确认</div>':'<button type="button" class="h5-big-btn" onclick="h5DingConfirm('+i+')">确认收到</button>')
+      :'');
+  h5OpenCustom('DING 详情',html);
+}
+function h5DingConfirm(i){
+  H5_DING[i].status='done';
+  h5Toast('已确认收到该 DING');
+  var items=document.querySelectorAll('#dingListIn .ding-item');
+  if(items[i]){var p=items[i].querySelector('.ding-status');if(p){p.className='ding-status ding-status-done';p.textContent='已确认';}}
+  h5DingDetail(i,false);
+}
+/* 通用自定义子页：复用 .h5-settings 容器与返回/Esc 机制 */
+function h5OpenCustom(title,html){
+  document.getElementById('h5SettingsTitle').textContent=title;
+  var b=document.getElementById('h5SettingsBody');
+  b.innerHTML=html;b.scrollTop=0;
+  document.getElementById('h5Settings').classList.add('show');
 }
 function h5SettingsPane(sec){
   if(sec==='profile'){
@@ -709,6 +1055,132 @@ function h5SettingsPane(sec){
   if(sec==='about'){
     return h5Card(h5Vl('产品版本','','v8.2.0')+h5Vl('开发商','','心飞科技')+h5Vl('官方网站','','xinfei.com')+h5Lk('用户协议与隐私政策','用户协议与隐私政策（演示）'))
       +'<div class="h5-set-note">心飞IM v8.2.0<br>© 2026 心飞科技有限公司</div>';
+  }
+  /* ===== 以下为新增业务子页（uniapp 映射：每个 sec 一个 navigateTo 独立页面） ===== */
+  if(sec==='search'){
+    return h5SearchField('搜索消息、文件、联系人')
+      +h5Sec('搜索历史')
+      +'<div class="h5-chips">'+['交互稿','周报','考勤','架构图','请假'].map(function(t){return '<button type="button" class="h5-chip" onclick="h5SearchFill(this)">'+h5Esc(t)+'</button>';}).join('')+'</div>'
+      +h5Sec('常用联系人')+h5Card(h5ContactRow('张三')+h5ContactRow('李四')+h5ContactRow('王五'))
+      +h5Sec('最近文件')+h5Card(h5FileRow('交互稿 v3.fig','10-28 · 张三')+h5FileRow('部署架构图.png','10-26 · 钱七'));
+  }
+  if(sec==='newChat'){
+    return h5Card(
+        '<div class="h5-set-row" onclick="h5Toast(\'发起群聊（演示）\')"><div class="h5-act-ic" style="background:var(--dt-brand-light);color:var(--dt-brand);"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>'+h5RowMain('发起群聊')+'<span class="h5-set-arrow">›</span></div>'
+      +'<div class="h5-set-row" onclick="h5Toast(\'添加好友（演示）\')"><div class="h5-act-ic" style="background:var(--dt-success-light);color:var(--dt-success);"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div>'+h5RowMain('添加好友')+'<span class="h5-set-arrow">›</span></div>'
+      +'<div class="h5-set-row" onclick="h5Settings(\'dingNew\')"><div class="h5-act-ic" style="background:var(--dt-warning-light);color:var(--dt-warning);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>'+h5RowMain('发起 DING')+'<span class="h5-set-arrow">›</span></div>')
+      +h5Sec('最近联系人')+h5Card(h5ContactRow('李四')+h5ContactRow('王五')+h5ContactRow('张三')+h5ContactRow('赵六'));
+  }
+  if(sec==='secretChat'){
+    return '<div class="h5-set-note" style="text-align:left">密聊消息采用端到端加密，双方禁止转发与截屏，会话背景带防截屏水印。</div>'
+      +h5Card(h5Sw('开启密聊','当前会话切换为密聊模式',true))
+      +h5Sec('消息有效期')
+      +h5Card(h5Sel('关闭','消息长期保留',false)+h5Sel('阅后即焚','已读后自动删除',false)+h5Sel('24 小时','发送 24 小时后销毁',true)+h5Sel('7 天','发送 7 天后销毁',false));
+  }
+  if(sec==='chatMore'){
+    return h5Card(h5Vl('群名称','','产品需求评审群')+h5Vl('群公告','','需求评审流程 v3，请提前阅读')+h5Lk('群管理','群管理（演示）'))
+      +h5Sec('群成员（8 人）')+h5Card(h5AvatarStack(['张三','李四','王五','赵六','钱七','孙八','周九','吴十']))
+      +h5Sec('本群设置')+h5Card(h5Sw('置顶聊天',null,true)+h5Sw('消息免打扰',null,false)+h5Sw('显示群成员昵称',null,true))
+      +'<div class="h5-set-gap"></div>'
+      +h5Card('<div class="h5-set-row" style="justify-content:center" onclick="h5ClearChat()"><span style="font-size:14px;color:var(--dt-danger)">清空聊天记录</span></div>');
+  }
+  if(sec==='dingNew'){
+    return h5Sec('接收人')+h5Card(h5Lk('按组织架构选择','选择接收人（演示）'))
+      +h5Card(h5AvatarStack(['张三','李四','王五','赵六','钱七','孙八','周九','吴十']))
+      +h5Sec('提醒方式')+h5Card(h5Sel('应用内 DING','仅应用内强提醒',true)+h5Sel('短信 DING','同步发送短信提醒',false)+h5Sel('电话 DING','电话语音提醒，强触达',false))
+      +h5Sec('DING 内容')+h5Card('<textarea class="h5-textarea" placeholder="输入 DING 内容…">今天下午 3 点需求评审，请准时参加！</textarea>')
+      +'<div class="h5-set-gap"></div><button type="button" class="h5-big-btn" onclick="h5SendDing()">发送 DING</button>';
+  }
+  if(sec==='wbAttend'){
+    return '<div class="h5-set-card"><div class="h5-punch-wrap"><div class="h5-punch-time">'+h5Now()+'</div><div class="h5-punch-tip">上班打卡 · 已进入打卡范围（软件园 A 座）</div><button type="button" class="h5-punch-btn" onclick="h5Punch(this)">上班打卡</button></div></div>'
+      +h5Sec('今日打卡记录')+h5Card(h5Vl('上班打卡','',h5Now()+' ✓')+h5Vl('下班打卡','','待打卡')+h5Vl('打卡地点','','软件园 A 座 3F'))
+      +h5Sec('本周统计')+h5Card(h5Vl('出勤天数','','4.5 天')+h5Vl('迟到 / 早退','','0 / 0 次')+h5Vl('缺卡','','0 次')+h5Vl('补卡申请','','1 单'));
+  }
+  if(sec==='wbApproval'){
+    return h5Sec('待我审批（2）')+h5Card(h5ApprRow('请假申请','王五 · 10月28日～10月29日 · 事假')+h5ApprRow('报销申请','赵六 · 差旅费 ¥486.00 · 3 张发票'))
+      +h5Sec('我发起的')+h5Card(
+        '<div class="h5-set-row">'+h5RowMain('请假申请','10月25日 全天')+'<span class="h5-pill ok">已通过</span></div>'
+       +'<div class="h5-set-row">'+h5RowMain('设备领用','MacBook Pro · 13 寸')+'<span class="h5-pill warn">审批中</span></div>'
+       +'<div class="h5-set-row">'+h5RowMain('办公用品采购','显示器支架 × 2')+'<span class="h5-pill ok">已通过</span></div>');
+  }
+  if(sec==='wbTodo'){
+    return h5Sec('今天')+h5Card(h5TodoRow('需求评审会前更新交互稿','来自 产品需求评审群 · 16:00 截止',false)+h5TodoRow('回复李四的视觉走查意见','来自 李四 · 18:00 截止',false))
+      +h5Sec('本周')+h5Card(h5TodoRow('提交本周日报','团队规则 · 周五 18:00 截止',false)+h5TodoRow('修复 iOS 输入框兼容问题','来自 前端开发小组 · 已逾期',true)+h5TodoRow('整理 10 月考勤异常','来自 DING助手 · 已完成',true));
+  }
+  if(sec==='wbMail'){
+    return h5Sec('收件箱（2 封未读）')+h5Card(
+        h5MailRow('人事部 · 王琳','11 月考勤周期调整通知','各位同事，11 月起考勤周期调整为自然月…','昨天',true)
+       +h5MailRow('财务部','10 月报销单据提交提醒','请于本月 25 日前提交报销单据…','昨天',true)
+       +h5MailRow('产品设计部','[周报] 本周迭代进展与风险','本周共完成需求 12 个，交互稿 v3 已评审…','周一',false)
+       +h5MailRow('心飞服务通知','你的请假申请已通过','10月25日 全天事假审批已通过…','周一',false));
+  }
+  if(sec==='wbCalendar'){
+    return h5Sec('今天 · 10月28日 周三')+h5Card(
+        h5CalRow('09:30 - 10:30','产品周会','会议室 A · 12 人','var(--dt-brand)')
+       +h5CalRow('14:00 - 15:30','需求评审会','会议室 B · 全体产品','var(--dt-warning)')
+       +h5CalRow('16:00 - 16:30','与李四 1v1','线上会议','var(--dt-purple)'))
+      +h5Sec('明天 · 10月29日 周四')+h5Card(
+        h5CalRow('10:00 - 11:00','迭代规划会','会议室 A','var(--dt-success)')
+       +h5CalRow('19:00 - 20:00','部门团建','公司楼下 · 火锅','var(--dt-brand)'));
+  }
+  if(sec==='wbDoc'){
+    return h5Sec('最近文档')+h5Card(
+        h5FileRow('交互稿 v3.fig','10-28 14:20 · 张三')
+       +h5FileRow('需求评审纪要.docx','10-27 17:05 · 王五')
+       +h5FileRow('部署架构图.png','10-26 13:12 · 钱七')
+       +h5FileRow('API 接口文档.md','10-25 09:40 · 何敏'))
+      +h5Sec('来自聊天')+h5Card(
+        h5FileRow('产品需求 PRD v2.pdf','产品需求评审群 · 昨天')
+       +h5FileRow('测试回归录屏.mp4','赵六 · 10-27'));
+  }
+  if(sec==='wbMeeting'){
+    return '<div class="h5-set-card h5-pad-card"><button type="button" class="h5-big-btn" onclick="h5Toast(\'已发起视频会议（演示）\')">发起会议</button></div>'
+      +h5Sec('进行中')+h5Card('<div class="h5-set-row">'+h5RowMain('产品需求评审会','12 人在会议中 · 已进行 25 分钟')+'<button type="button" class="h5-mini-btn primary" onclick="h5Toast(\'加入会议（演示）\')">加入</button></div>')
+      +h5Sec('即将开始')+h5Card(
+        '<div class="h5-set-row">'+h5RowMain('迭代规划会','今天 14:00 · 会议室 A')+'<span class="h5-pill warn">未开始</span></div>'
+       +'<div class="h5-set-row">'+h5RowMain('与李四 1v1','今天 16:00 · 线上会议')+'<span class="h5-pill warn">未开始</span></div>')
+      +h5Sec('历史会议')+h5Card('<div class="h5-set-row">'+h5RowMain('全员周会','昨天 10:00 · 42 分钟 · 已录制')+'<span class="h5-pill ok">已结束</span></div>');
+  }
+  if(sec==='wbLog'){
+    return '<div class="h5-set-card h5-pad-card"><button type="button" class="h5-big-btn" onclick="h5Toast(\'打开日志编辑（演示）\')">写日志</button></div>'
+      +h5Sec('我提交的')+h5Card(
+        '<div class="h5-set-row">'+h5RowMain('10月28日 日报','完成交互稿 v3 细节标注')+'<span class="h5-pill ok">已提交</span></div>'
+       +'<div class="h5-set-row">'+h5RowMain('10月27日 日报','推进视觉走查问题闭环')+'<span class="h5-pill ok">已提交</span></div>'
+       +'<div class="h5-set-row">'+h5RowMain('10月26日 周报','本周迭代进展与下周计划')+'<span class="h5-pill ok">已提交</span></div>'
+       +'<div class="h5-set-row">'+h5RowMain('10月25日 日报','参与需求评审会')+'<span class="h5-pill danger">未提交</span></div>');
+  }
+  if(sec==='wbTeamLog'){
+    return h5Sec('产品设计部')+h5Card(
+        h5TeamLogRow('张三','10月28日 日报','完成交互稿 v3 细节标注')
+       +h5TeamLogRow('李四','10月28日 日报','视觉走查 12 个问题已同步')
+       +h5TeamLogRow('郑冬','10月27日 日报','动效规范初稿整理'))
+      +h5Sec('技术研发部')+h5Card(
+        h5TeamLogRow('王五','10月28日 日报','联调环境部署完成')
+       +h5TeamLogRow('钱七','10月28日 日报','网关限流方案评审通过'));
+  }
+  if(sec==='contactSearch'){
+    var rows='';
+    H5_DEPTS.forEach(function(d){d[1].forEach(function(p){rows+=h5ContactRow(p[0]);});});
+    return h5SearchField('搜索联系人')+h5Sec('全部联系人（32 人）')+h5Card(rows);
+  }
+  if(sec==='orgContacts'){
+    var html=h5SearchField('搜索同事、部门');
+    H5_DEPTS.forEach(function(d){
+      html+=h5Sec(d[0]+'（'+d[1].length+' 人）')+h5Card(d[1].map(function(p){return h5ContactRow(p[0]);}).join(''));
+    });
+    return html;
+  }
+  if(sec==='newFriends'){
+    return h5Sec('好友申请（2）')+h5Card(h5FriendRow('钱七','后端工程师 · 来自通讯录')+h5FriendRow('孙八','运营专员 · 来自扫一扫'))
+      +h5Sec('已处理')+h5Card(
+        '<div class="h5-set-row"><div class="ci-avatar" style="background:var(--dt-av-indigo);">周</div>'+h5RowMain('周九','HRBP · 已添加')+'<span class="h5-pill ok">已同意</span></div>');
+  }
+  if(sec==='myGroups'){
+    return h5Sec('我的群组（4）')+h5Card(
+        h5GroupRow('产品需求评审群','8 人 · 昨天 14:35',0,'var(--dt-av-blue)','产')
+       +h5GroupRow('技术架构组','15 人 · 13:10',2,'var(--dt-success)','技')
+       +h5GroupRow('前端开发小组','6 人 · 昨天 17:40',5,'var(--dt-av-cyan)','前')
+       +h5GroupRow('产品设计部','23 人 · 周一 09:30',8,'var(--dt-av-blue)','产'));
   }
   return '';
 }
