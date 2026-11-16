@@ -151,7 +151,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .electron-titlebar .title{font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px}
 .electron-titlebar .controls{display:flex;gap:0;-webkit-app-region:no-drag;height:100%}
 .electron-titlebar .ctrl-btn{width:36px;height:100%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);font-size:14px;font-weight:300;font-family:var(--dt-font)}
-.electron-titlebar .ctrl-btn:hover{background:var(--dt-bg-body)}
+.electron-titlebar .ctrl-btn:hover{background:var(--dt-bg-session-hover)}
 .electron-titlebar .ctrl-btn.close:hover{background:var(--dt-danger);color:var(--dt-bg-card)}
 .electron-titlebar{display:none}
 body.electron{flex-direction:column}
@@ -184,7 +184,7 @@ body.electron .electron-titlebar{display:flex}
 .l2-search svg{width:14px;height:14px;flex-shrink:0}
 .l2-search:focus{outline:none}
 .l2-add-btn{width:32px;height:32px;border:none;background:transparent;border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dt-text-secondary)}
-.l2-add-btn:hover{background:var(--dt-bg-body)}
+.l2-add-btn:hover{background:var(--dt-bg-session-hover)}
 .l2-add-btn svg{width:16px;height:16px}
 
 /* ============================================================
@@ -301,7 +301,7 @@ body.electron .electron-titlebar{display:flex}
 .xf-help-head{height:var(--dt-header-height);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
 .xf-help-head span{font-size:15px;font-weight:600;color:var(--dt-text-primary)}
 .xf-help-close{width:28px;height:28px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;color:var(--dt-text-secondary);font-size:18px;line-height:1}
-.xf-help-close:hover{background:var(--dt-bg-body);color:var(--dt-text-primary)}
+.xf-help-close:hover{background:var(--dt-bg-session-hover);color:var(--dt-text-primary)}
 .xf-help-body{padding:24px;overflow-y:auto}
 .xf-help-sec{margin-bottom:24px}
 .xf-help-sec:last-child{margin-bottom:0}
@@ -321,7 +321,7 @@ body.electron .electron-titlebar{display:flex}
 .xf-confirm-hint{display:block;margin-top:8px;font-size:12px;color:var(--dt-text-tertiary)}
 .xf-confirm-actions{display:flex;justify-content:flex-end;gap:8px}
 .xf-confirm-btn{height:32px;padding:0 16px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:13px;font-family:var(--dt-font);cursor:pointer}
-.xf-confirm-btn:hover{background:var(--dt-bg-hover)}
+.xf-confirm-btn:hover{background:var(--dt-bg-session-hover)}
 .xf-confirm-btn.primary{background:var(--dt-brand);border-color:var(--dt-brand);color:var(--dt-bg-panel)}
 .xf-confirm-btn.primary:hover{background:var(--dt-brand-hover)}
 .xf-confirm-btn.danger{background:var(--dt-danger);border-color:var(--dt-danger);color:var(--dt-bg-panel)}
@@ -335,14 +335,14 @@ body.electron .electron-titlebar{display:flex}
 .xf-settings-aside-title{height:var(--dt-header-height);padding:0 24px;display:flex;align-items:center;font-size:16px;font-weight:600;color:var(--dt-text-primary);border-bottom:0.5px solid var(--dt-border)}
 .xf-settings-nav{display:flex;flex-direction:column;padding:8px}
 .xf-settings-nav-item{display:flex;align-items:center;height:40px;padding:0 16px;border:none;background:transparent;border-radius:var(--dt-radius-md);cursor:pointer;font-family:var(--dt-font);font-size:14px;text-align:left;color:var(--dt-text-regular);transition:background 0.1s}
-.xf-settings-nav-item:hover{background:var(--dt-bg-hover)}
+.xf-settings-nav-item:hover{background:var(--dt-bg-session-hover)}
 .xf-settings-nav-item:focus-visible{outline:2px solid var(--dt-brand);outline-offset:-2px}
 .xf-settings-nav-item.active{background:var(--dt-bg-session-active);color:var(--dt-brand);font-weight:500}
 .xf-settings-content{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .xf-settings-content-head{height:var(--dt-header-height);padding:0 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid var(--dt-border);flex-shrink:0}
 .xf-settings-content-head span{font-size:15px;font-weight:600;color:var(--dt-text-primary)}
 .xf-settings-close{width:28px;height:28px;border:none;background:transparent;border-radius:var(--dt-radius-sm);cursor:pointer;color:var(--dt-text-secondary);font-size:18px;line-height:1;display:flex;align-items:center;justify-content:center}
-.xf-settings-close:hover{background:var(--dt-bg-body);color:var(--dt-text-primary)}
+.xf-settings-close:hover{background:var(--dt-bg-session-hover);color:var(--dt-text-primary)}
 .xf-settings-close:focus-visible{outline:2px solid var(--dt-brand);outline-offset:-2px}
 .xf-settings-body{padding:24px;overflow-y:auto}
 .xf-settings-profile{display:flex;align-items:center;gap:16px;margin-bottom:24px}
@@ -368,6 +368,21 @@ body.electron .electron-titlebar{display:flex}
 /* 全站统一键盘焦点指示：各页输入控件普遍 outline:none，用 :focus-visible 提供替代焦点样式
    （!important 用于压过页面内同优先级的 outline:none；触摸聚焦不匹配 :focus-visible，不受影响） */
 input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--dt-brand)!important;outline-offset:-2px!important}
+
+/* === 全站轻反馈统一（8.2 规范：仅状态变化过渡，禁复杂动效）===
+   可交互元素 hover/active 的背景与文字色过渡统一 0.15s */
+.electron-titlebar .ctrl-btn,
+.l1-nav .l1-item,
+.l2-add-btn,
+.session-item,
+.session-close-btn,
+.xf-help-close,
+.xf-confirm-btn,
+.xf-settings-nav-item,
+.xf-settings-close,
+.xf-settings-logout,
+.xf-onboard-next,
+.xf-back{transition:background-color 0.15s,color 0.15s}
 .xf-settings-logout{width:100%;height:40px;border:0.5px solid var(--dt-border);background:var(--dt-bg-panel);border-radius:var(--dt-radius-sm);color:var(--dt-danger);font-size:13px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
 .xf-settings-logout:hover{background:var(--dt-danger-light);border-color:var(--dt-danger)}
 .xf-settings-value{font-size:13px;color:var(--dt-text-tertiary)}
@@ -417,7 +432,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 层级由 body.xf-depth-N 控制，返回按钮 .xf-back 逐级回退。
 ============================================================ */
 .xf-back{position:fixed;top:12px;left:12px;z-index:120;display:none;align-items:center;gap:4px;height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:13px;font-family:var(--dt-font);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
-.xf-back:hover{background:var(--dt-bg-hover)}
+.xf-back:hover{background:var(--dt-bg-session-hover)}
 .xf-back svg{width:16px;height:16px;flex-shrink:0}
 
 @media (max-width:768px){

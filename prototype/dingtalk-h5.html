@@ -139,6 +139,8 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 
 /* Chat Input：钉钉移动端输入区仅一行（+号 + 输入框 + 发送），无桌面版工具栏行 */
 .chat-input-area{background:var(--dt-bg-panel);border-top:0.5px solid var(--dt-border-light);flex-shrink:0}
+/* 全站按压轻反馈统一（8.2 规范：仅状态变化过渡）：:active 变背景色的可点元素统一 0.15s */
+.chat-back,.chat-actions button,.chat-input-icon,.chat-send-btn,.wb-card-item,.ding-item,.ci-item,.my-profile,.my-card-item,.my-logout-btn,.h5-settings-back,.h5-set-row,.h5-set-logout,.h5-mini-btn,.xf-confirm-btn,.tab-add-btn{transition:background-color 0.15s,color 0.15s}
 .chat-input-row{display:flex;align-items:center;padding:6px 8px 8px;gap:6px}
 .chat-input-icon{width:32px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);border-radius:50%;flex-shrink:0}
 .chat-input-icon:active{background:var(--dt-bg-body)}
