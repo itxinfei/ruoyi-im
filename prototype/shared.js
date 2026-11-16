@@ -21,7 +21,8 @@
   /* 各页弹层类名统一为 .show 控制显示；mockup 的 .modal-overlay 用 .hidden */
   var SHOW_OVERLAYS =
     '.cal-overlay.show, .approval-overlay.show, .approval-modal-overlay.show, ' +
-    '.confirm-overlay.show, .ct-overlay.show, .search-modal-overlay.show, ' +
+    '.call-overlay.show, .confirm-overlay.show, .ct-overlay.show, ' +
+    '.l2-action-popup.show, .read-detail.show, .search-modal-overlay.show, ' +
     '.checkin-modal-overlay.show, .xf-confirm-overlay.show, ' +
     '.xf-settings-overlay.show, .xf-palette-overlay.show, .xf-onboard-overlay.show';
 
@@ -39,6 +40,8 @@
         closeConfirm();
       } else if (show.classList.contains('xf-settings-overlay')) {
         closeSettings();
+      } else if (show.classList.contains('xf-palette-overlay')) {
+        closePalette();
       } else if (show.classList.contains('checkin-modal-overlay') && typeof window.closeCheckinModal === 'function') {
         window.closeCheckinModal();
       } else {
@@ -46,6 +49,9 @@
       }
       return true;
     }
+
+    var profileMask = qs('.profile-card-mask');
+    if (profileMask) { profileMask.remove(); return true; }
 
     var drawer = qs('.right-drawer-overlay');
     if (drawer && !drawer.classList.contains('hidden')) { drawer.classList.add('hidden'); return true; }
@@ -281,6 +287,9 @@
     if (light) root.setProperty('--dt-brand-light', light);
     if (hover) root.setProperty('--dt-brand-hover', hover);
     if (active) root.setProperty('--dt-brand-active', active);
+    /* 浏览器地址栏颜色跟随主题（仅带 metaThemeColor 的页面生效，如 H5 原型） */
+    var mt = document.getElementById('metaThemeColor');
+    if (mt) mt.setAttribute('content', color);
     try { localStorage.setItem(XF_THEME_KEY, [color, light || '', hover || '', active || ''].join('|')); } catch (err) {}
   }
 
@@ -785,19 +794,37 @@
     '.a-node,.t-node,.g-node,.h5-plus-item,.rp-member,.search-modal-card,' +
     '.search-modal-file,.search-modal-msg,.ct-card,.msg-avatar,.crumb,.sortable,' +
     '.am-file-upload,.my-card-item,.msg-read-status,.action,.cd-more-menu,.ding-tag-remove,.search-recent-tag,' +
+    /* H5 原型可点击块：筛选 tab / DING tab / 工作台入口 / 联系人行 / 我的页资料卡 / 搜索框 /
+       设置子页动态行（仅限真正带 onclick 的行，开关行与纯展示行不增强，避免虚假可聚焦） */
+    '.filter-tab,.ding-tab,.wb-qa-item,.wb-app-item,.wb-card-item,.ci-item,.my-profile,.search-input,' +
+    '.h5-set-row[onclick],' +
     /* 无类名的行内可点击块（如通讯录快捷入口、后台统计卡片） */
     'div[onclick]:not([class])';
 
   function a11yRoleFor(el) {
     var cls = (typeof el.className === 'string' ? el.className : '').trim();
     if (/^toggle-switch\b/.test(cls)) return 'switch';
-    if (/^tab-item\b/.test(cls)) return 'tab';
+    if (/^(tab-item|filter-tab|ding-tab)\b/.test(cls)) return 'tab';
     if (/^(a-node|t-node|g-node)\b/.test(cls)) return 'treeitem';
     return 'button';
   }
 
   function xfEnhanceClickable(el) {
-    if (!el || el.hasAttribute('role') || el.hasAttribute('tabindex')) return;
+    if (!el) return;
+    /* 原生控件自带 Enter/Space 行为，不重复挂 keydown（否则 button 会双触发）；
+       非原生可点击块（含已有 role/tabindex 但缺键盘处理的 div，如 H5 搜索框、h5Lk 行）统一补齐 */
+    var tag = el.tagName;
+    var native = tag === 'BUTTON' || tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || tag === 'A';
+    if (!native && !el.__xfKey) {
+      el.__xfKey = true;
+      el.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
+          e.preventDefault();
+          this.click();
+        }
+      });
+    }
+    if (el.hasAttribute('role') || el.hasAttribute('tabindex')) return;
     var role = a11yRoleFor(el);
     el.setAttribute('role', role);
     el.setAttribute('tabindex', '0');
@@ -809,12 +836,6 @@
     if (!el.hasAttribute('aria-label') && el.hasAttribute('title')) {
       el.setAttribute('aria-label', el.getAttribute('title'));
     }
-    el.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') {
-        e.preventDefault();
-        this.click();
-      }
-    });
   }
 
   function initA11y() {
@@ -837,6 +858,45 @@
         }
       }).observe(document.body, { childList: true, subtree: true });
     }
+    /* role="tab" 点击后同步同组 aria-selected（H5 主导航 tab / 筛选 tab / DING tab 共用） */
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest ? e.target.closest('[role="tab"]') : null;
+      if (!t || !t.parentElement) return;
+      var tabs = t.parentElement.querySelectorAll('[role="tab"]');
+      for (var i = 0; i < tabs.length; i++) tabs[i].setAttribute('aria-selected', tabs[i] === t ? 'true' : 'false');
+    });
+  }
+
+  /* ============================================================
+     L1 导航无刷新切换（消除整页 reload 白闪）
+     - 点击当前页：仅切换 active，不跳转
+     - 点击其他页：平滑淡出后跳转
+     ============================================================ */
+  /* 外壳页（app.html）自行处理 L1 → iframe，不启用同页跳转逻辑 */
+  function initL1Nav() {
+    if (document.body && document.body.hasAttribute('data-shell')) return;
+    document.addEventListener('click', function (e) {
+      var el = e.target && e.target.closest ? e.target.closest('.l1-item[data-go]') : null;
+      if (!el) return;
+      var target = el.getAttribute('data-go');
+      var cur = location.pathname.split('/').pop() || 'index.html';
+      var items = document.querySelectorAll('.l1-item');
+      for (var i = 0; i < items.length; i++) items[i].classList.remove('active');
+      el.classList.add('active');
+      if (target === cur) { e.preventDefault(); return; }
+      e.preventDefault();
+      if (document.documentElement.classList.contains('xf-leaving')) return;
+      document.documentElement.classList.add('xf-leaving');
+      setTimeout(function () { location.href = target; }, 180);
+    });
+  }
+
+  /* 嵌入检测：在 app.html 的 iframe 中仅显示内容区，隐藏自身标题栏与 L1 */
+  function initEmbedded() {
+    try {
+      if (window.self === window.top) return;
+      document.documentElement.classList.add('xf-embedded');
+    } catch (err) { /* 跨域时忽略 */ }
   }
 
   function boot() {
@@ -844,6 +904,8 @@
     initToasts();
     initMobileLayout();
     initA11y();
+    initL1Nav();
+    initEmbedded();
     if (!onboardDone()) showOnboard();
   }
 
