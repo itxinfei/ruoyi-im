@@ -170,41 +170,17 @@ if(window.isElectron||window.electronAPI){
     </div>
   </div>
 
-  <!-- 组织架构 -->
+  <!-- 组织架构：数据驱动渲染，与 dingtalk-h5.html 共用同一套组织事实源（5 部门 32 人） -->
   <div class="l2-tab-content active" id="orgTab">
-    <div class="t-node open" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg></div><span>XinFei 技术有限公司 (32人)</span></div>
-    <div class="t-children" style="display:block">
-      <div class="t-node open" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/></svg></div><span>产品研发中心 (18人)</span></div>
-      <div class="t-children" style="display:block">
-        <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><polyline points="16 18 22 12 16 8"/><polyline points="8 8 2 12 8 16"/></svg></div><span>前端组 (6人)</span></div>
-        <div class="t-children">
-          <div class="a-node" onclick="showContact('我','前端负责人','产品研发中心 / 前端组','EMP0001','me@xinfei.com','var(--dt-brand)')"><div class="a-av" style="background:var(--dt-brand)">我</div><div><div class="a-name">我</div><div class="a-pos">前端负责人</div></div></div>
-          <div class="a-node" onclick="showContact('李四','前端工程师','产品研发中心 / 前端组','EMP0042','lisi@xinfei.com','var(--dt-av-teal)')"><div class="a-av" style="background:var(--dt-av-teal)">李</div><div><div class="a-name">李四</div><div class="a-pos">前端工程师</div></div></div>
-          <div class="a-node" onclick="showContact('王五','前端工程师','产品研发中心 / 前端组','EMP0088','wangwu@xinfei.com','var(--dt-warning)')"><div class="a-av" style="background:var(--dt-warning)">王</div><div><div class="a-name">王五</div><div class="a-pos">前端工程师</div></div></div>
-        </div>
-        <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><span>后端组 (5人)</span></div>
-        <div class="t-children">
-          <div class="a-node" onclick="showContact('赵六','后端工程师','产品研发中心 / 后端组','EMP0065','zhaoliu@xinfei.com','var(--dt-av-pink)')"><div class="a-av" style="background:var(--dt-av-pink)">赵</div><div><div class="a-name">赵六</div><div class="a-pos">后端工程师</div></div></div>
-          <div class="a-node" onclick="showContact('钱七','后端工程师','产品研发中心 / 后端组','EMP0071','qianqi@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">钱</div><div><div class="a-name">钱七</div><div class="a-pos">后端工程师</div></div></div>
-        </div>
-        <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M12 20h9M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><span>测试组 (3人)</span></div>
-        <div class="t-children">
-          <div class="a-node" onclick="showContact('吴十','测试工程师','产品研发中心 / 测试组','EMP0078','wushi@xinfei.com','var(--dt-av-cyan)')"><div class="a-av" style="background:var(--dt-av-cyan)">吴</div><div><div class="a-name">吴十</div><div class="a-pos">测试工程师</div></div></div>
-        </div>
-      </div>
-      <div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon"><svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div><span>运营中心 (8人)</span></div>
-      <div class="t-children">
-        <div class="a-node" onclick="showContact('运营-小明','运营专员','运营中心','EMP0045','xiaoming@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">小</div><div><div class="a-name">小明</div><div class="a-pos">运营专员</div></div></div>
-      </div>
-    </div>
+    <div id="orgTree"></div>
   </div>
 
-  <!-- 好友 -->
+  <!-- 好友：引用组织架构中的真实成员（钉钉规则：好友不脱离树的事实源） -->
   <div class="l2-tab-content" id="friendTab">
-    <div class="a-node" onclick="showContact('白雨萌','产品经理','产品部','EMP0033','baimm@xinfei.com','var(--dt-av-pink)')"><div class="a-av" style="background:var(--dt-av-pink)">白</div><div><div class="a-name">白雨萌</div><div class="a-pos">产品经理 · 在线</div></div></div>
-    <div class="a-node" onclick="showContact('艾伦','数据分析师','产品研发中心','EMP0102','aillen@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">艾</div><div><div class="a-name">艾伦</div><div class="a-pos">数据分析师 · 不在线</div></div></div>
-    <div class="a-node" onclick="showContact('陈七','前端工程师','产品研发中心 / 前端组','EMP0056','chenqi@xinfei.com','var(--dt-av-cyan)')"><div class="a-av" style="background:var(--dt-av-cyan)">陈</div><div><div class="a-name">陈七</div><div class="a-pos">前端工程师 · 在线</div></div></div>
-    <div class="a-node" onclick="showContact('刘九','测试工程师','产品研发中心 / 测试组','EMP0079','liu9@xinfei.com','var(--dt-warning)')"><div class="a-av" style="background:var(--dt-warning)">刘</div><div><div class="a-name">刘九</div><div class="a-pos">测试工程师 · 在线</div></div></div>
+    <div class="a-node" onclick="showContact('张三','产品经理','产品设计部','XF10023','zhangsan@xinfei.com','var(--dt-purple)')"><div class="a-av" style="background:var(--dt-purple)">张</div><div><div class="a-name">张三</div><div class="a-pos">产品经理</div></div></div>
+    <div class="a-node" onclick="showContact('李四','UI 设计师','产品设计部','XF10035','lisi@xinfei.com','var(--dt-success)')"><div class="a-av" style="background:var(--dt-success)">李</div><div><div class="a-name">李四</div><div class="a-pos">UI 设计师</div></div></div>
+    <div class="a-node" onclick="showContact('王五','前端工程师','技术研发部','XF10052','wangwu@xinfei.com','var(--dt-warning)')"><div class="a-av" style="background:var(--dt-warning)">王</div><div><div class="a-name">王五</div><div class="a-pos">前端工程师</div></div></div>
+    <div class="a-node" onclick="showContact('赵六','测试工程师','技术研发部','XF10058','zhaoliu@xinfei.com','var(--dt-av-pink)')"><div class="a-av" style="background:var(--dt-av-pink)">赵</div><div><div class="a-name">赵六</div><div class="a-pos">测试工程师</div></div></div>
   </div>
 
   <!-- 群组 -->
@@ -226,10 +202,9 @@ if(window.isElectron||window.electronAPI){
     <div style="text-align:center;padding:32px 24px 16px">
       <div style="position:relative;width:80px;height:80px;margin:0 auto 12px">
         <div class="cd-av" id="cdAvatar">李</div>
-        <div id="cdOnline" style="position:absolute;bottom:2px;right:2px;width:14px;height:14px;background:var(--dt-success);border:2px solid var(--dt-bg-card);border-radius:50%;display:none"></div>
       </div>
       <div class="cd-name" id="cdName">李四</div>
-      <div class="cd-pos" id="cdPos">前端工程师 · 产品研发中心</div>
+      <div class="cd-pos" id="cdPos">UI 设计师 · 产品设计部</div>
     </div>
     <div class="cd-btns" style="position:relative">
       <button class="cd-msg" onclick="showToast('打开会话（演示）')"><svg aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--dt-bg-card)" stroke-width="1.5" style="margin-right:4px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>发消息</button>
@@ -244,12 +219,12 @@ if(window.isElectron||window.electronAPI){
       </div>
     </div>
     <div class="cd-info">
-      <div class="cd-row"><span class="cd-label">工号</span><span class="cd-val" id="cdEmp">EMP0042</span></div>
-      <div class="cd-row"><span class="cd-label">部门</span><span class="cd-val" id="cdDeptVal">产品研发中心 / 前端组</span></div>
+      <div class="cd-row"><span class="cd-label">工号</span><span class="cd-val" id="cdEmp">XF10035</span></div>
+      <div class="cd-row"><span class="cd-label">部门</span><span class="cd-val" id="cdDeptVal">产品设计部</span></div>
       <div class="cd-row"><span class="cd-label">手机</span><span class="cd-val">138****5678</span></div>
       <div class="cd-row"><span class="cd-label">邮箱</span><span class="cd-val" id="cdEmail">lisi@xinfei.com</span></div>
       <div class="cd-row"><span class="cd-label">工位</span><span class="cd-val">3F-B-042</span></div>
-      <div class="cd-row"><span class="cd-label">汇报给</span><span class="cd-val">张三（产品总监）</span></div>
+      <div class="cd-row"><span class="cd-label">汇报给</span><span class="cd-val">张三（产品经理）</span></div>
     </div>
   </div>
 </div>
@@ -305,8 +280,6 @@ function showContact(name,role,dept,id,email,color){
   var emp=document.getElementById('cdEmp');if(emp)emp.textContent=id;
   var deptVal=document.getElementById('cdDeptVal');if(deptVal)deptVal.textContent=dept;
   var em=document.getElementById('cdEmail');if(em)em.textContent=email;
-  var online=document.getElementById('cdOnline');
-  if(online){online.style.display=(name!=='艾伦')?'block':'none';}
 }
 function showToast(msg){var t=document.getElementById('ctToast');if(t){t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},2000);}}
 // Close more menu when clicking outside
@@ -322,20 +295,71 @@ document.querySelectorAll('.l2-tab').forEach(function(tab,i){
     if(el)el.classList.add('active');
   });
 });
-// Search - filter all node types
+// 组织架构唯一事实源：与 dingtalk-h5.html 的 H5_DEPTS/H5_CONTACTS 完全一致（5 部门 32 人）
+var ORG=[
+  ['产品设计部',[['张三','产品经理'],['李四','UI 设计师'],['郑冬','交互设计师'],['刘梅','用户研究员'],['陈曦','视觉设计师'],['杨帆','产品实习生'],['黄磊','产品运营'],['徐静','设计总监']]],
+  ['技术研发部',[['王五','前端工程师'],['赵六','测试工程师'],['钱七','后端工程师'],['何敏','架构师'],['高翔','运维工程师'],['林悦','数据工程师'],['罗成','移动端工程师'],['梁雪','安全工程师'],['宋佳','前端工程师'],['唐磊','测试工程师']]],
+  ['市场运营部',[['孙八','运营专员'],['吴十','销售顾问'],['韩雪','市场专员'],['冯刚','商务经理'],['曹颖','客服主管'],['许涛','渠道经理']]],
+  ['人力资源部',[['周九','HRBP'],['邓琪','招聘专员'],['萧然','薪酬绩效'],['程琳','行政前台'],['袁博','培训经理']]],
+  ['财务法务部',[['邓艾','财务经理'],['苏芮','会计'],['卢卡','法务专员']]]
+];
+// 显式档案（色值与 h5 保持同人同色），未详列成员按 h5 同款色板轮转补全
+var CT_CONTACTS={
+  '张三':['var(--dt-purple)','XF10023','zhangsan@xinfei.com'],
+  '李四':['var(--dt-success)','XF10035','lisi@xinfei.com'],
+  '王五':['var(--dt-warning)','XF10052','wangwu@xinfei.com'],
+  '赵六':['var(--dt-av-pink)','XF10058','zhaoliu@xinfei.com'],
+  '钱七':['var(--dt-av-cyan)','XF10061','qianqi@xinfei.com'],
+  '孙八':['var(--dt-av-teal)','XF10072','sunba@xinfei.com'],
+  '周九':['var(--dt-av-indigo)','XF10080','zhoujiu@xinfei.com'],
+  '吴十':['var(--dt-av-orange)','XF10085','wushi@xinfei.com']
+};
+(function(){
+  var pal=['var(--dt-av-blue)','var(--dt-av-indigo)','var(--dt-av-cyan)','var(--dt-av-pink)','var(--dt-av-teal)','var(--dt-av-orange)','var(--dt-av-red)','var(--dt-av-brown)','var(--dt-purple)','var(--dt-success)','var(--dt-warning)','var(--dt-danger)'];
+  var i=0;
+  ORG.forEach(function(d){d[1].forEach(function(p){
+    if(!CT_CONTACTS[p[0]])CT_CONTACTS[p[0]]=[pal[i%pal.length],'XF1'+(1000+i),'u'+(1000+i)+'@xinfei.com'];
+    i++;
+  });});
+})();
+function renderOrg(){
+  var deptIcon='<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>';
+  var rootIcon='<svg aria-hidden="true" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M3 21h18M5 21V7l8-4 8 4v14M9 21v-6h6v6"/></svg>';
+  var html='';
+  ORG.forEach(function(d){
+    var kids=d[1].map(function(p){
+      var c=CT_CONTACTS[p[0]]||['','',''];
+      return '<div class="a-node" onclick="showContact(\''+p[0]+'\',\''+p[1]+'\',\''+d[0]+'\',\''+c[1]+'\',\''+c[2]+'\',\''+c[0]+'\')">'
+        +'<div class="a-av" style="background:'+c[0]+'">'+p[0].charAt(0)+'</div>'
+        +'<div><div class="a-name">'+p[0]+'</div><div class="a-pos">'+p[1]+'</div></div></div>';
+    }).join('');
+    html+='<div class="t-node" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon">'+deptIcon+'</div><span>'+d[0]+' ('+d[1].length+'人)</span></div>'
+      +'<div class="t-children">'+kids+'</div>';
+  });
+  var total=ORG.reduce(function(s,d){return s+d[1].length},0);
+  document.getElementById('orgTree').innerHTML=
+    '<div class="t-node open" onclick="toggleOrg(this)"><div class="t-arrow">▶</div><div class="t-icon">'+rootIcon+'</div><span>XinFei 技术有限公司 ('+total+'人)</span></div>'
+    +'<div class="t-children" style="display:block">'+html+'</div>';
+}
+renderOrg();
+// Search - 数据驱动过滤：命中成员自动展开所属部门，无命中部门整组隐藏（不留孤儿成员列表），清空恢复默认
 document.getElementById('ctSearch').addEventListener('input',function(){
   var kw=this.value.trim().toLowerCase();
-  document.querySelectorAll('.a-node').forEach(function(node){
-    var name=node.querySelector('.a-name');
-    if(name){node.style.display=(!kw||name.textContent.toLowerCase().includes(kw))?'flex':'none';}
+  if(!kw){renderOrg();return;}
+  document.querySelectorAll('#orgTree .a-node').forEach(function(n){
+    n.style.display=n.textContent.toLowerCase().indexOf(kw)>=0?'flex':'none';
   });
-  document.querySelectorAll('.t-node').forEach(function(node){
-    var span=node.querySelector('span:last-child');
-    if(span){node.style.display=(!kw||span.textContent.toLowerCase().includes(kw))?'flex':'none';}
+  document.querySelectorAll('#orgTree .t-children').forEach(function(c){
+    var vis=false;
+    c.querySelectorAll('.a-node').forEach(function(n){if(n.style.display!=='none')vis=true;});
+    var tn=c.previousElementSibling;
+    var deptHit=tn&&tn.textContent.toLowerCase().indexOf(kw)>=0;
+    tn.style.display=(vis||deptHit)?'flex':'none';
+    c.style.display=(vis||deptHit)?'block':'none';
+    if(vis&&!deptHit)tn.classList.add('open');
   });
-  document.querySelectorAll('.g-node').forEach(function(node){
-    var name=node.querySelector('.g-name');
-    if(name){node.style.display=(!kw||name.textContent.toLowerCase().includes(kw))?'flex':'none';}
+  document.querySelectorAll('#friendTab .a-node,#groupTab .g-node').forEach(function(n){
+    n.style.display=n.textContent.toLowerCase().indexOf(kw)>=0?'flex':'none';
   });
 });
 </script>
