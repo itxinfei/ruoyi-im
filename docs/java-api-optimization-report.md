@@ -40,6 +40,7 @@
 Spring `@Transactional` 默认仅回滚 `RuntimeException`，缺少 `rollbackFor = Exception.class` 会导致 checked exception 时不回滚。
 
 **修复文件:**
+
 - `ImMessageMentionServiceImpl.java` — 3 处 (createMentions, markAsRead, batchMarkAsRead)
 - `ImFileChunkUploadServiceImpl.java` — 5 处 (initChunkUpload, uploadChunk, mergeChunks, cancelChunkUpload, pauseChunkUpload)
 - `ImDocumentServiceImpl.java` — 11 处
@@ -65,6 +66,7 @@ Spring `@Transactional` 默认仅回滚 `RuntimeException`，缺少 `rollbackFor
 **问题**: `KEYS` 命令阻塞 Redis 单线程，生产环境不可用。
 
 **修复文件:**
+
 - `ImCacheServiceImpl.java:159` — `redisTemplate.keys(pattern)` → `redisTemplate.scan(ScanOptions)`
 - `ImRedisUtil.java:391` — 同上
 
@@ -99,14 +101,17 @@ Spring `@Transactional` 默认仅回滚 `RuntimeException`，缺少 `rollbackFor
 ### 4.1 N+1 查询优化 (3 处)
 
 **ImMessageReadServiceImpl — getMessageReadStatus()**:
+
 - 原始: 循环内调用 `userMapper.selectImUserById()` 查询用户信息（2 处循环，各查 N 次）
 - 修复: 批量收集 userIds → `selectImUserListByIds()` 一次查询 → `Map<Long, ImUser>` 查找
 
 **ImMessageReadServiceImpl — getMessageReadDetail()**:
+
 - 原始: 已读用户列表和未读用户列表各循环内调用 `selectImUserById()`
 - 修复: 预加载所有会话成员用户信息到 Map，两个循环共用
 
 **ImConversationServiceImpl — searchConversations()**:
+
 - 原始: 每个会话分别调用 `getPeerUserId()` + `selectImUserById()` 或 `selectImGroupById()`
 - 修复: 批量加载所有成员 → 收集 peerUserIds/groupIds → 批量查询用户和群组 → Map 查找
 

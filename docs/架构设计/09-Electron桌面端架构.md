@@ -303,7 +303,7 @@ export class TrayManager {
       path.join(__dirname, '../resources/tray-icon.png')
     )
     this.tray = new Tray(icon.resize({ width: 16, height: 16 }))
-    this.tray.setToolTip('RuoYi-IM')
+    this.tray.setToolTip('心飞IM')
     this.setContextMenu()
 
     this.tray.on('click', () => {
@@ -380,7 +380,7 @@ export class AutoUpdater {
   },
   "build": {
     "appId": "com.ruoyi.im",
-    "productName": "若依IM",
+    "productName": "XinFei IM",
     "directories": { "output": "dist-electron" },
     "files": ["out/**/*", "package.json"],
     "win": {

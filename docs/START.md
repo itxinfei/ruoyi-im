@@ -26,7 +26,7 @@
 
 ```bash
 git clone <项目地址>
-cd RuoYi-IM
+cd im
 ```
 
 ---
@@ -47,6 +47,7 @@ mysql -u root -p im < ruoyi-im-api/sql/im_db.sql
 ```
 
 **验证成功**：
+
 ```bash
 mysql -u root -p im -e "SHOW TABLES;" | wc -l
 # 输出应该 > 50（表示表已创建）
@@ -80,6 +81,7 @@ mvn spring-boot:run
 ```
 
 **验证成功**：
+
 ```bash
 curl http://localhost:8080/api/user/info/1
 # 应返回用户 JSON 数据
@@ -112,6 +114,7 @@ npm run dev
 ```
 
 **验证成功**：
+
 - 浏览器自动打开 `http://localhost:5173`
 - 看到登录页面
 
@@ -164,6 +167,7 @@ kill -9 <PID>
 ### Q3: Redis 连接失败
 
 确认 Redis 已启动：
+
 ```bash
 redis-cli ping
 # 返回 PONG 表示正常

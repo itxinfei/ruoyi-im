@@ -7,7 +7,6 @@
 
 ---
 
-
 ## 一、PL-AI AI 助手审查
 
 ### 1.1 需求覆盖度清单
@@ -52,8 +51,6 @@
 
 建议 doc 06 补充 SSE 协议格式：
 
-
-
 ### 1.4 platform-ai 微服务 8091 实现状态
 
 **问题 3（P0）：platform-ai 服务无 Java 实现代码**
@@ -75,6 +72,7 @@
 **问题 4（P1）：推荐策略不可插拔**
 
 建议增加 AiRecommendationProvider 接口（复用 Plugable Adapter 模式），支持：
+
 - 基于聊天历史的摘要推荐
 - 基于时间/日程的上下文推荐
 - NoOp 降级：未配置时返回空列表
@@ -116,8 +114,6 @@
 
 实际代码 electron/main.js:24：
 
-
-
 架构 doc 09 §四 要求 sandbox: true。
 
 当前代码关闭了沙箱，意味着渲染进程可绕过 contextBridge 直接访问 Node.js API。若渲染进程被 XSS 注入（如 AI 助手渲染恶意内容、链接预览解析恶意页面），攻击者可执行任意系统命令。
@@ -130,15 +126,11 @@
 
 doc 09 §六 明确要求 safeStorage 加密：
 
-
-
 当前代码直接在渲染层用 localStorage，可通过 DevTools 或 XSS 直接读取。修复：使用 electron-store 加密管理配置，使用 safeStorage 加密 Token。
 
 #### 问题 E3：Notification 图标路径可能不存在
 
 实际代码 electron/main.js:51：
-
-
 
 electron/ 目录下没有 icon.png 文件（仅有 main.js 和 preload.js）。Tray 创建被 silent catch，无法报错。
 
@@ -195,6 +187,7 @@ doc 08-§五 已涵盖：服务端录制（IM-C-010）LiveKit Egress 已定义�
 | 多用户同时共享冲突 | 未定义 |
 
 修复建议：
+
 1. Electron 端使用 desktopCapturer.getSources({ types: [window, screen] }) 枚举窗口
 2. WS CALL 信令增加 SCREEN_SHARE_START / SCREEN_SHARE_STOP 子类型
 3. LiveKit Token 增加 canPublishScreen: true Grant
@@ -340,6 +333,7 @@ doc 01-§二做/不做总结：H5 未列，意味着不在本期范围内。
 | E3 | Electron | icon.png 不存在被 silent catch | 创建图标 |
 | 1-AI | AI | platform-ai 微服务零实现（8091 端口无代码） | 新建 ruoyi-im-ai 模块 |
 | 1-SSE | AI | SSE 连接无超时/重断/错误处理 | 写入规范（30s timeout, 自动重试3次） |
+
 ### 5.2 P1：功能完备性（本周）
 
 | # | 模块 | 问题 | 修复建议 |
@@ -350,6 +344,7 @@ doc 01-§二做/不做总结：H5 未列，意味着不在本期范围内。
 | E7 | Electron | tray Badge 空实现 | 实现 Windows overlay icon |
 | 1-API | AI | AiProvider 接口缺 listModels() | 接口 + NoOp 实现 |
 | E14 | Electron | 屏幕共享无协议规范 | 补 doc + 前端 |
+
 ### 5.3 P2：代码/文档质量（本月）
 
 | # | 模块 | 问题 | 修复建议 |
@@ -363,6 +358,7 @@ doc 01-§二做/不做总结：H5 未列，意味着不在本期范围内。
 | H2 | H5 | dingtalk-h5.html 原型仅静态 | UI 参考，一期不做 |
 | H3 | H5 | 手势/触摸/推送未规划 | 一期不做 |
 | H4 | H5 | 响应式断点策略未设计 | 按需 |
+
 ---
 
 ## 六、最终结论
@@ -394,4 +390,3 @@ doc 01-§二做/不做总结：H5 未列，意味着不在本期范围内。
 | 版本 | 日期 | 作者 | 变更内容 |
 |------|------|------|----------|
 | 1.0 | 2026-06-08 | CatPaw 审查 Agent | 初始版本：AI/Electron/H5 三模块深度审查 |
-

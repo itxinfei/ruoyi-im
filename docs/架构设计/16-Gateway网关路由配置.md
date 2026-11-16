@@ -213,6 +213,16 @@ spring:
             allowCredentials: true
             maxAge: 3600
 
+  # Redis (限流 + IP 白名单)
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PWD:redis_pwd_123}
+      lettuce:
+        pool:
+          max-active: 16
+
 # Resilience4j 熔断配置
 resilience4j:
   circuitbreaker:
@@ -226,17 +236,6 @@ resilience4j:
     configs:
       default:
         registerHealthIndicator: true
-
-# Redis (限流 + IP 白名单)
-spring:
-  data:
-    redis:
-      host: ${REDIS_HOST:redis}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PWD:redis_pwd_123}
-      lettuce:
-        pool:
-          max-active: 16
 
 # 限流 Key 解析器
 gateway:
@@ -263,7 +262,6 @@ logging:
     org.springframework.cloud.gateway: DEBUG
     reactor.netty: INFO
 
----
 # 路由优先级顺序 (排在前面的优先匹配)
 # 注意: Path 路由从上到下匹配, 第一个匹配到的就停止
 ```

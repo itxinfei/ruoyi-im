@@ -1204,7 +1204,7 @@ public class AttendeeVO {
 ```json
 {
   "code": 200,
-  "msg": "success,
+  "msg": "success",
   "data": [
     {
       "id": 5001,

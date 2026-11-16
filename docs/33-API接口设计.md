@@ -11,6 +11,7 @@
 ### 1.1 通用规范
 
 **请求头**：
+
 ```text
 Content-Type: application/json
 Authorization: Bearer {token}
@@ -19,6 +20,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **响应格式**：
+
 ```json
 {
   "code": 200,
@@ -29,6 +31,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **状态码规范**：
+
 | 状态码 | 说明 |
 |-------|------|
 | 200 | 成功 |
@@ -41,6 +44,7 @@ X-Client-Version: {客户端版本}
 ### 1.2 分页参数
 
 **请求参数**：
+
 | 参数 | 类型 | 默认值 | 说明 |
 |-----|------|-------|------|
 | pageNum | int | 1 | 页码 |
@@ -49,6 +53,7 @@ X-Client-Version: {客户端版本}
 | orderDirection | string | DESC | 排序方向 |
 
 **响应格式**：
+
 ```json
 {
   "code": 200,
@@ -69,9 +74,11 @@ X-Client-Version: {客户端版本}
 ### 2.1 用户认证
 
 #### POST /api/auth/login
+
 用户登录
 
 **请求体**：
+
 ```json
 {
   "username": "string",
@@ -81,6 +88,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -101,20 +109,25 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/auth/logout
+
 用户登出
 
 #### POST /api/auth/refresh
+
 刷新Token
 
 ### 2.2 用户信息
 
 #### GET /api/user/info
+
 获取当前用户信息
 
 #### PUT /api/user/info
+
 更新用户信息
 
 **请求体**：
+
 ```json
 {
   "nickname": "string",
@@ -125,9 +138,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### GET /api/user/search
+
 搜索用户
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | keyword | string | 是 | 搜索关键词 |
@@ -135,6 +150,7 @@ X-Client-Version: {客户端版本}
 | pageSize | int | 否 | 每页数量 |
 
 #### GET /api/user/online
+
 获取在线用户列表
 
 ---
@@ -144,9 +160,11 @@ X-Client-Version: {客户端版本}
 ### 3.1 会话管理
 
 #### GET /api/conversation/list
+
 获取会话列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | type | string | 否 | PRIVATE/GROUP |
@@ -154,6 +172,7 @@ X-Client-Version: {客户端版本}
 | isArchived | int | 否 | 是否归档 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -185,9 +204,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/conversation/create
+
 创建会话
 
 **请求体**：
+
 ```json
 {
   "type": "PRIVATE|GROUP",
@@ -198,9 +219,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### PUT /api/conversation/{id}/pin
+
 置顶会话
 
 **请求体**：
+
 ```json
 {
   "isPinned": true
@@ -208,9 +231,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### PUT /api/conversation/{id}/mute
+
 会话免打扰
 
 **请求体**：
+
 ```json
 {
   "isMuted": true
@@ -218,17 +243,21 @@ X-Client-Version: {客户端版本}
 ```
 
 #### DELETE /api/conversation/{id}
+
 删除会话
 
 ### 3.2 会话设置
 
 #### GET /api/conversation/{id}/settings
+
 获取会话设置
 
 #### PUT /api/conversation/{id}/settings
+
 更新会话设置
 
 **请求体**：
+
 ```json
 {
   "isPinned": true,
@@ -245,9 +274,11 @@ X-Client-Version: {客户端版本}
 ### 4.1 消息发送
 
 #### POST /api/message/send
+
 发送消息
 
 **请求体**：
+
 ```json
 {
   "conversationId": 1,
@@ -262,6 +293,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -277,9 +309,11 @@ X-Client-Version: {客户端版本}
 ### 4.2 消息查询
 
 #### GET /api/message/list
+
 获取消息列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | conversationId | long | 是 | 会话ID |
@@ -287,6 +321,7 @@ X-Client-Version: {客户端版本}
 | pageSize | int | 否 | 每页数量 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -320,17 +355,21 @@ X-Client-Version: {客户端版本}
 ```
 
 #### GET /api/message/{id}
+
 获取消息详情
 
 ### 4.3 消息操作
 
 #### PUT /api/message/{id}/revoke
+
 撤回消息
 
 #### PUT /api/message/{id}/edit
+
 编辑消息
 
 **请求体**：
+
 ```json
 {
   "content": "编辑后的内容"
@@ -338,12 +377,15 @@ X-Client-Version: {客户端版本}
 ```
 
 #### DELETE /api/message/{id}
+
 删除消息
 
 #### POST /api/message/{id}/reaction
+
 消息表情回应
 
 **请求体**：
+
 ```json
 {
   "reactionType": "LIKE|HEART|LAUGH|CRY|SURPRISE",
@@ -352,14 +394,17 @@ X-Client-Version: {客户端版本}
 ```
 
 #### DELETE /api/message/{id}/reaction
+
 取消消息表情回应
 
 ### 4.4 消息已读
 
 #### POST /api/message/read
+
 标记消息已读
 
 **请求体**：
+
 ```json
 {
   "conversationId": 1,
@@ -368,9 +413,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### GET /api/message/read-status/{messageId}
+
 获取消息已读状态
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -400,9 +447,11 @@ X-Client-Version: {客户端版本}
 ### 4.5 消息转发
 
 #### POST /api/message/forward
+
 转发消息
 
 **请求体**：
+
 ```json
 {
   "messageIds": [100, 101],
@@ -414,9 +463,11 @@ X-Client-Version: {客户端版本}
 ### 4.6 消息收藏
 
 #### POST /api/message/favorite
+
 收藏消息
 
 **请求体**：
+
 ```json
 {
   "messageId": 100,
@@ -426,22 +477,27 @@ X-Client-Version: {客户端版本}
 ```
 
 #### GET /api/message/favorite/list
+
 获取收藏消息列表
 
 #### DELETE /api/message/favorite/{id}
+
 取消收藏
 
 ### 4.7 链接解析 (Link Metadata)
 
 #### GET /api/im/url/parse
+
 解析 URL 元数据 (C-010)
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | url | string | 是 | 需要解析的完整 URL |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -461,9 +517,11 @@ X-Client-Version: {客户端版本}
 ### 5.1 群组管理
 
 #### POST /api/group/create
+
 创建群组
 
 **请求体**：
+
 ```json
 {
   "name": "群名称",
@@ -474,12 +532,15 @@ X-Client-Version: {客户端版本}
 ```
 
 #### GET /api/group/list
+
 获取群组列表
 
 #### GET /api/group/{id}
+
 获取群组详情
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -501,17 +562,21 @@ X-Client-Version: {客户端版本}
 ```
 
 #### PUT /api/group/{id}
+
 更新群组信息
 
 #### DELETE /api/group/{id}
+
 解散群组
 
 ### 5.2 群成员管理
 
 #### GET /api/group/{id}/members
+
 获取群成员列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | groupId | long | 是 | 群组ID |
@@ -519,9 +584,11 @@ X-Client-Version: {客户端版本}
 | keyword | string | 否 | 搜索关键词 |
 
 #### POST /api/group/{id}/members
+
 添加群成员
 
 **请求体**：
+
 ```json
 {
   "userIds": [1, 2, 3]
@@ -529,12 +596,15 @@ X-Client-Version: {客户端版本}
 ```
 
 #### DELETE /api/group/{id}/members/{userId}
+
 移除群成员
 
 #### PUT /api/group/{id}/members/{userId}/role
+
 设置群成员角色
 
 **请求体**：
+
 ```json
 {
   "role": "ADMIN|MEMBER"
@@ -542,17 +612,21 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/group/{id}/quit
+
 退出群组
 
 ### 5.3 群公告
 
 #### GET /api/group/{id}/announcements
+
 获取群公告列表
 
 #### POST /api/group/{id}/announcement
+
 发布群公告
 
 **请求体**：
+
 ```json
 {
   "content": "公告内容",
@@ -563,9 +637,11 @@ X-Client-Version: {客户端版本}
 ### 5.4 群文件
 
 #### GET /api/group/{id}/files
+
 获取群文件列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | category | string | 否 | document/image/video/audio/other |
@@ -579,14 +655,17 @@ X-Client-Version: {客户端版本}
 ### 6.1 好友管理
 
 #### GET /api/friend/list
+
 获取好友列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | groupName | string | 否 | 分组名称 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -612,9 +691,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/friend/add
+
 添加好友
 
 **请求体**：
+
 ```json
 {
   "userId": 2,
@@ -624,9 +705,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### PUT /api/friend/{friendId}
+
 更新好友信息
 
 **请求体**：
+
 ```json
 {
   "remark": "备注名",
@@ -636,22 +719,27 @@ X-Client-Version: {客户端版本}
 ```
 
 #### DELETE /api/friend/{friendId}
+
 删除好友
 
 ### 6.2 好友申请
 
 #### GET /api/friend/request/list
+
 获取好友申请列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | type | string | 否 | received/sent |
 
 #### PUT /api/friend/request/{id}
+
 处理好友申请
 
 **请求体**：
+
 ```json
 {
   "status": "APPROVED|REJECTED",
@@ -666,6 +754,7 @@ X-Client-Version: {客户端版本}
 ### 7.1 文件上传
 
 #### POST /api/file/upload
+
 上传文件
 
 **请求体**：multipart/form-data
@@ -676,6 +765,7 @@ X-Client-Version: {客户端版本}
 | conversationId | long | 否 | 会话ID |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -692,9 +782,11 @@ X-Client-Version: {客户端版本}
 ### 7.2 分片上传
 
 #### POST /api/file/chunk/init
+
 初始化分片上传
 
 **请求体**：
+
 ```json
 {
   "fileName": "video.mp4",
@@ -705,6 +797,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -717,6 +810,7 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/file/chunk/upload
+
 上传分片
 
 **请求体**：multipart/form-data
@@ -729,9 +823,11 @@ X-Client-Version: {客户端版本}
 | file | file | 是 | 分片文件 |
 
 #### POST /api/file/chunk/complete
+
 完成分片上传
 
 **请求体**：
+
 ```json
 {
   "uploadId": "uuid"
@@ -741,9 +837,11 @@ X-Client-Version: {客户端版本}
 ### 7.3 文件下载
 
 #### GET /api/file/download/{id}
+
 下载文件
 
 #### GET /api/file/preview/{id}
+
 预览文件
 
 ---
@@ -753,9 +851,11 @@ X-Client-Version: {客户端版本}
 ### 8.1 全局搜索
 
 #### GET /api/search
+
 全局搜索
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | keyword | string | 是 | 搜索关键词 |
@@ -764,6 +864,7 @@ X-Client-Version: {客户端版本}
 | pageSize | int | 否 | 每页数量 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -791,9 +892,11 @@ X-Client-Version: {客户端版本}
 ### 8.2 消息搜索
 
 #### GET /api/search/message
+
 搜索消息
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | keyword | string | 是 | 搜索关键词 |
@@ -811,21 +914,26 @@ X-Client-Version: {客户端版本}
 ### 9.1 系统通知
 
 #### GET /api/notification/list
+
 获取通知列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | type | string | 否 | SYSTEM/APPROVAL/MESSAGE/GROUP/FRIEND |
 | isRead | int | 否 | 是否已读 |
 
 #### PUT /api/notification/{id}/read
+
 标记通知已读
 
 #### PUT /api/notification/read-all
+
 标记全部已读
 
 #### GET /api/notification/unread-count
+
 获取未读通知数量
 
 ---
@@ -835,12 +943,15 @@ X-Client-Version: {客户端版本}
 ### 10.1 用户设置
 
 #### GET /api/user/settings
+
 获取用户设置
 
 #### PUT /api/user/settings
+
 更新用户设置
 
 **请求体**：
+
 ```json
 {
   "notification": {
@@ -863,6 +974,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **字段说明**：
+
 - `receiptEnabled`: 已读回执开关 (C-002)
 - `clearUnreadMode`: 未读清零规则: 0进入即清零 1已读回执清零 (C-003)
 
@@ -873,9 +985,11 @@ X-Client-Version: {客户端版本}
 ### 11.1 通话管理
 
 #### POST /api/call/initiate
+
 发起通话
 
 **请求体**：
+
 ```json
 {
   "targetId": 1,
@@ -885,6 +999,7 @@ X-Client-Version: {客户端版本}
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -897,9 +1012,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/call/answer
+
 接听通话
 
 **请求体**：
+
 ```json
 {
   "callId": "uuid"
@@ -907,9 +1024,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/call/reject
+
 拒绝通话
 
 **请求体**：
+
 ```json
 {
   "callId": "uuid"
@@ -917,9 +1036,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/call/end
+
 结束通话
 
 **请求体**：
+
 ```json
 {
   "callId": "uuid"
@@ -929,9 +1050,11 @@ X-Client-Version: {客户端版本}
 ### 11.2 通话记录
 
 #### GET /api/call/records
+
 获取通话记录
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | type | string | 否 | VOICE/VIDEO |
@@ -939,6 +1062,7 @@ X-Client-Version: {客户端版本}
 | pageSize | int | 否 | 每页数量 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -968,9 +1092,11 @@ X-Client-Version: {客户端版本}
 ### 12.1 日程管理
 
 #### GET /api/schedule/list
+
 获取日程列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | startDate | date | 否 | 开始日期 |
@@ -979,6 +1105,7 @@ X-Client-Version: {客户端版本}
 | pageSize | int | 否 | 每页数量 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1006,9 +1133,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/schedule/create
+
 创建日程
 
 **请求体**：
+
 ```json
 {
   "title": "项目会议",
@@ -1025,17 +1154,21 @@ X-Client-Version: {客户端版本}
 ```
 
 #### PUT /api/schedule/{id}
+
 更新日程
 
 #### DELETE /api/schedule/{id}
+
 删除日程
 
 ### 12.2 日历视图
 
 #### GET /api/schedule/calendar
+
 获取日历视图数据
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | year | int | 是 | 年份 |
@@ -1048,9 +1181,11 @@ X-Client-Version: {客户端版本}
 ### 13.1 待办管理
 
 #### GET /api/todo/list
+
 获取待办列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | status | string | 否 | PENDING/COMPLETED/EXPIRED |
@@ -1059,6 +1194,7 @@ X-Client-Version: {客户端版本}
 | pageSize | int | 否 | 每页数量 |
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1081,9 +1217,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/todo/create
+
 创建待办
 
 **请求体**：
+
 ```json
 {
   "title": "完成项目报告",
@@ -1096,12 +1234,15 @@ X-Client-Version: {客户端版本}
 ```
 
 #### PUT /api/todo/{id}
+
 更新待办
 
 #### PUT /api/todo/{id}/complete
+
 完成待办
 
 #### DELETE /api/todo/{id}
+
 删除待办
 
 ---
@@ -1111,9 +1252,11 @@ X-Client-Version: {客户端版本}
 ### 14.1 审批申请
 
 #### GET /api/approval/template/list
+
 获取审批模板列表
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1137,9 +1280,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/approval/submit
+
 提交审批申请
 
 **请求体**：
+
 ```json
 {
   "templateId": 1,
@@ -1155,25 +1300,31 @@ X-Client-Version: {客户端版本}
 ```
 
 #### GET /api/approval/my/list
+
 获取我的申请列表
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | status | string | 否 | PENDING/APPROVED/REJECTED |
 
 #### GET /api/approval/pending/list
+
 获取待我审批列表
 
 ### 14.2 审批处理
 
 #### GET /api/approval/{id}
+
 获取审批详情
 
 #### POST /api/approval/{id}/approve
+
 审批通过
 
 **请求体**：
+
 ```json
 {
   "comment": "同意"
@@ -1181,9 +1332,11 @@ X-Client-Version: {客户端版本}
 ```
 
 #### POST /api/approval/{id}/reject
+
 审批拒绝
 
 **请求体**：
+
 ```json
 {
   "comment": "拒绝原因"
@@ -1197,9 +1350,11 @@ X-Client-Version: {客户端版本}
 ### 15.1 AI对话
 
 #### POST /api/ai/chat
+
 AI对话
 
 **请求体**：
+
 ```json
 {
   "conversationId": "uuid",
@@ -1211,6 +1366,7 @@ AI对话
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1222,9 +1378,11 @@ AI对话
 ```
 
 #### GET /api/ai/conversations
+
 获取AI对话历史
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | pageNum | int | 否 | 页码 |
@@ -1233,9 +1391,11 @@ AI对话
 ### 15.2 AI功能
 
 #### POST /api/ai/summarize
+
 消息摘要
 
 **请求体**：
+
 ```json
 {
   "messageIds": [100, 101, 102]
@@ -1243,9 +1403,11 @@ AI对话
 ```
 
 #### POST /api/ai/translate
+
 消息翻译
 
 **请求体**：
+
 ```json
 {
   "content": "你好，世界",
@@ -1254,6 +1416,7 @@ AI对话
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1270,9 +1433,11 @@ AI对话
 ### 16.1 DING消息管理
 
 #### POST /api/ding/send
+
 发送DING消息
 
 **请求体**：
+
 ```json
 {
   "content": "紧急会议通知",
@@ -1282,6 +1447,7 @@ AI对话
 ```
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1294,9 +1460,11 @@ AI对话
 ```
 
 #### GET /api/ding/received
+
 获取收到的DING消息
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | status | string | 否 | PENDING/CONFIRMED |
@@ -1304,15 +1472,19 @@ AI对话
 | pageSize | int | 否 | 每页数量 |
 
 #### GET /api/ding/sent
+
 获取发送的DING消息
 
 #### PUT /api/ding/{id}/confirm
+
 确认DING消息
 
 #### GET /api/ding/{id}/stats
+
 获取DING统计
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1333,9 +1505,11 @@ AI对话
 ### 17.1 部门管理
 
 #### GET /api/admin/department/tree
+
 获取部门树
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1363,9 +1537,11 @@ AI对话
 ```
 
 #### POST /api/admin/department
+
 创建部门
 
 **请求体**：
+
 ```json
 {
   "name": "新部门",
@@ -1379,22 +1555,27 @@ AI对话
 ```
 
 #### PUT /api/admin/department/{id}
+
 更新部门
 
 #### DELETE /api/admin/department/{id}
+
 删除部门
 
 **说明**：存在子部门或成员时不允许删除
 
 #### GET /api/admin/department/{id}/members
+
 获取部门成员
 
 ### 17.2 角色管理
 
 #### GET /api/admin/role/list
+
 获取角色列表
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1415,9 +1596,11 @@ AI对话
 ```
 
 #### POST /api/admin/role
+
 创建角色
 
 **请求体**：
+
 ```json
 {
   "roleName": "部门管理员",
@@ -1430,20 +1613,25 @@ AI对话
 ```
 
 #### PUT /api/admin/role/{id}
+
 更新角色
 
 #### DELETE /api/admin/role/{id}
+
 删除角色
 
 **说明**：已分配用户的角色不允许删除
 
 #### GET /api/admin/role/{id}/permissions
+
 获取角色权限
 
 #### PUT /api/admin/role/{id}/permissions
+
 更新角色权限
 
 **请求体**：
+
 ```json
 {
   "menuIds": [1, 2, 3, 4, 5],
@@ -1454,9 +1642,11 @@ AI对话
 ### 17.3 数据统计
 
 #### GET /api/admin/stats/overview
+
 获取概览统计
 
 **响应体**：
+
 ```json
 {
   "code": 200,
@@ -1472,17 +1662,21 @@ AI对话
 ```
 
 #### GET /api/admin/stats/message-trend
+
 获取消息趋势
 
 **参数**：
+
 | 参数 | 类型 | 必填 | 说明 |
 |-----|------|-----|------|
 | days | int | 否 | 统计天数，默认7天 |
 
 #### GET /api/admin/stats/user-active
+
 获取用户活跃度
 
 #### GET /api/admin/stats/group-active
+
 获取群组活跃度
 
 ---
@@ -1507,7 +1701,6 @@ AI对话
 ---
 
 ## 十八、变更记录
-
 
 | 日期 | 变更内容 | 变更人 |
 |-----|---------|-------|

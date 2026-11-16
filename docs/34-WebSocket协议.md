@@ -8,6 +8,7 @@
 ## 1. 协议基础
 
 ### 1.1 数据帧格式 (JSON)
+
 ```json
 {
   "type": "MESSAGE",
@@ -19,6 +20,7 @@
 ```
 
 ### 1.2 核心消息类型 (`type`)
+
 - `AUTH`: 鉴权与心跳
 - `MESSAGE`: IM 聊天消息
 - `NOTIFY`: 业务通知 (红点、提醒)
@@ -30,15 +32,19 @@
 ## 2. IM 聊天消息 (`MESSAGE`)
 
 ### 2.1 序列号机制 (Sequence ID - 核心卓越项)
+
 为确保内网环境下不丢消息、不重消息，必须引入 **`seq`**：
+
 - **定义**：每个会话 (`conversationId`) 拥有一个从 1 开始、单调连续递增的序列号。
 - **作用**：客户端收到消息后，检查 `seq` 是否等于 `localLastSeq + 1`。
-    - 若 `seq > localLastSeq + 1`，说明产生 **"消息空隙 (Gap)"**，立即触发 `SYNC_REQ`。
-    - 若 `seq <= localLastSeq`，说明是 **"重复消息"**，直接丢弃。
+  - 若 `seq > localLastSeq + 1`，说明产生 **"消息空隙 (Gap)"**，立即触发 `SYNC_REQ`。
+  - 若 `seq <= localLastSeq`，说明是 **"重复消息"**，直接丢弃。
 
 ### 2.2 发送与接收流程 (Reliability Cycle)
+
 1. **上行 (SEND)**：客户端发送消息，必须带上 `requestId` (UUID)。
 2. **服务端确认 (SEND_ACK)**：服务端入库成功后，立即返回 ACK。
+
 ```json
 {
   "type": "MESSAGE",
@@ -51,7 +57,9 @@
   }
 }
 ```
+
 3. **下行推送 (RECEIVE)**：接收方收到的推送包必须包含 `seq`：
+
 ```json
 {
   "type": "MESSAGE",
@@ -67,6 +75,7 @@
 ```
 
 4. **送达确认 (DELIVERED_ACK)**：消息成功推送到接收方后，服务端通知发送方消息已送达。
+
 ```json
 {
   "type": "MESSAGE",
@@ -79,6 +88,7 @@
 ```
 
 > **消息状态与 WS 帧对应关系**：
+>
 > - `SEND_ACK`：对应 `SENT` 状态（消息已存储）
 > - `DELIVERED_ACK`：对应 `DELIVERED` 状态（消息已推送到接收方）
 > - `READ_RECEIPT`：对应已读状态
@@ -86,11 +96,14 @@
 ---
 
 ## 3. 消息撤回与编辑 (Update Logic)
+
 撤回与编辑同样占位一个 **`seq`**，以确保所有变更动作在时间线上是可追溯且连续的。
 
 ### 3.1 审批提醒 (APPROVAL)
+
 - **场景**：当用户有新的审批待处理时推送。
 - **Payload**:
+
 ```javascript
 {
   "type": "NOTIFY",
@@ -105,8 +118,10 @@
 ```
 
 ### 3.2 待办提醒 (TASK)
+
 - **场景**：待办任务即将到期或被指派时推送。
 - **Payload**:
+
 ```json
 {
   "type": "NOTIFY",
@@ -124,8 +139,10 @@
 ## 4. 状态与事件 (`EVENT`)
 
 ### 4.1 输入中状态 (TYPING)
+
 - **场景**：对方正在输入时，上方标题显示“正在输入...”。
 - **Payload**:
+
 ```json
 {
   "type": "EVENT",
@@ -138,7 +155,9 @@
 ```
 
 ### 4.2 在线状态变更 (PRESENCE)
+
 - **Payload**:
+
 ```json
 {
   "type": "EVENT",
@@ -155,7 +174,9 @@
 ## 5. 离线消息与同步逻辑 (Reliability)
 
 ### 5.1 重连握手 (Sync Handshake)
+
 当 WebSocket 重连成功后，客户端必须立即发送 `SYNC_REQ`：
+
 ```json
 {
   "type": "MESSAGE",
@@ -166,13 +187,16 @@
   }
 }
 ```
+
 ### 5.2 服务端推送 (Sync Response) 与解耦总线
+
 - **分页拉取**：服务端根据 `lastKnownMsgId` 检索数据库中更大的 ID，通过 `SYNC_PUSH` 批量推送。前后端开发时必须使用 **"时间窗口+限定拉取条数"**（如每次拉取最前方的几十条）实施流式分页补偿，防止断网且长期失效重连造成的内存与带宽爆表。
 - **业务总线解耦 (EventBus)**：由于重连/发送动作触发极快且频繁，所有推向客户端的 WS 下行广播不可直接挂接进落库的同步线程。Java 后端应该使用 Spring `ApplicationEvent` 监听 `MessageSendEvent` 等进行剥离式异步分发。
 
 ---
 
 ## 6. 心跳与熔断 (Keep-Alive)
+
 - **心跳间隔**：30s 客户端 PING，服务端 5s 内必须回 PONG。
 - **自动断开**：连续 3 次 PING 无响应，服务端必须强制清理该 Session 的 Redis 状态。
 
@@ -181,8 +205,10 @@
 ## 7. 通话信令 (`CALL`)
 
 ### 7.1 发起通话 (INVITE)
+
 - **场景**：用户发起语音/视频通话
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -201,8 +227,10 @@
 ```
 
 ### 7.2 响铃中 (RINGING)
+
 - **场景**：被叫方收到呼叫邀请
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -214,8 +242,10 @@
 ```
 
 ### 7.3 接听通话 (ANSWER)
+
 - **场景**：被叫方接听
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -228,8 +258,10 @@
 ```
 
 ### 7.4 拒绝通话 (REJECT)
+
 - **场景**：被叫方拒绝
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -242,8 +274,10 @@
 ```
 
 ### 7.5 结束通话 (END)
+
 - **场景**：任一方挂断
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -257,8 +291,10 @@
 ```
 
 ### 7.6 ICE 候选 (ICE_CANDIDATE)
+
 - **场景**：WebRTC ICE 候选交换
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -275,8 +311,10 @@
 ```
 
 ### 7.7 SDP 会话描述 (SDP)
+
 - **场景**：WebRTC SDP 交换
 - **Payload**:
+
 ```json
 {
   "type": "CALL",
@@ -293,8 +331,10 @@
 ## 8. 消息已读回执 (`MESSAGE`)
 
 ### 8.1 已读回执 (READ_RECEIPT)
+
 - **场景**：消息被阅读后推送
 - **Payload**:
+
 ```json
 {
   "type": "MESSAGE",
@@ -310,11 +350,14 @@
 ```
 
 ### 8.2 批量已读 (READ_BATCH)
+
 ... (保持原有内容)
 
 ### 8.3 多端已读同步 (SELF_READ_SYNC)
+
 - **场景**：用户在设备 A 阅读了消息，系统需通知该用户的设备 B、C 同步消除未读。
 - **Payload**:
+
 ```json
 {
   "type": "MESSAGE",
@@ -332,8 +375,10 @@
 ## 9. 消息编辑通知 (`MESSAGE`)
 
 ### 9.1 消息编辑 (EDIT)
+
 - **场景**：消息被编辑后通知
 - **Payload**:
+
 ```json
 {
   "type": "MESSAGE",
@@ -353,8 +398,10 @@
 ## 10. 群组事件 (`EVENT`)
 
 ### 10.1 群成员变更 (GROUP_MEMBER_CHANGE)
+
 - **场景**：群成员加入/退出/被移除
 - **Payload**:
+
 ```json
 {
   "type": "EVENT",
@@ -371,8 +418,10 @@
 ```
 
 ### 10.2 群信息变更 (GROUP_INFO_CHANGE)
+
 - **场景**：群名称/公告/设置变更
 - **Payload**:
+
 ```json
 {
   "type": "EVENT",
@@ -388,8 +437,10 @@
 ```
 
 ### 10.3 群解散 (GROUP_DISMISS)
+
 - **场景**：群被解散
 - **Payload**:
+
 ```json
 {
   "type": "EVENT",
@@ -407,8 +458,10 @@
 ## 11. 文件上传进度 (`EVENT`)
 
 ### 11.1 上传进度 (UPLOAD_PROGRESS)
+
 - **场景**：大文件分片上传进度通知
 - **Payload**:
+
 ```json
 {
   "type": "EVENT",
@@ -429,6 +482,7 @@
 ## 12. 完整消息类型汇总
 
 ### 12.1 消息类型 (`type`)
+
 | 类型 | 说明 | 子动作 |
 |-----|------|-------|
 | AUTH | 鉴权与心跳 | PING, PONG |
@@ -438,6 +492,7 @@
 | CALL | 通话信令 | INVITE, RINGING, ANSWER, REJECT, END, ICE_CANDIDATE, OFFER, ANSWER |
 
 ### 12.2 消息状态码
+
 | 状态码 | 说明 |
 |-------|------|
 | 0 | 成功 |

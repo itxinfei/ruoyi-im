@@ -87,27 +87,27 @@ server {
 
 ### 2.2 消息类型枚举
 
-| type | action | 方向 | 说明 |
-|------|--------|------|------|
-| MESSAGE | send | C→S | 发送消息 |
-| MESSAGE | receive | S→C | 新消息通知 |
-| MESSAGE | recall | C→S | 撤回消息 |
-| MESSAGE | recall_notify | S→C | 撤回广播 |
-| MESSAGE | edit | C→S | 编辑消息 |
-| MESSAGE | edit_notify | S→C | 编辑广播 |
-| MESSAGE | react | C→S | 表情反应 |
-| MESSAGE | react_notify | S→C | 反应广播 |
-| EVENT | typing_start | C→S | 正在输入 |
-| EVENT | typing_stop | C→S | 停止输入 |
-| EVENT | typing_notify | S→C | 输入状态通知 |
-| EVENT | read_receipt | C→S | 已读上报 |
-| EVENT | read_notify | S→C | 已读通知 |
-| EVENT | presence_online | S→C | 好友上线 |
-| EVENT | presence_offline | S→C | 好友下线 |
-| EVENT | session_update | S→C | 会话信息更新 |
+| type | action | 方向 | 说明 | 关键字段 |
+|------|--------|------|------|------|
+| MESSAGE | send | C→S | 发送消息 | — |
+| MESSAGE | receive | S→C | 新消息通知 | — |
+| MESSAGE | recall | C→S | 撤回消息 | — |
+| MESSAGE | recall_notify | S→C | 撤回广播 | — |
+| MESSAGE | edit | C→S | 编辑消息 | — |
+| MESSAGE | edit_notify | S→C | 编辑广播 | — |
+| MESSAGE | react | C→S | 表情反应 | — |
+| MESSAGE | react_notify | S→C | 反应广播 | — |
+| EVENT | typing_start | C→S | 正在输入 | — |
+| EVENT | typing_stop | C→S | 停止输入 | — |
+| EVENT | typing_notify | S→C | 输入状态通知 | — |
+| EVENT | read_receipt | C→S | 已读上报 | — |
+| EVENT | read_notify | S→C | 已读通知 | — |
+| EVENT | presence_online | S→C | 好友上线 | — |
+| EVENT | presence_offline | S→C | 好友下线 | — |
+| EVENT | session_update | S→C | 会话信息更新 | — |
 | EVENT | group_role_change | S→C | 群成员身份变更（群主/管理员变更）| convId, userId, newRole (=OWNER/ADMIN/MEMBER), operatorId |
 | EVENT | system_broadcast | S→C | 系统广播通知（仅管理员）| broadcastId, content, level |
-| EVENT | ding | S→C | DING 通知 |
+| EVENT | ding | S→C | DING 通知 | — |
 | EVENT | ding_notify | S→C | 新 DING 到达 | convId, dingId, level (=NORMAL/IMPORTANT/URGENT), creator, content |
 | EVENT | ding_ack_notify | S→C | DING 被确认（仅发送方可见）| dingId, ackUserId, ackCount, totalCount |
 | EVENT | ding_deadline | S→C | DING 截止未确认提醒 | dingId, deadline |
@@ -123,18 +123,18 @@ server {
 | EVENT | todo_remind | S→C | 待办到期提醒 | todoId, title, dueTime |
 | EVENT | todo_comment_remind | S→C | 待办有新评论 | todoId, commenter, comment |
 | EVENT | calendar_remind | S→C | 日程开始提醒 | eventId, title, startTime, minutesBefore |
-| CALL | invite | C→S | 发起通话 |
-| CALL | accept | C→S | 接听 |
-| CALL | reject | C→S | 拒接 |
-| CALL | hangup | C→S | 挂断 |
-| CALL | busy | S→C | 对方忙 |
-| CALL | timeout | S→C | 超时未接 |
-| CALL | offer | C↔S | SDP Offer |
-| CALL | answer | C↔S | SDP Answer |
-| CALL | ice | C↔S | ICE Candidate |
-| ACK | - | S→C | 消息确认 |
-| PING | - | C→S | 心跳 |
-| PONG | - | S→C | 心跳响应 |
+| CALL | invite | C→S | 发起通话 | — |
+| CALL | accept | C→S | 接听 | — |
+| CALL | reject | C→S | 拒接 | — |
+| CALL | hangup | C→S | 挂断 | — |
+| CALL | busy | S→C | 对方忙 | — |
+| CALL | timeout | S→C | 超时未接 | — |
+| CALL | offer | C↔S | SDP Offer | — |
+| CALL | answer | C↔S | SDP Answer | — |
+| CALL | ice | C↔S | ICE Candidate | — |
+| ACK | - | S→C | 消息确认 | — |
+| PING | - | C→S | 心跳 | — |
+| PONG | - | S→C | 心跳响应 | — |
 
 ---
 
@@ -142,7 +142,7 @@ server {
 
 ### 3.1 客户端发送消息
 
-```json
+```jsonc
 // C → S
 {
   "type": "MESSAGE",
@@ -157,7 +157,9 @@ server {
     "quotedMsgId": null
   }
 }
+```
 
+```jsonc
 // S → C (ACK)
 {
   "type": "ACK",
@@ -170,7 +172,9 @@ server {
     "status": "SENT"
   }
 }
+```
 
+```jsonc
 // S → 接收方 (receive)
 {
   "type": "MESSAGE",
@@ -194,7 +198,7 @@ server {
 
 #### 撤回 (REVOKE) — 2min 时限
 
-```json
+```jsonc
 // C → S
 {
   "type": "MESSAGE",
@@ -202,7 +206,9 @@ server {
   "id": "req-uuid-...",
   "data": { "msgId": 987654321 }
 }
+```
 
+```jsonc
 // S → 全群/对话双方 (广播)
 {
   "type": "MESSAGE",
@@ -218,7 +224,7 @@ server {
 
 #### 编辑 (EDIT) — 5min 时限
 
-```json
+```jsonc
 // C → S
 {
   "type": "MESSAGE",
@@ -229,7 +235,9 @@ server {
     "newContent": "修改后的文本"
   }
 }
+```
 
+```jsonc
 // S → 全群/对话双方 (广播)
 {
   "type": "MESSAGE",
@@ -246,7 +254,7 @@ server {
 
 #### 表情回应 (REACTION)
 
-```json
+```jsonc
 // C → S
 {
   "type": "MESSAGE",
@@ -257,7 +265,9 @@ server {
     "emoji": "👍"
   }
 }
+```
 
+```jsonc
 // S → 全群/对话双方 (广播)
 {
   "type": "MESSAGE",
@@ -308,35 +318,47 @@ IDLE → CALLING(invite) → CONNECTED(answer) → ENDED(hangup)
 
 ### 4.2 1v1 通话流程
 
-```json
+```jsonc
 // 1. 发起方 → 服务端
 { "type": "CALL", "action": "invite", "data": {
     "targetUserId": 222,
     "callType": "AUDIO",  // or VIDEO
     "roomId": "room-uuid"
 }}
+```
 
+```jsonc
 // 2. 服务端 → 接收方
 { "type": "CALL", "action": "invite", "data": {
     "callerId": 111,
     "callType": "AUDIO",
     "roomId": "room-uuid"
 }}
+```
 
+```jsonc
 // 3. 接收方 → 服务端 (接听)
 { "type": "CALL", "action": "accept", "data": { "roomId": "room-uuid" }}
+```
 
+```jsonc
 // 4. 服务端 → 发起方
 { "type": "CALL", "action": "accept", "data": { "roomId": "room-uuid", "calleeId": 222 }}
+```
 
+```text
 // 5. WebRTC SDP 交换 (通过 WS 中转)
 { "type": "CALL", "action": "offer", "data": { "roomId": "...", "sdp": "v=0..." }}
 { "type": "CALL", "action": "answer", "data": { "roomId": "...", "sdp": "v=0..." }}
 { "type": "CALL", "action": "ice", "data": { "roomId": "...", "candidate": {...} }}
+```
 
+```jsonc
 // 6. 任一方挂断
 { "type": "CALL", "action": "hangup", "data": { "roomId": "room-uuid" }}
+```
 
+```jsonc
 // 7. 服务端广播挂断
 { "type": "CALL", "action": "hangup", "data": { "roomId": "...", "reason": "NORMAL" }}
 ```

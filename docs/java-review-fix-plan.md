@@ -21,14 +21,16 @@
 ## Phase 1: BLOCKER 修复（3h）✅ 已完成
 
 ### T1. 统一 WebSocket 实现 — 移除双处理器冲突 [B-9] ✅
+
 - **文件**: `ImWebSocketConfig.java`, `ImWebSocketHandler.java`
-- **操作**: 
+- **操作**:
   1. 保留 `ImWebSocketEndpoint`(JSR-356) 作为唯一实现
   2. 从 `ImWebSocketConfig` 中移除 `ImWebSocketHandler` 的 Bean 注册和路径映射
   3. 验证 WebSocket 连接正常
 - **预计**: 30min
 
 ### T2. WebSocket 认证加固 [B-5, B-6, B-10]
+
 - **文件**: `ImWebSocketEndpoint.java`
 - **操作**:
   1. 握手阶段从 `ServerEndpointConfig.Configurator` 获取 HTTP 请求
@@ -40,6 +42,7 @@
 - **预计**: 1h
 
 ### T3. XSS 过滤器修复 [B-7]
+
 - **文件**: `XssFilter.java`, `XssHttpServletRequestWrapper.java`
 - **操作**:
   1. 仅对 `application/x-www-form-urlencoded` 和 `multipart/form-data` 请求做 XSS 清洗
@@ -49,6 +52,7 @@
 - **预计**: 45min
 
 ### T4. Spring WebSocket Handler Origin 校验 [B-8]
+
 - **文件**: `ImWebSocketHandler.java`（如果 T1 决定保留此实现）
 - **操作**: 在 `afterConnectionEstablished` 中校验 Origin header
 - **预计**: 15min（T1 完成后视情况决定是否需要）
@@ -58,6 +62,7 @@
 ## Phase 2: CRITICAL 安全修复（2.5h）✅ 已完成
 
 ### T5. Content-Disposition 头注入修复 [C-1] ✅
+
 - **文件**: `ImFileController.java:142, 228`
 - **操作**:
   1. 使用 `URLEncoder.encode(fileName, "UTF-8")` 编码文件名
@@ -66,6 +71,7 @@
 - **预计**: 30min
 
 ### T6. 缩略图尺寸限制 [C-4]
+
 - **文件**: `ImFilePreviewController.java:58-66`
 - **操作**:
   1. 添加 `@RequestParam` 的默认值和校验：`@Max(2000) @Min(1)`
@@ -73,6 +79,7 @@
 - **预计**: 15min
 
 ### T7. fastjson 替换为 Jackson [C-6]
+
 - **文件**: `ImGroupBotWebhookController.java`
 - **操作**:
   1. 将 `com.alibaba.fastjson.JSONObject` 替换为 `com.fasterxml.jackson.databind.JsonNode`
@@ -81,6 +88,7 @@
 - **预计**: 45min
 
 ### T8. Webhook 速率限制 [C-7]
+
 - **文件**: `ImGroupBotWebhookController.java`
 - **操作**:
   1. 使用 Guava `RateLimiter` 或 Spring `@RateLimiter` 注解
@@ -89,11 +97,13 @@
 - **预计**: 30min
 
 ### T9. 群成员操作批量上限 [C-8]
+
 - **文件**: `ImGroupController.java:158-163, 177-182`
 - **操作**: 添加 `if (userIds.size() > 500) return Result.fail("单次最多500人")`
 - **预计**: 15min
 
 ### T10. 二维码内容签名 [C-10]
+
 - **文件**: `ImGroupController.java:275`
 - **操作**:
   1. 生成随机 nonce + 过期时间
@@ -107,6 +117,7 @@
 ## Phase 3: CRITICAL 性能+架构修复（2h）✅ 已完成
 
 ### T11. ObjectMapper 单例化 [C-13] ✅
+
 - **文件**: `ImWebSocketEndpoint.java`
 - **操作**:
   1. 添加 `private static final ObjectMapper MAPPER = new ObjectMapper();`
@@ -115,6 +126,7 @@
 - **预计**: 30min
 
 ### T12. 异步发送替代同步阻塞 [C-14]
+
 - **文件**: `ImWebSocketEndpoint.java:836, 854`
 - **操作**:
   1. 将 `session.getBasicRemote().sendText()` 替换为 `session.getAsyncRemote().sendText()`
@@ -122,6 +134,7 @@
 - **预计**: 30min
 
 ### T13. 消除反射调用 [C-15]
+
 - **文件**: `ImWebSocketEndpoint.java:1057-1062`
 - **操作**:
   1. 直接注入 `OfflineMessageService`（使用 `@Lazy` 解决循环依赖）
@@ -129,6 +142,7 @@
 - **预计**: 20min
 
 ### T14. 异常信息脱敏 [C-12]
+
 - **文件**: `GlobalExceptionHandler.java:249-258`
 - **操作**:
   1. 通用异常处理器仅返回 `"系统内部错误 [追踪ID:xxx]"`
@@ -137,6 +151,7 @@
 - **预计**: 20min
 
 ### T15. 清理自引用常量死代码 [C-18, C-19]
+
 - **文件**: `ImMessageServiceImpl.java`, `ImConversationServiceImpl.java`
 - **操作**:
   1. 搜索 `X = X` 模式的自引用赋值
@@ -148,6 +163,7 @@
 ## Phase 4: 验证与回归（1.5h）✅ 已完成
 
 ### T16. 编译验证 ✅
+
 - **操作**:
   1. `mvn compile` 确认所有修改文件编译通过
   2. 修复因修改引入的新编译错误
@@ -158,6 +174,7 @@
 - **预计**: 30min
 
 ### T17. 功能回归测试 ✅
+
 - **操作**:
   1. 500 个单元测试全部通过
   2. 代码级验证 18 项修复均有效
@@ -166,6 +183,7 @@
 - **预计**: 45min
 
 ### T18. 安全验证 ✅
+
 - **操作**:
   1. 验证 WebSocket 认证：Configurator 阶段 Origin 白名单 + JWT 提取 ✅
   2. 验证 XSS 过滤器：JSON 请求跳过 body 清洗 ✅
@@ -216,12 +234,14 @@ T16~T18 (验证) ──所有任务完成后──→ 执行
 ## 已完成任务汇总
 
 ### Phase 1: BLOCKER 修复 ✅
+
 - T1: 统一WebSocket实现 — 移除双处理器冲突
 - T2: WebSocket认证加固
 - T3: XSS过滤器修复
 - T4: Spring WebSocket Handler Origin校验（已移除，不需要执行）
 
 ### Phase 2: CRITICAL 安全修复 ✅
+
 - T5: Content-Disposition头注入修复
 - T6: 缩略图尺寸限制
 - T7: fastjson替换为Jackson
@@ -230,6 +250,7 @@ T16~T18 (验证) ──所有任务完成后──→ 执行
 - T10: 二维码内容签名
 
 ### Phase 3: CRITICAL 性能+架构修复 ✅
+
 - T11: ObjectMapper单例化
 - T12: 异步发送替代同步阻塞
 - T13: 消除反射调用
@@ -237,6 +258,7 @@ T16~T18 (验证) ──所有任务完成后──→ 执行
 - T15: 清理自引用常量死代码
 
 ### Phase 4: 验证与回归 🔄
+
 - T16: 编译验证 ✅
 - T17: 功能回归测试 🔄
 - T18: 安全验证 待执行

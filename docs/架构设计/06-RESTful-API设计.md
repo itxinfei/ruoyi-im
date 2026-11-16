@@ -110,7 +110,7 @@
 
 ### 2.4 请求示例
 
-```json
+```jsonc
 // POST /im/message/send
 {
   "conversationId": 123456789,
@@ -120,7 +120,9 @@
   "quotedMsgId": null,
   "extra": null
 }
+```
 
+```jsonc
 // Response
 {
   "code": 200,
@@ -131,7 +133,9 @@
     "createTime": "2026-10-30T10:30:00"
   }
 }
+```
 
+```text
 // GET /im/message/history?convId=123456789&beforeSeq=100&limit=50
 // Response: { "data": { "list": [...], "hasNext": true, "oldestSeq": 50 } }
 ```

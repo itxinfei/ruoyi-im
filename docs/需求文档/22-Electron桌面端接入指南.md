@@ -164,10 +164,10 @@ function setupTray(mainWindow) {
     path.join(__dirname, '../public/tray-icon.png')
   )
   tray = new Tray(icon)
-  tray.setToolTip('RuoYi-IM')
+  tray.setToolTip('心飞IM')
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: '打开 RuoYi-IM', click: () => mainWindow.show() },
+    { label: '打开 心飞IM', click: () => mainWindow.show() },
     { type: 'separator' },
     { label: '退出', click: () => { mainWindow.destroy(); app.quit() } }
   ])
@@ -219,7 +219,7 @@ module.exports = { setupIpc }
 
 ```yaml
 appId: com.ruoyi.im
-productName: RuoYi-IM
+productName: XinFei IM
 directories:
   output: dist-electron
 files:
@@ -284,7 +284,7 @@ export default defineConfig(({ mode }) => ({
 <!-- src/components/layout/AppTitleBar.vue -->
 <template>
   <div class="app-titlebar" @mousedown="onMouseDown">
-    <span class="title">RuoYi-IM</span>
+    <span class="title">心飞IM</span>
     <div class="window-controls">
       <button @click="electronAPI.minize">—</button>
       <button @click="electronAPI.maximize">□</button>
@@ -326,12 +326,12 @@ function setupAutoUpdater(mainWindow) {
   autoUpdater.checkForUpdatesAndNotify()
 
   autoUpdater.on('update-available', () => {
-    new Notification({ title: 'RuoYi-IM', body: '发现新版本，正在下载...' }).show()
+    new Notification({ title: '心飞IM', body: '发现新版本，正在下载...' }).show()
   })
 
   autoUpdater.on('update-downloaded', () => {
     new Notification({
-      title: 'RuoYi-IM',
+      title: '心飞IM',
       body: '新版本已下载，重启后生效'
     }).show()
   })
@@ -412,9 +412,9 @@ npm run electron:build
 
 # 产出
 dist-electron/
-├── RuoYi-IM Setup 1.0.0.exe    ← Windows NSIS 安装包
-├── RuoYi-IM-1.0.0.dmg          ← macOS
-└── RuoYi-IM-1.0.0.AppImage     ← Linux
+├── XinFei IM Setup 1.0.0.exe    ← Windows NSIS 安装包
+├── XinFei IM-1.0.0.dmg          ← macOS
+└── XinFei IM-1.0.0.AppImage     ← Linux
 
 # 自动升级（Generic HTTP Server 托管）
 # - latest.yml (electron-builder 自动生成)

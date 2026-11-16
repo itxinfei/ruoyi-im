@@ -2,7 +2,7 @@
 
 > **规范对齐**: 11 种消息类型与 `08-IM 核心需求明细.md §2.1` 完全一致
 > `TEXT` / `IMAGE` / `FILE` / `VOICE` / `VIDEO` / `LINK` / `LOCATION` / `GEOTAG` / `DING` / `SYSTEM` / `RECALL`
-
+>
 > **定位**：WsFrame 协议中所有 `type` × `action` 组合 + payload schema。
 > **前置**：`06-WebSocket 实时协议.md`、`23-共享子模块架构设计.md`
 > **承诺**：前端 WS 处理只围绕本文档的 type/action 枚举扩展，**不新增未登记的类型**。
@@ -57,7 +57,7 @@
 | `EVENT_OFFLINE` | EVENT | S→C | 用户下线 |
 | `EVENT_READ_RECEIPT` | EVENT | S→C | 已读回执 |
 | `EVENT_SESSION_UPDATE` | EVENT | S→C | 会话列表变更（置顶/免打扰/未读）|
-`EVENT_CONTACT_CHANGE` | EVENT | S→C | 联系人变更 |
+| `EVENT_CONTACT_CHANGE` | EVENT | S→C | 联系人变更 |
 | `EVENT_GROUP_CHANGE` | EVENT | S→C | 群组变更（成员/群名/群公告）|
 | `CALL_INVITE` | CALL | C→S → S→C | 发起通话邀请 |
 | `CALL_ACCEPT` | CALL | C→S → S→C | 接受邀请 |
