@@ -6,13 +6,11 @@
 <title>心飞IM · 云文档</title>
 <link rel="stylesheet" href="shared.css">
 <style>
-/* Windows资源管理器风格 - 完整版 */
-body { display:flex; height:100vh; overflow:hidden; background:var(--dt-bg-body); font-size:13px; }
+/* 云文档专属 CSS（骨架见 shared.css） */
 
 /* L1 主导航（保持不变） */
 
-/* 左侧导航栏 */
-.nav-sidebar { width:var(--dt-l2-width); background:var(--dt-bg-card); border-right:1px solid var(--dt-border); display:flex; flex-direction:column; flex-shrink:0; }
+/* 左侧导航栏（骨架见 shared.css .l2-panel） */
 .nav-section-title { padding:8px 16px 4px; font-size:11px; font-weight:600; color:var(--dt-text-tertiary); }
 .nav-item { display:flex; align-items:center; gap:12px; height:40px; padding:0 16px; cursor:pointer; color:var(--dt-text-primary); font-size:14px; border-radius:var(--dt-radius-md); transition:background 0.1s; }
 .nav-item:hover { background:var(--dt-bg-hover); }
@@ -22,10 +20,7 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--dt-bg-body)
 .nav-item .nav-label { flex:1; }
 .nav-item .nav-badge { font-size:11px; color:var(--dt-text-secondary); }
 
-/* 主内容区 */
-.main-area { flex:1; display:flex; flex-direction:column; background:var(--dt-bg-card); margin:8px; border:1px solid var(--dt-border); border-radius:var(--dt-radius-sm); overflow:hidden; }
-/* 移动端：L2 全宽展示，清除桌面端外边距避免右侧溢出 */
-@media (max-width:768px){.main-area{margin:0}}
+/* 主内容区（骨架见 shared.css .l3-main） */
 
 /* 菜单栏 */
 .menu-bar { display:flex; align-items:center; padding:0 8px; background:var(--dt-bg-body); border-bottom:1px solid var(--dt-border); }
@@ -89,23 +84,21 @@ body { display:flex; height:100vh; overflow:hidden; background:var(--dt-bg-body)
 .ctx-item .ctx-icon { width:16px; text-align:center; }
 .ctx-sep { height:1px; background:var(--dt-border); margin:4px 0; }
 
-/* Toast */
-.toast { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:rgba(0,0,0,0.8); color:var(--dt-bg-card); padding:12px 24px; border-radius:var(--dt-radius-sm); font-size:13px; z-index:999; opacity:0; transition:opacity 0.2s; pointer-events:none; }
-.toast.show { opacity:1; }
+/* Toast（见 shared.css .xf-toast） */
 </style>
 </head>
 <body>
 
-<!-- Electron 原生标题栏 -->
-<div class="electron-titlebar" style="height:36px;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none">
-  <div style="font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+<!-- Electron 原生标题栏（统一样式见 shared.css） -->
+<div class="electron-titlebar">
+  <div class="title">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>心飞IM</span>
   </div>
-  <div style="display:flex;gap:0;-webkit-app-region:no-drag;height:100%">
-    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.minimize()">─</button>
-    <button style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary)" onclick="window.electronAPI?.maximize()">□</button>
-    <button aria-label="关闭窗口" style="width:36px;height:100%;border:none;background:transparent;cursor:pointer;font-size:14px;color:var(--dt-text-secondary);transition:background 0.15s" onmouseover="this.style.background='var(--dt-danger)';this.style.color='var(--dt-bg-card)'" onmouseout="this.style.background='transparent';this.style.color='var(--dt-text-secondary)'" onclick="window.electronAPI?.close()">✕</button>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="window.electronAPI?.minimize()">─</button>
+    <button class="ctrl-btn" onclick="window.electronAPI?.maximize()">□</button>
+    <button class="ctrl-btn close" aria-label="关闭窗口" onclick="window.electronAPI?.close()"><svg aria-hidden="true" class="ic"><use href="#i-x"/></svg></button>
   </div>
 </div>
 <script>
@@ -113,120 +106,120 @@ if(window.isElectron||window.electronAPI){
   document.body.classList.add('electron');
   document.body.style.padding='0';
 }
-</script><style>.electron-titlebar{display:none}body.electron{flex-direction:column}body.electron .electron-titlebar{display:flex;flex:none;width:100%}</style>
+</script>
 
 <!-- L1 主导航 -->
 <nav class="l1-nav">
-  <div class="l1-avatar" onclick="location.href='index.html'">我</div>
-    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="消息" aria-label="消息">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <div class="l1-avatar" data-go="index.html">我</div>
+    <div class="l1-item" data-go="dingtalk-mockup.html" title="消息" aria-label="消息">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>消息</span>
     <div class="l1-badge">24</div>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-contacts.html'" title="通讯录" aria-label="通讯录">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <div class="l1-item" data-go="dingtalk-contacts.html" title="通讯录" aria-label="通讯录">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span>通讯录</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-calendar.html'" title="日历" aria-label="日历">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  <div class="l1-item" data-go="dingtalk-calendar.html" title="日历" aria-label="日历">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span>日历</span>
   </div>
-  <div class="l1-item active" onclick="location.href='dingtalk-docs.html'" title="文档" aria-label="文档">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <div class="l1-item active" data-go="dingtalk-docs.html" title="文档" aria-label="文档">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
     <span>文档</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-workbench.html'" title="工作台" aria-label="工作台">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  <div class="l1-item" data-go="dingtalk-workbench.html" title="工作台" aria-label="工作台">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     <span>工作台</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-approval.html'" title="审批" aria-label="审批">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+  <div class="l1-item" data-go="dingtalk-approval.html" title="审批" aria-label="审批">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span>审批</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-mail.html'" title="邮箱" aria-label="邮箱">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  <div class="l1-item" data-go="dingtalk-mail.html" title="邮箱" aria-label="邮箱">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     <span>邮箱</span>
   </div>
 
   <div class="l1-bottom">
     <div class="l1-item" onclick="xfShowPalette()" title="搜索" aria-label="搜索">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <span>搜索</span>
     </div>
     <div class="l1-item" onclick="xfSettings()" title="设置" aria-label="设置">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
       <span>设置</span>
     </div>
   </div>
 </nav>
 
 <!-- 左侧导航栏 -->
-<div class="nav-sidebar">
+<div class="l2-panel">
   <div class="nav-section-title">快速访问</div>
   <div class="nav-item active" onclick="selectFolder('全部文档', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></span>
     <span class="nav-label">全部文档</span>
   </div>
   <div class="nav-item" onclick="showToast('最近使用')">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 14"/></svg></span>
     <span class="nav-label">最近使用</span>
   </div>
   <div class="nav-item" onclick="showToast('我的收藏')">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
     <span class="nav-label">我的收藏</span>
   </div>
   <div class="nav-item" onclick="showToast('共享给我')">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
     <span class="nav-label">共享给我</span>
   </div>
   <div class="nav-item" onclick="showToast('审查')">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
     <span class="nav-label">审查</span>
     <span class="nav-badge">3</span>
   </div>
 
   <div class="nav-section-title" style="margin-top:12px">我的空间</div>
   <div class="nav-item" onclick="selectFolder('产品文档', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
     <span class="nav-label">产品文档</span>
     <span class="nav-badge">12</span>
   </div>
   <div class="nav-item" onclick="selectFolder('技术文档', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
     <span class="nav-label">技术文档</span>
     <span class="nav-badge">28</span>
   </div>
   <div class="nav-item" onclick="selectFolder('需求文档', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
     <span class="nav-label">需求文档</span>
     <span class="nav-badge">8</span>
   </div>
   <div class="nav-item" onclick="selectFolder('测试文档', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
     <span class="nav-label">测试文档</span>
     <span class="nav-badge">5</span>
   </div>
   <div class="nav-item" onclick="selectFolder('运营文档', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
     <span class="nav-label">运营文档</span>
     <span class="nav-badge">3</span>
   </div>
   <div class="nav-item" onclick="selectFolder('新人手册', this)">
-    <span class="nav-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
+    <span class="nav-icon"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>
     <span class="nav-label">新人手册</span>
     <span class="nav-badge">4</span>
   </div>
 </div>
 
 <!-- 主内容区 -->
-<div class="main-area">
+<div class="l3-main">
   <!-- 工具栏 -->
   <div class="toolbar">
-    <button class="toolbar-btn primary" data-lock="900" onclick="showToast('新建文档')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>新建文档</button>
-    <button class="toolbar-btn" onclick="showToast('新建文件夹')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>新建文件夹</button>
+    <button class="toolbar-btn primary" data-lock="900" onclick="showToast('新建文档')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>新建文档</button>
+    <button class="toolbar-btn" onclick="showToast('新建文件夹')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>新建文件夹</button>
     <div class="toolbar-sep"></div>
-    <button class="toolbar-btn" onclick="showToast('上传文件')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>上传</button>
-    <button class="toolbar-btn" onclick="showToast('刷新')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>刷新</button>
+    <button class="toolbar-btn" onclick="showToast('上传文件')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>上传</button>
+    <button class="toolbar-btn" onclick="showToast('刷新')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>刷新</button>
   </div>
 
   <!-- 地址栏行 -->
@@ -237,7 +230,7 @@ if(window.isElectron||window.electronAPI){
       <span class="current" id="currentCrumb">需求文档</span>
     </div>
     <div class="search-box">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <span>搜索 需求文档</span>
     </div>
   </div>
@@ -256,19 +249,19 @@ if(window.isElectron||window.electronAPI){
 
 <!-- 右键菜单 -->
 <div class="context-menu" id="contextMenu">
-  <div class="ctx-item" onclick="ctxAction('打开')"><span class="ctx-icon"><svg class="ic"><use href="#i-folder-open"/></svg></span> 打开</div>
-  <div class="ctx-item" onclick="ctxAction('编辑')"><span class="ctx-icon"><svg class="ic"><use href="#i-edit"/></svg></span> 编辑</div>
+  <div class="ctx-item" onclick="ctxAction('打开')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-folder-open"/></svg></span> 打开</div>
+  <div class="ctx-item" onclick="ctxAction('编辑')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-edit"/></svg></span> 编辑</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item" onclick="ctxAction('下载')"><span class="ctx-icon"><svg class="ic"><use href="#i-download"/></svg></span> 下载</div>
-  <div class="ctx-item" onclick="ctxAction('共享')"><span class="ctx-icon"><svg class="ic"><use href="#i-users"/></svg></span> 共享</div>
+  <div class="ctx-item" onclick="ctxAction('下载')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-download"/></svg></span> 下载</div>
+  <div class="ctx-item" onclick="ctxAction('共享')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-users"/></svg></span> 共享</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item" onclick="ctxAction('重命名')"><span class="ctx-icon"><svg class="ic"><use href="#i-edit"/></svg></span> 重命名</div>
-  <div class="ctx-item" onclick="ctxAction('删除')"><span class="ctx-icon"><svg class="ic"><use href="#i-trash"/></svg></span> 删除</div>
+  <div class="ctx-item" onclick="ctxAction('重命名')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-edit"/></svg></span> 重命名</div>
+  <div class="ctx-item" onclick="ctxAction('删除')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-trash"/></svg></span> 删除</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item" onclick="ctxAction('属性')"><span class="ctx-icon"><svg class="ic"><use href="#i-info"/></svg></span> 属性</div>
+  <div class="ctx-item" onclick="ctxAction('属性')"><span class="ctx-icon"><svg aria-hidden="true" class="ic"><use href="#i-info"/></svg></span> 属性</div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="xf-toast" id="toast"></div>
 
 <script>
 var folders = {
@@ -435,6 +428,6 @@ renderFileList();
 
 <script src="shared.js"></script>
 <!-- SVG sprite：右键菜单图标（与邮箱页同源） -->
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol></svg>
+<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" style="display:none" ><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol></svg>
 </body>
 </html>

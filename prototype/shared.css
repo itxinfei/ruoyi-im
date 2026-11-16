@@ -4,8 +4,16 @@
    所有原型页面必须引用此文件，确保组件统一
    ============================================================ */
 
+/* === 品牌字体：阿里巴巴普惠体 3.0（本地托管，免费商用） ===
+   下载来源：官方 CDN fonts.alibabadesign.com，仅限本地引用，禁止外传 */
+@font-face{font-family:'AlibabaPuHuiTi';src:url('assets/fonts/AlibabaPuHuiTi-3-55-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:'AlibabaPuHuiTi';src:url('assets/fonts/AlibabaPuHuiTi-3-65-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:'AlibabaPuHuiTi';src:url('assets/fonts/AlibabaPuHuiTi-3-85-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+
 /* === Design Tokens（对齐 8.2 官方） === */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+/* 通用隐藏工具类（面板/计数等默认收起） */
+.hidden{display:none!important}
 /* 表单控件必须继承设计字体：Windows Chrome 的 UA 样式会让 button/input 回退为 Arial */
 button,input,select,textarea{font-family:var(--dt-font)}
 :root{
@@ -18,7 +26,7 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-bg-sidebar:#EDEFF2;
   --dt-bg-hover:#F6F6F6;
   --dt-bg-active:#E5E6EB;
-  --dt-bg-session-active:#E6F2FF;
+  --dt-bg-session-active:#E8EAF0;
   --dt-text-primary:#171A1D;
   --dt-text-regular:#5F6670;
   --dt-text-secondary:#5F6670;
@@ -76,7 +84,8 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-nav-sidebar-width:64px;
   --dt-l2-width:240px;
   --dt-contact-panel-width:240px;
-  --dt-session-panel-width:250px;
+  --dt-session-panel-width:240px;
+  --dt-l4-width:320px;
   --dt-drawer-width:320px;
   --dt-drawer-group-width:520px;
   --dt-header-height:56px;
@@ -87,21 +96,32 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-avatar-chat:36px;
   --dt-avatar-l1:40px;
   --dt-bg-session-list:#FFFFFF;
-  --dt-bg-session-hover:rgba(23,26,29,0.04);
+  --dt-bg-session-hover:#F2F3F5;
   --dt-shadow-sm:0 1px 2px rgba(0,0,0,0.04);
   --dt-shadow-md:0 2px 8px rgba(0,0,0,0.08);
   --dt-shadow-lg:0 4px 16px rgba(0,0,0,0.12);
   --dt-font-size-xs:11px;
   --dt-font-size-sm:12px;
   --dt-font-size-base:14px;
+  --dt-font-size-md:15px;
   --dt-font-size-lg:16px;
   --dt-font-size-xl:17px;
   --dt-font-size-2xl:18px;
-  --dt-icon-size:16px;
+  --dt-icon-size-xs:12px;
   --dt-icon-size-sm:14px;
+  --dt-icon-size:16px;
   --dt-icon-size-lg:20px;
-  --dt-icon-size-xl:24px;
-  --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  --dt-icon-size-xl:64px;
+  --dt-icon-size-2xl:80px;
+  --dt-font-weight-normal:400;
+  --dt-font-weight-medium:500;
+  --dt-font-weight-semibold:600;
+  --dt-font-weight-bold:700;
+  --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'PingFang SC','Hiragino Sans GB','Microsoft YaHei',sans-serif;
+  /* 品牌字体（已本地托管于 assets/fonts，仅标题/营销/空状态大标题用）：阿里巴巴普惠体 3.0，免费商用 */
+  --dt-font-brand:'AlibabaPuHuiTi','PingFang SC','Microsoft YaHei',sans-serif;
+  /* 数字字体：钉钉时间/未读用 DIN；未引入时回退系统字体 + 等宽数字 */
+  --dt-font-num:'DIN Alternate','Roboto',var(--dt-font);
   /* doc 12 官方 Token 名（别名，便于后续 app 复用） */
   --dt-brand-color:var(--dt-brand);
   --dt-brand-bg:var(--dt-brand-light);
@@ -122,6 +142,22 @@ button,input,select,textarea{font-family:var(--dt-font)}
 body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;height:100vh;overflow:hidden}
 
 /* ============================================================
+   Electron 原生标题栏 · 36px（唯一实现，各页不得再内联复制）
+   约定：<body> 第一个元素必须是 .electron-titlebar，
+   随后才是 <nav class="l1-nav">（shared.js markLayout 据此识别 L1）。
+   浏览器预览时隐藏；仅 Electron 环境显示并让 body 纵向排列。
+   ============================================================ */
+.electron-titlebar{height:36px;flex:none;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);display:flex;align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none}
+.electron-titlebar .title{font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px}
+.electron-titlebar .controls{display:flex;gap:0;-webkit-app-region:no-drag;height:100%}
+.electron-titlebar .ctrl-btn{width:36px;height:100%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);font-size:14px;font-weight:300;font-family:var(--dt-font)}
+.electron-titlebar .ctrl-btn:hover{background:var(--dt-bg-body)}
+.electron-titlebar .ctrl-btn.close:hover{background:var(--dt-danger);color:var(--dt-bg-card)}
+.electron-titlebar{display:none}
+body.electron{flex-direction:column}
+body.electron .electron-titlebar{display:flex}
+
+/* ============================================================
    L1 左侧导航栏 · 64px 品牌蓝（对齐 Windows 8.x 客户端）
    ============================================================ */
 .l1-nav{width:var(--dt-nav-sidebar-width);background:var(--dt-nav-sidebar-bg);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;z-index:10}
@@ -130,15 +166,20 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .l1-nav .l1-item:hover{background:var(--dt-nav-hover);color:var(--dt-nav-sidebar-text-hover)}
 .l1-nav .l1-item.active{background:var(--dt-nav-active);color:var(--dt-nav-sidebar-text-active)}
 .l1-nav .l1-item.active:hover{background:var(--dt-nav-active);color:var(--dt-nav-sidebar-text-active)}
-.l1-nav .l1-item svg{width:22px;height:22px;flex-shrink:0}
+.l1-nav .l1-item svg{width:20px;height:20px;flex-shrink:0}
 .l1-nav .l1-item .l1-badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px}
 .l1-nav .l1-bottom{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:8px}
 
 /* ============================================================
-   L2 左侧边栏 · 240px 浅色（消息会话列表 250px）
+   L2 左侧边栏 · 唯一骨架（宽度只由 token 决定，禁止逐页内联 width）
+   默认 240px；会话列表同宽（原 250px 例外已作废，2026-11-16 统一裁决）
    ============================================================ */
 .l2-panel{width:var(--dt-l2-width);background:var(--dt-bg-panel);border-right:0.5px solid var(--dt-border);display:flex;flex-direction:column;flex-shrink:0;min-width:0}
-.l2-header{height:var(--dt-header-height);padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--dt-border-light)}
+.l2-panel--session{width:var(--dt-session-panel-width)}
+.l2-panel--gray{background:var(--dt-bg-body)}
+/* 深色场景（管理后台） */
+.l2-panel--dark{background:var(--dt-nav-dark);border-right-color:rgba(255,255,255,0.06)}
+.l2-header{position:relative;height:var(--dt-header-height);padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
 .l2-search{flex:1;height:32px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--dt-text-secondary);font-size:13px;cursor:pointer;border:none;width:100%;font-family:var(--dt-font)}
 .l2-search svg{width:14px;height:14px;flex-shrink:0}
 .l2-search:focus{outline:none}
@@ -151,33 +192,85 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
    ============================================================ */
 .session-list{flex:1;overflow-y:auto}
 .session-item{display:flex;align-items:center;gap:12px;padding:8px 16px;min-height:var(--dt-session-item-height);cursor:pointer;position:relative;transition:background 0.15s}
-.session-item:hover{background:var(--dt-bg-hover)}
-/* doc12 §10：会话激活态 = 左蓝条 3px + #E6F2FF 背景 */
-.session-item.active{background:var(--dt-bg-session-active);box-shadow:inset 3px 0 0 var(--dt-brand)}
+/* 复刻钉钉 PC：hover 浅灰 #F2F3F5，选中整行冷灰蓝 #E8EAF0，无竖条/无描边/无圆角 */
+.session-item:hover{background:var(--dt-bg-session-hover)}
+.session-item.active{background:var(--dt-bg-session-active)}
 .session-item.active:hover{background:var(--dt-bg-session-active)}
 /* 关闭按钮固定在右上角（与时间/置顶图标同行）：原来 top:50% 垂直居中会压住右侧的未读徽标 */
 .session-close-btn{position:absolute;right:8px;top:12px;width:18px;height:18px;border:none;background:transparent;cursor:pointer;font-size:11px;color:var(--dt-text-tertiary);display:none;align-items:center;justify-content:center;z-index:2;border-radius:4px;line-height:1}
 .session-item:hover .session-close-btn{display:flex}
 .session-close-btn:hover{color:var(--dt-danger);background:var(--dt-bg-active)}
 /* hover 时让时间与置顶图标让位，未读数保持可见 */
-.session-item:hover .sess-time,.session-item:hover .pin-icon{visibility:hidden}
+.session-item:hover .sess-time,.session-item:hover .sess-pin{visibility:hidden}
 .sess-avatar{width:var(--dt-avatar-session);height:var(--dt-avatar-session);border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600;position:relative}
 .sess-avatar .online-dot{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:var(--dt-success);border:2px solid var(--dt-bg-card);border-radius:50%}
+/* 正在输入：复刻钉钉会话列表预览态（三点依次跳动） */
+.sess-typing{display:inline-flex;align-items:center;gap:4px;color:var(--dt-text-secondary);font-size:13px;line-height:18px;flex:1;min-width:0}
+.sess-typing i{width:5px;height:5px;border-radius:50%;background:var(--dt-text-tertiary);animation:xf-typing 1s infinite ease-in-out}
+.sess-typing i:nth-child(2){animation-delay:.15s}
+.sess-typing i:nth-child(3){animation-delay:.3s}
+@keyframes xf-typing{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-3px);opacity:1}}
 .sess-info{flex:1;min-width:0}
 /* 行高锁定 18px：18 + 4(间距) + 18 = 40，加 8*2 padding = 56px，保证会话项严格 56px（doc12 §10） */
 .sess-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;height:18px}
-.sess-name{font-size:14px;line-height:18px;font-weight:500;color:var(--dt-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sess-time{font-size:11px;line-height:18px;color:var(--dt-text-secondary);flex-shrink:0;margin-left:6px}
+.sess-name{font-size:14px;line-height:18px;font-weight:500;color:var(--dt-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+.sess-time{font-size:12px;line-height:18px;color:var(--dt-text-secondary);flex-shrink:0;margin-left:6px}
 .sess-row2{display:flex;align-items:center;gap:4px;height:18px}
-.sess-msg{flex:1;font-size:13px;line-height:18px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sess-mute-icn{width:14px;height:14px;flex-shrink:0}
+.sess-msg{flex:1;min-width:0;font-size:13px;line-height:18px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-mute-icn{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;color:var(--dt-text-tertiary)}
 .sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
 .sess-unread.group{background:var(--dt-text-tertiary);border-radius:var(--dt-radius-sm)}
+/* 未读：小圆点态（99+ 或纯提示） */
+.sess-unread.dots{width:10px;height:10px;min-width:10px;padding:0;border-radius:50%}
+/* 消息前缀标签（草稿 / @我 / DING / 类型），不加重底色 */
+.sess-prefix{font-size:12px;font-weight:400;line-height:16px;color:var(--dt-text-tertiary);flex-shrink:0;padding:1px 4px;border-radius:3px}
+.sess-prefix.draft{color:var(--dt-danger);font-weight:500}
+.sess-prefix.at-me,.sess-prefix.at-all{color:var(--dt-warning);font-weight:600}
+.sess-prefix.ding{color:var(--dt-danger);font-weight:600}
+/* 置顶图标（与会话项右侧未读/时间同行） */
+.sess-pin{font-size:12px;flex-shrink:0;color:var(--dt-text-tertiary);display:flex;align-items:center}
+/* 分组分隔条（置顶会话 / 今天 / 昨天） */
+.list-sep{height:28px;display:flex;align-items:center;padding:0 16px;font-size:11px;color:var(--dt-text-tertiary);background:var(--dt-bg-body);flex-shrink:0}
 
 /* ============================================================
-   L3 主内容通栏
+   L2 顶部 Tab 条 · 唯一实现（通讯录 / 审批 / 会话列表共用）
    ============================================================ */
-.l3-main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.l2-tabs{display:flex;border-bottom:0.5px solid var(--dt-border);background:var(--dt-bg-panel);flex-shrink:0}
+.l2-tab{flex:1 1 auto;padding:12px 0;text-align:center;font-size:13px;cursor:pointer;color:var(--dt-text-secondary);position:relative;white-space:nowrap;min-width:0;font-family:var(--dt-font)}
+.l2-tab:hover{color:var(--dt-text-primary)}
+.l2-tab.active{color:var(--dt-brand);font-weight:500}
+.l2-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--dt-brand);border-radius:1px}
+.l2-tab .badge{display:inline-block;min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:var(--dt-radius-lg);font-size:11px;padding:0 4px;margin-left:4px;line-height:16px}
+.l2-tab .tab-count{color:var(--dt-text-tertiary);font-size:11px;margin-left:2px}
+.l2-tab.active .tab-count{color:var(--dt-brand)}
+
+/* ============================================================
+   L3 主内容通栏 · 唯一骨架（默认白底；灰底模块加 .l3-main--gray）
+   ============================================================ */
+.l3-main{position:relative;flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden;background:var(--dt-bg-panel)}
+.l3-main--gray{background:var(--dt-bg-body)}
+/* 全屏深色场景（通话） */
+.l3-main--dark{background:var(--dt-nav-dark)}
+/* 右侧还有 L4 面板时，需要中间分隔线（邮件列表） */
+.l3-main--bordered{border-right:0.5px solid var(--dt-border)}
+.l3-hdr{height:var(--dt-header-height);padding:0 24px;display:flex;align-items:center;gap:8px;justify-content:space-between;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0;background:var(--dt-bg-panel)}
+/* L3 头部分组（左侧标题/按钮组，避免 space-between 把多个元素平铺分散） */
+.l3-hdr-group{display:flex;align-items:center;gap:8px;min-width:0}
+/* L2 标题文字（日历 / 文档等需要在 header 内显示标题的场景） */
+.l2-header .l2-title{font-size:16px;font-weight:500;color:var(--dt-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ============================================================
+   L4 右侧信息栏 · 唯一骨架（日历右侧信息 / 聊天群信息）
+   ============================================================ */
+.l4-panel{width:var(--dt-l4-width);background:var(--dt-bg-panel);border-left:0.5px solid var(--dt-border);display:flex;flex-direction:column;flex-shrink:0;min-width:0}
+/* 邮件详情等更宽的 L4 场景 */
+.l4-panel--wide{width:400px}
+
+/* ============================================================
+   全局 Toast · 唯一实现（各页禁止再自定义 toast 样式）
+   ============================================================ */
+.xf-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:13px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.xf-toast.show{opacity:1}
 
 /* ============================================================
    滚动条
@@ -271,6 +364,10 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .xf-settings-theme-dot:focus-visible{outline:2px solid var(--dt-brand);outline-offset:2px}
 .xf-settings-theme-dot.active{border-color:var(--dt-text-primary)}
 .xf-settings-theme-dot.active::after{content:'✓';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:700;line-height:1}
+
+/* 全站统一键盘焦点指示：各页输入控件普遍 outline:none，用 :focus-visible 提供替代焦点样式
+   （!important 用于压过页面内同优先级的 outline:none；触摸聚焦不匹配 :focus-visible，不受影响） */
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--dt-brand)!important;outline-offset:-2px!important}
 .xf-settings-logout{width:100%;height:40px;border:0.5px solid var(--dt-border);background:var(--dt-bg-panel);border-radius:var(--dt-radius-sm);color:var(--dt-danger);font-size:13px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
 .xf-settings-logout:hover{background:var(--dt-danger-light);border-color:var(--dt-danger)}
 .xf-settings-value{font-size:13px;color:var(--dt-text-tertiary)}
@@ -366,3 +463,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
   .send-btn{flex-shrink:0!important;white-space:nowrap}
   .input-bar .text-input{min-width:0}
 }
+
+/* === L1 导航无刷新切换过渡：消除整页 reload 白闪 === */
+body{transition:opacity .18s ease}
+.xf-leaving body{opacity:0}
+
+/* === 外壳（app.html）嵌入模式：模块页在 iframe 中只保留内容区 === */
+.xf-embedded .electron-titlebar{display:none!important}
+.xf-embedded .l1-nav{display:none!important}

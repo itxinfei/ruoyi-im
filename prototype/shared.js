@@ -30,6 +30,10 @@
     var help = qs('.xf-help-overlay');
     if (help) { help.remove(); return true; }
 
+    /* 动态插入的资料名片遮罩（remove() 关闭，无 .show 类） */
+    var pcm = qs('.profile-card-mask');
+    if (pcm) { pcm.remove(); return true; }
+
     var modal = qs('.modal-overlay:not(.hidden)');
     if (modal) { modal.classList.add('hidden'); return true; }
 
@@ -794,6 +798,9 @@
     '.a-node,.t-node,.g-node,.h5-plus-item,.rp-member,.search-modal-card,' +
     '.search-modal-file,.search-modal-msg,.ct-card,.msg-avatar,.crumb,.sortable,' +
     '.am-file-upload,.my-card-item,.msg-read-status,.action,.cd-more-menu,.ding-tag-remove,.search-recent-tag,' +
+    /* 桌面原型键盘可达性补漏：会话更多操作 / 转发文件链接 / 云盘插入文件 / 语音气泡 /
+       日历事件卡 / 工作台详情行 */
+    '.tool-more-item,.rp-file-item,.rp-link-item,.tool-img-item,.cloud-file,.voice-bubble,.dv-ev-card,.dp-row,' +
     /* H5 原型可点击块：筛选 tab / DING tab / 工作台入口 / 联系人行 / 我的页资料卡 / 搜索框 /
        设置子页动态行（仅限真正带 onclick 的行，开关行与纯展示行不增强，避免虚假可聚焦） */
     '.filter-tab,.ding-tab,.wb-qa-item,.wb-app-item,.wb-card-item,.ci-item,.my-profile,.search-input,' +

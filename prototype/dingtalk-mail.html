@@ -6,23 +6,7 @@
 <title>心飞IM · 邮件面板</title>
 <link rel="stylesheet" href="shared.css">
 <style>
-:root{
-  --dt-brand:#277EFB;--dt-brand-hover:#1169E0;--dt-brand-light:#E6F2FF;
-  --dt-success:#00B42A;--dt-warning:#FF7D00;--dt-danger:#F53F3F;--dt-unread:#FF4D4F;
-  --dt-text-primary:#171A1D;--dt-text-secondary:#5F6670;--dt-text-tertiary:#8A9099;
-  --dt-text-quaternary:#B1B6BD;--dt-text-icon:#ADB1B8;--dt-text-placeholder:#B1B6BD;
-  --dt-bg-body:#F5F6F7;--dt-bg-card:#FFFFFF;--dt-bg-hover:#F6F6F6;--dt-bg-active:#E5E6EB;
-  --dt-bg-session-active:#E6F2FF;--dt-nav-dark:#2B2D33;
-  --dt-border:#E5E6EB;--dt-border-light:#E5E6EB;
-  --dt-radius-sm:4px;--dt-radius-md:6px;--dt-radius-lg:8px;--dt-radius-xl:12px;
-  --dt-font:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
-}
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);background:var(--dt-bg-body);display:flex;height:100vh;overflow:hidden}
-
-/* Mail Sidebar (240px) */
-.mail-sidebar{width:var(--dt-l2-width);background:var(--dt-bg-body);border-right:0.5px solid var(--dt-border);display:flex;flex-direction:column;flex-shrink:0}
-.mail-compose{height:56px;padding:12px 16px;border-bottom:0.5px solid var(--dt-border);display:flex;align-items:center}
+/* 邮件专属 CSS（骨架 / Toast 见 shared.css） */
 .compose-btn{flex:1;height:36px;background:var(--dt-brand);color:var(--dt-bg-card);border:none;border-radius:6px;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:var(--dt-font)}
 .compose-btn:hover{background:var(--dt-brand-hover)}
 .compose-btn svg{width:16px;height:16px}
@@ -39,13 +23,11 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .label-item:hover{background:var(--dt-bg-active)}
 .label-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 
-/* Mail List (auto) */
-.mail-list-wrap{flex:1;display:flex;flex-direction:column;min-width:0;background:var(--dt-bg-card);border-right:0.5px solid var(--dt-border)}
-.list-toolbar{height:56px;padding:0 16px;display:flex;align-items:center;gap:12px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
+/* Mail List (auto)（骨架见 shared.css .l3-main / .l3-hdr） */
 .toolbar-btn{width:32px;height:32px;border:none;background:transparent;border-radius:4px;cursor:pointer;display:flex;align-items-center;justify-content:center;color:var(--dt-text-secondary)}
 .toolbar-btn:hover{background:var(--dt-bg-body)}
 .toolbar-btn svg{width:16px;height:16px}
-.list-title{font-size:15px;font-weight:600;flex:1}
+.list-title{font-size:15px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .list-search{height:30px;width:200px;background:var(--dt-bg-body);border:none;border-radius:6px;padding:0 12px;font-size:12px;font-family:var(--dt-font);color:var(--dt-text-primary)}
 .list-search:focus{outline:none;background:var(--dt-bg-card);box-shadow:0 0 0 1px var(--dt-brand-light)}
 .mail-list{flex:1;overflow-y:auto}
@@ -68,9 +50,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 .mail-tag.work{background:var(--dt-brand-light);color:var(--dt-brand)}
 .mail-tag.personal{background:var(--dt-success-light);color:var(--dt-success)}
 
-/* Mail Detail (400px) */
-.mail-detail{width:400px;background:var(--dt-bg-card);display:flex;flex-direction:column;flex-shrink:0}
-.detail-header{height:56px;padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--dt-border-light)}
+/* Mail Detail (400px)（骨架见 shared.css .l4-panel--wide / .l3-hdr） */
 .detail-subject{font-size:15px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .detail-actions{display:flex;gap:2px}
 .detail-btn{width:30px;height:30px;border:none;background:transparent;border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary)}
@@ -100,102 +80,117 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 /* 中屏（769–1279px）：三栏总宽不足（64+240+575+400=1279）时，详情面板改为右侧覆盖层，
    列表获得完整宽度，避免 .list-toolbar 标题被挤压换行；>1279px 仍为三栏 */
 @media (min-width:769px) and (max-width:1279px){
-.mail-detail{display:none}
-.mail-detail.open{display:flex;position:absolute;top:36px;right:0;bottom:0;width:400px;max-width:calc(100% - 64px);z-index:130;box-shadow:-6px 0 16px rgba(0,0,0,0.10)}
+.l4-panel--wide{display:none}
+.l4-panel--wide.open{display:flex;position:absolute;top:0;right:0;bottom:0;width:400px;max-width:calc(100% - 64px);z-index:130;box-shadow:-6px 0 16px rgba(0,0,0,0.10)}
 .detail-close{display:flex}
 }
-
-::-webkit-scrollbar{width:4px}
-::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:2px}
-::-webkit-scrollbar-track{background:transparent}
 </style>
 </head>
 <body>
-<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
+<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" style="display:none" ><symbol id="i-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></symbol><symbol id="i-gear" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></symbol><symbol id="i-shield" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></symbol><symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><path d="M9 22v-4h6v4M8 6h.01M16 6h.01M8 10h.01M16 10h.01M8 14h.01M16 14h.01"/></symbol><symbol id="i-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol><symbol id="i-folder-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 14l1.5-2.5A2 2 0 0 1 9.2 10.5H20a1 1 0 0 1 .9 1.4l-2.3 5.2a2 2 0 0 1-1.8 1.1H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2v1"/></symbol><symbol id="i-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></symbol><symbol id="i-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol><symbol id="i-trash" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6h14zM10 11v6M14 11v6"/></symbol><symbol id="i-attach" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></symbol><symbol id="i-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 12.9a10 10 0 0 1 3-2.4M12 20h.01M19 12.9a10 10 0 0 0-3-2.4"/></symbol><symbol id="i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol><symbol id="i-pin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17v5M9 3h6l1 6 3 3v2H5v-2l3-3 1-6z"/></symbol><symbol id="i-mute" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></symbol><symbol id="i-star" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></symbol><symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol><symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol></svg>
+
+<!-- Electron 原生标题栏（统一样式见 shared.css） -->
+<div class="electron-titlebar">
+  <div class="title">
+    <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <span>心飞IM</span>
+  </div>
+  <div class="controls">
+    <button class="ctrl-btn" onclick="window.electronAPI?.minimize()">─</button>
+    <button class="ctrl-btn" onclick="window.electronAPI?.maximize()">□</button>
+    <button class="ctrl-btn close" aria-label="关闭窗口" onclick="window.electronAPI?.close()"><svg aria-hidden="true" class="ic"><use href="#i-x"/></svg></button>
+  </div>
+</div>
+<script>
+if(window.isElectron||window.electronAPI){
+  document.body.classList.add('electron');
+  document.body.style.padding='0';
+}
+</script>
 
 <!-- L1 导航栏 -->
 <nav class="l1-nav">
-  <div class="l1-avatar" onclick="location.href='index.html'">我</div>
-    <div class="l1-item" onclick="location.href='dingtalk-mockup.html'" title="消息" aria-label="消息">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  <div class="l1-avatar" data-go="index.html">我</div>
+    <div class="l1-item" data-go="dingtalk-mockup.html" title="消息" aria-label="消息">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
     <span>消息</span>
     <div class="l1-badge">24</div>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-contacts.html'" title="通讯录" aria-label="通讯录">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+  <div class="l1-item" data-go="dingtalk-contacts.html" title="通讯录" aria-label="通讯录">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
     <span>通讯录</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-calendar.html'" title="日历" aria-label="日历">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+  <div class="l1-item" data-go="dingtalk-calendar.html" title="日历" aria-label="日历">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span>日历</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-docs.html'" title="文档" aria-label="文档">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+  <div class="l1-item" data-go="dingtalk-docs.html" title="文档" aria-label="文档">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
     <span>文档</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-workbench.html'" title="工作台" aria-label="工作台">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  <div class="l1-item" data-go="dingtalk-workbench.html" title="工作台" aria-label="工作台">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
     <span>工作台</span>
   </div>
-  <div class="l1-item" onclick="location.href='dingtalk-approval.html'" title="审批" aria-label="审批">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+  <div class="l1-item" data-go="dingtalk-approval.html" title="审批" aria-label="审批">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
     <span>审批</span>
   </div>
-  <div class="l1-item active" onclick="location.href='dingtalk-mail.html'" title="邮箱" aria-label="邮箱">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+  <div class="l1-item active" data-go="dingtalk-mail.html" title="邮箱" aria-label="邮箱">
+    <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
     <span>邮箱</span>
   </div>
 
   <div class="l1-bottom">
     <div class="l1-item" onclick="xfShowPalette()" title="搜索" aria-label="搜索">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <span>搜索</span>
     </div>
     <div class="l1-item" onclick="xfSettings()" title="设置" aria-label="设置">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 1.82-.33z"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42"/></svg>
       <span>设置</span>
     </div>
   </div>
 </nav>
 
 <!-- 邮件侧边栏 (240px) -->
-<div class="mail-sidebar">
-  <div class="mail-compose">
+<div class="l2-panel l2-panel--gray">
+  <div class="l2-header">
     <button class="compose-btn">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
       写邮件
     </button>
   </div>
   <div class="mail-folders">
     <div class="folder-item active">
       <span class="folder-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
       </span>
       收件箱
       <span class="folder-count unread">12</span>
     </div>
     <div class="folder-item">
       <span class="folder-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
       </span>
       已发送
     </div>
     <div class="folder-item">
       <span class="folder-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
       </span>
       草稿
       <span class="folder-count">2</span>
     </div>
     <div class="folder-item">
       <span class="folder-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
       </span>
       已删除
     </div>
     <div class="folder-item">
       <span class="folder-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+        <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
       </span>
       垃圾邮件
       <span class="folder-count unread">5</span>
@@ -211,31 +206,33 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 </div>
 
 <!-- 邮件列表 -->
-<div class="mail-list-wrap">
-  <div class="list-toolbar">
-    <button class="toolbar-btn" aria-label="回复"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg></button>
-    <button class="toolbar-btn" aria-label="刷新"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
-    <button class="toolbar-btn" aria-label="删除"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></button>
-    <div class="list-title">收件箱 <span style="font-size:12px;font-weight:400;color:var(--dt-text-tertiary)">(36封 12未读)</span></div>
+<div class="l3-main l3-main--bordered">
+  <div class="l3-hdr">
+    <div class="l3-hdr-group">
+      <button class="toolbar-btn" aria-label="回复"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg></button>
+      <button class="toolbar-btn" aria-label="刷新"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg></button>
+      <button class="toolbar-btn" aria-label="删除"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg></button>
+      <div class="list-title">收件箱 <span style="font-size:12px;font-weight:400;color:var(--dt-text-tertiary)">(36封 12未读)</span></div>
+    </div>
     <input class="list-search" placeholder="搜索邮件...">
   </div>
   <div class="mail-list">
     <div class="mail-item unread active">
       <div class="mail-checkbox"></div>
-      <div class="mail-star starred"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star starred"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">张建国</div>
       <div class="mail-content">
         <div class="mail-subject"><span class="mail-tag work">工作</span> Q4 OKR方案确认 - 请今天内回复确认</div>
         <div class="mail-preview">各位好，附件是团队Q4的OKR终稿，请在今天下班前确认。如有修改意见请直接回复本邮件...</div>
       </div>
       <div class="mail-right">
-        <div class="mail-attach"><svg class="ic"><use href="#i-attach"/></svg></div>
+        <div class="mail-attach"><svg aria-hidden="true" class="ic"><use href="#i-attach"/></svg></div>
         <div class="mail-date">14:23</div>
       </div>
     </div>
     <div class="mail-item unread">
       <div class="mail-checkbox"></div>
-      <div class="mail-star"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">李四</div>
       <div class="mail-content">
         <div class="mail-subject"><span class="mail-tag important">重要</span> 明天下午3点产品需求评审会议通知</div>
@@ -247,7 +244,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
     <div class="mail-item">
       <div class="mail-checkbox"></div>
-      <div class="mail-star starred"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star starred"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">GitHub</div>
       <div class="mail-content">
         <div class="mail-subject">[心飞IM] Pull Request #128: 新增消息已读状态功能</div>
@@ -259,7 +256,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
     <div class="mail-item unread">
       <div class="mail-checkbox"></div>
-      <div class="mail-star"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">王嘉兴</div>
       <div class="mail-content">
         <div class="mail-subject"><span class="mail-tag personal">个人</span> 团建活动方案收集</div>
@@ -271,7 +268,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
     <div class="mail-item">
       <div class="mail-checkbox"></div>
-      <div class="mail-star"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">系统通知</div>
       <div class="mail-content">
         <div class="mail-subject">您的密码将在7天后过期，请尽快修改</div>
@@ -283,20 +280,20 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
     <div class="mail-item">
       <div class="mail-checkbox"></div>
-      <div class="mail-star"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">财务部</div>
       <div class="mail-content">
         <div class="mail-subject">5月工资条已发放</div>
         <div class="mail-preview">您的5月工资条已生成，请登录HR系统查看...</div>
       </div>
       <div class="mail-right">
-        <div class="mail-attach"><svg class="ic"><use href="#i-attach"/></svg></div>
+        <div class="mail-attach"><svg aria-hidden="true" class="ic"><use href="#i-attach"/></svg></div>
         <div class="mail-date">6/8</div>
       </div>
     </div>
     <div class="mail-item">
       <div class="mail-checkbox"></div>
-      <div class="mail-star"><svg class="ic"><use href="#i-star"/></svg></div>
+      <div class="mail-star"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></div>
       <div class="mail-sender">心飞服务</div>
       <div class="mail-content">
         <div class="mail-subject">【账单】2026年5月企业版服务费</div>
@@ -310,15 +307,15 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
 </div>
 
 <!-- 邮件详情面板 -->
-<div class="mail-detail">
-  <div class="detail-header">
+<div class="l4-panel l4-panel--wide">
+  <div class="l3-hdr">
     <div class="detail-subject">Q4 OKR方案确认 - 请今天内回复确认</div>
     <div class="detail-actions">
-      <button class="detail-btn" title="回复" aria-label="回复"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button>
-      <button class="detail-btn" title="转发" aria-label="转发"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg></button>
-      <button class="detail-btn" title="删除" aria-label="删除"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
-      <button class="detail-btn" title="更多" aria-label="更多"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
-      <button class="detail-btn detail-close" type="button" title="关闭" aria-label="关闭" onclick="closeMailDetail()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <button class="detail-btn" title="回复" aria-label="回复"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 0 0-4-4H4"/></svg></button>
+      <button class="detail-btn" title="转发" aria-label="转发"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 17 20 12 15 7"/><path d="M4 18v-2a4 4 0 0 1 4-4h12"/></svg></button>
+      <button class="detail-btn" title="删除" aria-label="删除"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
+      <button class="detail-btn" title="更多" aria-label="更多"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+      <button class="detail-btn detail-close" type="button" title="关闭" aria-label="关闭" onclick="closeMailDetail()"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
   </div>
   <div class="detail-body">
@@ -344,7 +341,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
         <div class="attach-name">Q4_OKR_Team_Final_v3.pdf</div>
         <div class="attach-size">2.3 MB</div>
       </div>
-      <button class="detail-btn" title="下载" aria-label="下载"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+      <button class="detail-btn" title="下载" aria-label="下载"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
     </div>
     <div class="detail-toolbar">
       <button class="reply-btn primary">回复</button>
@@ -353,7 +350,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
     </div>
   </div>
 </div>
-<div class="mail-toast" id="mailToast"></div>
+<div class="xf-toast" id="mailToast"></div>
 <script>
 (function(){
   'use strict';
