@@ -265,11 +265,11 @@ body.electron{flex-direction:column}body.electron .electron-titlebar{display:fle
     <div class="quick-section">
       <div class="qs-title">快捷操作</div>
       <div class="qs-grid">
-        <div class="qs-item"><div class="qs-icon" style="background:var(--dt-warning-light)">📝<div class="qs-badge">2</div></div><div class="qs-name">待办</div></div>
-        <div class="qs-item"><div class="qs-icon" style="background:var(--dt-warning-light)">✅</div><div class="qs-name">审批</div></div>
+        <div class="qs-item"><div class="qs-icon" style="background:var(--dt-warning-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg><div class="qs-badge">2</div></div><div class="qs-name">待办</div></div>
+        <div class="qs-item"><div class="qs-icon" style="background:var(--dt-warning-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-warning)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div class="qs-name">审批</div></div>
         <div class="qs-item"><div class="qs-icon" style="background:var(--dt-brand-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12"/></svg></div><div class="qs-name">日志</div></div>
         <div class="qs-item"><div class="qs-icon" style="background:var(--dt-success-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16"/><rect x="4" y="2" width="16" height="20"/></svg></div><div class="qs-name">文档</div></div>
-        <div class="qs-item"><div class="qs-icon" style="background:var(--dt-app-brown)">📋</div><div class="qs-name">打卡</div></div>
+        <div class="qs-item"><div class="qs-icon" style="background:var(--dt-app-brown)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-av-brown)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg></div><div class="qs-name">打卡</div></div>
         <div class="qs-item"><div class="qs-icon" style="background:var(--dt-app-pink)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-av-pink)" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/></svg></div><div class="qs-name">通讯录</div></div>
         <div class="qs-item"><div class="qs-icon" style="background:var(--dt-success-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/></svg></div><div class="qs-name">日历</div></div>
         <div class="qs-item"><div class="qs-icon" style="background:var(--dt-purple-light)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--dt-purple)" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div class="qs-name">工作台</div></div>
@@ -278,13 +278,13 @@ body.electron{flex-direction:column}body.electron .electron-titlebar{display:fle
     <!-- 待办 + 审批 -->
     <div class="card-section">
       <div class="wb-card">
-        <div class="wc-title"><span>📋 待办事项</span><span class="wc-more">全部 5</span></div>
+        <div class="wc-title"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>待办事项</span><span class="wc-more">全部 5</span></div>
         <div class="wc-item"><div class="wc-dot" style="background:var(--dt-warning)"></div><div class="wc-info"><div class="wc-name">完成交互稿终稿</div><div class="wc-from">截止: 今天 18:00</div></div><div class="wc-time">今天</div></div>
         <div class="wc-item"><div class="wc-dot" style="background:var(--dt-danger)"></div><div class="wc-info"><div class="wc-name">Q4 OKR 确认</div><div class="wc-from">截止: 明天 12:00</div></div><div class="wc-time">明天</div></div>
         <div class="wc-item"><div class="wc-dot" style="background:var(--dt-brand)"></div><div class="wc-info"><div class="wc-name">提交本周团队周报</div><div class="wc-from">截止: 周五 17:00</div></div><div class="wc-time">周五</div></div>
       </div>
       <div class="wb-card">
-        <div class="wc-title"><span>✅ 待我审批</span><span class="wc-more">全部 2</span></div>
+        <div class="wc-title"><span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:4px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>待我审批</span><span class="wc-more">全部 2</span></div>
         <div class="wc-item"><div class="wc-dot" style="background:var(--dt-warning)"></div><div class="wc-info"><div class="wc-name">请假申请 - 李四</div><div class="wc-from">2天前</div></div><div class="wc-time">2天</div></div>
         <div class="wc-item"><div class="wc-dot" style="background:var(--dt-brand)"></div><div class="wc-info"><div class="wc-name">出差申请 - 王五</div><div class="wc-from">3天前</div></div><div class="wc-time">3天</div></div>
         <div class="wc-item"><div class="wc-dot" style="background:var(--dt-success)"></div><div class="wc-info"><div class="wc-name">报销申请 - 张三</div><div class="wc-from">已通过</div></div><div class="wc-time">5天</div></div>
@@ -326,10 +326,10 @@ body.electron{flex-direction:column}body.electron .electron-titlebar{display:fle
         </span>
       </div>
       <div class="apps-grid" id="appsGrid">
-        <div class="app-item"><div class="app-icon" style="background:var(--dt-warning-light)">📝</div><div class="app-name">日志</div></div>
+        <div class="app-item"><div class="app-icon" style="background:var(--dt-warning-light)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-warning)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg></div><div class="app-name">日志</div></div>
         <div class="app-item"><div class="app-icon" style="background:var(--dt-success-light)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="app-name">心飞文档</div></div>
         <div class="app-item"><div class="app-icon" style="background:var(--dt-brand-light)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-brand)" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg></div><div class="app-name">多维表格</div></div>
-        <div class="app-item"><div class="app-icon" style="background:var(--dt-app-brown)">📅</div><div class="app-name">日历</div></div>
+        <div class="app-item"><div class="app-icon" style="background:var(--dt-app-brown)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-av-brown)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="app-name">日历</div></div>
         <div class="app-item"><div class="app-icon" style="background:var(--dt-app-pink)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-av-pink)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><div class="app-name">通讯录</div></div>
         <div class="app-item"><div class="app-icon" style="background:var(--dt-purple-light)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-purple)" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5"/></svg></div><div class="app-name">考勤打卡</div></div>
         <div class="app-item"><div class="app-icon" style="background:var(--dt-success-light)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--dt-success)" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div><div class="app-name">知识库</div></div>
