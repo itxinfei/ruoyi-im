@@ -109,6 +109,8 @@ docs/dist/
 prototype/.impeccable/
 prototype/_work/
 prototype/_restore.ps1
+# 品牌字体本地托管（阿里巴巴普惠体授权禁止转载上传，不入库，需自行从官网下载）
+prototype/assets/fonts/
 
 # 工具产物 / 每日记忆（本地生成，不入库）
 .impeccable/
