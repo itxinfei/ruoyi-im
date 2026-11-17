@@ -13,36 +13,37 @@
 .approval-item:hover{background:var(--dt-bg-hover)}
 .approval-item.active{background:var(--dt-brand-light)}
 .ai-header{display:flex;justify-content:space-between;margin-bottom:8px}
-.ai-type{font-size:13px;font-weight:500;display:flex;align-items:center;gap:6px}
+.ai-type{font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px}
 .ai-status{font-size:12px;padding:2px 8px;border-radius:var(--dt-radius-lg);font-weight:500}
 .ai-status.pending{background:var(--dt-warning-light);color:var(--dt-warning)}
 .ai-status.approved{background:var(--dt-success-light);color:var(--dt-success)}
 .ai-status.rejected{background:var(--dt-danger-light);color:var(--dt-danger)}
-.ai-applicant{font-size:13px;color:var(--dt-text-regular);margin-bottom:4px}
+.ai-applicant{font-size:12px;color:var(--dt-text-regular);margin-bottom:4px}
 .ai-desc{font-size:12px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:6px}
 .ai-time{font-size:11px;color:var(--dt-text-placeholder)}
 
 /* L3 骨架见 shared.css .l3-main / .l3-hdr */
 .l3-hdr .title{font-size:16px;font-weight:500}
-.l3-body{flex:1;overflow-y:auto;padding:24px}
-.detail-card{border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-xl);padding:24px;max-width:600px;margin:0 auto}
+/* 详情卡浮在浅灰底上才有层次：白底白卡会像一张纸贴在白墙上，看不出这是"单据" */
+.l3-body{flex:1;overflow-y:auto;padding:24px;background:var(--dt-bg-body)}
+.detail-card{background:var(--dt-bg-panel);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-xl);padding:28px;max-width:768px;margin:0 auto;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
 .dc-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:16px;border-bottom:0.5px solid var(--dt-border-light)}
 .dc-type{font-size:18px;font-weight:500;margin-bottom:4px}
 .dc-sn{font-size:12px;color:var(--dt-text-secondary)}
 .dc-row{display:flex;padding:12px 0;border-bottom:0.5px solid var(--dt-border-light)}
-.dc-label{width:100px;font-size:13px;color:var(--dt-text-secondary);flex-shrink:0}
-.dc-value{flex:1;min-width:0;word-break:break-word;font-size:13px;color:var(--dt-text-primary)}
+.dc-label{width:110px;font-size:12px;color:var(--dt-text-secondary);flex-shrink:0}
+.dc-value{flex:1;min-width:0;word-break:break-word;font-size:12px;color:var(--dt-text-primary)}
 .dc-approvers{margin-top:24px;border-top:0.5px solid var(--dt-border-light);padding-top:16px}
-.dc-appr-title{font-size:13px;font-weight:500;color:var(--dt-text-regular);margin-bottom:12px}
+.dc-appr-title{font-size:12px;font-weight:500;color:var(--dt-text-regular);margin-bottom:12px}
 .flow-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:16px}
 .fs-indicator{flex-shrink:0}
-.fs-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600}
+.fs-circle{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
 .fs-circle.done{background:var(--dt-success);color:var(--dt-bg-card)}
 .fs-circle.current{background:var(--dt-brand);color:var(--dt-bg-card)}
 .fs-circle.wait{background:var(--dt-border-light);color:var(--dt-text-secondary)}
 .fs-line{width:2px;height:24px;background:var(--dt-border);margin:4px auto 0}
 .fs-info{padding-top:4px}
-.fs-name{font-size:13px;font-weight:500}
+.fs-name{font-size:12px;font-weight:500}
 .fs-status{font-size:12px;margin-top:2px}
 .fs-status.done{color:var(--dt-success)}
 .fs-status.current{color:var(--dt-brand)}
@@ -50,7 +51,7 @@
 .fs-time{font-size:11px;color:var(--dt-text-placeholder);margin-top:2px}
 
 .dc-actions{display:flex;gap:12px;margin-top:24px;justify-content:center}
-.dc-btn{padding:8px 28px;border-radius:var(--dt-radius-md);font-size:13px;font-weight:500;cursor:pointer}
+.dc-btn{padding:8px 28px;border-radius:var(--dt-radius-md);font-size:12px;font-weight:500;cursor:pointer}
 .dc-btn.primary{background:var(--dt-brand);color:var(--dt-bg-card);border:none}
 .dc-btn.reject{background:var(--dt-bg-panel);color:var(--dt-danger);border:0.5px solid var(--dt-danger)}
 .dc-btn.ghost{background:var(--dt-bg-panel);color:var(--dt-text-regular);border:0.5px solid var(--dt-border)}
@@ -98,7 +99,7 @@
 .am-close:hover { background: var(--dt-bg-body); color: var(--dt-text-regular); }
 .am-body { padding: 24px; }
 .am-form-group { margin-bottom: 16px; }
-.am-label { font-size: 13px; color: var(--dt-text-regular); margin-bottom: 6px; display: block; }
+.am-label { font-size:12px; color: var(--dt-text-regular); margin-bottom: 6px; display: block; }
 .am-label.required::after { content: '*'; color: var(--dt-danger); margin-left: 4px; }
 .am-input {
   width: 100%;
@@ -106,7 +107,7 @@
   border: 0.5px solid var(--dt-border);
   border-radius: var(--dt-radius-md);
   padding: 0 12px;
-  font-size: 13px;
+  font-size:12px;
   box-sizing: border-box;
 }
 .am-input:focus { border-color: var(--dt-brand); outline: none; }
@@ -116,7 +117,7 @@
   border: 0.5px solid var(--dt-border);
   border-radius: var(--dt-radius-md);
   padding: 8px 12px;
-  font-size: 13px;
+  font-size:12px;
   resize: vertical;
   box-sizing: border-box;
   font-family: inherit;
@@ -128,7 +129,7 @@
   border: 0.5px solid var(--dt-border);
   border-radius: var(--dt-radius-md);
   padding: 0 12px;
-  font-size: 13px;
+  font-size:12px;
   background: var(--dt-bg-card);
   cursor: pointer;
 }
@@ -177,7 +178,7 @@
 .am-btn {
   padding: 8px 24px;
   border-radius: var(--dt-radius-md);
-  font-size: 13px;
+  font-size:12px;
   font-weight: 500;
   cursor: pointer;
 }
@@ -710,7 +711,7 @@ function renderApprovalDetail(id){
   if(title)title.textContent=data.type+'详情';
   if(badge){badge.className='l3-badge '+(data.badge?data.badge.cls:'cc');badge.textContent=data.badge?data.badge.text:'';}
   var html='<div class="dc-hdr"><div><div class="dc-type">'+esc(data.type)+'</div><div class="dc-sn">'+esc(data.sn)+'</div></div>'+
-    '<div style="text-align:right"><div style="font-size:13px;color:var(--dt-text-regular);">'+esc(data.applicant)+'</div>'+
+    '<div style="text-align:right"><div style="font-size:12px;color:var(--dt-text-regular);">'+esc(data.applicant)+'</div>'+
     '<div style="font-size:12px;color:var(--dt-text-secondary);">'+esc(data.dept)+'</div></div></div>';
   for(var i=0;i<data.rows.length;i++){
     html+='<div class="dc-row"><div class="dc-label">'+esc(data.rows[i].label)+'</div><div class="dc-value">'+esc(data.rows[i].value)+'</div></div>';

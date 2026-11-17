@@ -13,6 +13,32 @@
 .empty-state .empty-icon{width:64px;height:64px;color:var(--dt-text-tertiary);opacity:0.4}
 .empty-state .empty-text{font-size:14px;color:var(--dt-text-secondary);margin-top:16px}
 .empty-state .empty-hint{font-size:12px;color:var(--dt-text-tertiary);margin-top:6px}
+
+/* 会话预览：右侧不再是一整屏空态。选中左侧任一会话，这里显示最近的几条对话，
+   让"会话列表"这一页本身可读，不用跳转就能看出每个会话在聊什么 */
+.sess-preview{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.sess-preview[hidden]{display:none}
+.sp-head{flex:none;display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--dt-bg-panel);border-bottom:1px solid var(--dt-border)}
+.sp-avatar{width:36px;height:36px;flex:none;border-radius:var(--dt-radius-sm);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500}
+.sp-title{font-size:15px;font-weight:600;color:var(--dt-text-primary);line-height:1.3}
+.sp-sub{font-size:12px;color:var(--dt-text-tertiary);margin-top:2px}
+.sp-actions{margin-left:auto;display:flex;gap:2px}
+.sp-btn{width:28px;height:28px;border:0;border-radius:var(--dt-radius-sm);background:transparent;color:var(--dt-text-icon);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.sp-btn:hover{background:var(--dt-bg-hover);color:var(--dt-text-regular)}
+.sp-body{flex:1;min-height:0;overflow-y:auto;padding:16px;background:var(--dt-bg-body);display:flex;flex-direction:column;gap:14px}
+.sp-time{text-align:center;font-size:12px;color:var(--dt-text-tertiary);margin-bottom:2px}
+.sp-msg{display:flex;gap:8px;max-width:76%}
+.sp-msg.me{align-self:flex-end;flex-direction:row-reverse}
+.sp-mav{width:32px;height:32px;flex:none;border-radius:var(--dt-radius-sm);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center}
+.sp-mbody{min-width:0}
+.sp-mname{font-size:12px;color:var(--dt-text-tertiary);margin-bottom:3px;line-height:1.2}
+.sp-msg.me .sp-mname{text-align:right}
+.sp-bubble{background:var(--dt-bg-panel);padding:8px 12px;border-radius:4px 8px 8px 8px;font-size:14px;line-height:1.55;color:var(--dt-text-primary);word-break:break-word}
+.sp-msg.me .sp-bubble{background:var(--dt-brand);color:#fff;border-radius:8px 4px 8px 8px}
+.sp-foot{flex:none;display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--dt-bg-panel);border-top:1px solid var(--dt-border)}
+.sp-tip{font-size:12px;color:var(--dt-text-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp-go{margin-left:auto;flex:none;height:30px;padding:0 14px;border-radius:var(--dt-radius-sm);background:var(--dt-brand);color:#fff;font-size:13px;text-decoration:none;display:flex;align-items:center}
+.sp-go:hover{background:var(--dt-brand-hover)}
 </style>
 </head>
 <body>
@@ -247,14 +273,129 @@
   </div>
 </div>
 
-<!-- 右侧空状态区（骨架见 shared.css .l3-main） -->
+<!-- 右侧：选中会话的最近对话预览（未选中时才显示空态） -->
 <div class="l3-main">
-  <div class="empty-state">
+  <div class="sess-preview" id="sessPreview" hidden>
+    <div class="sp-head">
+      <div class="sp-avatar" id="spAvatar">张</div>
+      <div>
+        <div class="sp-title" id="spName">张建国</div>
+        <div class="sp-sub" id="spSub">单聊 · 在线</div>
+      </div>
+      <div class="sp-actions">
+        <button class="sp-btn" type="button" title="会话信息"><svg aria-hidden="true" class="ic"><use href="#i-users"/></svg></button>
+        <button class="sp-btn" type="button" title="消息免打扰"><svg aria-hidden="true" class="ic"><use href="#i-mute"/></svg></button>
+        <button class="sp-btn" type="button" title="收藏会话"><svg aria-hidden="true" class="ic"><use href="#i-star"/></svg></button>
+      </div>
+    </div>
+    <div class="sp-body" id="spBody"></div>
+    <div class="sp-foot">
+      <span class="sp-tip">本页演示会话列表组件，输入与发送在聊天主区</span>
+      <a class="sp-go" href="dingtalk-mockup.html">打开完整会话</a>
+    </div>
+  </div>
+  <div class="empty-state" id="sessEmpty">
     <svg aria-hidden="true" class="empty-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H6l-2 2V4h16v12z"/></svg>
     <div class="empty-text">选择会话开始聊天</div>
     <div class="empty-hint">从左侧列表中选择一个会话</div>
   </div>
 </div>
 <script src="shared.js"></script>
+<script>
+/* 右侧预览：每个会话只写最近几条，够评审看出"这个会话在聊什么"即可。
+   数据跟聊天主区、审批页保持同一套演示时间线（10-28 周三、需求评审、李四请假） */
+(function(){
+  var P = {
+    '张建国':{sub:'单聊 · 在线',msgs:[
+      ['them','张建国','Q4 的 OKR 我看了一遍，目标对齐那块还是虚，得落到具体动作上。','14:18'],
+      ['me','','收到，今晚我按 O 和 KR 重拆一版，明早发你。','14:20'],
+      ['them','张建国','行。周会材料也一起定稿，别拖到周五。','14:23']]},
+    '产品部(12)':{sub:'群聊 · 12人',msgs:[
+      ['them','王五','@我 明天会议定 10 点还是 14 点？会议室还没订。','13:32'],
+      ['me','','14 点，301。议题还是需求评审，交互稿我带上。','13:36'],
+      ['them','王五','那就 14 点，我发日历。','13:40']]},
+    '设计组(8)':{sub:'群聊 · 8人',msgs:[
+      ['them','赵六','新版原型图过一遍，主色已经收敛到 #277EFB。','11:58'],
+      ['them','赵六','部署架构图也更新了，附件在群文件里。','12:03'],
+      ['me','','收到，标注我补齐后再一起过。','12:05']]},
+    '周武':{sub:'单聊 · 在线',msgs:[
+      ['them','周武','需求终稿 V3 的 PDF 发你了，第 6 页改的是权限那块。','11:28'],
+      ['me','','看到了。权限矩阵我核对完再回你。','11:30']]},
+    '王嘉舜':{sub:'单聊 · 离线',msgs:[
+      ['them','王嘉舜','语音说下排期的事：这周先做消息，日历往后挪一周。','10:15'],
+      ['me','','听完了，节奏可以，我按这个排。','10:20']]},
+    '刘洋':{sub:'单聊 · 在线',msgs:[
+      ['them','刘洋','现场那台机器的异响我录了 3 分半，你听听是不是风扇。','09:48'],
+      ['me','','是风扇，轴承干了。明天让运维换一组。','09:50']]},
+    '李四':{sub:'单聊 · 在线',msgs:[
+      ['them','李四','心飞 8.2 设计规范发布了，链接发你，重点看令牌那章。','09:18'],
+      ['me','','我按这份改组件库，改完提评审。','09:20']]},
+    '孙七':{sub:'单聊 · 离线',msgs:[
+      ['them','孙七','阿里云那边的产品经理张三，名片转你。','08:43'],
+      ['me','','收到，我加一下。','08:45']]},
+    '客户A对接群(6)':{sub:'群聊 · 6人',date:'昨天',msgs:[
+      ['them','张总','@所有人 周五前必须确认上线时间，不能再往后拖。','16:40'],
+      ['me','','周五上午给结论，我今天把联调排期拉出来。','16:52'],
+      ['them','张总','行，等你们消息。','17:05']]},
+    '系统通知':{sub:'系统通知',date:'昨天',msgs:[
+      ['them','系统通知','您的审批「请假申请 LV202610280001」已通过。','15:20'],
+      ['them','系统通知','流程：李四 提交 → 张三 通过 → HR 备案。','15:20']]},
+    '王浩':{sub:'单聊 · 在线',date:'昨天',msgs:[
+      ['them','王浩','发个位置，周六在张江这边团建，别跑错园区。','14:12'],
+      ['me','','收到，我按导航过去。','14:20']]},
+    '员工福利群(52)':{sub:'群聊 · 52人',date:'昨天',msgs:[
+      ['them','行政小周','中秋礼盒的红包来了，手快有。','11:30'],
+      ['me','','抢到了，谢谢。','11:31']]},
+    '赵六':{sub:'单聊 · 在线',date:'昨天',msgs:[
+      ['them','赵六','上次团建 AA 是我先垫的，转我 500 就行。','10:05'],
+      ['me','','转了，你收一下。','10:08']]},
+    '技术研发部(38)':{sub:'群聊 · 38人',date:'周一',msgs:[
+      ['them','徐静','@所有人 本周五下午团建，15:00 园区门口集合，记得带外套。','17:20'],
+      ['me','','收到。','17:26']]},
+    '运维告警(4)':{sub:'群聊 · 4人',date:'周一',msgs:[
+      ['them','告警机器人','【告警】im-gateway-02 CPU 使用率 85%，已持续 3 分钟。','09:12'],
+      ['me','','我上去看下，先扩一台顶上。','09:15']]}
+  };
+
+  var preview = document.getElementById('sessPreview'),
+      empty = document.getElementById('sessEmpty'),
+      spAvatar = document.getElementById('spAvatar'),
+      spName = document.getElementById('spName'),
+      spSub = document.getElementById('spSub'),
+      spBody = document.getElementById('spBody'),
+      items = [].slice.call(document.querySelectorAll('.session-list .session-item'));
+
+  function esc(s){ return String(s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+  function show(el){
+    var name = el.querySelector('.sess-name').textContent.trim();
+    var av = el.querySelector('.sess-avatar');
+    var avBg = av.style.background || 'var(--dt-av-blue)';
+    var d = P[name] || {sub:'单聊', msgs:[['them', name, (el.querySelector('.sess-msg')||{textContent:''}).textContent.trim(), '']]};
+
+    spAvatar.textContent = av.textContent.trim();
+    spAvatar.style.background = avBg;
+    spName.textContent = name;
+    spSub.textContent = d.sub || '';
+
+    var html = '<div class="sp-time">' + (d.date || '今天') + '</div>';
+    d.msgs.forEach(function(m){
+      var me = m[0] === 'me';
+      var who = esc(me ? '我' : (m[1] || name));
+      html += '<div class="sp-msg' + (me ? ' me' : '') + '">'
+        + '<div class="sp-mav" style="background:' + (me ? 'var(--dt-brand)' : avBg) + '">' + esc((me ? '我' : (m[1] || name)).slice(0,1)) + '</div>'
+        + '<div class="sp-mbody"><div class="sp-mname">' + who + '</div>'
+        + '<div class="sp-bubble">' + esc(m[2]) + '</div></div></div>';
+    });
+    spBody.innerHTML = html;
+    preview.hidden = false;
+    empty.style.display = 'none';
+    items.forEach(function(x){ x.classList.toggle('active', x === el); });
+  }
+
+  items.forEach(function(el){ el.addEventListener('click', function(){ show(el); }); });
+  if (items.length) show(items[0]);
+})();
+</script>
 </body>
 </html>

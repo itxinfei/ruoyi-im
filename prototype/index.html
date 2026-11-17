@@ -21,7 +21,7 @@ body.electron.xf-proto .electron-titlebar{margin-top:0}
 .card:hover{border-color:var(--dt-brand)}
 .card-icon{width:48px;height:48px;border-radius:var(--dt-radius-xl);display:flex;align-items:center;justify-content:center;margin-bottom:12px}
 .card-title{font-size:16px;font-weight:500;margin-bottom:6px;color:var(--dt-text-primary)}
-.card-desc{font-size:13px;color:var(--dt-text-secondary);line-height:1.5}
+.card-desc{font-size:12px;color:var(--dt-text-secondary);line-height:1.5}
 /* 移动端：收窄留白、网格转单列，避免 320px 下卡片右缘贴边（覆盖 shared.css 为底部 Tab 预留的 56px） */
 @media (max-width:768px){
   body{padding:20px 16px}
@@ -84,7 +84,7 @@ window.electronAPI?.onMenu((msg)=>{if(msg==='menu-new-chat')location.href='dingt
   <a class="card" href="dingtalk-docs.html">
     <div class="card-icon" style="background:var(--dt-app-brown);color:var(--dt-av-brown)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div>
     <div class="card-title">云文档 / 知识库</div>
-    <div class="card-desc">知识库目录树 · 文件卡片网格（doc/sheet/slide/folder）· 协作人头像 · 最近使用列表</div>
+    <div class="card-desc">知识库目录树 · 列表/网格双视图 · 真实类型图标（doc/sheet/slide/folder）· 协作人头像 · 面包屑 · 右键菜单</div>
   </a>
   <a class="card" href="dingtalk-workbench.html">
     <div class="card-icon" style="background:var(--dt-ic-blue);color:var(--dt-ic-navy-fg)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
@@ -99,7 +99,7 @@ window.electronAPI?.onMenu((msg)=>{if(msg==='menu-new-chat')location.href='dingt
   <a class="card" href="dingtalk-session-list.html">
     <div class="card-icon" style="background:var(--dt-warning-light);color:var(--dt-warning-text)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></div>
     <div class="card-title">会话列表</div>
-    <div class="card-desc">置顶会话 · 全部/未读/@我/草稿筛选 · 今日/昨天分组 · 未读角标</div>
+    <div class="card-desc">置顶会话 · 全部/未读/@我/草稿筛选 · 今日/昨天分组 · 未读角标 · 点选即看最近对话</div>
   </a>
   <a class="card" href="dingtalk-admin.html">
     <div class="card-icon" style="background:var(--dt-ic-gray);color:var(--dt-bg-card)"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg></div>

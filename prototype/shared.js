@@ -898,12 +898,19 @@
     });
   }
 
-  /* 嵌入检测：在 app.html 的 iframe 中仅显示内容区，隐藏自身标题栏与 L1 */
+  /* 嵌入检测：在 app.html 的 iframe 中仅显示内容区，隐藏自身标题栏与 L1
+     返回 true 表示当前是嵌入态，调用方据此跳过首用引导（否则引导弹窗
+     会盖在外壳的聊天区中央） */
   function initEmbedded() {
     try {
-      if (window.self === window.top) return;
+      if (window.self === window.top) return false;
       document.documentElement.classList.add('xf-embedded');
-    } catch (err) { /* 跨域时忽略 */ }
+      return true;
+    } catch (err) {
+      /* 访问 top 抛 SecurityError 说明确实处在 iframe 里（file:// 跨源），按嵌入处理 */
+      document.documentElement.classList.add('xf-embedded');
+      return true;
+    }
   }
 
   /* ============================================================
@@ -940,9 +947,12 @@
       html += '<a class="proto-bar__link"' + (cur === node.href ? ' aria-current="page"' : '') + ' href="' + node.href + '">' + node.label + '</a>';
       if (node.sep) html += '<i class="proto-bar__sep" aria-hidden="true"></i>';
     }
+    html += '<i class="proto-bar__sep" aria-hidden="true"></i><a class="proto-bar__link proto-bar__help" href="#" role="button">使用说明</a>';
     bar.innerHTML = html;
     document.body.insertBefore(bar, document.body.firstChild);
     document.body.classList.add('xf-proto');
+    var help = bar.querySelector('.proto-bar__help');
+    if (help) help.addEventListener('click', function (e) { e.preventDefault(); showOnboard(); });
     syncProtoBarHeight(bar);
     /* 窄屏换行后条高随宽度变化，窗口尺寸变化时重新实测，
        否则 body 让位 / xf-back / L2 高度会跟实际条高错位 */
@@ -968,7 +978,8 @@
     initL1Nav();
     initEmbedded();
     initProtoBar();
-    if (!onboardDone()) showOnboard();
+    /* 首用引导不再自动弹：它讲的是 L1/L2/L3 三栏，自动弹出等于让人第一眼看到遮罩而不是页面。
+       要看就点导航条右端的「使用说明」，命令面板里的「重新查看新手指引」也是同一个入口 */
   }
 
   if (document.readyState === 'loading') {

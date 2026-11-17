@@ -25,6 +25,10 @@
 .a-node .a-av{width:32px;height:32px;border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:13px;font-weight:600;flex-shrink:0}
 .a-node .a-name{font-size:13px;font-weight:500}
 .a-node .a-pos{font-size:11px;color:var(--dt-text-tertiary)}
+.a-node.active{background:var(--dt-brand-light)}
+.a-node.active .a-name{color:var(--dt-brand)}
+.a-node.active{background:var(--dt-brand-light)}
+.a-node.active .a-name{color:var(--dt-brand)}
 /* Group node */
 .g-node{display:flex;align-items:center;gap:12px;padding:8px 12px;cursor:pointer;border-radius:var(--dt-radius-md)}
 .g-node:hover{background:var(--dt-bg-body)}
@@ -270,8 +274,12 @@ if(window.isElectron||window.electronAPI){
 function toggleOrg(el){
   el.classList.toggle('open');
 }
-function showContact(name,role,dept,id,email,color){
+function showContact(name,role,dept,id,email,color,el){
   // 仅显示 L3 详情（不弹名片弹窗）
+  if(el && el.classList){
+    document.querySelectorAll('#orgTree .a-node').forEach(function(n){n.classList.remove('active');});
+    el.classList.add('active');
+  }
   var e=document.getElementById('l3Empty');if(e)e.style.display='none';
   var d=document.getElementById('l3Detail');if(d)d.style.display='flex';
   var av=document.getElementById('cdAvatar');if(av){av.textContent=name.charAt(0);av.style.background=color;}
@@ -346,7 +354,7 @@ function renderOrg(){
   ORG.forEach(function(d){
     var kids=d[1].map(function(p){
       var c=CT_CONTACTS[p[0]]||['','',''];
-      return '<div class="a-node" onclick="showContact(\''+p[0]+'\',\''+p[1]+'\',\''+d[0]+'\',\''+c[1]+'\',\''+c[2]+'\',\''+c[0]+'\')">'
+      return '<div class="a-node" onclick="showContact(\''+p[0]+'\',\''+p[1]+'\',\''+d[0]+'\',\''+c[1]+'\',\''+c[2]+'\',\''+c[0]+'\',this)">'
         +'<div class="a-av" style="background:'+c[0]+'">'+p[0].charAt(0)+'</div>'
         +'<div><div class="a-name">'+p[0]+'</div><div class="a-pos">'+p[1]+'</div></div></div>';
     }).join('');
@@ -359,6 +367,14 @@ function renderOrg(){
     +'<div class="t-children" style="display:block">'+html+'</div>';
 }
 renderOrg();
+/* 首屏默认选中第一位联系人并展开其部门，避免右侧大面积空置 */
+(function(){
+  var d0=ORG[0],p0=d0[1][0],c0=CT_CONTACTS[p0[0]]||['','',''];
+  var deptNode=document.querySelectorAll('#orgTree .t-node')[1];
+  if(deptNode)deptNode.classList.add('open');
+  var first=document.querySelector('#orgTree .a-node');
+  if(first)showContact(p0[0],p0[1],d0[0],c0[1],c0[2],c0[0],first);
+})();
 // Search - 数据驱动过滤：命中成员自动展开所属部门，无命中部门整组隐藏（不留孤儿成员列表），清空恢复默认
 document.getElementById('ctSearch').addEventListener('input',function(){
   var kw=this.value.trim().toLowerCase();

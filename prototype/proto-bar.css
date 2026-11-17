@@ -28,3 +28,13 @@ body.xf-proto .electron-titlebar{margin-top:var(--proto-bar-h)}
 body.xf-proto .xf-back{top:calc(var(--proto-bar-h) + var(--dt-spacing-md))}
 body.xf-mobile.xf-proto .xf-back{top:calc(var(--proto-bar-h) + var(--dt-spacing-sm))}
 body.xf-mobile.xf-proto .xf-l2,body.xf-mobile.xf-proto .xf-l3,body.xf-mobile.xf-proto .xf-l4{height:calc(100vh - var(--proto-bar-h) - 56px)!important}
+
+/* 窄屏：压缩字号与内距，换行从 3 行降到 2 行。手机端页面本身只剩一屏高度，
+   条子占掉 88px 也就是一成的屏幕，纯评审用的跳转不该抢业务内容的面积 */
+@media(max-width:600px){
+  .proto-bar{gap:2px;padding:3px var(--dt-spacing-sm)}
+  .proto-bar__brand{height:20px;padding-right:var(--dt-spacing-sm);gap:4px;font-size:11px}
+  .proto-bar__brand::before{width:14px;height:14px}
+  .proto-bar__link{height:20px;padding:0 5px;font-size:11px}
+  .proto-bar__sep{height:12px;margin:0 3px}
+}

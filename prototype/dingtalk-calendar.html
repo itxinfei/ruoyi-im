@@ -413,8 +413,10 @@ if(window.isElectron||window.electronAPI){
 <div class="xf-toast" id="calToast"></div>
 
 <script>
-var now=new Date();
-var todayY=now.getFullYear(),todayM=now.getMonth()+1,todayD=now.getDate();
+/* 演示锚点固定为 2026-10-28：与整套原型（聊天记录 10/28、审批编号 LV20261028、
+   工作台打卡 10-29、邮件 10/28）保持同一时间线，避免真实系统时间（11 月）
+   与静态「本月日程」列表（10 月）错位 */
+var todayY=2026,todayM=10,todayD=28;
 var selDate=todayD,selYear=todayY,selMonth=todayM;
 var weeks=['日','一','二','三','四','五','六'];
 var eventsData={
@@ -430,7 +432,9 @@ var eventsData={
   '29':[{time:'09:00',name:'迭代计划会',loc:'会议室201',color:'var(--dt-brand)',cal:'我的日程'}]
 };
 function getMonthDays(y,m){return new Date(y,m,0).getDate();}
-function getFirstDay(y,m){var d=new Date(y,m-1,1).getDay();return d===0?6:d-1;}
+/* 列头顺序是 日一二三四五六（周日在前），偏移必须直接用 getDay()（0=周日），
+   原实现 d===0?6:d-1 是「周一在前」的算法，会让整月错位一天 */
+function getFirstDay(y,m){return new Date(y,m-1,1).getDay();}
 function showCalToast(msg){var t=document.getElementById('calToast');if(!t)return;t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show')},1500);}
 function renderMonthGrid(y,m){
   var days=getMonthDays(y,m),first=getFirstDay(y,m);

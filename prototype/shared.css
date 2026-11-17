@@ -161,7 +161,7 @@ body{font-family:var(--dt-font);font-size:14px;color:var(--dt-text-primary);back
    浏览器预览时隐藏；仅 Electron 环境显示并让 body 纵向排列。
    ============================================================ */
 .electron-titlebar{height:36px;flex:none;background:var(--dt-bg-card);border-bottom:0.5px solid var(--dt-border);display:flex;align-items:center;justify-content:space-between;padding:0 12px;-webkit-app-region:drag;user-select:none}
-.electron-titlebar .title{font-size:13px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:6px}
+.electron-titlebar .title{font-size:12px;font-weight:500;color:var(--dt-text-primary);display:flex;align-items:center;gap:8px}
 .electron-titlebar .controls{display:flex;gap:0;-webkit-app-region:no-drag;height:100%}
 .electron-titlebar .ctrl-btn{width:36px;height:100%;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--dt-text-secondary);font-size:14px;font-weight:300;font-family:var(--dt-font)}
 .electron-titlebar .ctrl-btn:hover{background:var(--dt-bg-session-hover)}
@@ -175,7 +175,7 @@ body.electron .electron-titlebar{display:flex}
    ============================================================ */
 .l1-nav{width:var(--dt-nav-sidebar-width);background:var(--dt-nav-sidebar-bg);display:flex;flex-direction:column;align-items:center;padding:12px 0;gap:4px;flex-shrink:0;z-index:10}
 .l1-nav .l1-avatar{width:var(--dt-avatar-l1);height:var(--dt-avatar-l1);border-radius:var(--dt-radius-sm);background:var(--dt-bg-panel);color:var(--dt-brand);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;margin-bottom:16px;cursor:pointer;flex-shrink:0}
-.l1-nav .l1-item{position:relative;width:44px;height:44px;border-radius:var(--dt-radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;color:var(--dt-nav-sidebar-text);font-size:12px;text-decoration:none;transition:background 0.1s,color 0.1s}
+.l1-nav .l1-item{position:relative;width:44px;height:44px;border-radius:var(--dt-radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--dt-nav-sidebar-text);font-size:12px;text-decoration:none;transition:background 0.1s,color 0.1s}
 .l1-nav .l1-item:hover{background:var(--dt-nav-hover);color:var(--dt-nav-sidebar-text-hover)}
 .l1-nav .l1-item.active{background:var(--dt-nav-active);color:var(--dt-nav-sidebar-text-active)}
 .l1-nav .l1-item.active:hover{background:var(--dt-nav-active);color:var(--dt-nav-sidebar-text-active)}
@@ -193,7 +193,7 @@ body.electron .electron-titlebar{display:flex}
 /* 深色场景（管理后台） */
 .l2-panel--dark{background:var(--dt-nav-dark);border-right-color:rgba(255,255,255,0.06)}
 .l2-header{position:relative;height:var(--dt-header-height);padding:0 16px;display:flex;align-items:center;gap:8px;border-bottom:0.5px solid var(--dt-border-light);flex-shrink:0}
-.l2-search{flex:1;height:32px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);display:flex;align-items:center;gap:6px;padding:0 12px;color:var(--dt-text-secondary);font-size:13px;cursor:pointer;border:none;width:100%;font-family:var(--dt-font)}
+.l2-search{flex:1;height:32px;background:var(--dt-bg-body);border-radius:var(--dt-radius-md);display:flex;align-items:center;gap:8px;padding:0 12px;color:var(--dt-text-secondary);font-size:12px;cursor:pointer;border:none;width:100%;font-family:var(--dt-font)}
 .l2-search svg{width:14px;height:14px;flex-shrink:0}
 .l2-search:focus{outline:none}
 .l2-add-btn{width:32px;height:32px;border:none;background:transparent;border-radius:var(--dt-radius-sm);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--dt-text-secondary)}
@@ -217,26 +217,26 @@ body.electron .electron-titlebar{display:flex}
 .session-item:hover .sess-time,.session-item:hover .sess-pin{visibility:hidden}
 .sess-avatar{width:var(--dt-avatar-session);height:var(--dt-avatar-session);border-radius:var(--dt-radius-sm);flex-shrink:0;display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:16px;font-weight:600;position:relative}
 .sess-avatar .online-dot{position:absolute;bottom:-1px;right:-1px;width:10px;height:10px;background:var(--dt-success);border:2px solid var(--dt-bg-card);border-radius:50%}
-/* 正在输入：复刻钉钉会话列表预览态（三点依次跳动） */
-.sess-typing{display:inline-flex;align-items:center;gap:4px;color:var(--dt-text-secondary);font-size:13px;line-height:18px;flex:1;min-width:0}
-.sess-typing i{width:5px;height:5px;border-radius:50%;background:var(--dt-text-tertiary);animation:xf-typing 1s infinite ease-in-out}
-.sess-typing i:nth-child(2){animation-delay:.15s}
-.sess-typing i:nth-child(3){animation-delay:.3s}
-@keyframes xf-typing{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-3px);opacity:1}}
+/* 正在输入：复刻钉钉会话列表预览态。
+   红线禁止 @keyframes / 位移动画（docs/00 §9 一票否决），改为静态透明度层次 */
+.sess-typing{display:inline-flex;align-items:center;gap:4px;color:var(--dt-text-secondary);font-size:12px;line-height:18px;flex:1;min-width:0}
+.sess-typing i{width:5px;height:5px;border-radius:50%;background:var(--dt-text-tertiary);opacity:.35}
+.sess-typing i:nth-child(2){opacity:.65}
+.sess-typing i:nth-child(3){opacity:1}
 .sess-info{flex:1;min-width:0}
 /* 行高锁定 18px：18 + 4(间距) + 18 = 40，加 8*2 padding = 56px，保证会话项严格 56px（doc12 §10） */
 .sess-row1{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;height:18px}
 .sess-name{font-size:14px;line-height:18px;font-weight:500;color:var(--dt-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
-.sess-time{font-size:12px;line-height:18px;color:var(--dt-text-secondary);flex-shrink:0;margin-left:6px}
+.sess-time{font-size:12px;line-height:18px;color:var(--dt-text-secondary);flex-shrink:0;margin-left:8px}
 .sess-row2{display:flex;align-items:center;gap:4px;height:18px}
-.sess-msg{flex:1;min-width:0;font-size:13px;line-height:18px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sess-msg{flex:1;min-width:0;font-size:12px;line-height:18px;color:var(--dt-text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sess-mute-icn{width:14px;height:14px;flex-shrink:0;display:flex;align-items:center;color:var(--dt-text-tertiary)}
-.sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 5px;flex-shrink:0}
+.sess-unread{min-width:18px;height:18px;background:var(--dt-unread);color:var(--dt-bg-card);border-radius:var(--dt-radius-full);font-size:11px;display:flex;align-items:center;justify-content:center;padding:0 4px;flex-shrink:0}
 .sess-unread.group{background:var(--dt-text-tertiary);border-radius:var(--dt-radius-sm)}
 /* 未读：小圆点态（99+ 或纯提示） */
 .sess-unread.dots{width:10px;height:10px;min-width:10px;padding:0;border-radius:50%}
 /* 消息前缀标签（草稿 / @我 / DING / 类型），不加重底色 */
-.sess-prefix{font-size:12px;font-weight:400;line-height:16px;color:var(--dt-text-tertiary);flex-shrink:0;padding:1px 4px;border-radius:3px}
+.sess-prefix{font-size:12px;font-weight:400;line-height:16px;color:var(--dt-text-tertiary);flex-shrink:0;padding:0 4px;border-radius:3px}
 .sess-prefix.draft{color:var(--dt-danger);font-weight:500}
 .sess-prefix.at-me,.sess-prefix.at-all{color:var(--dt-warning);font-weight:600}
 .sess-prefix.ding{color:var(--dt-danger);font-weight:600}
@@ -249,12 +249,12 @@ body.electron .electron-titlebar{display:flex}
    L2 顶部 Tab 条 · 唯一实现（通讯录 / 审批 / 会话列表共用）
    ============================================================ */
 .l2-tabs{display:flex;border-bottom:0.5px solid var(--dt-border);background:var(--dt-bg-panel);flex-shrink:0}
-.l2-tab{flex:1 1 auto;padding:12px 0;text-align:center;font-size:13px;cursor:pointer;color:var(--dt-text-secondary);position:relative;white-space:nowrap;min-width:0;font-family:var(--dt-font)}
+.l2-tab{flex:1 1 auto;padding:12px 0;text-align:center;font-size:12px;cursor:pointer;color:var(--dt-text-secondary);position:relative;white-space:nowrap;min-width:0;font-family:var(--dt-font)}
 .l2-tab:hover{color:var(--dt-text-primary)}
 .l2-tab.active{color:var(--dt-brand);font-weight:500}
 .l2-tab.active::after{content:'';position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--dt-brand);border-radius:1px}
 .l2-tab .badge{display:inline-block;min-width:16px;height:16px;background:var(--dt-danger);color:var(--dt-bg-card);border-radius:var(--dt-radius-lg);font-size:11px;padding:0 4px;margin-left:4px;line-height:16px}
-.l2-tab .tab-count{color:var(--dt-text-tertiary);font-size:11px;margin-left:2px}
+.l2-tab .tab-count{color:var(--dt-text-tertiary);font-size:11px;margin-left:4px}
 .l2-tab.active .tab-count{color:var(--dt-brand)}
 
 /* ============================================================
@@ -282,14 +282,14 @@ body.electron .electron-titlebar{display:flex}
 /* ============================================================
    全局 Toast · 唯一实现（各页禁止再自定义 toast 样式）
    ============================================================ */
-.xf-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:13px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
+.xf-toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,0.8);color:var(--dt-bg-card);padding:12px 24px;border-radius:var(--dt-radius-lg);font-size:12px;z-index:999;opacity:0;transition:opacity 0.2s;pointer-events:none}
 .xf-toast.show{opacity:1}
 
 /* ============================================================
    滚动条
    ============================================================ */
 ::-webkit-scrollbar{width:4px;height:4px}
-::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:2px}
+::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:3px}
 ::-webkit-scrollbar-track{background:transparent}
 
 /* ============================================================
@@ -320,20 +320,20 @@ body.electron .electron-titlebar{display:flex}
 .xf-help-sec:last-child{margin-bottom:0}
 .xf-help-title{font-size:12px;font-weight:600;color:var(--dt-text-tertiary);letter-spacing:0.04em;margin-bottom:12px;text-transform:uppercase}
 .xf-help-list{list-style:none;display:flex;flex-direction:column;gap:8px}
-.xf-help-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px;color:var(--dt-text-regular)}
+.xf-help-list li{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;color:var(--dt-text-regular)}
 .xf-help-list li span{color:var(--dt-text-secondary)}
-.xf-help-panel kbd{display:inline-block;min-width:20px;padding:2px 6px;background:var(--dt-bg-body);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);font-family:var(--dt-font);font-size:12px;color:var(--dt-text-primary);text-align:center}
-.xf-help-note{font-size:13px;color:var(--dt-text-secondary);line-height:1.6}
+.xf-help-panel kbd{display:inline-block;min-width:20px;padding:4px 8px;background:var(--dt-bg-body);border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);font-family:var(--dt-font);font-size:12px;color:var(--dt-text-primary);text-align:center}
+.xf-help-note{font-size:12px;color:var(--dt-text-secondary);line-height:1.6}
 
 /* 全局确认弹层（shared.js xfConfirm） */
 .xf-confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:2100;display:none;align-items:center;justify-content:center}
 .xf-confirm-overlay.show{display:flex}
 .xf-confirm{width:340px;max-width:calc(100vw - 48px);background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
 .xf-confirm-title{font-size:15px;font-weight:600;color:var(--dt-text-primary);margin-bottom:8px}
-.xf-confirm-body{font-size:13px;line-height:1.6;color:var(--dt-text-regular);margin-bottom:24px}
+.xf-confirm-body{font-size:12px;line-height:1.6;color:var(--dt-text-regular);margin-bottom:24px}
 .xf-confirm-hint{display:block;margin-top:8px;font-size:12px;color:var(--dt-text-tertiary)}
 .xf-confirm-actions{display:flex;justify-content:flex-end;gap:8px}
-.xf-confirm-btn{height:32px;padding:0 16px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:13px;font-family:var(--dt-font);cursor:pointer}
+.xf-confirm-btn{height:32px;padding:0 16px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-sm);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:12px;font-family:var(--dt-font);cursor:pointer}
 .xf-confirm-btn:hover{background:var(--dt-bg-session-hover)}
 .xf-confirm-btn.primary{background:var(--dt-brand);border-color:var(--dt-brand);color:var(--dt-bg-panel)}
 .xf-confirm-btn.primary:hover{background:var(--dt-brand-hover)}
@@ -362,7 +362,7 @@ body.electron .electron-titlebar{display:flex}
 .xf-settings-avatar{width:64px;height:64px;border-radius:var(--dt-radius-sm);background:var(--dt-brand);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-panel);font-size:24px;font-weight:600;flex-shrink:0}
 .xf-settings-name{font-size:17px;font-weight:600;color:var(--dt-text-primary)}
 .xf-settings-sub{font-size:12px;color:var(--dt-text-tertiary);margin-top:4px}
-.xf-settings-sec-title{font-size:13px;font-weight:500;color:var(--dt-text-secondary);margin-bottom:12px}
+.xf-settings-sec-title{font-size:12px;font-weight:500;color:var(--dt-text-secondary);margin-bottom:12px}
 .xf-settings-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:0.5px solid var(--dt-border)}
 .xf-settings-row-title{font-size:14px;color:var(--dt-text-primary)}
 .xf-settings-row-desc{font-size:12px;color:var(--dt-text-tertiary);margin-top:4px}
@@ -396,9 +396,9 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 .xf-settings-logout,
 .xf-onboard-next,
 .xf-back{transition:background-color 0.15s,color 0.15s}
-.xf-settings-logout{width:100%;height:40px;border:0.5px solid var(--dt-border);background:var(--dt-bg-panel);border-radius:var(--dt-radius-sm);color:var(--dt-danger);font-size:13px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
+.xf-settings-logout{width:100%;height:40px;border:0.5px solid var(--dt-border);background:var(--dt-bg-panel);border-radius:var(--dt-radius-sm);color:var(--dt-danger);font-size:12px;font-weight:500;font-family:var(--dt-font);cursor:pointer}
 .xf-settings-logout:hover{background:var(--dt-danger-light);border-color:var(--dt-danger)}
-.xf-settings-value{font-size:13px;color:var(--dt-text-tertiary)}
+.xf-settings-value{font-size:12px;color:var(--dt-text-tertiary)}
 .xf-settings-more{font-size:16px;line-height:1;color:var(--dt-text-quaternary)}
 .xf-settings-gap{margin-top:24px}
 .xf-settings-note{font-size:12px;line-height:1.7;color:var(--dt-text-tertiary);margin-top:24px}
@@ -412,11 +412,11 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 .xf-palette-input{flex:1;border:none;outline:none;font-size:14px;font-family:var(--dt-font);color:var(--dt-text-primary);background:transparent;min-width:0}
 .xf-palette-list{max-height:320px;overflow-y:auto;padding:4px 0}
 .xf-palette-group{font-size:11px;color:var(--dt-text-tertiary);padding:8px 16px 4px}
-.xf-palette-item{display:flex;align-items:center;gap:12px;padding:8px 16px;cursor:pointer;font-size:13px;color:var(--dt-text-primary)}
+.xf-palette-item{display:flex;align-items:center;gap:12px;padding:8px 16px;cursor:pointer;font-size:12px;color:var(--dt-text-primary)}
 .xf-palette-item.active{background:var(--dt-brand-light);color:var(--dt-brand)}
 .xf-palette-item .xf-palette-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .xf-palette-item kbd{margin-left:auto}
-.xf-palette-empty{padding:24px 16px;text-align:center;font-size:13px;color:var(--dt-text-tertiary)}
+.xf-palette-empty{padding:24px 16px;text-align:center;font-size:12px;color:var(--dt-text-tertiary)}
 .xf-palette-foot{display:flex;gap:12px;padding:8px 16px;border-top:0.5px solid var(--dt-border-light);font-size:11px;color:var(--dt-text-tertiary)}
 
 /* 首用引导（shared.js xfOnboard） */
@@ -425,14 +425,14 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 .xf-onboard{width:420px;max-width:calc(100vw - 48px);background:var(--dt-bg-panel);border-radius:var(--dt-radius-xl);padding:24px;box-shadow:0 4px 16px rgba(0,0,0,0.12)}
 .xf-onboard-step{font-size:11px;color:var(--dt-text-tertiary);margin-bottom:8px}
 .xf-onboard-title{font-size:16px;font-weight:600;color:var(--dt-text-primary);margin-bottom:8px}
-.xf-onboard-body{font-size:13px;line-height:1.7;color:var(--dt-text-regular);margin-bottom:24px}
-.xf-onboard-dots{display:flex;gap:6px;margin-bottom:24px}
-.xf-onboard-dot{width:18px;height:3px;border-radius:2px;background:var(--dt-border)}
+.xf-onboard-body{font-size:12px;line-height:1.7;color:var(--dt-text-regular);margin-bottom:24px}
+.xf-onboard-dots{display:flex;gap:8px;margin-bottom:24px}
+.xf-onboard-dot{width:18px;height:3px;border-radius:3px;background:var(--dt-border)}
 .xf-onboard-dot.active{background:var(--dt-brand)}
 .xf-onboard-actions{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.xf-onboard-skip{border:none;background:transparent;color:var(--dt-text-secondary);font-size:13px;cursor:pointer;font-family:var(--dt-font)}
+.xf-onboard-skip{border:none;background:transparent;color:var(--dt-text-secondary);font-size:12px;cursor:pointer;font-family:var(--dt-font)}
 .xf-onboard-skip:hover{color:var(--dt-text-regular)}
-.xf-onboard-next{height:32px;padding:0 24px;border:none;border-radius:var(--dt-radius-sm);background:var(--dt-brand);color:var(--dt-bg-panel);font-size:13px;cursor:pointer;font-family:var(--dt-font)}
+.xf-onboard-next{height:32px;padding:0 24px;border:none;border-radius:var(--dt-radius-sm);background:var(--dt-brand);color:var(--dt-bg-panel);font-size:12px;cursor:pointer;font-family:var(--dt-font)}
 .xf-onboard-next:hover{background:var(--dt-brand-hover)}
 
 /* 防重复提交锁 */
@@ -444,7 +444,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 结构标记由 shared.js markLayout() 注入 .xf-l1 / .xf-l2 / .xf-l3 / .xf-l4
 层级由 body.xf-depth-N 控制，返回按钮 .xf-back 逐级回退。
 ============================================================ */
-.xf-back{position:fixed;top:12px;left:12px;z-index:120;display:none;align-items:center;gap:4px;height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:13px;font-family:var(--dt-font);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.xf-back{position:fixed;top:12px;left:12px;z-index:120;display:none;align-items:center;gap:4px;height:32px;padding:0 12px;border:0.5px solid var(--dt-border);border-radius:var(--dt-radius-md);background:var(--dt-bg-panel);color:var(--dt-text-regular);font-size:12px;font-family:var(--dt-font);cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
 .xf-back:hover{background:var(--dt-bg-session-hover)}
 .xf-back svg{width:16px;height:16px;flex-shrink:0}
 
@@ -479,7 +479,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
   body.xf-mobile .xf-settings-aside{width:100%;border-right:none;border-bottom:0.5px solid var(--dt-border)}
   body.xf-mobile .xf-settings-aside-title{display:none}
   body.xf-mobile .xf-settings-nav{flex-direction:row;overflow-x:auto;padding:6px 8px;gap:4px}
-  body.xf-mobile .xf-settings-nav-item{flex-shrink:0;height:34px;padding:0 12px;font-size:13px;border-radius:var(--dt-radius-full)}
+  body.xf-mobile .xf-settings-nav-item{flex-shrink:0;height:34px;padding:0 12px;font-size:12px;border-radius:var(--dt-radius-full)}
   body.xf-mobile .xf-settings-nav-item.active{background:var(--dt-brand-light);color:var(--dt-brand)}
   body.xf-mobile .xf-settings-content-head{height:48px;padding:0 16px}
   body.xf-mobile .xf-settings-body{padding:16px}
@@ -493,7 +493,7 @@ input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px soli
 }
 
 /* === L1 导航无刷新切换过渡：消除整页 reload 白闪 === */
-body{transition:opacity .18s ease}
+body{transition:opacity .15s ease}
 .xf-leaving body{opacity:0}
 
 /* === 外壳（app.html）嵌入模式：模块页在 iframe 中只保留内容区 === */

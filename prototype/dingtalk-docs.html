@@ -85,6 +85,94 @@
 .ctx-sep { height:1px; background:var(--dt-border); margin:4px 0; }
 
 /* Toast（见 shared.css .xf-toast） */
+
+/* ===== 云文档视觉增强（覆盖上方基础样式） ===== */
+
+/* 左侧导航精修 */
+.nav-section-title { padding:12px 16px 6px; font-size:12px; letter-spacing:.02em; }
+.nav-item { height:36px; padding:0 12px; margin:0 8px; border-radius:var(--dt-radius-md); font-size:13px; }
+.nav-item.active { background:var(--dt-brand-light); color:var(--dt-brand); font-weight:500; }
+.nav-item.active .nav-icon svg { color:var(--dt-brand); }
+.nav-item .nav-badge { min-width:18px; text-align:right; font-variant-numeric:tabular-nums; }
+
+/* 工具栏 */
+.toolbar { height:56px; padding:0 16px; gap:6px; background:var(--dt-bg-card); border-bottom:1px solid #EDEFF2; flex-shrink:0; }
+.toolbar-btn { padding:8px 14px; border-radius:var(--dt-radius-md); font-size:13px; font-family:var(--dt-font); transition:background .12s; }
+.toolbar-btn:hover { background:var(--dt-bg-hover); }
+.toolbar-btn svg { width:16px; height:16px; color:var(--dt-text-icon); }
+.toolbar-btn.primary { background:var(--dt-brand); color:#fff; font-weight:500; padding:8px 16px; }
+.toolbar-btn.primary svg { color:#fff; }
+.toolbar-btn.primary:hover { background:#1F6BE0; }
+.toolbar-sep { margin:0 6px; height:20px; background:#EDEFF2; }
+.toolbar-right { margin-left:auto; display:flex; align-items:center; gap:8px; }
+.view-switch { display:flex; padding:2px; background:var(--dt-bg-body); border-radius:var(--dt-radius-md); }
+.view-btn { width:34px; height:28px; border:none; background:transparent; border-radius:var(--dt-radius-sm); display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--dt-text-tertiary); transition:background .12s,color .12s; }
+.view-btn svg { width:16px; height:16px; }
+.view-btn.active { background:var(--dt-bg-card); color:var(--dt-brand); box-shadow:var(--dt-shadow-sm); }
+
+/* 面包屑行 */
+.address-row { height:48px; padding:0 16px; gap:12px; background:var(--dt-bg-card); border-bottom:1px solid #EDEFF2; flex-shrink:0; }
+.address-bar { gap:2px; font-size:14px; border:none; background:transparent; padding:0; }
+.address-bar .crumb { padding:3px 8px; border-radius:var(--dt-radius-sm); color:var(--dt-text-secondary); }
+.address-bar .crumb:hover { background:var(--dt-bg-hover); color:var(--dt-text-primary); }
+.address-bar .sep { font-size:12px; color:var(--dt-text-quaternary); }
+.address-bar .current { font-weight:600; }
+.search-box { width:220px; height:32px; padding:0 12px; gap:8px; background:var(--dt-bg-body); border:1px solid transparent; border-radius:var(--dt-radius-md); color:var(--dt-text-placeholder); }
+.search-box svg { width:14px; height:14px; color:var(--dt-text-icon); }
+
+/* 表头：名称 / 协作人 / 修改日期 / 大小 */
+.file-header { grid-template-columns:minmax(0,1fr) 110px 150px 90px 32px; gap:12px; height:38px; padding:0 16px; font-size:12px; font-weight:400; color:var(--dt-text-tertiary); background:var(--dt-bg-card); border-bottom:1px solid #EDEFF2; flex-shrink:0; }
+.file-header .sortable { gap:4px; font-weight:400; }
+.file-header .sortable:hover { color:var(--dt-brand); }
+.file-header .sortable span { font-size:11px; opacity:.6; }
+
+/* 文件列表 */
+.file-list { padding:0; background:var(--dt-bg-card); }
+.file-row { grid-template-columns:minmax(0,1fr) 110px 150px 90px 32px; gap:12px; min-height:56px; padding:6px 16px; border-bottom:1px solid #F2F3F5; border-radius:0; font-size:13px; transition:background .1s; }
+.file-row:hover { background:var(--dt-bg-hover); }
+.file-row.selected { background:var(--dt-brand-light); }
+.file-row.selected .file-name { color:var(--dt-text-primary); }
+
+.file-name-cell { gap:12px; min-width:0; }
+.file-icon { width:32px; height:32px; border-radius:8px; font-size:0; }
+.file-icon.doc { background:rgba(43,87,154,.08); }
+.file-icon.sheet { background:rgba(33,115,70,.09); }
+.file-icon.slide { background:rgba(196,62,28,.09); }
+.file-icon.folder { background:rgba(255,193,7,.14); }
+.file-icon svg { width:18px; height:18px; }
+.file-icon.doc svg { color:#2B579A; }
+.file-icon.sheet svg { color:#217346; }
+.file-icon.slide svg { color:#C43E1C; }
+.file-icon.folder svg { color:#B8860B; }
+.file-txt { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.file-name { font-size:13px; font-weight:500; line-height:1.35; }
+.file-sub { font-size:12px; color:var(--dt-text-tertiary); line-height:1.3; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.file-date { font-size:12px; color:var(--dt-text-secondary); }
+.file-size { font-size:12px; color:var(--dt-text-secondary); text-align:right; font-variant-numeric:tabular-nums; }
+.file-more { display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .12s; }
+.file-row:hover .file-more, .file-row.selected .file-more { opacity:1; }
+.file-type { display:none; }
+
+/* 协作人头像组 */
+.collab { display:flex; align-items:center; }
+.collab .cav { width:24px; height:24px; margin-left:-7px; border:1.5px solid var(--dt-bg-card); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:600; color:#fff; flex-shrink:0; }
+.collab .cav:first-child { margin-left:0; }
+.collab .cav.more { background:var(--dt-bg-body); color:var(--dt-text-secondary); }
+
+/* 网格视图 */
+.file-grid { flex:1; overflow-y:auto; background:var(--dt-bg-card); padding:16px; display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; align-content:start; }
+.file-card { position:relative; display:flex; flex-direction:column; gap:10px; padding:16px; min-height:154px; border:1px solid #EDEFF2; border-radius:10px; background:var(--dt-bg-card); cursor:pointer; transition:border-color .15s,box-shadow .15s,transform .15s; }
+.file-card:hover { border-color:#DCE3F0; box-shadow:var(--dt-shadow-md); transform:translateY(-1px); }
+.file-card.selected { border-color:var(--dt-brand); box-shadow:0 0 0 3px rgba(39,126,251,.12); }
+.file-card .fc-top { display:flex; align-items:flex-start; justify-content:space-between; }
+.file-card .fc-name { font-size:14px; font-weight:500; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; min-height:41px; word-break:break-all; }
+.file-card .fc-date { font-size:12px; color:var(--dt-text-tertiary); }
+.file-card .fc-foot { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto; }
+.file-card .fc-sub { font-size:12px; color:var(--dt-text-tertiary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* 底部状态栏 */
+.doc-status { display:flex; align-items:center; justify-content:space-between; height:36px; padding:0 16px; border-top:1px solid #EDEFF2; background:var(--dt-bg-card); font-size:12px; color:var(--dt-text-tertiary); flex-shrink:0; }
+.doc-status .st-left { display:flex; align-items:center; gap:16px; }
 </style>
 </head>
 <body>
@@ -220,6 +308,12 @@ if(window.isElectron||window.electronAPI){
     <div class="toolbar-sep"></div>
     <button class="toolbar-btn" onclick="showToast('上传文件')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>上传</button>
     <button class="toolbar-btn" onclick="showToast('刷新')"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>刷新</button>
+    <div class="toolbar-right">
+      <div class="view-switch">
+        <button class="view-btn active" id="viewList" onclick="setView('list')" title="列表视图" aria-label="列表视图"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></button>
+        <button class="view-btn" id="viewGrid" onclick="setView('grid')" title="网格视图" aria-label="网格视图"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></button>
+      </div>
+    </div>
   </div>
 
   <!-- 地址栏行 -->
@@ -238,13 +332,22 @@ if(window.isElectron||window.electronAPI){
   <!-- 文件列表表头 -->
   <div class="file-header">
     <div class="sortable">名称 <span>↕</span></div>
+    <div>协作人</div>
     <div class="sortable">修改日期 <span>↕</span></div>
-    <div class="sortable">类型 <span>↕</span></div>
     <div class="sortable" style="text-align:right">大小 <span>↕</span></div>
+    <div></div>
   </div>
 
   <!-- 文件列表 -->
   <div class="file-list" id="fileList" oncontextmenu="showContextMenu(event)"></div>
+
+  <div class="doc-status">
+    <div class="st-left">
+      <span id="stCount">共 0 个文件</span>
+      <span>已用 12.4 GB / 50 GB</span>
+    </div>
+    <span>最后同步 14:32</span>
+  </div>
 </div>
 
 <!-- 右键菜单 -->
@@ -318,42 +421,115 @@ var currentFolder = '需求文档';
 var selectedIndex = -1;
 var currentCtxRow = null;
 
-function getFileIcon(type) {
-  if(type === 'doc') return '<div class="file-icon doc">DOC</div>';
-  if(type === 'sheet') return '<div class="file-icon sheet">XLS</div>';
-  if(type === 'slide') return '<div class="file-icon slide">PPT</div>';
-  return '<div class="file-icon doc">DOC</div>';
-}
+var currentView = 'list';
+var ownerNames = ['张建国','李四','王五','赵六','产品部','技术部','运营部'];
+var collabSets = [
+  ['张建国','李四'], ['张建国','王五','赵六'], ['李四','王五'], ['王五','赵六'],
+  ['张建国','李四','王五','赵六'], ['赵六','产品部'], ['张建国','技术部'],
+  ['李四','王五','赵六'], ['张建国','赵六'], ['王五']
+];
+var avColorList = ['blue','indigo','cyan','pink','teal','orange','red','brown'];
 
 function getFileType(type) {
   if(type === 'doc') return '文本文档';
   if(type === 'sheet') return '工作表';
   if(type === 'slide') return '演示文稿';
+  if(type === 'folder') return '文件夹';
   return '文本文档';
+}
+
+function fileIconSvg(type) {
+  var c = 'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"';
+  if(type === 'sheet') return '<svg viewBox="0 0 24 24" aria-hidden="true" ' + c + '><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/></svg>';
+  if(type === 'slide') return '<svg viewBox="0 0 24 24" aria-hidden="true" ' + c + '><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>';
+  if(type === 'folder') return '<svg viewBox="0 0 24 24" aria-hidden="true" ' + c + '><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h11a2 2 0 0 1 2 2z"/></svg>';
+  return '<svg viewBox="0 0 24 24" aria-hidden="true" ' + c + '><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>';
+}
+
+function moreSvg() {
+  return '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--dt-text-icon)" stroke-width="1.6"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>';
+}
+
+function avatarsHtml(set, max) {
+  max = max || 3;
+  var shown = set.slice(0, max);
+  var h = shown.map(function(n, i) {
+    var color = avColorList[(n.charCodeAt(0) + i) % avColorList.length];
+    return '<span class="cav" style="background:var(--dt-av-' + color + ')" title="' + n + '">' + n.charAt(0) + '</span>';
+  }).join('');
+  if (set.length > max) h += '<span class="cav more">+' + (set.length - max) + '</span>';
+  return '<div class="collab">' + h + '</div>';
 }
 
 function renderFileList() {
   var files = folders[currentFolder].files;
+  var listEl = document.getElementById('fileList');
+  var header = document.querySelector('.file-header');
   var html = '';
-  files.forEach(function(f, i) {
-    var selected = selectedIndex === i ? ' selected' : '';
-    html += '<div class="file-row'+selected+'" onclick="selectFile('+i+')" ondblclick="openFile(\''+f.name+'\')">' +
-      '<div class="file-name-cell">' +
-        getFileIcon(f.type) +
-        '<span class="file-name">'+f.name+'</span>' +
-      '</div>' +
-      '<div class="file-date">'+f.date+'</div>' +
-      '<div class="file-type">'+getFileType(f.type)+'</div>' +
-      '<div class="file-size">'+f.size+'</div>' +
-    '</div>';
-  });
-  document.getElementById('fileList').innerHTML = html;
+
+  if (currentView === 'grid') {
+    header.style.display = 'none';
+    listEl.className = 'file-grid';
+    html = files.map(function(f, i) {
+      var selected = selectedIndex === i ? ' selected' : '';
+      var owner = ownerNames[i % ownerNames.length];
+      return '<div class="file-card' + selected + '" onclick="selectFile(' + i + ')" ondblclick="openFile(&quot;' + f.name + '&quot;)">' +
+        '<div class="fc-top"><span class="file-icon ' + f.type + '">' + fileIconSvg(f.type) + '</span>' +
+        '<span class="file-more">' + moreSvg() + '</span></div>' +
+        '<div class="fc-name">' + f.name + '</div>' +
+        '<div class="fc-date">' + f.date + '</div>' +
+        '<div class="fc-foot"><span class="fc-sub">' + owner + ' · ' + f.size + '</span>' +
+        avatarsHtml(collabSets[i % collabSets.length], 2) + '</div>' +
+        '</div>';
+    }).join('');
+  } else {
+    header.style.display = '';
+    listEl.className = 'file-list';
+    html = files.map(function(f, i) {
+      var selected = selectedIndex === i ? ' selected' : '';
+      var owner = ownerNames[i % ownerNames.length];
+      return '<div class="file-row' + selected + '" onclick="selectFile(' + i + ')" ondblclick="openFile(&quot;' + f.name + '&quot;)">' +
+        '<div class="file-name-cell">' +
+          '<div class="file-icon ' + f.type + '">' + fileIconSvg(f.type) + '</div>' +
+          '<div class="file-txt"><span class="file-name">' + f.name + '</span>' +
+          '<span class="file-sub">' + owner + ' · ' + getFileType(f.type) + '</span></div>' +
+        '</div>' +
+        '<div>' + avatarsHtml(collabSets[i % collabSets.length], 3) + '</div>' +
+        '<div class="file-date">' + f.date + '</div>' +
+        '<div class="file-size">' + f.size + '</div>' +
+        '<div class="file-more">' + moreSvg() + '</div>' +
+        '</div>';
+    }).join('');
+  }
+
+  listEl.innerHTML = html;
+  var st = document.getElementById('stCount');
+  if (st) st.textContent = '共 ' + files.length + ' 个文件';
+}
+
+function setView(v) {
+  currentView = v;
+  var lb = document.getElementById('viewList');
+  var gb = document.getElementById('viewGrid');
+  if (lb) lb.classList.toggle('active', v === 'list');
+  if (gb) gb.classList.toggle('active', v === 'grid');
+  renderFileList();
 }
 
 function selectFolder(name, el) {
   currentFolder = name;
   selectedIndex = -1;
-  document.getElementById('currentCrumb').textContent = name;
+  var crumb = document.getElementById('currentCrumb');
+  var sepEl = document.querySelector('.address-row .sep');
+  if (name === '全部文档') {
+    crumb.textContent = '';
+    crumb.style.display = 'none';
+    if (sepEl) sepEl.style.display = 'none';
+  } else {
+    crumb.textContent = name;
+    crumb.style.display = '';
+    if (sepEl) sepEl.style.display = '';
+  }
 
   if(el) {
     document.querySelectorAll('.nav-item').forEach(function(e) {
@@ -376,7 +552,7 @@ function openFile(name) {
 
 function showContextMenu(e) {
   e.preventDefault();
-  currentCtxRow = e.target && e.target.closest ? e.target.closest('.file-row') : null;
+  currentCtxRow = e.target && e.target.closest ? e.target.closest('.file-row, .file-card') : null;
   var menu = document.getElementById('contextMenu');
   menu.style.left = e.clientX + 'px';
   menu.style.top = e.clientY + 'px';
@@ -387,9 +563,9 @@ function ctxAction(action) {
   document.getElementById('contextMenu').classList.remove('show');
   if(action === '删除'){
     if(!currentCtxRow){ showToast('请先选择要删除的文件'); return; }
-    var rows = document.querySelectorAll('.file-row');
+    var rows = document.querySelectorAll('#fileList .file-row, #fileList .file-card');
     var idx = Array.prototype.indexOf.call(rows, currentCtxRow);
-    var nameEl = currentCtxRow.querySelector('.file-name');
+    var nameEl = currentCtxRow.querySelector('.file-name') || currentCtxRow.querySelector('.fc-name');
     var name = nameEl ? nameEl.textContent : '该文件';
     xfConfirm({
       title:'删除文件',
