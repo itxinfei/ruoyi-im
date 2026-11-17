@@ -9,7 +9,10 @@
   display: flex;
   height: 100%;
   overflow: hidden;
-  background-color: var(--dt-bg-card);
+  // 聊天区底色（钉钉默认灰底）：接收方气泡是纯白实色无边框，
+  // 若此处用白底（--dt-bg-card）会变成「白底白气泡」完全不可见。
+  // 头部 / 输入区各自显式白底，只有消息滚动区落在此灰底上。
+  background-color: var(--dt-bg-chat);
 }
 
 // 消息区域容器

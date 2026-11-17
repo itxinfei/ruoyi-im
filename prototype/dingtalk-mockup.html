@@ -51,7 +51,7 @@
 .chat-header .video-btn{color:var(--dt-brand)}
 
 /* === Message List === */
-.msg-list{flex:1;overflow-y:auto;padding:24px 24px 16px;background:var(--dt-bg-panel);position:relative}
+.msg-list{flex:1;overflow-y:auto;padding:24px 24px 16px;background:var(--dt-bg-body);position:relative}
 .msg-list::-webkit-scrollbar{width:4px}
 .msg-list::-webkit-scrollbar-thumb{background:var(--dt-scrollbar);border-radius:2px}
 
@@ -125,8 +125,11 @@
 /* System Message */
 .sys-msg{background:rgba(0,0,0,0.04);color:var(--dt-text-secondary);font-size:11px;padding:3px 16px;border-radius:var(--dt-radius-lg)}
 
-/* === File Card === */
-.file-card{display:flex;align-items:center;gap:12px;background:var(--dt-bg-panel);padding:12px 16px;border-radius:var(--dt-radius-lg);border:0.5px solid var(--dt-border);min-width:240px;cursor:pointer;transition:background 0.1s}
+/* === File Card ===
+   规格与文本气泡统一（docs/00 §3）：9px/12px 内边距 · 12px 圆角 · 近头像顶角 4px · 纯色无边框 */
+.file-card{display:flex;align-items:center;gap:12px;background:var(--dt-bg-panel);padding:9px 12px;border-radius:var(--dt-bubble-radius);min-width:240px;cursor:pointer;transition:background 0.15s}
+.msg-wrap:not(.self) .file-card{border-top-left-radius:4px}
+.msg-wrap.self .file-card{border-top-right-radius:4px}
 .file-card:hover{background:var(--dt-bg-hover)}
 .file-icon{width:40px;height:40px;border-radius:var(--dt-radius-md);display:flex;align-items:center;justify-content:center;color:var(--dt-bg-card);font-size:11px;font-weight:700;flex-shrink:0}
 .file-info{flex:1;min-width:0}
@@ -144,10 +147,13 @@
 .img-placeholder{width:180px;height:120px;background:var(--dt-brand-light);display:flex;align-items:center;justify-content:center}
 .img-placeholder svg{width:28px;height:28px;stroke:var(--dt-text-tertiary);fill:none;stroke-width:1.5}
 
-/* === Voice Bubble === */
-.voice-bubble{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--dt-bg-panel);border-radius:var(--dt-bubble-radius);min-width:140px;cursor:pointer;border:0.5px solid var(--dt-border)}
-.voice-bubble.playing{border-color:var(--dt-brand);background:var(--dt-brand-light)}
-.voice-bubble.self-bubble{background:var(--dt-brand);border-color:transparent;color:var(--dt-bg-panel)}
+/* === Voice Bubble ===
+   规格与文本气泡统一（docs/00 §3）：9px/12px 内边距 · 12px 圆角 · 近头像顶角 4px · 纯色无边框 */
+.voice-bubble{display:flex;align-items:center;gap:12px;padding:9px 12px;background:var(--dt-bg-panel);border-radius:var(--dt-bubble-radius);min-width:140px;cursor:pointer}
+.msg-wrap:not(.self) .voice-bubble{border-top-left-radius:4px}
+.msg-wrap.self .voice-bubble{border-top-right-radius:4px}
+.voice-bubble.playing{background:var(--dt-bg-hover)}
+.voice-bubble.self-bubble{background:var(--dt-brand);color:var(--dt-bg-panel)}
 .voice-bubble.self-bubble .voice-duration,.voice-bubble.self-bubble .voice-play-btn{color:var(--dt-bg-panel)}
 .voice-play-btn{width:28px;height:28px;border-radius:50%;border:none;background:var(--dt-brand);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0}
 .voice-play-btn svg{width:12px;height:12px;fill:var(--dt-bg-card)}
@@ -295,12 +301,15 @@
 .search-nav-btn:disabled{opacity:0.35;cursor:default;background:transparent}
 .msg-wrap.msg-search-current .msg-bubble,.msg-wrap.msg-search-current .file-card,.msg-wrap.msg-search-current .img-bubble,.msg-wrap.msg-search-current .ding-card,.msg-wrap.msg-search-current .todo-card{outline:2px solid var(--dt-warning);outline-offset:1px}
 
-/* 语音消息气泡 */
-.voice-bubble{display:inline-flex;align-items:center;gap:8px;background:var(--dt-bg-panel);border:0.5px solid var(--dt-border);border-radius:var(--dt-bubble-radius);padding:8px 14px;cursor:pointer;font-size:13px;min-width:72px}
-.voice-bubble:hover{background:var(--dt-bg-hover)}
-.voice-bubble .voice-play{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;font-size:11px}
-.voice-bubble.playing .voice-play{animation:none;color:var(--dt-brand)}
-.voice-bubble .voice-dur{color:var(--dt-text-secondary)}
+/* 语音消息气泡 · 紧凑变体（自己发送的短语音，appendOwnNode 使用）
+   原名与上面的 .voice-bubble 重复定义，导致 padding/gap/字号/最小宽度被后一条覆盖，现拆分独立类名 */
+.voice-bubble--compact{display:inline-flex;align-items:center;gap:12px;padding:9px 12px;background:var(--dt-bg-panel);border-radius:var(--dt-bubble-radius);cursor:pointer;font-size:14px;min-width:72px}
+.msg-wrap:not(.self) .voice-bubble--compact{border-top-left-radius:4px}
+.msg-wrap.self .voice-bubble--compact{border-top-right-radius:4px}
+.voice-bubble--compact:hover{background:var(--dt-bg-hover)}
+.voice-bubble--compact .voice-play{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;font-size:11px}
+.voice-bubble--compact.playing .voice-play{color:var(--dt-brand)}
+.voice-bubble--compact .voice-dur{color:var(--dt-text-secondary)}
 
 /* 通话最小化后：浮层不遮挡、悬浮球可点 */
 .call-overlay.minimized{pointer-events:none;background:transparent}
@@ -2742,7 +2751,7 @@ function toggleVoiceRec(){
     btn.classList.remove('recording');btn.textContent='按住说话';
     if(voiceSeconds>0){
       var sec=voiceSeconds;
-      appendOwnNode('<div class="voice-bubble" onclick="playVoice(this)"><span class="voice-play">▶</span><span class="voice-dur">'+sec+'″</span></div>');
+      appendOwnNode('<div class="voice-bubble--compact" onclick="playVoice(this)"><span class="voice-play">▶</span><span class="voice-dur">'+sec+'″</span></div>');
       showToast('已发送语音 '+sec+'″');
     }
     voiceSeconds=0;

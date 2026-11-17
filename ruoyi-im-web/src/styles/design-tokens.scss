@@ -106,6 +106,7 @@
   --dt-bubble-sent-icon-bg: rgba(255, 255, 255, 0.2);
   --dt-bubble-sent-text: rgba(255, 255, 255, 0.8);
   --dt-bubble-voice-progress-bg: rgba(0, 0, 0, 0.1);
+  --dt-bubble-voice-wave-gap: 2px;  /* 语音声波条间距（装饰性密排） */
 
   // === Typography (文本层级 - 钉钉风格) ===
   --dt-text-primary: #171a1d;
@@ -126,6 +127,12 @@
   --dt-file-excel: #22AB5C;   /* 钉钉规范：Excel文件图标色 */
   --dt-file-ppt: #FF7A00;     /* 钉钉规范：PPT文件图标色 */
   --dt-file-other: #ADB1B8;   /* 钉钉规范：其他文件图标色 */
+  /* 文件图标底色（与上一组 --dt-file-* 一一对应，禁止在 JS/组件里写 rgba 硬编码） */
+  --dt-file-pdf-bg: rgba(255, 77, 79, 0.1);
+  --dt-file-word-bg: rgba(43, 125, 255, 0.1);
+  --dt-file-excel-bg: rgba(34, 171, 92, 0.1);
+  --dt-file-ppt-bg: rgba(255, 122, 0, 0.1);
+  --dt-file-other-bg: rgba(173, 177, 184, 0.1);
 
   // === DingTalk Signature Colors (钉钉特色色 - "钉钉味"核心) ===
   // ⚠️ 权威依据：docs/00-钉钉8.2像素级权威基线.md §2.6
@@ -241,26 +248,26 @@
   --dt-message-status-read-color: #00B42A;
   --dt-message-status-icon-size: 12px;
   --dt-message-status-gap: 4px;
-  --dt-bubble-status-position: bottom-right;
 
   // === Text Links (链接文字) ===
   --dt-text-link-color: var(--dt-brand-color);
   --dt-text-link-hover-color: #4493FA;
 
   // === Bubble Compact (气泡紧凑模式 - 连续消息) ===
-  --dt-bubble-compact-padding: 6px;
-  --dt-bubble-compact-margin-top: -4px;  // 连续消息压缩间距 钉钉标准
+  // 连续消息净间距 4px（docs/22 [M3]）：上下各 2px，与非连续行 12px+12px=24px 形成压缩对比
+  --dt-bubble-compact-padding: 2px;
 
   // === Component Specific (钉钉风格 - 对齐21文档) ===
-  /* 气泡内边距/底色：对齐 H5 与桌面原型（9px 12px，接收方无边框、面板底色） */
+  /* 气泡内边距/底色：对齐 H5 与桌面原型（9px 12px）。
+     接收方纯白实色、无边框，靠 --dt-bg-chat 灰底衬托（见 docs/00 §3） */
   --dt-bubble-padding-v: 9px;   /* 上下 9px */
   --dt-bubble-padding-h: 12px;  /* 左右 12px */
   --dt-bubble-left-bg: var(--dt-bg-card);
   --dt-bubble-right-bg: var(--dt-brand-color);
   --dt-bubble-max-width: 70%;  /* 钉钉规范：气泡最大宽度 70% */
-  --dt-bubble-right-bg-hover: #4493FA;
+  --dt-bubble-right-bg-hover: #4493FA;  /* 发送方气泡 hover（仅背景色变化） */
+  --dt-bubble-meta-height: 18px;  /* 昵称+时间行高，用于头像顶部与气泡顶部对齐（docs/22 [M2]） */
   --dt-chat-gutter: 24px;  /* 钉钉规范：消息区左右内边距 24px */
-  --dt-chat-gutter-compact: 12px;
   --dt-chat-content-max-width: 1120px;
   --dt-time-divider-bg: rgba(255, 255, 255, 0.82);
   --dt-chat-window-header-bg: #f8fbff;  /* 聊天窗口顶部渐变起始色 */

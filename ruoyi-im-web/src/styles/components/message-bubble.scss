@@ -3,11 +3,11 @@
 // 规范: docs/22-UI视觉与交互红线.md, .claude/rules/dingtalk-ui-prompt.md
 // ============================================================================
 
-// 消息行基础布局
+// 消息行基础布局（上下 12px / 左右 24px，对齐 docs/00 #03-chat-window「消息 padding 12px/24px」）
 .message-row {
   display: flex;
   align-items: flex-start;
-  padding: 8px var(--dt-chat-gutter);
+  padding: var(--dt-spacing-md) var(--dt-chat-gutter);
   position: relative;
   width: 100%;
   box-sizing: border-box;
@@ -21,10 +21,10 @@
   }
 }
 
-// 连续消息：压缩间距
+// 连续消息：压缩间距（净 4px，docs/22 [M3]）
 .message-row.is-consecutive {
-  padding-top: 2px;
-  padding-bottom: 2px;
+  padding-top: var(--dt-bubble-compact-padding);
+  padding-bottom: var(--dt-bubble-compact-padding);
 
   .meta-row {
     display: none;
@@ -40,15 +40,20 @@
 // ============================================================================
 
 .avatar-zone {
-  width: 36px;
-  height: 36px;
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   flex-shrink: 0;
-  margin-right: var(--dt-spacing-lg);
+  margin-right: var(--dt-spacing-md);
+}
+
+// docs/22 [M2]：头像顶部与气泡第一行文字顶部对齐 —— 跳过昵称+时间行（18px + 4px）
+.message-row:not(.is-consecutive) .avatar-zone {
+  margin-top: calc(var(--dt-bubble-meta-height) + var(--dt-spacing-xs));
 }
 
 .avatar {
-  width: 36px;
-  height: 36px;
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   border-radius: var(--dt-radius-sm);
   object-fit: cover;
   cursor: pointer;
@@ -59,31 +64,31 @@
 }
 
 .avatar-placeholder {
-  width: 36px;
-  height: 36px;
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   border-radius: var(--dt-radius-sm);
   background: var(--dt-brand-color);
   color: var(--dt-text-white);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--dt-font-size-base);
+  font-weight: var(--dt-font-weight-semibold);
   cursor: pointer;
 }
 
 // 时间区 (连续消息)
 .time-zone {
-  width: 36px;
-  height: 36px;
+  width: var(--dt-avatar-size-md);
+  height: var(--dt-avatar-size-md);
   flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-right: var(--dt-spacing-lg);
+  margin-right: var(--dt-spacing-md);
 
   .time-text {
-    font-size: var(--dt-font-size-xs);
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
   }
 }
@@ -97,27 +102,29 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  max-width: 70%;
+  max-width: var(--dt-bubble-max-width);
 }
 
-// 元数据行
+// 元数据行（昵称 + 时间）：12px 辅助文字，与 H5/桌面原型一致
 .meta-row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-bottom: 4px;
-  line-height: 1.2;
+  gap: var(--dt-spacing-sm);
+  height: var(--dt-bubble-meta-height);
+  line-height: var(--dt-bubble-meta-height);
+  margin-bottom: var(--dt-spacing-xs);
+  font-size: var(--dt-font-size-sm);
 
   .sender-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--dt-text-primary);
+    font-size: var(--dt-font-size-sm);
+    font-weight: var(--dt-font-weight-normal);
+    color: var(--dt-text-secondary);
   }
 
   .timestamp {
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
-    font-weight: 400;
+    font-weight: var(--dt-font-weight-normal);
   }
 }
 
@@ -131,15 +138,39 @@
 // 消息气泡基础样式
 // ============================================================================
 
+// 全站唯一气泡规格（docs/00 §3，不可调整）：
+//   内边距 9px 12px · 圆角 12px（近头像顶角 4px）· 纯色无边框 · 字号 14px / 行高 1.5
+// 所有消息类型（文本 / 图片 / 视频 / 文件 / 名片 / 位置 / 语音）共用此容器。
 .bubble {
+  box-sizing: border-box;
   padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
-  border-radius: var(--dt-bubble-radius);
-  font-size: 14px;
+  border-radius: var(--dt-bubble-radius-received);
+  background-color: var(--dt-bubble-left-bg);
+  color: var(--dt-text-primary);
+  font-size: var(--dt-font-size-base);
   line-height: 1.5;
   word-break: break-word;
+  overflow-wrap: break-word;
   white-space: pre-wrap;
   max-width: 100%;
   position: relative;
+}
+
+// 发送方：品牌蓝实色 + 白字，右上尖角
+.message-row.is-sent .bubble {
+  background-color: var(--dt-bubble-right-bg);
+  color: var(--dt-text-white);
+  border-radius: var(--dt-bubble-radius-sent);
+}
+
+// 图片 / 视频为纯媒体气泡：无底色、无内边距（优先级需高于发送方覆盖）
+.bubble.bubble-image,
+.bubble.bubble-video,
+.message-row.is-sent .bubble.bubble-image,
+.message-row.is-sent .bubble.bubble-video {
+  padding: 0;
+  background: transparent;
+  color: var(--dt-text-primary);
 }
 
 // 文本消息气泡已统一由全局组件 <AppBubble> 接管，样式见 @/styles/components/bubble.scss
@@ -149,15 +180,10 @@
 // ============================================================================
 
 .bubble-image {
-  padding: 0;
-  background: transparent;
-  border: none;
-  border-radius: var(--dt-bubble-radius);
-
   .message-image {
     max-width: 280px;
     max-height: 280px;
-    border-radius: var(--dt-bubble-radius);
+    border-radius: inherit;
     display: block;
   }
 }
@@ -167,9 +193,6 @@
 // ============================================================================
 
 .bubble-video {
-  padding: 0;
-  background: transparent;
-  border: none;
   position: relative;
   cursor: pointer;
   max-width: 320px;
@@ -177,7 +200,7 @@
   .message-video {
     width: 100%;
     max-height: 200px;
-    border-radius: var(--dt-bubble-radius);
+    border-radius: inherit;
     display: block;
   }
 
@@ -188,7 +211,7 @@
     align-items: center;
     justify-content: center;
     background: var(--dt-bubble-video-overlay);
-    border-radius: var(--dt-bubble-radius);
+    border-radius: inherit;
 
     .play-icon {
       font-size: 48px;
@@ -209,8 +232,7 @@
 .bubble-file {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: var(--dt-bubble-padding-h);
   max-width: 280px;
   cursor: pointer;
 
@@ -225,7 +247,7 @@
     flex-shrink: 0;
 
     .file-icon {
-      font-size: 20px;
+      font-size: var(--dt-icon-size-md);
       color: var(--dt-brand-color);
     }
   }
@@ -235,8 +257,8 @@
     min-width: 0;
 
     .file-name {
-      font-size: 14px;
-      font-weight: 500;
+      font-size: var(--dt-font-size-base);
+      font-weight: var(--dt-font-weight-medium);
       color: var(--dt-text-primary);
       white-space: nowrap;
       overflow: hidden;
@@ -244,24 +266,28 @@
     }
 
     .file-size {
-      font-size: 12px;
+      font-size: var(--dt-font-size-sm);
       color: var(--dt-text-tertiary);
-      margin-top: 2px;
+      margin-top: var(--dt-spacing-xs);
     }
   }
 
   .download-icon {
-    font-size: 16px;
+    font-size: var(--dt-icon-size-md);
     color: var(--dt-text-tertiary);
   }
 
   &:hover {
-    background: var(--dt-bg-hover);
+    background-color: var(--dt-bg-hover);
   }
 }
 
 // 发送方文件消息
 .message-row.is-sent .bubble-file {
+  &:hover {
+    background-color: var(--dt-bubble-right-bg-hover);
+  }
+
   .file-icon-wrapper {
     background: var(--dt-bubble-sent-icon-bg);
 
@@ -290,8 +316,7 @@
 .bubble-card {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: var(--dt-bubble-padding-h);
   max-width: 280px;
 
   .card-avatar {
@@ -306,15 +331,15 @@
     min-width: 0;
 
     .card-name {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: var(--dt-font-size-base);
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-primary);
     }
 
     .card-dept {
-      font-size: 12px;
+      font-size: var(--dt-font-size-sm);
       color: var(--dt-text-tertiary);
-      margin-top: 2px;
+      margin-top: var(--dt-spacing-xs);
     }
   }
 }
@@ -335,6 +360,7 @@
 // ============================================================================
 
 .bubble-location {
+  // 地图占满气泡顶部，因此容器自身不留内边距，改为底部信息区使用气泡标准内边距
   padding: 0;
   max-width: 240px;
 
@@ -363,20 +389,29 @@
   }
 
   .location-info {
-    padding: 12px;
+    padding: var(--dt-bubble-padding-v) var(--dt-bubble-padding-h);
 
     .location-title {
-      font-size: 14px;
-      font-weight: 600;
+      font-size: var(--dt-font-size-base);
+      font-weight: var(--dt-font-weight-semibold);
       color: var(--dt-text-primary);
     }
 
     .location-address {
-      font-size: 12px;
+      font-size: var(--dt-font-size-sm);
       color: var(--dt-text-tertiary);
-      margin-top: 2px;
+      margin-top: var(--dt-spacing-xs);
     }
   }
+}
+
+// 地图顶部两角跟随气泡的近头像尖角（--dt-bubble-radius-received / -sent）
+.message-row:not(.is-sent) .bubble-location .location-map {
+  border-top-left-radius: var(--dt-radius-sm);
+}
+
+.message-row.is-sent .bubble-location .location-map {
+  border-top-right-radius: var(--dt-radius-sm);
 }
 
 // 发送方位置消息
@@ -397,29 +432,28 @@
 .bubble-voice {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--dt-spacing-sm);
   min-width: 100px;
   max-width: 200px;
   cursor: pointer;
   position: relative;
 
   .voice-icon {
-    font-size: 20px;
+    font-size: var(--dt-icon-size-md);
     color: var(--dt-brand-color);
   }
 
   .voice-wave {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--dt-bubble-voice-wave-gap);
     height: 20px;
 
     span {
       width: 3px;
       background: currentColor;
-      border-radius: 1px;
+      border-radius: var(--dt-radius-xs);
       opacity: 0.6;
-      transition: height 0.15s ease;
 
       &:nth-child(1) { height: 8px; }
       &:nth-child(2) { height: 14px; }
@@ -428,8 +462,9 @@
       &:nth-child(5) { height: 8px; }
     }
 
+    // 规范禁止 CSS 动画：播放态只用颜色反馈，不做 scaleY 循环动画
     &.is-playing span {
-      animation: voiceWave 0.5s ease-in-out infinite;
+      opacity: 1;
     }
   }
 
@@ -440,7 +475,7 @@
     right: 36px;
     height: 2px;
     background: var(--dt-bubble-voice-progress-bg);
-    border-radius: 1px;
+    border-radius: var(--dt-radius-xs);
     overflow: hidden;
 
     .voice-progress-bar {
@@ -450,20 +485,19 @@
     }
   }
 
-  @keyframes voiceWave {
-    0%, 100% { transform: scaleY(1); }
-    50% { transform: scaleY(0.5); }
-  }
-
   .voice-duration {
-    font-size: 12px;
+    font-size: var(--dt-font-size-sm);
     color: var(--dt-text-tertiary);
     margin-left: auto;
   }
 
   &:hover {
-    opacity: 0.9;
+    background-color: var(--dt-bg-hover);
   }
+}
+
+.message-row.is-sent .bubble-voice:hover {
+  background-color: var(--dt-bubble-right-bg-hover);
 }
 
 // 发送方语音消息
@@ -496,11 +530,11 @@
 .message-status {
   display: flex;
   align-items: center;
-  margin-top: 4px;
-  margin-left: 4px;
+  margin-top: var(--dt-spacing-xs);
+  margin-left: var(--dt-spacing-xs);
 
   .status-icon {
-    font-size: 14px;
+    font-size: var(--dt-font-size-base);
 
     &.sent { color: var(--dt-text-tertiary); }
     &.read { color: var(--dt-brand-color); }
@@ -520,24 +554,24 @@
 .reactions-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 4px;
+  gap: var(--dt-spacing-xs);
+  margin-top: var(--dt-spacing-xs);
   max-width: 100%;
 }
 
 .reaction-item {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px 8px;
+  gap: var(--dt-spacing-xs);
+  padding: var(--dt-spacing-xs) var(--dt-spacing-sm);
   background: var(--dt-bg-input);
   border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-full);
-  font-size: 12px;
+  font-size: var(--dt-font-size-sm);
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color var(--dt-transition-fast), border-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
-  .reaction-emoji { font-size: 14px; }
+  .reaction-emoji { font-size: var(--dt-font-size-base); }
   .reaction-count { color: var(--dt-text-secondary); }
 
   &:hover {
@@ -558,7 +592,7 @@
 
 .action-bar {
   position: absolute;
-  top: 4px;
+  top: var(--dt-spacing-xs);
   display: flex;
   align-items: center;
   padding: var(--dt-spacing-xs);
@@ -590,8 +624,8 @@
   color: var(--dt-text-secondary);
   border-radius: var(--dt-radius-sm);
   cursor: pointer;
-  font-size: 16px;
-  transition: all 0.15s;
+  font-size: var(--dt-icon-size-md);
+  transition: background-color var(--dt-transition-fast), color var(--dt-transition-fast);
 
   &:hover {
     background: var(--dt-bg-hover);
@@ -599,16 +633,15 @@
   }
 }
 
-// 操作栏动画
+// 操作栏淡入（仅 opacity，不做位移/缩放）
 .action-fade-enter-active,
 .action-fade-leave-active {
-  transition: opacity 0.1s, transform 0.1s;
+  transition: opacity var(--dt-transition-fast);
 }
 
 .action-fade-enter-from,
 .action-fade-leave-to {
   opacity: 0;
-  transform: translateY(4px);
 }
 
 // ============================================================================
@@ -620,12 +653,12 @@
 
   .avatar-zone {
     margin-right: 0;
-    margin-left: var(--dt-spacing-lg);
+    margin-left: var(--dt-spacing-md);
   }
 
   .time-zone {
     margin-right: 0;
-    margin-left: var(--dt-spacing-lg);
+    margin-left: var(--dt-spacing-md);
   }
 
   .content-zone {

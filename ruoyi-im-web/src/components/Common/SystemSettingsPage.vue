@@ -976,7 +976,7 @@ onBeforeUnmount(() => {
   padding: 0;
   border: none;
   border-radius: 13px;
-  background: var(--dt-border);
+  background: var(--dt-border-color);  // 开关关态底（原 --dt-border 未定义，会渲染成透明）
   cursor: pointer;
   transition: background 0.15s;
 
@@ -1011,7 +1011,7 @@ onBeforeUnmount(() => {
 
 .dt-chip {
   padding: 4px 10px;
-  border: 1px solid var(--dt-border);
+  border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-full);
   background: transparent;
   font-family: var(--dt-font-family);
@@ -1109,7 +1109,7 @@ onBeforeUnmount(() => {
 .dt-set-edit {
   flex-shrink: 0;
   padding: 5px 12px;
-  border: 1px solid var(--dt-border);
+  border: 1px solid var(--dt-border-light);
   border-radius: var(--dt-radius-full);
   background: transparent;
   font-family: var(--dt-font-family);

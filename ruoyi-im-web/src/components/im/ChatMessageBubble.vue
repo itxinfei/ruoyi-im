@@ -224,14 +224,14 @@ const fileIconColor = computed(() => {
   return 'var(--dt-file-other)'
 })
 
-// 文件图标背景色（与 fileIconColor 对应的浅色背景）
+// 文件图标背景色（与 fileIconColor 对应的浅色背景，统一走 design-tokens 的 --dt-file-*-bg）
 const fileIconBg = computed(() => {
   const name = resolvedFileName.value.toLowerCase()
-  if (name.endsWith('.pdf')) return 'rgba(255, 77, 79, 0.1)'
-  if (name.endsWith('.doc') || name.endsWith('.docx')) return 'rgba(43, 125, 255, 0.1)'
-  if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'rgba(34, 171, 92, 0.1)'
-  if (name.endsWith('.ppt') || name.endsWith('.pptx')) return 'rgba(255, 122, 0, 0.1)'
-  return 'rgba(173, 177, 184, 0.1)'
+  if (name.endsWith('.pdf')) return 'var(--dt-file-pdf-bg)'
+  if (name.endsWith('.doc') || name.endsWith('.docx')) return 'var(--dt-file-word-bg)'
+  if (name.endsWith('.xls') || name.endsWith('.xlsx')) return 'var(--dt-file-excel-bg)'
+  if (name.endsWith('.ppt') || name.endsWith('.pptx')) return 'var(--dt-file-ppt-bg)'
+  return 'var(--dt-file-other-bg)'
 })
 
 const reactions = computed(() => props.message.reactions || [])

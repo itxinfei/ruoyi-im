@@ -335,9 +335,11 @@ onMounted(() => {
 
 // 2. 对话容器
 .ai-chat-container {
-  flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-card); position: relative;
+  // 聊天区底色（钉钉默认灰底）：AI 回复气泡为纯白实色无边框，需灰底才能浮出
+  flex: 1; display: flex; flex-direction: column; background: var(--dt-bg-chat); position: relative;
   .chat-header {
     height: var(--dt-header-height); padding: 0 24px; border-bottom: 1px solid var(--dt-border-light);
+    background: var(--dt-bg-card);
     display: flex; align-items: center; justify-content: space-between;
     .title-info { display: flex; align-items: center; gap: 8px; }
     .ai-badge { background: var(--dt-brand-color); color: var(--dt-text-white); font-size: 12px; padding: 1px 4px; border-radius: var(--dt-radius-sm); }
@@ -414,7 +416,8 @@ onMounted(() => {
 
 // 3. 底部
 .chat-footer {
-  padding: 0 24px 24px;
+background: var(--dt-bg-card); border-top: 1px solid var(--dt-border-light);
+padding: 0 24px 24px;
   .prompt-chips {
     display: flex; gap: 8px; margin-bottom: 12px; overflow-x: auto; padding-bottom: 4px;
     &::-webkit-scrollbar { height: 0; }
