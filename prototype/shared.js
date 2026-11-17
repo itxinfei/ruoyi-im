@@ -906,6 +906,60 @@
     } catch (err) { /* 跨域时忽略 */ }
   }
 
+  /* ============================================================
+     原型导航条：评审时跨页面跳转
+     iframe 内不注入（app.html 的 L1 已负责切换，双层会打架）
+     12 个入口平铺一次点击直达；sep 用于分隔模块组；
+     样式在 proto-bar.css（与 shared.css 同一份），此处只负责注入与高度回写
+     ============================================================ */
+  var PROTO_NAV = [
+    { label: '总览', href: 'index.html', sep: true },
+    { label: '聊天主区', href: 'dingtalk-mockup.html' },
+    { label: '会话列表', href: 'dingtalk-session-list.html' },
+    { label: '通讯录', href: 'dingtalk-contacts.html', sep: true },
+    { label: '日历', href: 'dingtalk-calendar.html' },
+    { label: '审批', href: 'dingtalk-approval.html' },
+    { label: '云文档', href: 'dingtalk-docs.html' },
+    { label: '邮件', href: 'dingtalk-mail.html', sep: true },
+    { label: '工作台', href: 'dingtalk-workbench.html' },
+    { label: '管理后台', href: 'dingtalk-admin.html', sep: true },
+    { label: 'H5 手机端', href: 'dingtalk-h5.html' },
+    { label: '桌面外壳', href: 'app.html' }
+  ];
+
+  function initProtoBar() {
+    try { if (window.self !== window.top) return; } catch (err) { return; }
+    if (!document.body || document.querySelector('.proto-bar')) return;
+    var cur = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    var bar = document.createElement('nav');
+    bar.className = 'proto-bar';
+    bar.setAttribute('aria-label', '原型页面导航');
+    var html = '<a class="proto-bar__brand" href="index.html">心飞IM · 原型</a>';
+    for (var i = 0; i < PROTO_NAV.length; i++) {
+      var node = PROTO_NAV[i];
+      html += '<a class="proto-bar__link"' + (cur === node.href ? ' aria-current="page"' : '') + ' href="' + node.href + '">' + node.label + '</a>';
+      if (node.sep) html += '<i class="proto-bar__sep" aria-hidden="true"></i>';
+    }
+    bar.innerHTML = html;
+    document.body.insertBefore(bar, document.body.firstChild);
+    document.body.classList.add('xf-proto');
+    syncProtoBarHeight(bar);
+    /* 窄屏换行后条高随宽度变化，窗口尺寸变化时重新实测，
+       否则 body 让位 / xf-back / L2 高度会跟实际条高错位 */
+    var rz = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(rz);
+      rz = setTimeout(function () { syncProtoBarHeight(bar); }, 100);
+    });
+  }
+
+  /* 条高是唯一来源：CSS 里所有补偿（body padding / xf-back / L2 / 手机壳）都读 --proto-bar-h */
+  function syncProtoBarHeight(bar) {
+    if (!bar) bar = document.querySelector('.proto-bar');
+    if (!bar) return;
+    document.documentElement.style.setProperty('--proto-bar-h', bar.offsetHeight + 'px');
+  }
+
   function boot() {
     xfRestoreTheme();
     initToasts();
@@ -913,6 +967,7 @@
     initA11y();
     initL1Nav();
     initEmbedded();
+    initProtoBar();
     if (!onboardDone()) showOnboard();
   }
 

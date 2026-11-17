@@ -4,6 +4,9 @@
    所有原型页面必须引用此文件，确保组件统一
    ============================================================ */
 
+/* 原型导航条（评审脚手架）独立成文件：H5 页不引用 shared.css，也需要同一份样式 */
+@import url('./proto-bar.css');
+
 /* === 品牌字体：阿里巴巴普惠体 3.0（本地托管，免费商用） ===
    下载来源：官方 CDN fonts.alibabadesign.com，仅限本地引用，禁止外传 */
 @font-face{font-family:'AlibabaPuHuiTi';src:url('assets/fonts/AlibabaPuHuiTi-3-55-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
@@ -47,6 +50,9 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-danger-light:#FFF1F0;
   --dt-warning-light:#FFF7E6;
   --dt-success-light:#F6FFED;
+  /* 浅底上的文字/图标前景（原 --dt-success / --dt-warning 直接作前景只有 2.7:1 / 2.4:1，未达 WCAG AA） */
+  --dt-success-text:#00871F;
+  --dt-warning-text:#A85400;
   --dt-nav-dark:#2B2D33;
   /* 头像底色（已按 WCAG AA 4.5:1 加深，保证白色 initials 可读） */
   --dt-av-blue:#4A74CA;
@@ -79,6 +85,13 @@ button,input,select,textarea{font-family:var(--dt-font)}
   --dt-radius-xl:12px;
   --dt-radius-2xl:16px;
   --dt-radius-full:9999px;
+  /* 间距（8pt 栅格，对齐 .agent/rules/ui-standards.md §2.2） */
+  --dt-spacing-xs:4px;
+  --dt-spacing-sm:8px;
+  --dt-spacing-md:12px;
+  --dt-spacing-lg:16px;
+  --dt-spacing-xl:24px;
+  --dt-spacing-2xl:32px;
   --dt-bubble-radius:12px;
   /* 三栏骨架（doc 12 §1） */
   --dt-nav-sidebar-width:64px;
@@ -486,3 +499,5 @@ body{transition:opacity .18s ease}
 /* === 外壳（app.html）嵌入模式：模块页在 iframe 中只保留内容区 === */
 .xf-embedded .electron-titlebar{display:none!important}
 .xf-embedded .l1-nav{display:none!important}
+
+/* 原型导航条（.proto-bar / body.xf-proto）已抽至 proto-bar.css，此处不再重复 */
